@@ -4,7 +4,7 @@
  * Toutes les fonctions de ce module sont pures : elles prennent des mesures
  * météo brutes et renvoient des indicateurs directement exploitables au champ.
  * La même logique est implémentée à l'identique côté iOS
- * (ios/MeteoAgricole/Models/AgroIndicators.swift) — les seuils vivent ici et
+ * (ios/Klima/Models/AgroIndicators.swift) — les seuils vivent ici et
  * dans `AgroThresholds` côté Swift, et doivent rester synchronisés.
  */
 

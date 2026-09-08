@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from 'react'
 import type { Parcelle } from '../api/openMeteo'
 
-const STORAGE_KEY = 'meteo-agricole.parcelle'
+const STORAGE_KEY = 'klima.parcelle'
 
 /** Parcelle par défaut : plaine céréalière de Beauce. */
 const DEFAULT_PARCELLE: Parcelle = {

@@ -1,5 +1,5 @@
 import XCTest
-@testable import MeteoAgricole
+@testable import Klima
 
 /// Les mêmes cas que la suite du site web (`web/src/domain/agro.test.ts`),
 /// pour garantir que les deux plateformes donnent le même conseil.

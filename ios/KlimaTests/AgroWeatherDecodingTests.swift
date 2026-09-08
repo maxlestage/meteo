@@ -1,5 +1,5 @@
 import XCTest
-@testable import MeteoAgricole
+@testable import Klima
 
 /// Vérifie le contrat avec Open-Meteo : noms de champs, valeurs nulles et
 /// interprétation des horodatages dans le fuseau de la parcelle.

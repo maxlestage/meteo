@@ -1,7 +1,7 @@
-# Météo Agricole
+# Klima
 
-Deux applications qui partagent le même cœur agronomique : une application iOS
-en SwiftUI et un site web en Bun + Vite + React. Les données viennent
+Météo agricole en deux applications qui partagent le même cœur agronomique :
+une application iOS en SwiftUI et un site web en Bun + Vite + React. Les données viennent
 exclusivement de l'**API agricole Open-Meteo** — humidité et température du sol,
 évapotranspiration de référence FAO-56, déficit de pression de vapeur — sans
 clé d'API.
@@ -37,23 +37,23 @@ thermique de la semaine, lever et coucher du soleil.
 
 Les seuils sont définis une seule fois par plateforme et doivent rester
 synchronisés : `web/src/domain/agro.ts` (`AgroThresholds`) et
-`ios/MeteoAgricole/Models/AgroIndicators.swift` (`AgroThresholds`). Les deux
+`ios/Klima/Models/AgroIndicators.swift` (`AgroThresholds`). Les deux
 suites de tests couvrent les mêmes cas, pour que le conseil rendu soit
 identique au champ.
 
 ## iOS
 
 ```bash
-open ios/MeteoAgricole.xcodeproj
+open ios/Klima.xcodeproj
 ```
 
 Le projet est un `project.pbxproj` classique, versionné et modifiable
 directement — pas de générateur ni de Fastlane. Cible iOS 17, deux cibles :
-`MeteoAgricole` (application) et `MeteoAgricoleTests` (tests unitaires), avec un
+`Klima` (application) et `KlimaTests` (tests unitaires), avec un
 schéma partagé.
 
 ```bash
-xcodebuild -project ios/MeteoAgricole.xcodeproj -scheme MeteoAgricole \
+xcodebuild -project ios/Klima.xcodeproj -scheme Klima \
   -destination 'platform=iOS Simulator,name=iPhone 15' test
 ```
 
@@ -64,7 +64,7 @@ dans les réglages de la cible.
 Organisation :
 
 ```
-MeteoAgricole/
+Klima/
   App/          Point d'entrée SwiftUI
   Models/       Types de mesure et cœur agronomique (AgroIndicators)
   Services/     Client Open-Meteo, relevé de position

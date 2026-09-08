@@ -1,7 +1,7 @@
 import SwiftUI
 
 @main
-struct MeteoAgricoleApp: App {
+struct KlimaApp: App {
     var body: some Scene {
         WindowGroup {
             DashboardView()

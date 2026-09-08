@@ -1,5 +1,5 @@
 import XCTest
-@testable import MeteoAgricole
+@testable import Klima
 
 /// Les heures affichées sont celles de la parcelle, pas celles du téléphone.
 final class AgroFormatTests: XCTestCase {

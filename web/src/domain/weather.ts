@@ -2,7 +2,7 @@
  * Traduction des codes météo WMO renvoyés par Open-Meteo.
  *
  * La même table est implémentée côté iOS
- * (ios/MeteoAgricole/Models/WeatherCondition.swift).
+ * (ios/Klima/Models/WeatherCondition.swift).
  */
 
 /** Famille de pictogramme, déclinée jour / nuit à l'affichage. */
