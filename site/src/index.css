@@ -1,0 +1,599 @@
+/*
+ * Site de présentation : lecture claire et posée. La section météo du jour et
+ * l'aperçu iPhone reprennent le ciel sombre de l'application, pour montrer à
+ * quoi elle ressemble sans capture d'écran.
+ */
+
+:root {
+  --paper: #faf8f4;
+  --surface: #ffffff;
+  --ink: #1b2016;
+  --ink-soft: #5f6659;
+  --line: #e3ded2;
+  --accent: #3f6b2b;
+  --good: #4a7c2f;
+  --warn: #a56a12;
+  --bad: #a83232;
+  --sky-1: #3c556e;
+  --sky-2: #2b3d52;
+  --sky-3: #1d2836;
+  --radius: 16px;
+  --shadow: 0 1px 2px rgb(27 32 22 / 5%), 0 12px 32px rgb(27 32 22 / 7%);
+  color-scheme: light;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1,
+h2,
+h3 {
+  letter-spacing: -0.02em;
+  line-height: 1.15;
+}
+
+a {
+  color: inherit;
+}
+
+/* Navigation ------------------------------------------------------------- */
+
+.nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  max-width: 1040px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.nav__brand {
+  font-size: 20px;
+  font-weight: 650;
+  letter-spacing: -0.02em;
+  text-decoration: none;
+}
+
+.nav nav {
+  display: flex;
+  gap: 20px;
+  font-size: 15px;
+}
+
+.nav nav a {
+  color: var(--ink-soft);
+  text-decoration: none;
+}
+
+.nav nav a:hover {
+  color: var(--accent);
+}
+
+/* Structure -------------------------------------------------------------- */
+
+main {
+  max-width: 1040px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+section {
+  padding: 56px 0;
+  border-top: 1px solid var(--line);
+}
+
+.hero {
+  border-top: 0;
+  padding-top: 24px;
+}
+
+.section-head {
+  max-width: 62ch;
+  margin-bottom: 28px;
+}
+
+.section-head h2 {
+  margin: 0 0 8px;
+  font-size: clamp(26px, 4vw, 34px);
+}
+
+.section-head p {
+  margin: 0;
+  color: var(--ink-soft);
+  font-size: 17px;
+}
+
+/* En-tête ---------------------------------------------------------------- */
+
+.hero {
+  display: grid;
+  gap: 40px;
+  grid-template-columns: minmax(0, 1.15fr) auto;
+  align-items: center;
+}
+
+@media (max-width: 820px) {
+  .hero {
+    grid-template-columns: 1fr;
+  }
+}
+
+.hero__eyebrow {
+  margin: 0 0 10px;
+  font-size: 12px;
+  font-weight: 650;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+
+.hero h1 {
+  margin: 0 0 16px;
+  font-size: clamp(36px, 6.4vw, 56px);
+}
+
+.hero__lead {
+  margin: 0 0 24px;
+  max-width: 54ch;
+  font-size: 18px;
+  color: var(--ink-soft);
+}
+
+.hero__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.hero__note {
+  margin: 18px 0 0;
+  font-size: 14px;
+  color: var(--ink-soft);
+}
+
+.button {
+  display: inline-block;
+  padding: 11px 20px;
+  border: 1px solid var(--accent);
+  border-radius: 10px;
+  background: var(--accent);
+  color: #fff;
+  font: inherit;
+  font-size: 15px;
+  font-weight: 550;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.button:hover {
+  background: #35591f;
+}
+
+.button--ghost {
+  background: transparent;
+  border-color: var(--line);
+  color: var(--ink);
+}
+
+.button--ghost:hover {
+  background: #efece4;
+}
+
+/* Aperçu iPhone ---------------------------------------------------------- */
+
+.phone {
+  width: 264px;
+  padding: 10px;
+  border: 1px solid #d3cdc0;
+  border-radius: 40px;
+  background: linear-gradient(160deg, #efece4, #ddd7c9);
+  box-shadow: var(--shadow);
+  justify-self: center;
+}
+
+.phone__screen {
+  padding: 14px 14px 18px;
+  border-radius: 31px;
+  background: linear-gradient(180deg, var(--sky-1), var(--sky-2) 45%, var(--sky-3));
+  color: #fff;
+  text-align: center;
+}
+
+.phone__status {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 11px;
+  font-weight: 600;
+  opacity: 0.85;
+}
+
+.phone__signal {
+  width: 22px;
+  height: 7px;
+  border-radius: 2px;
+  background: rgb(255 255 255 / 60%);
+}
+
+.phone__place {
+  margin: 12px 0 0;
+  font-size: 20px;
+}
+
+.phone__temperature {
+  margin: 0;
+  font-size: 60px;
+  font-weight: 200;
+  line-height: 1.05;
+}
+
+.phone__condition {
+  margin: 0;
+  font-size: 13px;
+  opacity: 0.7;
+}
+
+.phone__range {
+  margin: 2px 0 12px;
+  font-size: 13px;
+  min-height: 18px;
+}
+
+.phone__card,
+.phone__tile {
+  padding: 9px 10px;
+  border: 1px solid rgb(255 255 255 / 14%);
+  border-radius: 13px;
+  background: rgb(255 255 255 / 12%);
+  text-align: left;
+}
+
+.phone__label {
+  margin: 0 0 6px;
+  font-size: 8.5px;
+  font-weight: 650;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  opacity: 0.65;
+}
+
+.phone__hours {
+  display: flex;
+  justify-content: space-between;
+}
+
+.phone__hour {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+}
+
+.phone__tiles {
+  display: grid;
+  gap: 8px;
+  grid-template-columns: 1fr 1fr;
+  margin-top: 8px;
+}
+
+.phone__value {
+  margin: 0;
+  font-size: 16px;
+}
+
+/* Météo du jour ---------------------------------------------------------- */
+
+.commune {
+  position: relative;
+  max-width: 380px;
+  margin-bottom: 18px;
+}
+
+.commune__input {
+  width: 100%;
+  padding: 11px 15px;
+  border: 1px solid var(--line);
+  border-radius: 11px;
+  background: var(--surface);
+  color: var(--ink);
+  font: inherit;
+  font-size: 16px;
+}
+
+.commune__input:focus-visible,
+.button:focus-visible,
+.commune__results button:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.commune__results {
+  position: absolute;
+  z-index: 10;
+  top: calc(100% + 6px);
+  left: 0;
+  right: 0;
+  margin: 0;
+  padding: 5px;
+  list-style: none;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--surface);
+  box-shadow: var(--shadow);
+}
+
+.commune__results button {
+  display: flex;
+  width: 100%;
+  gap: 8px;
+  align-items: baseline;
+  justify-content: space-between;
+  padding: 9px 12px;
+  border: 0;
+  border-radius: 8px;
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.commune__results button:hover {
+  background: #f1eee6;
+}
+
+.commune__admin {
+  color: var(--ink-soft);
+  font-size: 13px;
+}
+
+.today__card {
+  padding: 26px;
+  border-radius: var(--radius);
+  background: linear-gradient(160deg, var(--sky-1), var(--sky-2) 55%, var(--sky-3));
+  color: #fff;
+  box-shadow: var(--shadow);
+}
+
+.today__state {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  align-items: center;
+  padding: 40px 0;
+  color: rgb(255 255 255 / 70%);
+}
+
+.today__state p {
+  margin: 0;
+}
+
+.today__state .button--ghost {
+  border-color: rgb(255 255 255 / 30%);
+  color: #fff;
+}
+
+.today__hero {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  align-items: flex-start;
+  justify-content: space-between;
+  padding-bottom: 20px;
+  border-bottom: 1px solid rgb(255 255 255 / 16%);
+}
+
+.today__place {
+  margin: 0;
+  font-size: 26px;
+  font-weight: 550;
+}
+
+.today__date {
+  margin: 0;
+  color: rgb(255 255 255 / 65%);
+  font-size: 15px;
+}
+
+.today__now {
+  display: flex;
+  gap: 14px;
+  align-items: center;
+}
+
+.today__temperature {
+  margin: 0;
+  font-size: 60px;
+  font-weight: 200;
+  line-height: 1;
+  letter-spacing: -0.03em;
+}
+
+.today__condition {
+  margin: 0;
+  font-size: 17px;
+}
+
+.today__range {
+  margin: 0;
+  color: rgb(255 255 255 / 65%);
+  font-size: 15px;
+}
+
+.today__facts {
+  display: grid;
+  gap: 18px;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  margin: 20px 0 24px;
+}
+
+.fact dt {
+  font-size: 11px;
+  font-weight: 650;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgb(255 255 255 / 62%);
+}
+
+.fact dd {
+  margin: 4px 0 0;
+}
+
+.fact__value {
+  display: block;
+  font-size: 22px;
+}
+
+.fact__detail {
+  display: block;
+  color: rgb(255 255 255 / 62%);
+  font-size: 13px;
+}
+
+.today__agro {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+}
+
+.advice {
+  padding: 14px 16px;
+  border: 1px solid rgb(255 255 255 / 14%);
+  border-left-width: 4px;
+  border-radius: 12px;
+  background: rgb(255 255 255 / 10%);
+}
+
+.advice--good {
+  border-left-color: #7ed07a;
+}
+
+.advice--warn {
+  border-left-color: #f0c14b;
+}
+
+.advice--bad {
+  border-left-color: #ef8b7f;
+}
+
+.advice h3 {
+  margin: 0;
+  font-size: 11px;
+  font-weight: 650;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgb(255 255 255 / 62%);
+}
+
+.advice__value {
+  margin: 6px 0 2px;
+  font-size: 20px;
+}
+
+.advice__detail {
+  margin: 0;
+  color: rgb(255 255 255 / 62%);
+  font-size: 13px;
+}
+
+/* Indicateurs et données -------------------------------------------------- */
+
+.features__grid,
+.data__grid {
+  display: grid;
+  gap: 16px;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+}
+
+.feature,
+.data__grid article {
+  padding: 20px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface);
+}
+
+.feature h3,
+.data__grid h3 {
+  margin: 0 0 8px;
+  font-size: 18px;
+}
+
+.feature__rule {
+  margin: 0 0 8px;
+  font-size: 15px;
+}
+
+.feature__detail,
+.data__grid p {
+  margin: 0;
+  color: var(--ink-soft);
+  font-size: 15px;
+}
+
+/* Pied de page ----------------------------------------------------------- */
+
+.footer {
+  max-width: 1040px;
+  margin: 0 auto;
+  padding: 32px 20px 56px;
+  border-top: 1px solid var(--line);
+  color: var(--ink-soft);
+  font-size: 14px;
+}
+
+.footer p {
+  margin: 0 0 6px;
+  max-width: 68ch;
+}
+
+.footer__note {
+  font-size: 13px;
+}
+
+/* Pictogrammes ----------------------------------------------------------- */
+
+.wicon__cloud {
+  fill: #f2f5f8;
+}
+
+.wicon__sun,
+.wicon__moon,
+.wicon__bolt {
+  fill: #f7c948;
+}
+
+.wicon__ray {
+  stroke: #f7c948;
+  stroke-width: 1.6;
+  stroke-linecap: round;
+}
+
+.wicon__drop {
+  stroke: #7fd0f5;
+  stroke-width: 1.7;
+  stroke-linecap: round;
+}
+
+.wicon__flake {
+  fill: #cfe9f7;
+}
+
+.wicon__fog {
+  stroke: #dbe4ec;
+  stroke-width: 1.7;
+  stroke-linecap: round;
+}

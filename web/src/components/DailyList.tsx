@@ -1,6 +1,6 @@
-import type { DailySample } from '../domain/agro'
-import { weatherCondition } from '../domain/weather'
-import { WeatherIcon } from './WeatherIcon'
+import type { DailySample } from '@klima/core'
+import { percent, weatherCondition } from '@klima/core'
+import { WeatherIcon } from '@klima/core/ui'
 
 interface Props {
   days: readonly DailySample[]
@@ -38,9 +38,7 @@ export function DailyList({ days, currentTemperature, timeZone }: Props) {
               <span className="days__weather">
                 <WeatherIcon icon={condition.icon} size={24} title={condition.label} />
                 <span className="days__rain">
-                  {day.precipitationProbabilityMax >= 10
-                    ? `${Math.round(day.precipitationProbabilityMax)} %`
-                    : ''}
+                  {day.precipitationProbabilityMax >= 10 ? percent(day.precipitationProbabilityMax) : ''}
                 </span>
               </span>
 

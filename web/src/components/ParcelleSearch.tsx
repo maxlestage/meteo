@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { searchParcelles, type Parcelle } from '../api/openMeteo'
+import { searchParcelles, type Parcelle } from '@klima/core'
 
 interface Props {
   current: Parcelle

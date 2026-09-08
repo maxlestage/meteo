@@ -4,7 +4,7 @@ import { Hero } from './components/Hero'
 import { HourlyStrip } from './components/HourlyStrip'
 import { ParcelleSearch } from './components/ParcelleSearch'
 import { SprayCard } from './components/SprayCard'
-import { AgroThresholds } from './domain/agro'
+import { AgroThresholds, percent, signedWithUnit, withUnit } from '@klima/core'
 import { useAgroForecast } from './hooks/useAgroForecast'
 import { useParcelle } from './hooks/useParcelle'
 
@@ -53,7 +53,10 @@ export default function App() {
               <DetailTile
                 label="Humidité du sol"
                 value={summary.soil.state === 'ressuye' ? 'Ressuyé' : summary.soil.state === 'sature' ? 'Saturé' : 'Sec'}
-                caption={`${(summary.soil.moisture * 100).toFixed(0)} % vol. · ${summary.soil.temperature} °C à 6 cm. ${
+                caption={`${percent(summary.soil.moisture * 100)} vol. · ${withUnit(
+                  summary.soil.temperature,
+                  '°C',
+                )} à 6 cm. ${
                   summary.soil.trafficable ? 'Le sol porte les engins.' : 'Risque de tassement.'
                 }`}
                 gauge={{
@@ -65,24 +68,31 @@ export default function App() {
 
               <DetailTile
                 label="Bilan hydrique"
-                value={`${summary.water.balance > 0 ? '+' : ''}${summary.water.balance} mm`}
+                value={signedWithUnit(summary.water.balance, 'mm')}
                 caption={
                   summary.water.irrigationAdvice > 0
                     ? `Irrigation conseillée : ${Math.round(summary.water.irrigationAdvice)} mm sur 7 jours.`
-                    : `Pluie ${summary.water.precipitation} mm, ET0 ${summary.water.evapotranspiration} mm sur 7 jours.`
+                    : `Pluie ${withUnit(summary.water.precipitation, 'mm')}, ET0 ${withUnit(
+                        summary.water.evapotranspiration,
+                        'mm',
+                      )} sur 7 jours.`
                 }
               />
 
               <DetailTile
                 label="Vent"
-                value={`${Math.round(forecast.current.windSpeed)} km/h`}
-                caption={`Rafales ${Math.round(forecast.current.windGusts)} km/h. Limite de pulvérisation : ${AgroThresholds.sprayWindMax} km/h.`}
+                value={withUnit(forecast.current.windSpeed, 'km/h', 0)}
+                caption={`Rafales ${withUnit(forecast.current.windGusts, 'km/h', 0)}. Limite de pulvérisation : ${withUnit(
+                  AgroThresholds.sprayWindMax,
+                  'km/h',
+                  0,
+                )}.`}
               />
 
               <DetailTile
                 label="Risque de gel"
                 value={frostLabel(summary.frost.severity)}
-                caption={`Mini ${summary.frost.minTemperature} °C cette nuit${
+                caption={`Mini ${withUnit(summary.frost.minTemperature, '°C')} cette nuit${
                   summary.frost.hoarFrost ? ', gelée blanche probable' : ''
                 }.`}
               />
@@ -95,7 +105,7 @@ export default function App() {
 
               <DetailTile
                 label="Degrés-jours"
-                value={`${summary.gdd} °C·j`}
+                value={withUnit(summary.gdd, '°C·j')}
                 caption={`Cumul sur 7 jours, base ${AgroThresholds.gddBase} °C.`}
               />
 
@@ -108,7 +118,7 @@ export default function App() {
               <DetailTile
                 label="Semis"
                 value={summary.soil.sowable ? 'Possible' : 'Déconseillé'}
-                caption={`Sol à ${summary.soil.temperature} °C à 6 cm ; il faut 8 °C et un sol ressuyé.`}
+                caption={`Sol à ${withUnit(summary.soil.temperature, '°C')} à 6 cm ; il faut 8 °C et un sol ressuyé.`}
               />
             </div>
 

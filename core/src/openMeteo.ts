@@ -6,7 +6,7 @@
  * en plus des paramètres nécessaires au calcul des fenêtres de traitement.
  * L'API est libre d'accès et ne demande aucune clé.
  */
-import type { CurrentSample, DailySample, HourlySample } from '../domain/agro'
+import type { CurrentSample, DailySample, HourlySample } from './agro'
 
 const FORECAST_URL = 'https://api.open-meteo.com/v1/forecast'
 const GEOCODING_URL = 'https://geocoding-api.open-meteo.com/v1/search'

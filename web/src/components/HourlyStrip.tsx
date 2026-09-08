@@ -1,6 +1,6 @@
-import type { CurrentSample, HourlySample } from '../domain/agro'
-import { weatherCondition } from '../domain/weather'
-import { WeatherIcon } from './WeatherIcon'
+import type { CurrentSample, HourlySample } from '@klima/core'
+import { percent, weatherCondition } from '@klima/core'
+import { WeatherIcon } from '@klima/core/ui'
 
 interface Props {
   hours: readonly HourlySample[]
@@ -34,9 +34,7 @@ export function HourlyStrip({ hours, current, timeZone }: Props) {
                 title={condition.label}
               />
               <span className="strip__rain">
-                {hour.precipitationProbability >= 10
-                  ? `${Math.round(hour.precipitationProbability)} %`
-                  : '\u00a0'}
+                {hour.precipitationProbability >= 10 ? percent(hour.precipitationProbability) : '\u00a0'}
               </span>
               <span className="strip__temp">
                 {Math.round(observed ? current.temperature : hour.temperature)}°
