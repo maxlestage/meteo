@@ -1,0 +1,55 @@
+name: Site de présentation
+
+# Publie site/ sur GitHub Pages à chaque poussée sur la branche par défaut.
+# Le dépôt doit avoir Pages configuré sur « GitHub Actions »
+# (Settings → Pages → Source).
+on:
+  push:
+    branches: [master]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Une publication à la fois, sans annuler celle qui est en cours.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - run: bun install --frozen-lockfile
+
+      # Le cœur partagé porte les règles agronomiques citées par la page.
+      - name: Tests du cœur partagé
+        run: bun test
+
+      # `build` enchaîne tsc puis vite : une erreur de types arrête la publication.
+      - name: Construction du site
+        run: bun run --cwd site build
+
+      - uses: actions/configure-pages@v5
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: site/dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

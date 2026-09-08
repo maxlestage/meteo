@@ -110,6 +110,21 @@ bun run build      # dist/
 Les seuils affichés dans la page sont lus dans `AgroThresholds` : la vitrine ne
 peut pas annoncer autre chose que ce que l'application applique.
 
+### Publication sur GitHub Pages
+
+`.github/workflows/pages.yml` construit `site/` et le publie à chaque poussée
+sur la branche par défaut (et à la demande, via *Run workflow*). Le déploiement
+échoue si les tests du cœur partagé ou la vérification de types échouent : rien
+d'incohérent n'est mis en ligne.
+
+Une seule chose à faire côté dépôt, une fois : **Settings → Pages → Source →
+GitHub Actions**. Sans cela le job `deploy` s'arrête faute d'environnement
+`github-pages`.
+
+Le site est construit avec des chemins d'actifs relatifs : il fonctionne sous le
+sous-chemin d'un dépôt (`https://<compte>.github.io/<dépôt>/`) comme à la racine
+d'un domaine personnalisé, sans rien reconfigurer.
+
 ## Cœur partagé
 
 ```bash
