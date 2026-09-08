@@ -40,13 +40,15 @@ final class DashboardViewModel: ObservableObject {
         return zone
     }
 
-    func load() {
+    /// Charge la prévision. L'appel attend la fin du chargement : un « tirer
+    /// pour rafraîchir » garde ainsi son indicateur jusqu'aux données reçues.
+    func load() async {
         loadTask?.cancel()
         let parcelle = parcelle
         isLoading = true
         errorMessage = nil
 
-        loadTask = Task {
+        let task = Task {
             do {
                 let forecast = try await service.forecast(for: parcelle, days: 7)
                 guard !Task.isCancelled else { return }
@@ -63,13 +65,15 @@ final class DashboardViewModel: ObservableObject {
             }
             self.isLoading = false
         }
+        loadTask = task
+        await task.value
     }
 
     func select(_ parcelle: Parcelle) {
         self.parcelle = parcelle
         searchResults = []
         persist(parcelle)
-        load()
+        Task { await load() }
     }
 
     /// Recherche différée : on laisse l'utilisateur finir de taper.

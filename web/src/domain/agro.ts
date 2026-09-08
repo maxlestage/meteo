@@ -11,6 +11,12 @@
 export interface HourlySample {
   /** Horodatage local de la parcelle. */
   time: Date
+  /** Code temps WMO, traduit par `weatherCondition`. */
+  weatherCode: number
+  /** Vrai entre le lever et le coucher du soleil. */
+  isDay: boolean
+  /** Probabilité de précipitations sur l'heure (%). */
+  precipitationProbability: number
   /** Température de l'air à 2 m (°C). */
   temperature: number
   /** Humidité relative à 2 m (%). */
@@ -36,6 +42,8 @@ export interface HourlySample {
 export interface DailySample {
   /** Jour local (minuit heure de la parcelle). */
   date: Date
+  /** Code temps WMO dominant de la journée. */
+  weatherCode: number
   temperatureMin: number
   temperatureMax: number
   /** Cumul de pluie du jour (mm). */
@@ -46,6 +54,21 @@ export interface DailySample {
   et0Sum: number
   /** Rafales maximales du jour (km/h). */
   windGustsMax: number
+  sunrise: Date | null
+  sunset: Date | null
+}
+
+/** Conditions observées à l'instant, pour l'en-tête. */
+export interface CurrentSample {
+  time: Date
+  temperature: number
+  /** Température ressentie (°C). */
+  apparentTemperature: number
+  weatherCode: number
+  isDay: boolean
+  relativeHumidity: number
+  windSpeed: number
+  windGusts: number
 }
 
 /**
@@ -232,11 +255,19 @@ export function sprayWindows(hours: readonly HourlySample[]): SprayWindow[] {
   return hours.map((_, i) => evaluateSprayHour(hours, i))
 }
 
+/** Plage continue exploitable pour un traitement. */
+export interface SprayOpportunity {
+  start: Date
+  end: Date
+  /** Score moyen de la plage, 0–100. */
+  score: number
+}
+
 /** Prochaine plage d'au moins `minLength` heures consécutives exploitables. */
 export function nextSprayOpportunity(
   windows: readonly SprayWindow[],
   minLength = 2,
-): { start: Date; end: Date; score: number } | null {
+): SprayOpportunity | null {
   let run: SprayWindow[] = []
   for (const w of windows) {
     if (w.verdict === 'defavorable') {
@@ -363,7 +394,7 @@ export interface AgroSummary {
   disease: DiseasePressure
   frost: FrostRisk
   gdd: number
-  nextSpray: { start: Date; end: Date; score: number } | null
+  nextSpray: SprayOpportunity | null
 }
 
 /** Assemble tous les indicateurs pour le tableau de bord. */

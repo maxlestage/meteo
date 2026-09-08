@@ -74,11 +74,11 @@ export function ParcelleSearch({ current, onSelect }: Props) {
   }
 
   return (
-    <div className="parcelle-search" ref={containerRef}>
-      <div className="parcelle-search__row">
+    <div className="search" ref={containerRef}>
+      <div className="search__row">
         <input
           type="search"
-          className="parcelle-search__input"
+          className="search__input"
           value={query}
           onChange={(event) => setQuery(event.target.value)}
           placeholder={`${current.name} — changer de parcelle`}
@@ -89,15 +89,15 @@ export function ParcelleSearch({ current, onSelect }: Props) {
         </button>
       </div>
 
-      {error && <p className="parcelle-search__error">{error}</p>}
+      {error && <p className="search__error">{error}</p>}
 
       {results.length > 0 && (
-        <ul className="parcelle-search__results">
+        <ul className="search__results">
           {results.map((result) => (
             <li key={`${result.latitude},${result.longitude}`}>
               <button type="button" onClick={() => choose(result)}>
                 <span>{result.name}</span>
-                <span className="parcelle-search__admin">
+                <span className="search__admin">
                   {[result.admin, result.country].filter(Boolean).join(', ')}
                 </span>
               </button>

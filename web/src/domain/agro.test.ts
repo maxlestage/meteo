@@ -16,6 +16,9 @@ import {
 
 const hour = (overrides: Partial<HourlySample> = {}, index = 0): HourlySample => ({
   time: new Date(Date.UTC(2026, 4, 12, 6 + index)),
+  weatherCode: 3,
+  isDay: true,
+  precipitationProbability: 20,
   temperature: 18,
   relativeHumidity: 65,
   dewPoint: 11,
@@ -31,12 +34,15 @@ const hour = (overrides: Partial<HourlySample> = {}, index = 0): HourlySample =>
 
 const day = (overrides: Partial<DailySample> = {}): DailySample => ({
   date: new Date(Date.UTC(2026, 4, 12)),
+  weatherCode: 3,
   temperatureMin: 10,
   temperatureMax: 22,
   precipitationSum: 2,
   precipitationProbabilityMax: 30,
   et0Sum: 3.5,
   windGustsMax: 25,
+  sunrise: new Date(Date.UTC(2026, 4, 12, 4, 20)),
+  sunset: new Date(Date.UTC(2026, 4, 12, 19, 40)),
   ...overrides,
 })
 

@@ -1,48 +1,75 @@
 import SwiftUI
 
-/// Écran unique de l'application : les indicateurs agronomiques de la parcelle.
+/// Écran unique de l'application : la météo agricole de la parcelle, présentée
+/// comme l'application Météo du système.
 struct DashboardView: View {
     @StateObject private var viewModel = DashboardViewModel()
     @State private var query = ""
 
-    private let columns = [GridItem(.adaptive(minimum: 165), spacing: 12)]
+    private let tiles = [GridItem(.adaptive(minimum: 150), spacing: 12)]
 
     var body: some View {
         NavigationStack {
-            ScrollView {
-                VStack(spacing: 16) {
-                    if viewModel.isLoading && viewModel.forecast == nil {
-                        ProgressView("Chargement des données agronomiques…")
-                            .padding(.top, 60)
-                    }
+            ZStack {
+                SkyBackground(
+                    isDay: viewModel.forecast?.current.isDay ?? false,
+                    weatherCode: viewModel.forecast?.current.weatherCode ?? 3
+                )
 
-                    if let message = viewModel.errorMessage {
-                        errorBanner(message)
-                    }
-
-                    if let summary = viewModel.summary, let forecast = viewModel.forecast {
-                        LazyVGrid(columns: columns, spacing: 12) {
-                            ForEach(cards(for: summary), id: \.title) { card in
-                                IndicatorCard(
-                                    title: card.title,
-                                    value: card.value,
-                                    caption: card.caption,
-                                    tone: card.tone,
-                                    tags: card.tags
-                                )
-                            }
+                ScrollView {
+                    VStack(spacing: 12) {
+                        if viewModel.isLoading && viewModel.forecast == nil {
+                            ProgressView()
+                                .tint(.white)
+                                .padding(.top, 80)
                         }
 
-                        SprayTimelineView(hours: forecast.hourly, timeZone: viewModel.timeZone)
-                        WeeklyForecastView(days: forecast.daily, timeZone: viewModel.timeZone)
-                        source(forecast)
+                        if let message = viewModel.errorMessage {
+                            errorBanner(message)
+                        }
+
+                        if let forecast = viewModel.forecast, let summary = viewModel.summary {
+                            HeroView(forecast: forecast)
+
+                            HourlyStripView(
+                                hours: forecast.hourly,
+                                current: forecast.current,
+                                timeZone: viewModel.timeZone
+                            )
+
+                            DailyListView(
+                                days: forecast.daily,
+                                currentTemperature: forecast.current.temperature,
+                                timeZone: viewModel.timeZone
+                            )
+
+                            SprayCardView(
+                                hours: forecast.hourly,
+                                nextSpray: summary.nextSpray,
+                                timeZone: viewModel.timeZone
+                            )
+
+                            LazyVGrid(columns: tiles, spacing: 12) {
+                                ForEach(detailTiles(forecast, summary), id: \.label) { tile in
+                                    DetailTile(
+                                        label: tile.label,
+                                        value: tile.value,
+                                        caption: tile.caption,
+                                        gauge: tile.gauge
+                                    )
+                                }
+                            }
+
+                            source(forecast)
+                        }
                     }
+                    .padding(.horizontal, 16)
+                    .padding(.bottom, 32)
                 }
-                .padding(16)
+                .scrollIndicators(.hidden)
             }
-            .background(Color(uiColor: .systemGroupedBackground))
-            .navigationTitle(viewModel.parcelle.name)
-            .navigationBarTitleDisplayMode(.large)
+            .foregroundStyle(.white)
+            .toolbarBackground(.hidden, for: .navigationBar)
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
                     Button {
@@ -50,6 +77,7 @@ struct DashboardView: View {
                     } label: {
                         Label("Me localiser", systemImage: "location")
                     }
+                    .tint(.white)
                 }
             }
             .searchable(text: $query, prompt: "Rechercher une commune")
@@ -64,6 +92,7 @@ struct DashboardView: View {
             .refreshable { await viewModel.load() }
             .task { await viewModel.load() }
         }
+        .preferredColorScheme(.dark)
     }
 
     // MARK: Sous-vues
@@ -80,130 +109,124 @@ struct DashboardView: View {
                         Spacer()
                         Text(result.subtitle)
                             .font(.footnote)
-                            .foregroundStyle(.secondary)
+                            .foregroundStyle(.white.opacity(0.62))
                     }
                     .padding(.horizontal, 16)
                     .padding(.vertical, 11)
                     .contentShape(Rectangle())
                 }
                 .buttonStyle(.plain)
-                Divider()
+                Divider().overlay(Color.white.opacity(0.14))
             }
         }
-        .background(Color(uiColor: .secondarySystemGroupedBackground))
-        .clipShape(RoundedRectangle(cornerRadius: 14))
-        .shadow(color: .black.opacity(0.12), radius: 12, y: 4)
+        .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 14))
         .padding(.horizontal, 16)
     }
 
     private func errorBanner(_ message: String) -> some View {
-        HStack(alignment: .firstTextBaseline) {
-            Label(message, systemImage: "exclamationmark.triangle")
-                .font(.subheadline)
-            Spacer()
-            Button("Réessayer") { viewModel.load() }
-                .font(.subheadline.weight(.semibold))
+        VStack(spacing: 10) {
+            Text(message)
+                .multilineTextAlignment(.center)
+            Button("Réessayer") { Task { await viewModel.load() } }
+                .buttonStyle(.bordered)
+                .tint(.white)
         }
-        .padding(14)
-        .background(Tone.bad.color.opacity(0.12), in: RoundedRectangle(cornerRadius: 12))
-        .foregroundStyle(Tone.bad.color)
+        .padding(.top, 40)
     }
 
     private func source(_ forecast: AgroForecast) -> some View {
-        VStack(spacing: 4) {
-            Text("Données Open-Meteo — modèle agricole : humidité et température du sol, ET0 FAO-56, VPD.")
-            Text("Parcelle à \(Int(forecast.elevation.rounded())) m · mise à jour \(updated(forecast.fetchedAt))")
-        }
-        .font(.caption2)
-        .foregroundStyle(.secondary)
-        .multilineTextAlignment(.center)
-        .padding(.top, 4)
+        Text("Données Open-Meteo — modèle agricole : humidité et température du sol, ET0 FAO-56, déficit de pression de vapeur. Parcelle à \(Int(forecast.elevation.rounded())) m.")
+            .font(.caption2)
+            .foregroundStyle(.white.opacity(0.62))
+            .multilineTextAlignment(.center)
+            .padding(.top, 6)
     }
 
-    // MARK: Construction des cartes
+    // MARK: Tuiles de détail
 
-    private struct CardModel {
-        let title: String
+    private struct TileModel {
+        let label: String
         let value: String
-        let caption: String
-        let tone: Tone
-        var tags: [String] = []
+        var caption: String?
+        var gauge: (position: Double, colors: [Color])?
     }
 
-    private func cards(for summary: AgroSummary) -> [CardModel] {
-        let water = summary.water
+    private func detailTiles(_ forecast: AgroForecast, _ summary: AgroSummary) -> [TileModel] {
         let soil = summary.soil
-        let disease = summary.disease
-        let frost = summary.frost
+        let water = summary.water
+        let zone = viewModel.timeZone
+        let today = forecast.daily.first
 
         return [
-            CardModel(
-                title: "Bilan hydrique 7 j",
+            TileModel(
+                label: "Humidité du sol",
+                value: soil.state.label,
+                caption: String(
+                    format: "%.0f %% vol. · %.1f °C à 6 cm. %@",
+                    soil.moisture * 100,
+                    soil.temperature,
+                    soil.trafficable ? "Le sol porte les engins." : "Risque de tassement."
+                ),
+                gauge: (
+                    position: soil.moisture / 0.5,
+                    colors: [
+                        Color(red: 0.847, green: 0.702, blue: 0.416),
+                        Color(red: 0.561, green: 0.769, blue: 0.416),
+                        Color(red: 0.290, green: 0.639, blue: 0.847),
+                        Color(red: 0.169, green: 0.373, blue: 0.620),
+                    ]
+                )
+            ),
+            TileModel(
+                label: "Bilan hydrique",
                 value: String(format: "%@%.1f mm", water.balance > 0 ? "+" : "", water.balance),
                 caption: water.irrigationAdvice > 0
-                    ? "Irrigation conseillée : \(Int(water.irrigationAdvice.rounded())) mm"
-                    : String(format: "Pluie %.1f mm · ET0 %.1f mm", water.precipitation, water.evapotranspiration),
-                tone: water.status == .deficit ? .bad : (water.status == .excedent ? .warn : .good)
+                    ? "Irrigation conseillée : \(Int(water.irrigationAdvice.rounded())) mm sur 7 jours."
+                    : String(
+                        format: "Pluie %.1f mm, ET0 %.1f mm sur 7 jours.",
+                        water.precipitation,
+                        water.evapotranspiration
+                    )
             ),
-            CardModel(
-                title: "État du sol",
-                value: soil.state.label,
-                caption: String(format: "%.1f %% vol. · %.1f °C à 6 cm", soil.moisture * 100, soil.temperature),
-                tone: soil.state == .sature ? .bad : (soil.state == .sec ? .warn : .good),
-                tags: [
-                    soil.trafficable ? "Portance correcte" : "Risque de tassement",
-                    soil.sowable ? "Semis possible" : "Semis déconseillé",
-                ]
+            TileModel(
+                label: "Vent",
+                value: "\(Int(forecast.current.windSpeed.rounded())) km/h",
+                caption: String(
+                    format: "Rafales %d km/h. Limite de pulvérisation : %d km/h.",
+                    Int(forecast.current.windGusts.rounded()),
+                    Int(AgroThresholds.sprayWindMax)
+                )
             ),
-            CardModel(
-                title: "Fenêtre de traitement",
-                value: summary.nextSpray.map { range($0) } ?? "Aucune",
-                caption: summary.nextSpray.map { "Score \($0.score)/100 sur la plage" }
-                    ?? "Rien d’exploitable sur 7 jours",
-                tone: summary.nextSpray.map { $0.score >= 80 ? Tone.good : .warn } ?? .bad
+            TileModel(
+                label: "Risque de gel",
+                value: summary.frost.severity.label,
+                caption: String(format: "Mini %.1f °C cette nuit", summary.frost.minTemperature)
+                    + (summary.frost.hoarFrost ? ", gelée blanche probable." : ".")
             ),
-            CardModel(
-                title: "Pression maladie",
-                value: disease.level.label,
-                caption: "\(disease.leafWetnessHours) h d’humectation du feuillage sur 24 h",
-                tone: disease.level == .elevee ? .bad : (disease.level == .moyenne ? .warn : .good)
+            TileModel(
+                label: "Pression maladie",
+                value: summary.disease.level.label,
+                caption: "\(summary.disease.leafWetnessHours) h d’humectation du feuillage sur 24 h."
             ),
-            CardModel(
-                title: "Risque de gel",
-                value: frost.severity.label,
-                caption: String(format: "Mini %.1f °C", frost.minTemperature)
-                    + (frost.hoarFrost ? " · gelée blanche probable" : ""),
-                tone: frost.severity == .aucun ? .good : (frost.severity == .faible ? .warn : .bad)
-            ),
-            CardModel(
-                title: "Degrés-jours (base 10)",
+            TileModel(
+                label: "Degrés-jours",
                 value: String(format: "%.1f °C·j", summary.gdd),
-                caption: "Cumul sur les 7 jours de prévision",
-                tone: .neutral
+                caption: "Cumul sur 7 jours, base \(Int(AgroThresholds.gddBase)) °C."
+            ),
+            TileModel(
+                label: "Lever",
+                value: AgroFormat.time(today?.sunrise, in: zone),
+                caption: "Coucher à \(AgroFormat.time(today?.sunset, in: zone))."
+            ),
+            TileModel(
+                label: "Semis",
+                value: soil.sowable ? "Possible" : "Déconseillé",
+                caption: String(
+                    format: "Sol à %.1f °C à 6 cm ; il faut 8 °C et un sol ressuyé.",
+                    soil.temperature
+                )
             ),
         ]
-    }
-
-    // MARK: Formatage
-
-    private func range(_ opportunity: SprayOpportunity) -> String {
-        let formatter = DateFormatter()
-        formatter.locale = Locale(identifier: "fr_FR")
-        formatter.timeZone = viewModel.timeZone
-        formatter.dateFormat = "EEE HH 'h'"
-        let endFormatter = DateFormatter()
-        endFormatter.locale = Locale(identifier: "fr_FR")
-        endFormatter.timeZone = viewModel.timeZone
-        endFormatter.dateFormat = "HH 'h'"
-        return "\(formatter.string(from: opportunity.start)) → \(endFormatter.string(from: opportunity.end))"
-    }
-
-    private func updated(_ date: Date) -> String {
-        let formatter = DateFormatter()
-        formatter.locale = Locale(identifier: "fr_FR")
-        formatter.timeZone = viewModel.timeZone
-        formatter.dateFormat = "HH:mm"
-        return formatter.string(from: date)
     }
 }
 
