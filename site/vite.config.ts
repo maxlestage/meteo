@@ -4,6 +4,9 @@ import react from '@vitejs/plugin-react'
 
 export default defineConfig({
   plugins: [react()],
+  // Chemins relatifs : le site fonctionne aussi bien à la racine d'un domaine
+  // que sous le sous-chemin d'un dépôt GitHub Pages (/<dépôt>/).
+  base: './',
   // Le cœur partagé est consommé en TypeScript, sans étape de compilation.
   resolve: {
     alias: {
