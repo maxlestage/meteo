@@ -1,23 +1,28 @@
 # Klima
 
-Météo agricole en deux applications qui partagent le même cœur agronomique :
-une application iOS en SwiftUI et un site web en Bun + Vite + React. Les données viennent
+Météo agricole : une application iOS en SwiftUI, une application web et un site
+de présentation, tous bâtis sur le même cœur agronomique. Les données viennent
 exclusivement de l'**API agricole Open-Meteo** — humidité et température du sol,
 évapotranspiration de référence FAO-56, déficit de pression de vapeur — sans
 clé d'API.
 
 ```
+core/   Cœur partagé TypeScript : règles agronomiques, codes météo, client Open-Meteo
 ios/    Application iOS (SwiftUI, projet Xcode avec project.pbxproj versionné)
-web/    Site web (Bun + TypeScript + Vite + React)
+web/    Application web complète (Bun + TypeScript + Vite + React)
+site/   Site de présentation, avec la météo du jour
 ```
 
-L'écran reprend la présentation de l'application Météo du système — commune,
-température, bandeau horaire, liste des sept jours — et range les indicateurs
-agronomiques dans les tuiles de détail.
+Les trois paquets JavaScript forment un espace de travail Bun : `bun install` à la
+racine les installe ensemble, et `bun test` y exécute la suite du cœur partagé.
+
+L'application reprend la présentation de l'application Météo du système —
+commune, température, bandeau horaire, liste des sept jours — et range les
+indicateurs agronomiques dans les tuiles de détail.
 
 ## Ce que l'application calcule
 
-Les deux plateformes appliquent les mêmes règles, avec les mêmes seuils :
+iOS et web appliquent les mêmes règles, avec les mêmes seuils :
 
 | Indicateur | Règle |
 | --- | --- |
@@ -36,8 +41,8 @@ temps WMO traduits en pictogrammes, probabilité de pluie horaire, amplitude
 thermique de la semaine, lever et coucher du soleil.
 
 Les seuils sont définis une seule fois par plateforme et doivent rester
-synchronisés : `web/src/domain/agro.ts` (`AgroThresholds`) et
-`ios/Klima/Models/AgroIndicators.swift` (`AgroThresholds`). Les deux
+synchronisés : `core/src/agro.ts` (`AgroThresholds`), consommé par le web et le
+site, et `ios/Klima/Models/AgroIndicators.swift` (`AgroThresholds`). Les deux
 suites de tests couvrent les mêmes cas, pour que le conseil rendu soit
 identique au champ.
 
@@ -75,11 +80,12 @@ Klima/
 
 ## Web
 
+L'application complète : bandeau horaire, semaine et tuiles agronomiques.
+
 ```bash
+bun install        # à la racine, installe core, web et site
 cd web
-bun install
 bun run dev        # http://localhost:5173
-bun test           # cœur agronomique
 bun run typecheck
 bun run build      # dist/
 ```
@@ -87,6 +93,33 @@ bun run build      # dist/
 La parcelle est mémorisée dans le navigateur ; la recherche de commune passe par
 le géocodage Open-Meteo et le bouton « Me localiser » par la géolocalisation du
 navigateur. Le fond suit le ciel : nuit, journée couverte ou journée dégagée.
+
+## Site de présentation
+
+La vitrine de Klima : ce que fait l'application, et une section « météo du jour »
+qui la fait essayer sur sa propre commune — la journée en cours uniquement, la
+semaine et le détail horaire restant l'affaire de l'application.
+
+```bash
+cd site
+bun run dev        # http://localhost:5174
+bun run typecheck
+bun run build      # dist/
+```
+
+Les seuils affichés dans la page sont lus dans `AgroThresholds` : la vitrine ne
+peut pas annoncer autre chose que ce que l'application applique.
+
+## Cœur partagé
+
+```bash
+cd core
+bun test           # règles agronomiques, codes météo, journée en cours, formats
+bun run typecheck
+```
+
+`core` n'a pas d'étape de compilation : le web et le site l'importent en
+TypeScript via l'alias `@klima/core`, et `@klima/core/ui` pour les pictogrammes.
 
 ## Données
 

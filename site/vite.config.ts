@@ -12,6 +12,6 @@ export default defineConfig({
       '@klima/core': fileURLToPath(new URL('../core/src/index.ts', import.meta.url)),
     },
   },
-  server: { port: 5173 },
+  server: { port: 5174 },
   build: { outDir: 'dist', sourcemap: true },
 })

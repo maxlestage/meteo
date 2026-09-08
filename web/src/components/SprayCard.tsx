@@ -1,4 +1,4 @@
-import { sprayWindows, type HourlySample, type SprayOpportunity } from '../domain/agro'
+import { sprayWindows, type HourlySample, type SprayOpportunity } from '@klima/core'
 
 interface Props {
   hours: readonly HourlySample[]

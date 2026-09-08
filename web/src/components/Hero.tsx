@@ -1,5 +1,5 @@
-import type { AgroForecast } from '../api/openMeteo'
-import { weatherCondition } from '../domain/weather'
+import type { AgroForecast } from '@klima/core'
+import { weatherCondition } from '@klima/core'
 
 interface Props {
   forecast: AgroForecast

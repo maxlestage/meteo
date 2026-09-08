@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react'
-import type { Parcelle } from '../api/openMeteo'
+import type { Parcelle } from '@klima/core'
 
 const STORAGE_KEY = 'klima.parcelle'
 

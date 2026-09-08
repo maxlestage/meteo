@@ -1,4 +1,4 @@
-import type { ConditionIcon } from '../domain/weather'
+import type { ConditionIcon } from '../weather'
 
 interface Props {
   icon: ConditionIcon

@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { AgroApiError, fetchAgroForecast, type AgroForecast, type Parcelle } from '../api/openMeteo'
-import { summarize, type AgroSummary } from '../domain/agro'
+import { AgroApiError, fetchAgroForecast, type AgroForecast, type Parcelle } from '@klima/core'
+import { summarize, type AgroSummary } from '@klima/core'
 
 interface State {
   forecast: AgroForecast | null

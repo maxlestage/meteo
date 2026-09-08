@@ -13,16 +13,6 @@
       "bun",
       "vite/client"
     ],
-    "strict": true,
-    "noUnusedLocals": true,
-    "noUnusedParameters": true,
-    "noFallthroughCasesInSwitch": true,
-    "noUncheckedIndexedAccess": true,
-    "verbatimModuleSyntax": true,
-    "isolatedModules": true,
-    "resolveJsonModule": true,
-    "skipLibCheck": true,
-    "noEmit": true,
     "paths": {
       "@klima/core": [
         "../core/src/index.ts"
@@ -30,7 +20,16 @@
       "@klima/core/ui": [
         "../core/src/ui/index.ts"
       ]
-    }
+    },
+    "strict": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noFallthroughCasesInSwitch": true,
+    "noUncheckedIndexedAccess": true,
+    "verbatimModuleSyntax": true,
+    "isolatedModules": true,
+    "skipLibCheck": true,
+    "noEmit": true
   },
   "include": [
     "src",

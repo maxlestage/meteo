@@ -3,8 +3,43 @@
   "configVersion": 1,
   "workspaces": {
     "": {
-      "name": "klima-web",
+      "name": "klima",
+    },
+    "core": {
+      "name": "@klima/core",
+      "version": "1.0.0",
+      "devDependencies": {
+        "@types/bun": "^1.1.14",
+        "@types/react": "^19.0.0",
+        "react": "^19.0.0",
+        "typescript": "^5.7.2",
+      },
+      "peerDependencies": {
+        "react": ">=19",
+      },
+    },
+    "site": {
+      "name": "klima-site",
+      "version": "1.0.0",
       "dependencies": {
+        "@klima/core": "workspace:*",
+        "react": "^19.0.0",
+        "react-dom": "^19.0.0",
+      },
+      "devDependencies": {
+        "@types/bun": "^1.1.14",
+        "@types/react": "^19.0.0",
+        "@types/react-dom": "^19.0.0",
+        "@vitejs/plugin-react": "^4.3.4",
+        "typescript": "^5.7.2",
+        "vite": "^6.0.7",
+      },
+    },
+    "web": {
+      "name": "klima-web",
+      "version": "1.0.0",
+      "dependencies": {
+        "@klima/core": "workspace:*",
         "react": "^19.0.0",
         "react-dom": "^19.0.0",
       },
@@ -119,6 +154,8 @@
 
     "@jridgewell/trace-mapping": ["@jridgewell/trace-mapping@0.3.31", "", { "dependencies": { "@jridgewell/resolve-uri": "^3.1.0", "@jridgewell/sourcemap-codec": "^1.4.14" } }, "sha512-zzNR+SdQSDJzc8joaeP8QQoCQr8NuYx2dIIytl1QeBEZHJ9uW6hebsrYgbz8hJwUQao3TWCMtmfV8Nu1twOLAw=="],
 
+    "@klima/core": ["@klima/core@workspace:core"],
+
     "@napi-rs/lzma-linux-x64-gnu": ["@napi-rs/lzma-linux-x64-gnu@1.5.1", "", { "os": "linux", "cpu": "x64" }, "sha512-oTXEIha4SsuXdTA4Iyskj0kpdx2yVXdhd75c2v3xGrHFfVMsbhTPZU/nMPL4sWKo4pBHm3aucLaqGlF696dTyQ=="],
 
     "@rolldown/pluginutils": ["@rolldown/pluginutils@1.0.0-beta.27", "", {}, "sha512-+d0F4MKMCbeVUJwG96uQ4SgAznZNSq93I3V+9NHA4OpvqG8mRCpGdKmK8l/dl02h2CCDHwW2FqilnTyDcAnqjA=="],
@@ -224,6 +261,10 @@
     "jsesc": ["jsesc@3.1.0", "", { "bin": { "jsesc": "bin/jsesc" } }, "sha512-/sM3dO2FOzXjKQhJuo0Q173wf2KOo8t4I8vHy6lF9poUp7bKT0/NHE8fPX23PwfhnykfqnC2xRxOnVw5XuGIaA=="],
 
     "json5": ["json5@2.2.3", "", { "bin": { "json5": "lib/cli.js" } }, "sha512-XmOWe7eyHYH14cLdVPoyg+GOH3rYX++KpzrylJwSW98t3Nk+U8XOl8FWKOgwtzdb8lXGf6zYwDUzeHMWfxasyg=="],
+
+    "klima-site": ["klima-site@workspace:site"],
+
+    "klima-web": ["klima-web@workspace:web"],
 
     "lru-cache": ["lru-cache@5.1.1", "", { "dependencies": { "yallist": "^3.0.2" } }, "sha512-KpNARQA3Iwv+jTA0utUVVbrh+Jlrr1Fv0e56GGzAFOXN7dk/FviaDW8LHmK52DlcH4WP2n6gI8vN1aesBFgo9w=="],
 
