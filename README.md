@@ -11,6 +11,10 @@ ios/    Application iOS (SwiftUI, projet Xcode avec project.pbxproj versionné)
 web/    Site web (Bun + TypeScript + Vite + React)
 ```
 
+L'écran reprend la présentation de l'application Météo du système — commune,
+température, bandeau horaire, liste des sept jours — et range les indicateurs
+agronomiques dans les tuiles de détail.
+
 ## Ce que l'application calcule
 
 Les deux plateformes appliquent les mêmes règles, avec les mêmes seuils :
@@ -26,6 +30,10 @@ Les deux plateformes appliquent les mêmes règles, avec les mêmes seuils :
 
 Le vent, les rafales et la pluie imminente sont **rédhibitoires** : ils rendent
 l'heure inexploitable pour un traitement quel que soit le reste du score.
+
+S'y ajoutent les éléments d'une météo classique : conditions du moment, codes
+temps WMO traduits en pictogrammes, probabilité de pluie horaire, amplitude
+thermique de la semaine, lever et coucher du soleil.
 
 Les seuils sont définis une seule fois par plateforme et doivent rester
 synchronisés : `web/src/domain/agro.ts` (`AgroThresholds`) et
@@ -61,7 +69,7 @@ MeteoAgricole/
   Models/       Types de mesure et cœur agronomique (AgroIndicators)
   Services/     Client Open-Meteo, relevé de position
   ViewModels/   État du tableau de bord
-  Views/        Tableau de bord, frise de pulvérisation, semaine agronomique
+  Views/        Tableau de bord, bandeau horaire, liste des jours, tuiles
   Resources/    Info.plist, catalogue d'assets
 ```
 
@@ -78,11 +86,17 @@ bun run build      # dist/
 
 La parcelle est mémorisée dans le navigateur ; la recherche de commune passe par
 le géocodage Open-Meteo et le bouton « Me localiser » par la géolocalisation du
-navigateur.
+navigateur. Le fond suit le ciel : nuit, journée couverte ou journée dégagée.
 
 ## Données
 
 [Open-Meteo](https://open-meteo.com/) — API libre, sans clé. Variables
 interrogées : `soil_temperature_6cm`, `soil_moisture_3_to_9cm`,
 `et0_fao_evapotranspiration`, `vapour_pressure_deficit`, plus la température,
-l'hygrométrie, la pluie et le vent nécessaires aux fenêtres de traitement.
+l'hygrométrie, la pluie et le vent nécessaires aux fenêtres de traitement, et
+`weather_code`, `is_day`, `sunrise`, `sunset` pour la présentation.
+
+L'API renvoie les horodatages en heure locale de la parcelle et les séries
+horaires depuis minuit : les deux clients les ramènent en instants absolus et
+recoupent la série à l'heure en cours, pour que « maintenant » soit bien le
+premier élément affiché.

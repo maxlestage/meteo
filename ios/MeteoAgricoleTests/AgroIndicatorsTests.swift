@@ -21,6 +21,9 @@ final class AgroIndicatorsTests: XCTestCase {
     ) -> HourlySample {
         HourlySample(
             time: reference.addingTimeInterval(Double(index) * 3600),
+            weatherCode: 3,
+            isDay: true,
+            precipitationProbability: 20,
             temperature: temperature,
             relativeHumidity: relativeHumidity,
             dewPoint: dewPoint,
@@ -42,12 +45,15 @@ final class AgroIndicatorsTests: XCTestCase {
     ) -> DailySample {
         DailySample(
             date: reference,
+            weatherCode: 3,
             temperatureMin: temperatureMin,
             temperatureMax: temperatureMax,
             precipitationSum: precipitationSum,
             precipitationProbabilityMax: 30,
             et0Sum: et0Sum,
-            windGustsMax: 25
+            windGustsMax: 25,
+            sunrise: reference.addingTimeInterval(-3600),
+            sunset: reference.addingTimeInterval(12 * 3600)
         )
     }
 

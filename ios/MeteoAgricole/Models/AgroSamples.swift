@@ -4,6 +4,12 @@ import Foundation
 struct HourlySample: Equatable, Identifiable {
     /// Horodatage local de la parcelle.
     let time: Date
+    /// Code temps WMO, traduit par `WeatherCondition`.
+    let weatherCode: Int
+    /// Vrai entre le lever et le coucher du soleil.
+    let isDay: Bool
+    /// Probabilité de précipitations sur l'heure (%).
+    let precipitationProbability: Double
     /// Température de l'air à 2 m (°C).
     let temperature: Double
     /// Humidité relative à 2 m (%).
@@ -32,6 +38,8 @@ struct HourlySample: Equatable, Identifiable {
 struct DailySample: Equatable, Identifiable {
     /// Jour local (minuit heure de la parcelle).
     let date: Date
+    /// Code temps WMO dominant de la journée.
+    let weatherCode: Int
     let temperatureMin: Double
     let temperatureMax: Double
     /// Cumul de pluie du jour (mm).
@@ -42,6 +50,8 @@ struct DailySample: Equatable, Identifiable {
     let et0Sum: Double
     /// Rafales maximales du jour (km/h).
     let windGustsMax: Double
+    let sunrise: Date?
+    let sunset: Date?
 
     var id: Date { date }
 
@@ -79,6 +89,19 @@ struct Parcelle: Equatable, Codable, Identifiable, Hashable {
     )
 }
 
+/// Conditions observées à l'instant, pour l'en-tête.
+struct CurrentSample: Equatable {
+    let time: Date
+    let temperature: Double
+    /// Température ressentie (°C).
+    let apparentTemperature: Double
+    let weatherCode: Int
+    let isDay: Bool
+    let relativeHumidity: Double
+    let windSpeed: Double
+    let windGusts: Double
+}
+
 /// Prévision agricole complète renvoyée par le service.
 struct AgroForecast: Equatable {
     let parcelle: Parcelle
@@ -86,6 +109,7 @@ struct AgroForecast: Equatable {
     let timezone: String
     /// Altitude du point de grille (m).
     let elevation: Double
+    let current: CurrentSample
     let hourly: [HourlySample]
     let daily: [DailySample]
     let fetchedAt: Date
