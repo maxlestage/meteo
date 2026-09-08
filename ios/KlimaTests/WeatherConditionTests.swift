@@ -1,5 +1,5 @@
 import XCTest
-@testable import MeteoAgricole
+@testable import Klima
 
 /// Les mêmes cas que la suite du site web (`web/src/domain/weather.test.ts`).
 final class WeatherConditionTests: XCTestCase {

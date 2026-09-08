@@ -15,9 +15,9 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "E3435DDA2687639586BF0B70"
-               BuildableName = "MeteoAgricole.app"
-               BlueprintName = "MeteoAgricole"
-               ReferencedContainer = "container:MeteoAgricole.xcodeproj">
+               BuildableName = "Klima.app"
+               BlueprintName = "Klima"
+               ReferencedContainer = "container:Klima.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
       </BuildActionEntries>
@@ -33,9 +33,9 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "A700229C3AC2DAE057FE5B27"
-               BuildableName = "MeteoAgricoleTests.xctest"
-               BlueprintName = "MeteoAgricoleTests"
-               ReferencedContainer = "container:MeteoAgricole.xcodeproj">
+               BuildableName = "KlimaTests.xctest"
+               BlueprintName = "KlimaTests"
+               ReferencedContainer = "container:Klima.xcodeproj">
             </BuildableReference>
          </TestableReference>
       </Testables>
@@ -55,9 +55,9 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "E3435DDA2687639586BF0B70"
-            BuildableName = "MeteoAgricole.app"
-            BlueprintName = "MeteoAgricole"
-            ReferencedContainer = "container:MeteoAgricole.xcodeproj">
+            BuildableName = "Klima.app"
+            BlueprintName = "Klima"
+            ReferencedContainer = "container:Klima.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
    </LaunchAction>
@@ -72,9 +72,9 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "E3435DDA2687639586BF0B70"
-            BuildableName = "MeteoAgricole.app"
-            BlueprintName = "MeteoAgricole"
-            ReferencedContainer = "container:MeteoAgricole.xcodeproj">
+            BuildableName = "Klima.app"
+            BlueprintName = "Klima"
+            ReferencedContainer = "container:Klima.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
    </ProfileAction>

@@ -19,7 +19,7 @@ final class DashboardViewModel: ObservableObject {
     private var loadTask: Task<Void, Never>?
     private var searchTask: Task<Void, Never>?
 
-    private static let storageKey = "meteo-agricole.parcelle"
+    private static let storageKey = "klima.parcelle"
 
     init(
         service: AgroWeatherProviding = AgroWeatherService(),

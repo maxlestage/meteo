@@ -10,7 +10,7 @@
 		1A130F063342B72B457FC015 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 8D7172619DB15AD08404D409 /* Assets.xcassets */; };
 		2464C2E49CFAC0B3B4CA09A1 /* HeroView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 39D975AAB74D8A287A6B7254 /* HeroView.swift */; };
 		2480C8BED00599CB4A37BE3A /* AgroFormatTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E22F9EBB5D794EB26C40EE42 /* AgroFormatTests.swift */; };
-		26D127BC3AE25EAFDD08F25F /* MeteoAgricoleApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 62C99D0738C901B3E8A53FDE /* MeteoAgricoleApp.swift */; };
+		24CA7F13131AEBCF7A64E4F3 /* KlimaApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84116E324F300217E14A7D80 /* KlimaApp.swift */; };
 		283A94658C4BF890014C510B /* LocationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 08707F96197B8A0C91B93434 /* LocationService.swift */; };
 		51054172AD319320D71CEA33 /* AgroIndicators.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B0DC023C950B262ED20013F /* AgroIndicators.swift */; };
 		566DADF1BB936E66C038F7E7 /* AgroWeatherDecodingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3F0452B25BE676E099C8DFF9 /* AgroWeatherDecodingTests.swift */; };
@@ -35,7 +35,7 @@
 			containerPortal = 46F86FAA6BBF9AC94A7E4595 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = E3435DDA2687639586BF0B70;
-			remoteInfo = MeteoAgricole;
+			remoteInfo = Klima;
 		};
 /* End PBXContainerItemProxy section */
 
@@ -50,16 +50,16 @@
 		4A2507732A1784A4B8EB0921 /* DailyListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DailyListView.swift; sourceTree = "<group>"; };
 		55D9837846F076DA896F495A /* AgroSamples.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AgroSamples.swift; sourceTree = "<group>"; };
 		57C0845A4CF93D4730923065 /* DetailTile.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DetailTile.swift; sourceTree = "<group>"; };
-		62C99D0738C901B3E8A53FDE /* MeteoAgricoleApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MeteoAgricoleApp.swift; sourceTree = "<group>"; };
 		7B37E35ECA785B0C85EB31B2 /* AgroIndicatorsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AgroIndicatorsTests.swift; sourceTree = "<group>"; };
 		825B4E58277E1D7A0598F0B6 /* WeatherCondition.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeatherCondition.swift; sourceTree = "<group>"; };
-		84337AD8D27FCD69AF2C4FC2 /* MeteoAgricole.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MeteoAgricole.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		84116E324F300217E14A7D80 /* KlimaApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KlimaApp.swift; sourceTree = "<group>"; };
+		84337AD8D27FCD69AF2C4FC2 /* Klima.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Klima.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		8B0DC023C950B262ED20013F /* AgroIndicators.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AgroIndicators.swift; sourceTree = "<group>"; };
 		8D7172619DB15AD08404D409 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		8EAC6CF1F72EC8295D30BFC0 /* DashboardViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DashboardViewModel.swift; sourceTree = "<group>"; };
 		93EC2AB4F329AF5B76E33693 /* DashboardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DashboardView.swift; sourceTree = "<group>"; };
 		CEF32E59D1BBAFCEC6849810 /* AgroFormat.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AgroFormat.swift; sourceTree = "<group>"; };
-		DFDED23FA58339F9273F6C84 /* MeteoAgricoleTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = MeteoAgricoleTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		DFDED23FA58339F9273F6C84 /* KlimaTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = KlimaTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		E17880A312A4AE0F1F118119 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		E22F9EBB5D794EB26C40EE42 /* AgroFormatTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AgroFormatTests.swift; sourceTree = "<group>"; };
 		F71CC5F308473AF0D312F14C /* WeatherConditionTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeatherConditionTests.swift; sourceTree = "<group>"; };
@@ -86,8 +86,8 @@
 		518DA81DB9B99529C0C0AEBE /*  */ = {
 			isa = PBXGroup;
 			children = (
-				82CF2A43A7100F086D7FCFDD /* MeteoAgricole */,
-				A0937472EE5878FA82CB0F7E /* MeteoAgricoleTests */,
+				82CF2A43A7100F086D7FCFDD /* Klima */,
+				A0937472EE5878FA82CB0F7E /* KlimaTests */,
 				547D009064F7C3F13BEF3460 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -95,13 +95,13 @@
 		547D009064F7C3F13BEF3460 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				84337AD8D27FCD69AF2C4FC2 /* MeteoAgricole.app */,
-				DFDED23FA58339F9273F6C84 /* MeteoAgricoleTests.xctest */,
+				84337AD8D27FCD69AF2C4FC2 /* Klima.app */,
+				DFDED23FA58339F9273F6C84 /* KlimaTests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
 		};
-		82CF2A43A7100F086D7FCFDD /* MeteoAgricole */ = {
+		82CF2A43A7100F086D7FCFDD /* Klima */ = {
 			isa = PBXGroup;
 			children = (
 				1D2F5BF9FB339F234299CFC8 /* App */,
@@ -111,13 +111,13 @@
 				0CCEE07ECE9D2EC579E24F2E /* Views */,
 				BED87D8D27E536A8E36A49DA /* Resources */,
 			);
-			path = MeteoAgricole;
+			path = Klima;
 			sourceTree = "<group>";
 		};
 		1D2F5BF9FB339F234299CFC8 /* App */ = {
 			isa = PBXGroup;
 			children = (
-				62C99D0738C901B3E8A53FDE /* MeteoAgricoleApp.swift */,
+				84116E324F300217E14A7D80 /* KlimaApp.swift */,
 			);
 			path = App;
 			sourceTree = "<group>";
@@ -173,7 +173,7 @@
 			path = Resources;
 			sourceTree = "<group>";
 		};
-		A0937472EE5878FA82CB0F7E /* MeteoAgricoleTests */ = {
+		A0937472EE5878FA82CB0F7E /* KlimaTests */ = {
 			isa = PBXGroup;
 			children = (
 				7B37E35ECA785B0C85EB31B2 /* AgroIndicatorsTests.swift */,
@@ -181,15 +181,15 @@
 				F71CC5F308473AF0D312F14C /* WeatherConditionTests.swift */,
 				E22F9EBB5D794EB26C40EE42 /* AgroFormatTests.swift */,
 			);
-			path = MeteoAgricoleTests;
+			path = KlimaTests;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		E3435DDA2687639586BF0B70 /* MeteoAgricole */ = {
+		E3435DDA2687639586BF0B70 /* Klima */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 1D97B77EAD2380603A3F2A82 /* Build configuration list for PBXNativeTarget "MeteoAgricole" */;
+			buildConfigurationList = 1D97B77EAD2380603A3F2A82 /* Build configuration list for PBXNativeTarget "Klima" */;
 			buildPhases = (
 				4821909E9BF9E73E471FEA84 /* Sources */,
 				6EFAB1ECC0D092E20FE51FCD /* Frameworks */,
@@ -199,14 +199,14 @@
 			);
 			dependencies = (
 			);
-			name = MeteoAgricole;
-			productName = MeteoAgricole;
-			productReference = 84337AD8D27FCD69AF2C4FC2 /* MeteoAgricole.app */;
+			name = Klima;
+			productName = Klima;
+			productReference = 84337AD8D27FCD69AF2C4FC2 /* Klima.app */;
 			productType = "com.apple.product-type.application";
 		};
-		A700229C3AC2DAE057FE5B27 /* MeteoAgricoleTests */ = {
+		A700229C3AC2DAE057FE5B27 /* KlimaTests */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 0F471B4923D46E58DCE40A0E /* Build configuration list for PBXNativeTarget "MeteoAgricoleTests" */;
+			buildConfigurationList = 0F471B4923D46E58DCE40A0E /* Build configuration list for PBXNativeTarget "KlimaTests" */;
 			buildPhases = (
 				D3B6D4B6799995BE6A7BCB75 /* Sources */,
 				35F1006C97E0D485FB4F1132 /* Frameworks */,
@@ -217,9 +217,9 @@
 			dependencies = (
 				5A0AB56B64A077C4F9DAD608 /* PBXTargetDependency */,
 			);
-			name = MeteoAgricoleTests;
-			productName = MeteoAgricoleTests;
-			productReference = DFDED23FA58339F9273F6C84 /* MeteoAgricoleTests.xctest */;
+			name = KlimaTests;
+			productName = KlimaTests;
+			productReference = DFDED23FA58339F9273F6C84 /* KlimaTests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
 		};
 /* End PBXNativeTarget section */
@@ -241,7 +241,7 @@
 					};
 				};
 			};
-			buildConfigurationList = 1F4E3D13C2320EDA50221924 /* Build configuration list for PBXProject "MeteoAgricole" */;
+			buildConfigurationList = 1F4E3D13C2320EDA50221924 /* Build configuration list for PBXProject "Klima" */;
 			compatibilityVersion = "Xcode 14.0";
 			developmentRegion = fr;
 			hasScannedForEncodings = 0;
@@ -255,8 +255,8 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				E3435DDA2687639586BF0B70 /* MeteoAgricole */,
-				A700229C3AC2DAE057FE5B27 /* MeteoAgricoleTests */,
+				E3435DDA2687639586BF0B70 /* Klima */,
+				A700229C3AC2DAE057FE5B27 /* KlimaTests */,
 			);
 		};
 /* End PBXProject section */
@@ -284,7 +284,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				26D127BC3AE25EAFDD08F25F /* MeteoAgricoleApp.swift in Sources */,
+				24CA7F13131AEBCF7A64E4F3 /* KlimaApp.swift in Sources */,
 				85CA810AE3589C6B30CAFB6F /* AgroSamples.swift in Sources */,
 				51054172AD319320D71CEA33 /* AgroIndicators.swift in Sources */,
 				98784EE749DEEF1017EDF486 /* WeatherCondition.swift in Sources */,
@@ -318,7 +318,7 @@
 /* Begin PBXTargetDependency section */
 		5A0AB56B64A077C4F9DAD608 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = E3435DDA2687639586BF0B70 /* MeteoAgricole */;
+			target = E3435DDA2687639586BF0B70 /* Klima */;
 			targetProxy = 193D0A8035DE97CF1A3652FD /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
@@ -452,13 +452,13 @@
 				CURRENT_PROJECT_VERSION = 1;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = NO;
-				INFOPLIST_FILE = MeteoAgricole/Resources/Info.plist;
+				INFOPLIST_FILE = Klima/Resources/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.meteoagricole.app;
+				PRODUCT_BUNDLE_IDENTIFIER = com.klima.app;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
@@ -475,13 +475,13 @@
 				CURRENT_PROJECT_VERSION = 1;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = NO;
-				INFOPLIST_FILE = MeteoAgricole/Resources/Info.plist;
+				INFOPLIST_FILE = Klima/Resources/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.meteoagricole.app;
+				PRODUCT_BUNDLE_IDENTIFIER = com.klima.app;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
@@ -497,12 +497,12 @@
 				CURRENT_PROJECT_VERSION = 1;
 				GENERATE_INFOPLIST_FILE = YES;
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.meteoagricole.app.tests;
+				PRODUCT_BUNDLE_IDENTIFIER = com.klima.app.tests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = NO;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/MeteoAgricole.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/MeteoAgricole";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Klima.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Klima";
 			};
 			name = Debug;
 		};
@@ -514,19 +514,19 @@
 				CURRENT_PROJECT_VERSION = 1;
 				GENERATE_INFOPLIST_FILE = YES;
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.meteoagricole.app.tests;
+				PRODUCT_BUNDLE_IDENTIFIER = com.klima.app.tests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = NO;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/MeteoAgricole.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/MeteoAgricole";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Klima.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Klima";
 			};
 			name = Release;
 		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		1F4E3D13C2320EDA50221924 /* Build configuration list for PBXProject "MeteoAgricole" */ = {
+		1F4E3D13C2320EDA50221924 /* Build configuration list for PBXProject "Klima" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				4A43692AD8BCEEB8B727C85B /* Debug */,
@@ -535,7 +535,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		1D97B77EAD2380603A3F2A82 /* Build configuration list for PBXNativeTarget "MeteoAgricole" */ = {
+		1D97B77EAD2380603A3F2A82 /* Build configuration list for PBXNativeTarget "Klima" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				0615050D04BD2DC4E6CFFAFF /* Debug */,
@@ -544,7 +544,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		0F471B4923D46E58DCE40A0E /* Build configuration list for PBXNativeTarget "MeteoAgricoleTests" */ = {
+		0F471B4923D46E58DCE40A0E /* Build configuration list for PBXNativeTarget "KlimaTests" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				FC45C70AF9BBBC9692F6FCD0 /* Debug */,
