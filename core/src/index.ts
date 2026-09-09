@@ -10,6 +10,7 @@
 export * from './agro'
 export * from './weather'
 export * from './openMeteo'
+export * from './parcelleUrl'
 export * from './today'
 export * from './format'
 export * from './i18n'
