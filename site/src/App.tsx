@@ -43,6 +43,9 @@ export default function App() {
             <a href="#sources">{t('nav.sources')}</a>
             <a href="#donnees">{t('nav.data')}</a>
           </nav>
+          <a className="button button--compact" href="./app/">
+            {t('app.open')}
+          </a>
           <LanguageSwitcher className="lang" label={t('language.label')} />
         </div>
       </header>

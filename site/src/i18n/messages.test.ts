@@ -2,7 +2,7 @@ import { describe, expect, test } from 'bun:test'
 import { LANGUAGES } from '@klima/core'
 import { siteMessages } from './messages'
 
-describe('catalogue de l’site de présentation', () => {
+describe('catalogue du site de présentation', () => {
   test('les trois langues portent exactement les mêmes clés', () => {
     const reference = Object.keys(siteMessages.fr).sort()
     for (const language of LANGUAGES) {
