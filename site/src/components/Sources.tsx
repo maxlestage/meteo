@@ -1,4 +1,4 @@
-import { weatherModel, type Consensus } from '@klima/core'
+import { attributionsFor, type Consensus } from '@klima/core'
 import { useI18n } from '@klima/core/ui'
 import { useReveal } from '../hooks/useReveal'
 
@@ -39,6 +39,12 @@ export function Sources({ consensus, loading }: Props) {
               <div className="sources__median">
                 <p className="sources__label">{t('sources.now')}</p>
                 <p className="sources__value">{f.unit(consensus.temperature.median, '°C')}</p>
+                <p className="sources__providers">
+                  {t('sources.answered', {
+                    answered: consensus.providersAnswered,
+                    queried: consensus.providersQueried,
+                  })}
+                </p>
                 <p className="sources__spread">
                   {t('consensus.detail', {
                     count: consensus.readings.length,
@@ -51,16 +57,16 @@ export function Sources({ consensus, loading }: Props) {
 
             <ul className="models">
               {consensus.readings.map((reading) => {
-                const model = weatherModel(reading.model.id) ?? reading.model
+                const source = reading.source
                 const range = Math.max(consensus.temperature.spread, 0.1)
                 const offset = ((reading.temperature - consensus.temperature.min) / range) * 100
 
                 return (
-                  <li className="models__row" key={model.id}>
-                    <span className="models__flag">{model.country}</span>
+                  <li className="models__row" key={source.id}>
+                    <span className="models__flag">{source.country}</span>
                     <span className="models__name">
-                      <strong>{model.institution}</strong>
-                      <span>{model.name}</span>
+                      <strong>{source.institution}</strong>
+                      <span>{source.name}</span>
                     </span>
                     <span className="models__axis">
                       <span className="models__dot" style={{ left: `${offset}%` }} />
@@ -78,6 +84,13 @@ export function Sources({ consensus, loading }: Props) {
         <h3>{t('sources.method')}</h3>
         <p>{t('sources.methodBody')}</p>
         <p className="sources__note">{t('sources.note')}</p>
+        {consensus && (
+          <ul className="sources__attributions">
+            {attributionsFor(consensus.readings).map((attribution) => (
+              <li key={attribution}>{attribution}</li>
+            ))}
+          </ul>
+        )}
       </div>
     </section>
   )

@@ -6,18 +6,9 @@
  * annoncer un chiffre sans réserve ; quand ils divergent, il faut le dire
  * plutôt que d'afficher une fausse précision.
  */
-import type { WeatherModel } from './models'
+import type { ProviderOutcome, SourceReading } from './providers'
 
-/** Relevé d'un modèle pour une échéance donnée. */
-export interface ModelReading {
-  model: WeatherModel
-  temperature: number
-  /** Précipitations sur l'heure (mm). */
-  precipitation: number
-  windSpeed: number
-}
-
-/** Degré d'accord entre les modèles. */
+/** Degré d'accord entre les sources. */
 export type Agreement = 'forte' | 'moyenne' | 'faible'
 
 export interface Spread {
@@ -30,7 +21,10 @@ export interface Spread {
 }
 
 export interface Consensus {
-  readings: ModelReading[]
+  readings: SourceReading[]
+  /** Fournisseurs ayant répondu, sur ceux qui ont été interrogés. */
+  providersAnswered: number
+  providersQueried: number
   temperature: Spread
   precipitation: Spread
   windSpeed: Spread
@@ -54,7 +48,10 @@ export const ConsensusThresholds = {
  * modèle ne fait pas un consensus, et le dire vaut mieux que de le laisser
  * croire.
  */
-export function consensus(readings: readonly ModelReading[]): Consensus | null {
+export function consensus(
+  readings: readonly SourceReading[],
+  providers: { answered: number; queried: number } = { answered: 0, queried: 0 },
+): Consensus | null {
   if (readings.length < 2) return null
 
   const temperature = spread(readings.map((r) => r.temperature))
@@ -64,14 +61,28 @@ export function consensus(readings: readonly ModelReading[]): Consensus | null {
   const rainy = readings.map((r) => r.precipitation >= ConsensusThresholds.rainThreshold)
   const agreeOnRain = rainy.every((value) => value === rainy[0])
 
+  const distinctProviders = new Set(readings.map((r) => r.source.provider)).size
+
   return {
     readings: [...readings],
+    providersAnswered: providers.answered || distinctProviders,
+    providersQueried: providers.queried || distinctProviders,
     temperature,
     precipitation,
     windSpeed,
     agreeOnRain,
     agreement: agreementFrom(temperature.spread, agreeOnRain),
   }
+}
+
+/**
+ * Recoupe ce que les fournisseurs ont renvoyé, en gardant trace de ceux qui
+ * n'ont rien pu dire : l'interface doit pouvoir annoncer « 5 sources sur 6 ».
+ */
+export function consensusFromOutcomes(outcomes: readonly ProviderOutcome[]): Consensus | null {
+  const readings = outcomes.flatMap((outcome) => outcome.readings)
+  const answered = outcomes.filter((outcome) => outcome.readings.length > 0).length
+  return consensus(readings, { answered, queried: outcomes.length })
 }
 
 /**

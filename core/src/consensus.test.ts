@@ -1,9 +1,9 @@
 import { describe, expect, test } from 'bun:test'
-import { consensus, type ModelReading } from './consensus'
-import { WEATHER_MODELS, weatherModel } from './models'
+import { consensus, consensusFromOutcomes } from './consensus'
+import { OPEN_METEO_SOURCES, weatherSource, type SourceReading } from './providers'
 
-const reading = (index: number, temperature: number, precipitation = 0, windSpeed = 10): ModelReading => ({
-  model: WEATHER_MODELS[index]!,
+const reading = (index: number, temperature: number, precipitation = 0, windSpeed = 10): SourceReading => ({
+  source: OPEN_METEO_SOURCES[index]!,
   temperature,
   precipitation,
   windSpeed,
@@ -78,18 +78,34 @@ describe('recoupement des modèles', () => {
   })
 })
 
-describe('table des modèles', () => {
-  test('quatre services indépendants', () => {
-    expect(WEATHER_MODELS).toHaveLength(4)
-    expect(new Set(WEATHER_MODELS.map((m) => m.institution)).size).toBe(4)
-  })
-
-  test('les identifiants sont uniques', () => {
-    expect(new Set(WEATHER_MODELS.map((m) => m.id)).size).toBe(WEATHER_MODELS.length)
+describe('table des sources', () => {
+  test('quatre modèles chez Open-Meteo, tous d’instituts différents', () => {
+    expect(OPEN_METEO_SOURCES).toHaveLength(4)
+    expect(new Set(OPEN_METEO_SOURCES.map((s) => s.institution)).size).toBe(4)
+    expect(new Set(OPEN_METEO_SOURCES.map((s) => s.id)).size).toBe(4)
   })
 
   test('recherche par identifiant', () => {
-    expect(weatherModel('meteofrance_seamless')?.institution).toBe('Météo-France')
-    expect(weatherModel('inconnu')).toBeUndefined()
+    expect(weatherSource('meteofrance_seamless')?.institution).toBe('Météo-France')
+    expect(weatherSource('inconnu')).toBeUndefined()
+  })
+})
+
+describe('comptage des fournisseurs', () => {
+  test('retient combien de fournisseurs ont répondu', () => {
+    const result = consensusFromOutcomes([
+      { provider: { id: 'a' } as never, readings: [reading(0, 18), reading(1, 18.4)] },
+      { provider: { id: 'b' } as never, readings: [] },
+      { provider: { id: 'c' } as never, readings: [reading(2, 18.6)] },
+    ])!
+    expect(result.readings).toHaveLength(3)
+    expect(result.providersAnswered).toBe(2)
+    expect(result.providersQueried).toBe(3)
+  })
+
+  test('aucun fournisseur n’a répondu', () => {
+    expect(
+      consensusFromOutcomes([{ provider: { id: 'a' } as never, readings: [], error: new Error('x') }]),
+    ).toBeNull()
   })
 })

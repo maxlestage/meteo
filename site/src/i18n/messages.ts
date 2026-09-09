@@ -99,17 +99,18 @@ export const siteMessages: Record<Language, Catalog> = {
 
     'nav.sources': 'Sources',
 
-    'sources.title': 'Quatre services météo, une seule réponse',
+    'sources.title': 'Plusieurs fournisseurs, une seule réponse',
     'sources.lead':
-      'Un seul modèle donne un chiffre. Quatre modèles donnent un chiffre et une idée de sa fiabilité. Klima interroge les sorties de quatre centres de calcul nationaux et les recoupe pour l’heure en cours.',
+      'Un seul service donne un chiffre. Plusieurs services donnent un chiffre et une idée de sa fiabilité. Klima interroge des fournisseurs indépendants — modèles nationaux et observations de station — et les recoupe pour l’heure en cours.',
     'sources.method': 'Comment se lit l’accord',
     'sources.methodBody':
       'La valeur retenue est la médiane, moins sensible qu’une moyenne à un modèle isolé. L’accord est jugé fort quand les modèles tiennent dans 1,5 °C et s’entendent sur la pluie ; faible au-delà de 3 °C d’écart. Quand ils divergent, Klima le dit plutôt que d’afficher une fausse précision.',
     'sources.note':
-      'Les quatre modèles sont redistribués par Open-Meteo, qui n’en produit aucun : ce sont bien quatre centres de calcul indépendants.',
+      'Chaque fournisseur est interrogé séparément : une panne, un refus ou une absence de couverture n’en écarte qu’un. MET Norway n’est appelé que depuis l’application, ses conditions exigeant un en-tête que le navigateur interdit de fixer.',
     'sources.loading': 'Recoupement en cours…',
     'sources.unavailable': 'Comparaison indisponible pour cette commune.',
     'sources.now': 'Température à l’heure en cours',
+    'sources.answered': '{answered} fournisseurs sur {queried} ont répondu',
 
     'footer.tagline': 'La météo qui parle agronomie. Sur iPhone, sur la montre et sur le web.',
     'footer.product': 'Le produit',
@@ -222,17 +223,18 @@ export const siteMessages: Record<Language, Catalog> = {
 
     'nav.sources': 'Sources',
 
-    'sources.title': 'Four weather services, one answer',
+    'sources.title': 'Several providers, one answer',
     'sources.lead':
-      'One model gives you a figure. Four models give you a figure and a sense of how much to trust it. Klima queries the output of four national forecasting centres and cross-checks them for the current hour.',
+      'One service gives you a figure. Several services give you a figure and a sense of how much to trust it. Klima queries independent providers — national models and station observations — and cross-checks them for the current hour.',
     'sources.method': 'How agreement is read',
     'sources.methodBody':
       'The value used is the median, less sensitive than an average to a single outlying model. Agreement counts as strong when the models sit within 1.5 °C and concur on rain; weak beyond 3 °C apart. When they diverge, Klima says so rather than displaying false precision.',
     'sources.note':
-      'The four models are redistributed by Open-Meteo, which produces none of them: these really are four independent forecasting centres.',
+      'Each provider is queried separately: an outage, a refusal or a gap in coverage drops only that one. MET Norway is queried from the app alone, its terms requiring a header browsers forbid setting.',
     'sources.loading': 'Cross-checking…',
     'sources.unavailable': 'Comparison unavailable for this town.',
     'sources.now': 'Temperature for the current hour',
+    'sources.answered': '{answered} of {queried} providers answered',
 
     'footer.tagline': 'Weather that speaks agronomy. On iPhone, on the watch and on the web.',
     'footer.product': 'Product',
@@ -345,17 +347,18 @@ export const siteMessages: Record<Language, Catalog> = {
 
     'nav.sources': 'Fuentes',
 
-    'sources.title': 'Cuatro servicios meteorológicos, una sola respuesta',
+    'sources.title': 'Varios proveedores, una sola respuesta',
     'sources.lead':
-      'Un solo modelo da una cifra. Cuatro modelos dan una cifra y una idea de su fiabilidad. Klima consulta las salidas de cuatro centros de cálculo nacionales y las contrasta para la hora en curso.',
+      'Un solo servicio da una cifra. Varios servicios dan una cifra y una idea de su fiabilidad. Klima consulta proveedores independientes — modelos nacionales y observaciones de estación — y los contrasta para la hora en curso.',
     'sources.method': 'Cómo se lee el acuerdo',
     'sources.methodBody':
       'El valor retenido es la mediana, menos sensible que una media a un modelo aislado. El acuerdo se considera fuerte cuando los modelos caben en 1,5 °C y coinciden sobre la lluvia; débil más allá de 3 °C de diferencia. Cuando discrepan, Klima lo dice en lugar de mostrar una falsa precisión.',
     'sources.note':
-      'Open-Meteo redistribuye los cuatro modelos, pero no produce ninguno: son realmente cuatro centros de cálculo independientes.',
+      'Cada proveedor se consulta por separado: una avería, un rechazo o una falta de cobertura solo descarta a uno. MET Norway solo se consulta desde la aplicación, pues sus condiciones exigen una cabecera que el navegador prohíbe fijar.',
     'sources.loading': 'Contrastando…',
     'sources.unavailable': 'Comparación no disponible para este municipio.',
     'sources.now': 'Temperatura de la hora en curso',
+    'sources.answered': '{answered} de {queried} proveedores han respondido',
 
     'footer.tagline': 'La meteorología que habla de agronomía. En el iPhone, en el reloj y en la web.',
     'footer.product': 'El producto',
