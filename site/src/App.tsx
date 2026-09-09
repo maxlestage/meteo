@@ -1,6 +1,5 @@
-import { useState } from 'react'
 import { AgroThresholds, weatherCondition, type Parcelle } from '@klima/core'
-import { BrandLockup, LanguageSwitcher, useI18n } from '@klima/core/ui'
+import { BrandLockup, LanguageSwitcher, useI18n, useParcelleInUrl } from '@klima/core/ui'
 import { Features } from './components/Features'
 import { Footer } from './components/Footer'
 import { SkyScene, SoilProfile, SprayScene } from './components/Illustrations'
@@ -21,7 +20,9 @@ const DEFAULT_PARCELLE: Parcelle = {
 
 export default function App() {
   const { t, f } = useI18n()
-  const [parcelle, setParcelle] = useState<Parcelle>(DEFAULT_PARCELLE)
+  // La commune consultée vit dans l'adresse : le bouton retour la défait, et
+  // l'adresse envoyée à quelqu'un lui montre bien la parcelle qu'on a regardée.
+  const [parcelle, setParcelle] = useParcelleInUrl(DEFAULT_PARCELLE)
   const { digest, loading, error, reload, forecast, consensus } = useDayDigest(parcelle)
   const featuresReveal = useReveal<HTMLDivElement>()
   const dataReveal = useReveal<HTMLDivElement>()

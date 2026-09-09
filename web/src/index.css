@@ -102,6 +102,17 @@ body {
   padding: 14px 0 2px;
 }
 
+.topbar__home {
+  color: inherit;
+  text-decoration: none;
+  border-radius: 10px;
+}
+
+.topbar__home:focus-visible {
+  outline: 2px solid rgb(255 255 255 / 70%);
+  outline-offset: 3px;
+}
+
 .brand {
   display: inline-flex;
   align-items: center;

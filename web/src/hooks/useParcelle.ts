@@ -1,7 +1,5 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useParcelleInUrl } from '@klima/core/ui'
 import type { Parcelle } from '@klima/core'
-
-const STORAGE_KEY = 'klima.parcelle'
 
 /** Parcelle par défaut : plaine céréalière de Beauce. */
 const DEFAULT_PARCELLE: Parcelle = {
@@ -12,38 +10,12 @@ const DEFAULT_PARCELLE: Parcelle = {
   country: 'France',
 }
 
-/** Parcelle courante, mémorisée d'une visite à l'autre. */
+/**
+ * Parcelle courante de l'application, tenue dans l'adresse et mémorisée d'une
+ * visite à l'autre. La mécanique est partagée avec la vitrine ; seule la
+ * mémorisation lui est propre — c'est un outil qu'on rouvre, pas une page
+ * qu'on visite.
+ */
 export function useParcelle(): [Parcelle, (parcelle: Parcelle) => void] {
-  const [parcelle, setParcelle] = useState<Parcelle>(() => readStored() ?? DEFAULT_PARCELLE)
-
-  useEffect(() => {
-    try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(parcelle))
-    } catch {
-      // Navigation privée ou stockage plein : on garde la parcelle en mémoire.
-    }
-  }, [parcelle])
-
-  const select = useCallback((next: Parcelle) => setParcelle(next), [])
-  return [parcelle, select]
-}
-
-function readStored(): Parcelle | null {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY)
-    if (!raw) return null
-    const parsed: unknown = JSON.parse(raw)
-    if (
-      typeof parsed === 'object' &&
-      parsed !== null &&
-      typeof (parsed as Parcelle).name === 'string' &&
-      typeof (parsed as Parcelle).latitude === 'number' &&
-      typeof (parsed as Parcelle).longitude === 'number'
-    ) {
-      return parsed as Parcelle
-    }
-    return null
-  } catch {
-    return null
-  }
+  return useParcelleInUrl(DEFAULT_PARCELLE, { storageKey: 'klima.parcelle' })
 }
