@@ -21,7 +21,17 @@ export default function App() {
     <div className={`sky sky--${sky}`}>
       <div className="shell">
         <header className="topbar">
-          <BrandLockup size={26} />
+          {/*
+            Le signe ramène à la vitrine. Sans lui l'application est un
+            cul-de-sac : on y arrive par un lien partagé, un favori ou l'icône
+            de l'écran d'accueil — sans historique à remonter — et installée
+            sur l'écran d'accueil, il n'y a même plus de barre de navigation.
+            Le chemin est relatif : l'application est publiée sous /app/ de la
+            vitrine.
+          */}
+          <a className="topbar__home" href="../" aria-label={t('app.home')}>
+            <BrandLockup size={26} />
+          </a>
           <LanguageSwitcher className="lang" label={t('language.label')} />
         </header>
 
