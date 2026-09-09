@@ -5,7 +5,7 @@ import { HourlyStrip } from './components/HourlyStrip'
 import { ParcelleSearch } from './components/ParcelleSearch'
 import { SprayCard } from './components/SprayCard'
 import { AgroThresholds } from '@klima/core'
-import { LanguageSwitcher, useI18n } from '@klima/core/ui'
+import { BrandLockup, LanguageSwitcher, useI18n } from '@klima/core/ui'
 import { useAgroForecast } from './hooks/useAgroForecast'
 import { useParcelle } from './hooks/useParcelle'
 
@@ -19,10 +19,12 @@ export default function App() {
   return (
     <div className={`sky sky--${sky}`}>
       <div className="shell">
-        <div className="topbar">
-          <ParcelleSearch current={parcelle} onSelect={setParcelle} />
+        <header className="topbar">
+          <BrandLockup size={26} />
           <LanguageSwitcher className="lang" label={t('language.label')} />
-        </div>
+        </header>
+
+        <ParcelleSearch current={parcelle} onSelect={setParcelle} />
 
         {loading && !forecast && <p className="state">{t('app.loading')}</p>}
 

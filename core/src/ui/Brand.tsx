@@ -7,8 +7,12 @@
  * un pied de page.
  *
  * La géométrie est celle des gabarits de /tmp/brand : favicon, icônes web,
- * icône iOS et watchOS, image de partage et ce composant sortent du même
- * dessin, dans le même repère de 1024. Toute retouche se porte des deux côtés.
+ * icône iOS et watchOS, aperçus de lien partagé et ce composant sortent du
+ * même dessin, dans le même repère de 1024. Toute retouche se porte des deux
+ * côtés.
+ *
+ * Le composant vit dans le paquet partagé : l'application web et le site
+ * affichent le même signe, pas deux copies qui divergeront.
  */
 
 interface Props {
