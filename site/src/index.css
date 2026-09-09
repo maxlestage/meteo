@@ -307,6 +307,12 @@ section {
   background: #3f6b2b;
 }
 
+/* Le bouton du bandeau : la même pilule, resserrée pour tenir dans une barre. */
+.button--compact {
+  padding: 8px 15px;
+  font-size: 14px;
+}
+
 .button--ghost {
   background: var(--surface);
   border-color: var(--line);
@@ -756,6 +762,25 @@ section {
 .reveal.is-visible {
   opacity: 1;
   transform: none;
+}
+
+/* Le renvoi vers l'application, sous l'accroche de la section du jour. */
+.today__app {
+  display: inline-block;
+  margin-top: 10px;
+  color: var(--accent);
+  font-size: 15px;
+  font-weight: 600;
+  text-decoration-color: rgb(158 208 115 / 45%);
+  text-underline-offset: 4px;
+}
+
+.today__app::after {
+  content: ' →';
+}
+
+.today__app:hover {
+  text-decoration-color: currentcolor;
 }
 
 /* Bandeau illustré --------------------------------------------------------- */
