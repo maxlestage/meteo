@@ -214,6 +214,21 @@ bun run build      # dist/
 Les seuils affichés dans la page sont lus dans `AgroThresholds` : la vitrine ne
 peut pas annoncer autre chose que ce que l'application applique.
 
+### Marque et typographie
+
+Le signe de Klima — un disque de ciel, une goutte, une feuille — tient à seize
+pixels comme sur une icône d'application. Il sert de favicon (SVG et PNG),
+d'icône iOS et watchOS, et de marque dans la barre et le pied de page.
+
+L'écriture porte la marque : **Fraunces** pour tout ce qui s'annonce, la linéale
+du système pour tout ce qui se lit. La police est **servie depuis le site**
+(`site/public/fonts/`, licence OFL incluse) : aucun appel à un tiers, donc rien
+à déclarer côté données personnelles, et un chargement de moins.
+
+Les liens partagés affichent une image : `site/public/og.png`, 1200 × 630,
+déclarée en `og:image` et `twitter:image`. Elle est rendue depuis un gabarit
+HTML, comme les icônes — le même signe partout, sans retouche manuelle.
+
 Les illustrations sont dessinées en SVG — rien à licencier, rien à charger, et
 le trait reste net à toutes les tailles. Les animations sont en CSS et se
 coupent d'elles-mêmes sous `prefers-reduced-motion`. Les apparitions au

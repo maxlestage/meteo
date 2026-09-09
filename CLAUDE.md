@@ -37,6 +37,13 @@ cd web && bun run build        # idem dans site/
 Le projet Xcode est généré : après tout ajout de fichier iOS, régénérer
 `ios/Klima.xcodeproj/project.pbxproj` et le revalider.
 
+## Marque
+
+Le signe, le favicon, l'icône d'application et l'image de partage sont rendus
+depuis les gabarits de `site/public/` et `/tmp/brand` — un seul dessin, décliné.
+La police d'affichage est auto-hébergée : ne jamais la remplacer par un appel à
+un service tiers.
+
 ## Crédits
 
 Le site mentionne **Maxime Nathan Lestage** comme concepteur et développeur.
