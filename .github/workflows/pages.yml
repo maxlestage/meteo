@@ -1,6 +1,7 @@
 name: Site de présentation
 
-# Publie site/ sur GitHub Pages à chaque poussée sur la branche par défaut.
+# Publie la vitrine sur GitHub Pages à chaque poussée sur la branche par défaut,
+# et l'application web à côté d'elle, sous /app/.
 # Le dépôt doit avoir Pages configuré sur « GitHub Actions »
 # (Settings → Pages → Source).
 on:
@@ -35,8 +36,17 @@ jobs:
         run: bun test
 
       # `build` enchaîne tsc puis vite : une erreur de types arrête la publication.
-      - name: Construction du site
+      - name: Construction de la vitrine
         run: bun run --cwd site build
+
+      - name: Construction de l'application web
+        run: bun run --cwd web build
+
+      # L'application est servie depuis un sous-chemin de la vitrine. Les deux
+      # projets construisent en chemins relatifs (`base: './'`), il n'y a donc
+      # rien à reconfigurer pour qu'elle vive sous /app/.
+      - name: Assemblage de la publication
+        run: cp -r web/dist site/dist/app
 
       - uses: actions/configure-pages@v5
 
