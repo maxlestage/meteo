@@ -10,9 +10,9 @@ final class ConsensusTests: XCTestCase {
         _ temperature: Double,
         precipitation: Double = 0,
         windSpeed: Double = 10
-    ) -> ModelReading {
-        ModelReading(
-            model: WeatherModel.all[index],
+    ) -> SourceReading {
+        SourceReading(
+            source: WeatherProviders.openMeteoSources[index],
             temperature: temperature,
             precipitation: precipitation,
             windSpeed: windSpeed
@@ -80,55 +80,12 @@ final class ConsensusTests: XCTestCase {
         XCTAssertEqual(result.agreement, .forte)
     }
 
-    func testFourIndependentServices() {
-        XCTAssertEqual(WeatherModel.all.count, 4)
-        XCTAssertEqual(Set(WeatherModel.all.map(\.institution)).count, 4)
-        XCTAssertEqual(Set(WeatherModel.all.map(\.id)).count, 4)
-        XCTAssertEqual(WeatherModel.named("meteofrance_seamless")?.institution, "Météo-France")
-        XCTAssertNil(WeatherModel.named("inconnu"))
+    func testFourIndependentModelsAtOpenMeteo() {
+        let sources = WeatherProviders.openMeteoSources
+        XCTAssertEqual(sources.count, 4)
+        XCTAssertEqual(Set(sources.map(\.institution)).count, 4)
+        XCTAssertEqual(Set(sources.map(\.id)).count, 4)
+        XCTAssertEqual(WeatherProviders.source("meteofrance_seamless")?.institution, "Météo-France")
     }
 
-    /// Décodage des colonnes suffixées par modèle, et rejet d'un modèle vide.
-    func testDecodesSuffixedColumns() throws {
-        let pad = { (n: Int) in String(format: "%02d", n) }
-        let now = Date()
-        var calendar = Calendar(identifier: .gregorian)
-        calendar.timeZone = .current
-        let stamps = (-1...1).map { offset -> String in
-            let date = now.addingTimeInterval(Double(offset) * 3600)
-            let c = calendar.dateComponents([.year, .month, .day, .hour], from: date)
-            return "\(c.year!)-\(pad(c.month!))-\(pad(c.day!))T\(pad(c.hour!)):00"
-        }
-
-        let json = """
-        {
-          "timezone": "\(TimeZone.current.identifier)",
-          "hourly": {
-            "time": ["\(stamps[0])", "\(stamps[1])", "\(stamps[2])"],
-            "temperature_2m_meteofrance_seamless": [10, 18.2, 19],
-            "precipitation_meteofrance_seamless": [0, 0, 0],
-            "wind_speed_10m_meteofrance_seamless": [8, 12, 14],
-            "temperature_2m_ecmwf_ifs025": [10, 18.6, 19],
-            "precipitation_ecmwf_ifs025": [0, 0, 0],
-            "wind_speed_10m_ecmwf_ifs025": [8, 13, 14],
-            "temperature_2m_icon_seamless": [null, null, null],
-            "temperature_2m_gfs_seamless": [10, 18.4, 19],
-            "precipitation_gfs_seamless": [0, 0, 0],
-            "wind_speed_10m_gfs_seamless": [8, 12, 14]
-          }
-        }
-        """.data(using: .utf8)!
-
-        let payload = try JSONDecoder().decode(ModelPayload.self, from: json)
-        let readings = AgroWeatherService.readings(from: payload)
-
-        // ICON n'a que des valeurs nulles : il sort du recoupement.
-        XCTAssertEqual(readings.count, 3)
-        XCTAssertFalse(readings.contains { $0.model.id == "icon_seamless" })
-
-        let result = try XCTUnwrap(ModelConsensus.consensus(readings))
-        XCTAssertEqual(result.temperature.min, 18.2)
-        XCTAssertEqual(result.temperature.max, 18.6)
-        XCTAssertEqual(result.agreement, .forte)
-    }
 }

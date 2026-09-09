@@ -8,8 +8,8 @@
  */
 import type { CurrentSample, DailySample, HourlySample } from './agro'
 import type { Params } from './i18n'
-import { consensus, type Consensus, type ModelReading } from './consensus'
-import { WEATHER_MODELS, weatherModel } from './models'
+import { consensusFromOutcomes, type Consensus } from './consensus'
+import { fetchAllReadings, type Platform } from './providers'
 
 const FORECAST_URL = 'https://api.open-meteo.com/v1/forecast'
 const GEOCODING_URL = 'https://geocoding-api.open-meteo.com/v1/search'
@@ -128,7 +128,7 @@ function fromCurrentHour(hours: HourlySample[], now: Date): HourlySample[] {
 }
 
 /**
- * Interroge plusieurs modèles pour l'heure en cours et les recoupe.
+ * Interroge tous les fournisseurs de la plateforme et recoupe leurs réponses.
  *
  * Requête séparée de la prévision principale, à dessein : si la comparaison
  * échoue, l'application continue de fonctionner avec sa source habituelle.
@@ -136,67 +136,14 @@ function fromCurrentHour(hours: HourlySample[], now: Date): HourlySample[] {
 export async function fetchModelConsensus(
   parcelle: Parcelle,
   signal?: AbortSignal,
+  platform: Platform = 'web',
 ): Promise<Consensus | null> {
-  const url = new URL(FORECAST_URL)
-  url.searchParams.set('latitude', parcelle.latitude.toFixed(4))
-  url.searchParams.set('longitude', parcelle.longitude.toFixed(4))
-  url.searchParams.set('hourly', 'temperature_2m,precipitation,wind_speed_10m')
-  url.searchParams.set('models', WEATHER_MODELS.map((model) => model.id).join(','))
-  url.searchParams.set('wind_speed_unit', 'kmh')
-  url.searchParams.set('timezone', 'auto')
-  url.searchParams.set('forecast_days', '1')
-
-  const payload = await getJson<ModelPayload>(url, signal)
-  return consensus(decodeReadings(payload))
-}
-
-interface ModelPayload {
-  utc_offset_seconds: number
-  hourly: Record<string, unknown> & { time: string[] }
-}
-
-/**
- * Avec plusieurs modèles, Open-Meteo suffixe chaque variable de l'identifiant
- * du modèle. Un modèle qui ne couvre pas la parcelle renvoie des `null` : on
- * l'écarte du recoupement plutôt que de compter un zéro.
- */
-function decodeReadings(payload: ModelPayload): ModelReading[] {
-  const times = payload.hourly.time
-  const index = currentHourIndex(times, payload.utc_offset_seconds)
-  if (index < 0) return []
-
-  const readings: ModelReading[] = []
-  for (const model of WEATHER_MODELS) {
-    const temperature = valueAt(payload.hourly, `temperature_2m_${model.id}`, index)
-    const precipitation = valueAt(payload.hourly, `precipitation_${model.id}`, index)
-    const windSpeed = valueAt(payload.hourly, `wind_speed_10m_${model.id}`, index)
-    if (temperature === null) continue
-
-    readings.push({
-      model: weatherModel(model.id) ?? model,
-      temperature,
-      precipitation: precipitation ?? 0,
-      windSpeed: windSpeed ?? 0,
-    })
-  }
-  return readings
-}
-
-/** Première heure de la série postérieure ou égale à l'heure en cours. */
-function currentHourIndex(times: readonly string[], offsetSeconds: number): number {
-  const start = Math.floor(Date.now() / 3_600_000) * 3_600_000
-  for (let i = 0; i < times.length; i += 1) {
-    const time = parseStamp(times[i]!, offsetSeconds)
-    if (time && time.getTime() >= start) return i
-  }
-  return times.length > 0 ? times.length - 1 : -1
-}
-
-function valueAt(block: Record<string, unknown>, key: string, index: number): number | null {
-  const raw = block[key]
-  if (!Array.isArray(raw)) return null
-  const value = raw[index]
-  return typeof value === 'number' && Number.isFinite(value) ? value : null
+  const outcomes = await fetchAllReadings(
+    { latitude: parcelle.latitude, longitude: parcelle.longitude },
+    platform,
+    signal,
+  )
+  return consensusFromOutcomes(outcomes)
 }
 
 /** Recherche une commune par son nom (géocodage Open-Meteo). */

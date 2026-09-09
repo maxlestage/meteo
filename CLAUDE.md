@@ -22,6 +22,9 @@ nouvelle pull request.
 - **Les heures sont celles de la parcelle**, pas celles du lecteur. Les nombres
   et les dates suivent en revanche la langue de l'utilisateur.
 - **Ne pas publier de lien vers le code source** sur le site de présentation.
+- **Respecter les conditions des fournisseurs météo.** MET Norway exige un
+  `User-Agent` identifiant : il n'est appelé que depuis le natif. Les mentions
+  de licence s'affichent dès qu'une source est utilisée.
 
 ## Vérifications avant de livrer
 
