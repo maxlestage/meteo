@@ -13,12 +13,37 @@ web/    Application web complète (Bun + TypeScript + Vite + React)
 site/   Site de présentation, avec la météo du jour
 ```
 
+Le tout est traduit en **français, anglais et espagnol**.
+
 Les trois paquets JavaScript forment un espace de travail Bun : `bun install` à la
 racine les installe ensemble, et `bun test` y exécute la suite du cœur partagé.
 
 L'application reprend la présentation de l'application Météo du système —
 commune, température, bandeau horaire, liste des sept jours — et range les
 indicateurs agronomiques dans les tuiles de détail.
+
+## Langues
+
+Le domaine ne fabrique jamais de phrase : il renvoie des états et des motifs
+structurés — `SoilState.sature`, `SprayBlocker.windTooStrong(wind:limit:)` — que
+l'interface traduit. Les textes vivent donc dans des catalogues, jamais dans le
+code de calcul.
+
+| Surface | Catalogue | Choix de la langue |
+| --- | --- | --- |
+| Commun web et site | `core/src/messages.ts` | — |
+| Application web | `web/src/i18n/messages.ts` | Sélecteur, sinon le navigateur |
+| Site de présentation | `site/src/i18n/messages.ts` | Sélecteur, sinon le navigateur |
+| iOS | `ios/Klima/Resources/Localizable.xcstrings` | Réglages du système |
+
+Les nombres et les dates suivent la langue : virgule décimale en français et en
+espagnol, point en anglais ; horloge sur 24 h en français, sur 12 h en anglais
+américain. Les heures restent en revanche celles du fuseau de la parcelle, pas
+celui du lecteur.
+
+Les suites de tests vérifient que les trois langues portent exactement les mêmes
+clés et les mêmes valeurs à interpoler : une traduction oubliée fait échouer la
+compilation, elle n'apparaît pas en clair dans l'application.
 
 ## Ce que l'application calcule
 

@@ -4,3 +4,5 @@
  * pas entraîner React.
  */
 export { WeatherIcon } from './WeatherIcon'
+export { I18nProvider, useI18n } from './i18n'
+export { LanguageSwitcher } from './LanguageSwitcher'

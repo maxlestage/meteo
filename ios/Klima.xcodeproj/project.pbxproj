@@ -12,8 +12,10 @@
 		2480C8BED00599CB4A37BE3A /* AgroFormatTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E22F9EBB5D794EB26C40EE42 /* AgroFormatTests.swift */; };
 		24CA7F13131AEBCF7A64E4F3 /* KlimaApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84116E324F300217E14A7D80 /* KlimaApp.swift */; };
 		283A94658C4BF890014C510B /* LocationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 08707F96197B8A0C91B93434 /* LocationService.swift */; };
+		4AAC6C51457C1BDE9ADA4C30 /* AgroFormat.swift in Sources */ = {isa = PBXBuildFile; fileRef = C7341EAFF0E4443B5ABD02E9 /* AgroFormat.swift */; };
 		51054172AD319320D71CEA33 /* AgroIndicators.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B0DC023C950B262ED20013F /* AgroIndicators.swift */; };
 		566DADF1BB936E66C038F7E7 /* AgroWeatherDecodingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3F0452B25BE676E099C8DFF9 /* AgroWeatherDecodingTests.swift */; };
+		5A55EF8272D960B4FC47FB3D /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = 4F3133CB82A42C2405ECFE76 /* Localizable.xcstrings */; };
 		5CB1DC4D9E9EF3CBD328F32A /* DetailTile.swift in Sources */ = {isa = PBXBuildFile; fileRef = 57C0845A4CF93D4730923065 /* DetailTile.swift */; };
 		67FC76359AD16BC4695DEADF /* DailyListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A2507732A1784A4B8EB0921 /* DailyListView.swift */; };
 		6CA0879E8E9DEEB22B32B61F /* DashboardViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EAC6CF1F72EC8295D30BFC0 /* DashboardViewModel.swift */; };
@@ -24,9 +26,11 @@
 		8E2514CD7022B11A162D60FF /* HourlyStripView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 009B9C142273FBBEE0BD6576 /* HourlyStripView.swift */; };
 		92ED5AA3CD3F48E0A5F3C553 /* AgroWeatherService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 01CA31D408493CD502FD9260 /* AgroWeatherService.swift */; };
 		98784EE749DEEF1017EDF486 /* WeatherCondition.swift in Sources */ = {isa = PBXBuildFile; fileRef = 825B4E58277E1D7A0598F0B6 /* WeatherCondition.swift */; };
+		A1DE9873B96987414F2F42C6 /* InfoPlist.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = 7B6FF51FE076902715B4B924 /* InfoPlist.xcstrings */; };
+		C21D9E9AB4672C6217F0C805 /* Localized.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0F39F13CE4421E38A88D16C2 /* Localized.swift */; };
 		C854772C2CA5284C54066F33 /* DashboardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 93EC2AB4F329AF5B76E33693 /* DashboardView.swift */; };
+		DA25062AA566C57EA1E5EA85 /* LocalizationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7243F4B117C994C20AEFEEF0 /* LocalizationTests.swift */; };
 		ED5D6480274C408C81A1C888 /* SkyBackground.swift in Sources */ = {isa = PBXBuildFile; fileRef = 27B0E714FCA793075A26FF7C /* SkyBackground.swift */; };
-		F59C2FB0808273F8FFC8BAD5 /* AgroFormat.swift in Sources */ = {isa = PBXBuildFile; fileRef = CEF32E59D1BBAFCEC6849810 /* AgroFormat.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -43,14 +47,18 @@
 		009B9C142273FBBEE0BD6576 /* HourlyStripView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HourlyStripView.swift; sourceTree = "<group>"; };
 		01CA31D408493CD502FD9260 /* AgroWeatherService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AgroWeatherService.swift; sourceTree = "<group>"; };
 		08707F96197B8A0C91B93434 /* LocationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationService.swift; sourceTree = "<group>"; };
+		0F39F13CE4421E38A88D16C2 /* Localized.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Localized.swift; sourceTree = "<group>"; };
 		27B0E714FCA793075A26FF7C /* SkyBackground.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SkyBackground.swift; sourceTree = "<group>"; };
 		39D975AAB74D8A287A6B7254 /* HeroView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HeroView.swift; sourceTree = "<group>"; };
 		3F0452B25BE676E099C8DFF9 /* AgroWeatherDecodingTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AgroWeatherDecodingTests.swift; sourceTree = "<group>"; };
 		40839EA4E38B24E6B555CC61 /* SprayCardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SprayCardView.swift; sourceTree = "<group>"; };
 		4A2507732A1784A4B8EB0921 /* DailyListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DailyListView.swift; sourceTree = "<group>"; };
+		4F3133CB82A42C2405ECFE76 /* Localizable.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = Localizable.xcstrings; sourceTree = "<group>"; };
 		55D9837846F076DA896F495A /* AgroSamples.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AgroSamples.swift; sourceTree = "<group>"; };
 		57C0845A4CF93D4730923065 /* DetailTile.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DetailTile.swift; sourceTree = "<group>"; };
+		7243F4B117C994C20AEFEEF0 /* LocalizationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalizationTests.swift; sourceTree = "<group>"; };
 		7B37E35ECA785B0C85EB31B2 /* AgroIndicatorsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AgroIndicatorsTests.swift; sourceTree = "<group>"; };
+		7B6FF51FE076902715B4B924 /* InfoPlist.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = InfoPlist.xcstrings; sourceTree = "<group>"; };
 		825B4E58277E1D7A0598F0B6 /* WeatherCondition.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeatherCondition.swift; sourceTree = "<group>"; };
 		84116E324F300217E14A7D80 /* KlimaApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KlimaApp.swift; sourceTree = "<group>"; };
 		84337AD8D27FCD69AF2C4FC2 /* Klima.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Klima.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -58,7 +66,7 @@
 		8D7172619DB15AD08404D409 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		8EAC6CF1F72EC8295D30BFC0 /* DashboardViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DashboardViewModel.swift; sourceTree = "<group>"; };
 		93EC2AB4F329AF5B76E33693 /* DashboardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DashboardView.swift; sourceTree = "<group>"; };
-		CEF32E59D1BBAFCEC6849810 /* AgroFormat.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AgroFormat.swift; sourceTree = "<group>"; };
+		C7341EAFF0E4443B5ABD02E9 /* AgroFormat.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AgroFormat.swift; sourceTree = "<group>"; };
 		DFDED23FA58339F9273F6C84 /* KlimaTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = KlimaTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		E17880A312A4AE0F1F118119 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		E22F9EBB5D794EB26C40EE42 /* AgroFormatTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AgroFormatTests.swift; sourceTree = "<group>"; };
@@ -128,6 +136,8 @@
 				55D9837846F076DA896F495A /* AgroSamples.swift */,
 				8B0DC023C950B262ED20013F /* AgroIndicators.swift */,
 				825B4E58277E1D7A0598F0B6 /* WeatherCondition.swift */,
+				C7341EAFF0E4443B5ABD02E9 /* AgroFormat.swift */,
+				0F39F13CE4421E38A88D16C2 /* Localized.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -152,7 +162,6 @@
 		0CCEE07ECE9D2EC579E24F2E /* Views */ = {
 			isa = PBXGroup;
 			children = (
-				CEF32E59D1BBAFCEC6849810 /* AgroFormat.swift */,
 				93EC2AB4F329AF5B76E33693 /* DashboardView.swift */,
 				4A2507732A1784A4B8EB0921 /* DailyListView.swift */,
 				57C0845A4CF93D4730923065 /* DetailTile.swift */,
@@ -168,6 +177,8 @@
 			isa = PBXGroup;
 			children = (
 				8D7172619DB15AD08404D409 /* Assets.xcassets */,
+				4F3133CB82A42C2405ECFE76 /* Localizable.xcstrings */,
+				7B6FF51FE076902715B4B924 /* InfoPlist.xcstrings */,
 				E17880A312A4AE0F1F118119 /* Info.plist */,
 			);
 			path = Resources;
@@ -180,6 +191,7 @@
 				3F0452B25BE676E099C8DFF9 /* AgroWeatherDecodingTests.swift */,
 				F71CC5F308473AF0D312F14C /* WeatherConditionTests.swift */,
 				E22F9EBB5D794EB26C40EE42 /* AgroFormatTests.swift */,
+				7243F4B117C994C20AEFEEF0 /* LocalizationTests.swift */,
 			);
 			path = KlimaTests;
 			sourceTree = "<group>";
@@ -248,6 +260,7 @@
 			knownRegions = (
 				fr,
 				en,
+				es,
 				Base,
 			);
 			mainGroup = 518DA81DB9B99529C0C0AEBE;
@@ -267,6 +280,8 @@
 			buildActionMask = 2147483647;
 			files = (
 				1A130F063342B72B457FC015 /* Assets.xcassets in Resources */,
+				5A55EF8272D960B4FC47FB3D /* Localizable.xcstrings in Resources */,
+				A1DE9873B96987414F2F42C6 /* InfoPlist.xcstrings in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -288,10 +303,11 @@
 				85CA810AE3589C6B30CAFB6F /* AgroSamples.swift in Sources */,
 				51054172AD319320D71CEA33 /* AgroIndicators.swift in Sources */,
 				98784EE749DEEF1017EDF486 /* WeatherCondition.swift in Sources */,
+				4AAC6C51457C1BDE9ADA4C30 /* AgroFormat.swift in Sources */,
+				C21D9E9AB4672C6217F0C805 /* Localized.swift in Sources */,
 				92ED5AA3CD3F48E0A5F3C553 /* AgroWeatherService.swift in Sources */,
 				283A94658C4BF890014C510B /* LocationService.swift in Sources */,
 				6CA0879E8E9DEEB22B32B61F /* DashboardViewModel.swift in Sources */,
-				F59C2FB0808273F8FFC8BAD5 /* AgroFormat.swift in Sources */,
 				C854772C2CA5284C54066F33 /* DashboardView.swift in Sources */,
 				67FC76359AD16BC4695DEADF /* DailyListView.swift in Sources */,
 				5CB1DC4D9E9EF3CBD328F32A /* DetailTile.swift in Sources */,
@@ -310,6 +326,7 @@
 				566DADF1BB936E66C038F7E7 /* AgroWeatherDecodingTests.swift in Sources */,
 				719AE84CF3AE3953C830D50B /* WeatherConditionTests.swift in Sources */,
 				2480C8BED00599CB4A37BE3A /* AgroFormatTests.swift in Sources */,
+				DA25062AA566C57EA1E5EA85 /* LocalizationTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

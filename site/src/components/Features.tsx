@@ -1,61 +1,74 @@
-import { AgroThresholds, decimal, percent } from '@klima/core'
+import { AgroThresholds } from '@klima/core'
+import { useI18n } from '@klima/core/ui'
 
 /**
- * Ce que Klima calcule. Les seuils cités viennent du code : la page ne peut pas
- * annoncer autre chose que ce que l'application applique.
+ * Ce que Klima calcule. Les seuils cités viennent du code et sont mis en forme
+ * dans la langue courante : la page ne peut pas annoncer autre chose que ce que
+ * l'application applique.
  */
-const FEATURES = [
-  {
-    title: 'Bilan hydrique',
-    rule: 'Pluie moins évapotranspiration de référence, cumulées sur sept jours.',
-    detail: `Passé un déficit de ${Math.abs(AgroThresholds.irrigationDeficit)} mm sur la période, Klima chiffre l'irrigation à apporter.`,
-  },
-  {
-    title: 'État du sol',
-    rule: 'Humidité volumique entre 3 et 9 cm, et température à 6 cm.',
-    detail: `Saturé au-delà de ${percent(AgroThresholds.soilTooWet * 100)} vol., sec en deçà de ${percent(
-      AgroThresholds.soilTooDry * 100,
-    )}. Portance et aptitude au semis en découlent.`,
-  },
-  {
-    title: 'Fenêtre de traitement',
-    rule: `Vent entre ${AgroThresholds.sprayWindMin} et ${AgroThresholds.sprayWindMax} km/h, rafales sous ${AgroThresholds.sprayGustMax} km/h, pas de pluie dans les deux heures.`,
-    detail: `S'y ajoutent la température (${AgroThresholds.sprayTempMin} à ${AgroThresholds.sprayTempMax} °C), l'hygrométrie et un déficit de pression de vapeur sous ${decimal(AgroThresholds.sprayVpdMax)} kPa.`,
-  },
-  {
-    title: 'Pression maladie',
-    rule: `Heures d'humectation du feuillage : hygrométrie au-dessus de ${percent(AgroThresholds.leafWetnessHumidity)}.`,
-    detail: `Comptées dans la plage de température favorable au champignon, ${AgroThresholds.diseaseTempMin} à ${AgroThresholds.diseaseTempMax} °C.`,
-  },
-  {
-    title: 'Risque de gel',
-    rule: 'Température minimale de la nuit et point de rosée.',
-    detail: 'Distingue la gelée blanche du gel sévère, jusqu’à −4 °C et au-delà.',
-  },
-  {
-    title: 'Degrés-jours',
-    rule: `Moyenne plafonnée, base ${AgroThresholds.gddBase} °C.`,
-    detail: `La journée ne capitalise plus au-delà de ${AgroThresholds.gddCeiling} °C.`,
-  },
-]
-
 export function Features() {
+  const { t, f } = useI18n()
+  const kmh = (value: number) => f.unit(value, 'km/h', 0)
+  const celsius = (value: number) => f.unit(value, '°C', 0)
+
+  const features = [
+    {
+      key: 'water',
+      detail: { deficit: f.unit(Math.abs(AgroThresholds.irrigationDeficit), 'mm', 0) },
+    },
+    {
+      key: 'soil',
+      detail: {
+        wet: f.percent(AgroThresholds.soilTooWet * 100),
+        dry: f.percent(AgroThresholds.soilTooDry * 100),
+      },
+    },
+    {
+      key: 'spray',
+      rule: {
+        min: kmh(AgroThresholds.sprayWindMin),
+        max: kmh(AgroThresholds.sprayWindMax),
+        gusts: kmh(AgroThresholds.sprayGustMax),
+      },
+      detail: {
+        tempMin: celsius(AgroThresholds.sprayTempMin),
+        tempMax: celsius(AgroThresholds.sprayTempMax),
+        vpd: f.unit(AgroThresholds.sprayVpdMax, 'kPa'),
+      },
+    },
+    {
+      key: 'disease',
+      rule: { humidity: f.percent(AgroThresholds.leafWetnessHumidity) },
+      detail: {
+        min: celsius(AgroThresholds.diseaseTempMin),
+        max: celsius(AgroThresholds.diseaseTempMax),
+      },
+    },
+    { key: 'frost' },
+    {
+      key: 'gdd',
+      rule: { base: celsius(AgroThresholds.gddBase) },
+      detail: { ceiling: celsius(AgroThresholds.gddCeiling) },
+    },
+  ] as const
+
   return (
     <section className="features" id="indicateurs">
       <div className="section-head">
-        <h2>Six indicateurs, une seule question</h2>
-        <p>
-          Est-ce que je peux y aller aujourd'hui ? Klima part des variables agricoles brutes et
-          rend une réponse, pas un tableau de chiffres.
-        </p>
+        <h2>{t('features.title')}</h2>
+        <p>{t('features.lead')}</p>
       </div>
 
       <div className="features__grid">
-        {FEATURES.map((feature) => (
-          <article className="feature" key={feature.title}>
-            <h3>{feature.title}</h3>
-            <p className="feature__rule">{feature.rule}</p>
-            <p className="feature__detail">{feature.detail}</p>
+        {features.map((feature) => (
+          <article className="feature" key={feature.key}>
+            <h3>{t(`feature.${feature.key}.title`)}</h3>
+            <p className="feature__rule">
+              {t(`feature.${feature.key}.rule`, 'rule' in feature ? feature.rule : undefined)}
+            </p>
+            <p className="feature__detail">
+              {t(`feature.${feature.key}.detail`, 'detail' in feature ? feature.detail : undefined)}
+            </p>
           </article>
         ))}
       </div>

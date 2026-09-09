@@ -13,7 +13,7 @@ struct SprayCardView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 4) {
-            CardLabel(text: "Fenêtre de traitement")
+            CardLabel(text: Localized.text("spray.title"))
 
             Text(headline)
                 .font(.system(size: 26, weight: .regular))
@@ -35,11 +35,11 @@ struct SprayCardView: View {
             .frame(height: 26)
 
             HStack {
-                Text("Maintenant")
+                Text(Localized.text("spray.now"))
                 Spacer()
-                Text("+12 h")
+                Text(Localized.text("spray.plus12"))
                 Spacer()
-                Text("+24 h")
+                Text(Localized.text("spray.plus24"))
             }
             .font(.system(size: 11))
             .foregroundStyle(.white.opacity(0.62))
@@ -49,18 +49,18 @@ struct SprayCardView: View {
     }
 
     private var headline: String {
-        guard let nextSpray else { return "Aucune fenêtre sur 7 jours" }
+        guard let nextSpray else { return Localized.text("spray.none") }
         return "\(AgroFormat.weekdayHour(nextSpray.start, in: timeZone)) → \(AgroFormat.hour(nextSpray.end, in: timeZone))"
     }
 
     private var caption: String {
         if let nextSpray {
-            return "Score \(nextSpray.score)/100 sur la plage"
+            return Localized.text("spray.score", String(nextSpray.score))
         }
         // Le premier motif de blocage résume la situation.
         let blocked = windows.first { $0.verdict == .defavorable && !$0.blockers.isEmpty }
-        guard let blocker = blocked?.blockers.first else { return "Conditions défavorables" }
-        return "Blocage principal : \(blocker.lowercased())"
+        guard let blocker = blocked?.blockers.first else { return Localized.text("spray.unsuitable") }
+        return Localized.text("spray.mainBlocker", blocker.text.lowercased())
     }
 
     private func color(for verdict: SprayVerdict) -> Color {

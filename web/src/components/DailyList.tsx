@@ -1,6 +1,6 @@
 import type { DailySample } from '@klima/core'
-import { percent, weatherCondition } from '@klima/core'
-import { WeatherIcon } from '@klima/core/ui'
+import { weatherCondition } from '@klima/core'
+import { useI18n, WeatherIcon } from '@klima/core/ui'
 
 interface Props {
   days: readonly DailySample[]
@@ -11,7 +11,8 @@ interface Props {
 
 /** Liste des jours, avec la barre d'amplitude thermique de la semaine. */
 export function DailyList({ days, currentTemperature, timeZone }: Props) {
-  const dayFormat = new Intl.DateTimeFormat('fr-FR', { weekday: 'short', timeZone })
+  const { t, f, locale } = useI18n()
+  const dayFormat = new Intl.DateTimeFormat(locale, { weekday: 'short', timeZone })
 
   // Toutes les barres se lisent sur la même échelle : celle de la semaine.
   const lows = days.map((d) => d.temperatureMin)
@@ -21,8 +22,8 @@ export function DailyList({ days, currentTemperature, timeZone }: Props) {
   const span = Math.max(weekHigh - weekLow, 1)
 
   return (
-    <section className="card" aria-label="Prévision sur 7 jours">
-      <h2 className="card__label">Prévision sur 7 jours</h2>
+    <section className="card" aria-label={t('daily.title')}>
+      <h2 className="card__label">{t('daily.title')}</h2>
       <ul className="days">
         {days.map((day, index) => {
           const condition = weatherCondition(day.weatherCode)
@@ -32,17 +33,17 @@ export function DailyList({ days, currentTemperature, timeZone }: Props) {
           return (
             <li className="days__row" key={day.date.toISOString()}>
               <span className="days__name">
-                {index === 0 ? 'Auj.' : capitalize(dayFormat.format(day.date))}
+                {index === 0 ? t('daily.today') : capitalize(dayFormat.format(day.date))}
               </span>
 
               <span className="days__weather">
-                <WeatherIcon icon={condition.icon} size={24} title={condition.label} />
+                <WeatherIcon icon={condition.icon} size={24} title={t(condition.labelKey)} />
                 <span className="days__rain">
-                  {day.precipitationProbabilityMax >= 10 ? percent(day.precipitationProbabilityMax) : ''}
+                  {day.precipitationProbabilityMax >= 10 ? f.percent(day.precipitationProbabilityMax) : ''}
                 </span>
               </span>
 
-              <span className="days__low">{Math.round(day.temperatureMin)}°</span>
+              <span className="days__low">{f.temperature(day.temperatureMin)}</span>
               <span className="days__bar">
                 <span className="days__fill" style={{ left: `${left}%`, width: `${width}%` }} />
                 {index === 0 && (
@@ -54,7 +55,7 @@ export function DailyList({ days, currentTemperature, timeZone }: Props) {
                   />
                 )}
               </span>
-              <span className="days__high">{Math.round(day.temperatureMax)}°</span>
+              <span className="days__high">{f.temperature(day.temperatureMax)}</span>
             </li>
           )
         })}

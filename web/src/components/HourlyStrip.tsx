@@ -1,6 +1,6 @@
 import type { CurrentSample, HourlySample } from '@klima/core'
-import { percent, weatherCondition } from '@klima/core'
-import { WeatherIcon } from '@klima/core/ui'
+import { weatherCondition } from '@klima/core'
+import { useI18n, WeatherIcon } from '@klima/core/ui'
 
 interface Props {
   hours: readonly HourlySample[]
@@ -11,12 +11,13 @@ interface Props {
 
 /** Bandeau horaire sur 24 h : heure, temps, probabilité de pluie, température. */
 export function HourlyStrip({ hours, current, timeZone }: Props) {
-  const hourFormat = new Intl.DateTimeFormat('fr-FR', { hour: 'numeric', timeZone })
+  const { t, f, locale } = useI18n()
+  const hourFormat = new Intl.DateTimeFormat(locale, { hour: 'numeric', timeZone })
   const slice = hours.slice(0, 24)
 
   return (
-    <section className="card" aria-label="Prévision horaire">
-      <h2 className="card__label">Conditions météo</h2>
+    <section className="card" aria-label={t('hourly.title')}>
+      <h2 className="card__label">{t('hourly.title')}</h2>
       <div className="strip">
         {slice.map((hour, index) => {
           // La première colonne montre le relevé courant, pas la prévision de
@@ -26,18 +27,18 @@ export function HourlyStrip({ hours, current, timeZone }: Props) {
           return (
             <div className="strip__item" key={hour.time.toISOString()}>
               <span className="strip__hour">
-                {observed ? 'Maint.' : hourFormat.format(hour.time)}
+                {observed ? t('hourly.now') : hourFormat.format(hour.time)}
               </span>
               <WeatherIcon
                 icon={condition.icon}
                 isDay={observed ? current.isDay : hour.isDay}
-                title={condition.label}
+                title={t(condition.labelKey)}
               />
               <span className="strip__rain">
-                {hour.precipitationProbability >= 10 ? percent(hour.precipitationProbability) : '\u00a0'}
+                {hour.precipitationProbability >= 10 ? f.percent(hour.precipitationProbability) : '\u00a0'}
               </span>
               <span className="strip__temp">
-                {Math.round(observed ? current.temperature : hour.temperature)}°
+                {f.temperature(observed ? current.temperature : hour.temperature)}
               </span>
             </div>
           )

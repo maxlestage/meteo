@@ -96,18 +96,18 @@ describe('fenêtres de pulvérisation', () => {
   test('vent réglementaire dépassé', () => {
     const w = evaluateSprayHour([hour({ windSpeed: 24 })], 0)
     expect(w.verdict).toBe('defavorable')
-    expect(w.blockers[0]).toContain('Vent 24 km/h')
+    expect(w.blockers[0]).toEqual({ kind: 'windTooStrong', wind: 24, limit: 19 })
   })
 
   test('pluie attendue à l’heure suivante', () => {
     const w = evaluateSprayHour([hour(), hour({ precipitation: 1.4 }, 1)], 0)
     expect(w.verdict).toBe('defavorable')
-    expect(w.blockers.join(' ')).toContain('Pluie')
+    expect(w.blockers).toContainEqual({ kind: 'rain', amount: 1.4 })
   })
 
   test('vent nul : inversion thermique signalée', () => {
     const w = evaluateSprayHour([hour({ windSpeed: 1 })], 0)
-    expect(w.blockers.join(' ')).toContain('inversion thermique')
+    expect(w.blockers).toContainEqual({ kind: 'windTooWeak' })
     expect(w.verdict).toBe('acceptable')
   })
 

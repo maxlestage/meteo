@@ -1,6 +1,6 @@
 import Foundation
 
-/// Erreurs remontées à l'utilisateur, en français.
+/// Erreurs remontées à l'utilisateur, dans la langue de l'appareil.
 enum AgroWeatherError: LocalizedError, Equatable {
     case unreachable
     case badStatus(Int)
@@ -9,11 +9,11 @@ enum AgroWeatherError: LocalizedError, Equatable {
     var errorDescription: String? {
         switch self {
         case .unreachable:
-            return "Service météo injoignable. Vérifiez votre connexion."
+            return Localized.text("api.unreachable")
         case let .badStatus(code):
-            return "Le service météo a répondu \(code)."
+            return Localized.text("api.status", String(code))
         case .malformedResponse:
-            return "Réponse illisible du service météo."
+            return Localized.text("api.malformed")
         }
     }
 }

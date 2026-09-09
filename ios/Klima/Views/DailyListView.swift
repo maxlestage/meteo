@@ -9,7 +9,7 @@ struct DailyListView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
-            CardLabel(text: "Prévision sur 7 jours")
+            CardLabel(text: Localized.text("daily.title"))
 
             VStack(spacing: 0) {
                 ForEach(Array(days.enumerated()), id: \.element.id) { index, day in
@@ -32,7 +32,7 @@ struct DailyListView: View {
         let condition = WeatherCondition.forCode(day.weatherCode)
 
         return HStack(spacing: 10) {
-            Text(isToday ? "Auj." : AgroFormat.weekday(day.date, in: timeZone))
+            Text(isToday ? Localized.text("daily.today") : AgroFormat.weekday(day.date, in: timeZone))
                 .font(.body.weight(.medium))
                 .frame(width: 48, alignment: .leading)
 
@@ -41,20 +41,20 @@ struct DailyListView: View {
                     .symbolRenderingMode(.multicolor)
                     .font(.system(size: 18))
                 Text(day.precipitationProbabilityMax >= 10
-                     ? "\(Int(day.precipitationProbabilityMax.rounded())) %"
+                     ? AgroFormat.percent(day.precipitationProbabilityMax)
                      : " ")
                     .font(.system(size: 11, weight: .semibold))
                     .foregroundStyle(Color(red: 0.498, green: 0.816, blue: 0.961))
             }
             .frame(width: 46)
 
-            Text("\(Int(day.temperatureMin.rounded()))°")
+            Text(AgroFormat.temperature(day.temperatureMin))
                 .foregroundStyle(.white.opacity(0.62))
                 .frame(width: 34, alignment: .trailing)
 
             temperatureBar(for: day, isToday: isToday)
 
-            Text("\(Int(day.temperatureMax.rounded()))°")
+            Text(AgroFormat.temperature(day.temperatureMax))
                 .frame(width: 34, alignment: .trailing)
         }
         .font(.body)

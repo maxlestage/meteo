@@ -61,7 +61,7 @@ final class DashboardViewModel: ObservableObject {
                 self.forecast = nil
                 self.summary = nil
                 self.errorMessage = (error as? LocalizedError)?.errorDescription
-                    ?? "Impossible de charger la prévision agricole."
+                    ?? Localized.text("app.error")
             }
             self.isLoading = false
         }
@@ -105,14 +105,14 @@ final class DashboardViewModel: ObservableObject {
                 let coordinate = try await location.currentCoordinate()
                 select(
                     Parcelle(
-                        name: "Ma parcelle",
+                        name: Localized.text("search.myField"),
                         latitude: coordinate.latitude,
                         longitude: coordinate.longitude
                     )
                 )
             } catch {
                 errorMessage = (error as? LocalizedError)?.errorDescription
-                    ?? "Position indisponible pour le moment."
+                    ?? Localized.text("location.unavailable")
             }
         }
     }
