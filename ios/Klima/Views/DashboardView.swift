@@ -185,7 +185,7 @@ struct DashboardView: View {
         let zone = viewModel.timeZone
         let today = forecast.daily.first
 
-        return [
+        var tiles: [TileModel] = [
             TileModel(
                 label: Localized.text("tile.soil"),
                 value: soil.state.label,
@@ -261,6 +261,37 @@ struct DashboardView: View {
                 caption: Localized.text("tile.sowing.caption", AgroFormat.unit(soil.temperature, "°C"))
             ),
         ]
+
+        // Le recoupement des modèles n'apparaît que s'il a abouti.
+        if let consensus = viewModel.consensus {
+            let detail = Localized.text(
+                "consensus.detail",
+                String(consensus.readings.count),
+                AgroFormat.unit(consensus.temperature.spread, "°C")
+            )
+            let rain = consensus.agreeOnRain ? "" : " · " + Localized.text("consensus.rainDisagreement")
+            let median = Localized.text(
+                "consensus.median",
+                AgroFormat.unit(consensus.temperature.median, "°C")
+            )
+            tiles.append(
+                TileModel(
+                    label: Localized.text("consensus.title"),
+                    value: consensus.agreement.label,
+                    caption: "\(detail)\(rain). \(median).",
+                    gauge: (
+                        position: 1 - min(consensus.temperature.spread / 5, 1),
+                        colors: [
+                            Color(red: 0.937, green: 0.541, blue: 0.353),
+                            Color(red: 0.941, green: 0.757, blue: 0.294),
+                            Color(red: 0.494, green: 0.816, blue: 0.478),
+                        ]
+                    )
+                )
+            )
+        }
+
+        return tiles
     }
 }
 
