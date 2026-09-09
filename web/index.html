@@ -16,9 +16,9 @@
     <title>Klima — météo agricole</title>
 
     <!--
-      L'aperçu des liens partagés. L'application n'a pas encore d'adresse
-      publique : les chemins restent relatifs et deviendront absolus le jour
-      où elle sera publiée, comme sur le site de présentation.
+      L'aperçu des liens partagés. L'application est publiée à côté de la
+      vitrine, sous /app/ ; les chemins sont donc absolus, comme l'exige Open
+      Graph.
     -->
     <meta property="og:type" content="website" />
     <meta property="og:site_name" content="Klima" />
@@ -30,7 +30,8 @@
       property="og:description"
       content="Cherchez une commune, lisez la journée : état du sol, bilan hydrique et fenêtres de traitement. Sans compte ni clé d'API."
     />
-    <meta property="og:image" content="./og.png" />
+    <meta property="og:url" content="https://maxlestage.github.io/meteo/app/" />
+    <meta property="og:image" content="https://maxlestage.github.io/meteo/app/og.png" />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
     <meta
@@ -43,7 +44,7 @@
       name="twitter:description"
       content="Cherchez une commune, lisez la journée : état du sol, bilan hydrique et fenêtres de traitement. Sans compte ni clé d'API."
     />
-    <meta name="twitter:image" content="./og.png" />
+    <meta name="twitter:image" content="https://maxlestage.github.io/meteo/app/og.png" />
   </head>
   <body>
     <div id="root"></div>
