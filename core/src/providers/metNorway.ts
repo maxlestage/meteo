@@ -1,13 +1,18 @@
+import { endpoints } from '../endpoints'
 import { USER_AGENT, type Provider, type ProviderQuery, type SourceReading, type WeatherSource } from './types'
 
 /**
  * Institut météorologique norvégien — `Locationforecast 2.0`.
  *
- * **Fournisseur natif uniquement.** Ses conditions d'utilisation imposent un
- * en-tête `User-Agent` identifiant l'application et un moyen de contact ; un
- * navigateur interdit de le fixer. On l'appelle donc depuis iOS et watchOS, où
- * `URLSession` le permet, et pas depuis le web — plutôt que d'envoyer des
- * requêtes anonymes contre leur volonté.
+ * Ses conditions imposent un en-tête `User-Agent` identifiant l'application et
+ * un moyen de contact. Un navigateur interdit de le fixer : **en appel direct,
+ * ce fournisseur est donc réservé au natif**, où `URLSession` le permet —
+ * plutôt que d'envoyer des requêtes anonymes contre leur volonté.
+ *
+ * Par le relais, l'obstacle tombe : c'est le serveur qui pose l'en-tête, et il
+ * le pose. MET Norway devient alors accessible aussi depuis le web. La règle
+ * n'a jamais été « natif seulement » mais « seulement là où l'on peut se
+ * nommer » ; le relais est un de ces endroits.
  */
 const SOURCE: WeatherSource = {
   id: 'met-no-locationforecast',
@@ -22,6 +27,7 @@ export const metNorwayProvider: Provider = {
   id: 'met-norway',
   institution: 'MET Norway',
   platforms: ['native'],
+  viaRelay: true,
   attribution: SOURCE.attribution,
   fetch: fetchMetNorway,
 }
@@ -41,11 +47,15 @@ interface MetPayload {
 }
 
 async function fetchMetNorway(query: ProviderQuery, signal?: AbortSignal): Promise<SourceReading[]> {
-  const url = new URL('https://api.met.no/weatherapi/locationforecast/2.0/compact')
+  const via = endpoints()
+  const url = new URL(via.metNorway)
   url.searchParams.set('lat', query.latitude.toFixed(4))
   url.searchParams.set('lon', query.longitude.toFixed(4))
 
-  const response = await fetch(url, { signal, headers: { 'User-Agent': USER_AGENT } })
+  // Le relais pose l'en-tête lui-même ; un navigateur qui l'ajouterait ici
+  // verrait sa requête refusée avant d'être envoyée.
+  const headers = via.transport === 'direct' ? { 'User-Agent': USER_AGENT } : undefined
+  const response = await fetch(url, { signal, headers })
   if (!response.ok) throw new Error(`MET Norway ${response.status}`)
 
   const payload = (await response.json()) as MetPayload

@@ -1,3 +1,4 @@
+import { endpoints } from '../endpoints'
 import type { Provider, ProviderQuery, SourceReading, WeatherSource } from './types'
 
 /**
@@ -46,6 +47,7 @@ export const openMeteoProvider: Provider = {
   id: 'open-meteo',
   institution: 'Open-Meteo',
   platforms: ['web', 'native'],
+  viaRelay: true,
   attribution: ATTRIBUTION,
   fetch: fetchOpenMeteo,
 }
@@ -53,7 +55,7 @@ export const openMeteoProvider: Provider = {
 export const OPEN_METEO_SOURCES = MODELS
 
 async function fetchOpenMeteo(query: ProviderQuery, signal?: AbortSignal): Promise<SourceReading[]> {
-  const url = new URL('https://api.open-meteo.com/v1/forecast')
+  const url = new URL(endpoints().openMeteoForecast)
   url.searchParams.set('latitude', query.latitude.toFixed(4))
   url.searchParams.set('longitude', query.longitude.toFixed(4))
   url.searchParams.set('hourly', 'temperature_2m,precipitation,wind_speed_10m')
