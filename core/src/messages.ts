@@ -80,6 +80,23 @@ export const sharedMessages: Record<Language, Catalog> = {
     'consensus.rainDisagreement': 'désaccord sur la pluie',
     'consensus.unavailable': 'Comparaison indisponible',
     'consensus.median': 'Valeur retenue : {value}',
+    // Alertes : ce que Klima dit sans qu'on ouvre l'application.
+    'alert.fenetre.title': 'Fenêtre de traitement',
+    'alert.fenetre.body': 'Conditions réunies, score {score}/100 sur la plage.',
+    'alert.gel.title': 'Gel cette nuit',
+    'alert.gel.body': 'Jusqu’à {temperature} °C attendus.',
+    'alert.sol.title': 'Sol ressuyé',
+    'alert.sol.body': 'Humidité retombée à {moisture} : la parcelle porte.',
+    'alert.pluie.title': 'Pluie après la fenêtre',
+    'alert.pluie.body': '{rain} mm attendus : un traitement risque d’être lavé.',
+
+    // Ce qu'un palier ferme. Le domaine renvoie la clé, l'interface la montre.
+    'plan.libre': 'Klima',
+    'plan.pro': 'Klima Pro',
+    'plan.reason.recoupement': 'Comparer plusieurs instituts demande l’abonnement.',
+    'plan.reason.alertes': 'Être prévenu sans ouvrir l’application demande l’abonnement.',
+    'plan.reason.cumuls': 'Les cumuls depuis une date demandent l’abonnement.',
+    'plan.reason.registre': 'L’export des conditions de traitement demande l’abonnement.',
   },
 
   en: {
@@ -156,6 +173,22 @@ export const sharedMessages: Record<Language, Catalog> = {
     'consensus.rainDisagreement': 'they disagree on rain',
     'consensus.unavailable': 'Comparison unavailable',
     'consensus.median': 'Value used: {value}',
+    // Alerts: what Klima says without the app being opened.
+    'alert.fenetre.title': 'Spraying window',
+    'alert.fenetre.body': 'Conditions are right, {score}/100 over the window.',
+    'alert.gel.title': 'Frost tonight',
+    'alert.gel.body': 'Down to {temperature} °C expected.',
+    'alert.sol.title': 'Soil drained',
+    'alert.sol.body': 'Moisture back to {moisture}: the field bears machinery.',
+    'alert.pluie.title': 'Rain after the window',
+    'alert.pluie.body': '{rain} mm expected: a treatment could be washed off.',
+
+    'plan.libre': 'Klima',
+    'plan.pro': 'Klima Pro',
+    'plan.reason.recoupement': 'Comparing several institutes needs the subscription.',
+    'plan.reason.alertes': 'Being warned without opening the app needs the subscription.',
+    'plan.reason.cumuls': 'Totals since a chosen date need the subscription.',
+    'plan.reason.registre': 'Exporting treatment conditions needs the subscription.',
   },
 
   es: {
@@ -232,5 +265,21 @@ export const sharedMessages: Record<Language, Catalog> = {
     'consensus.rainDisagreement': 'discrepan sobre la lluvia',
     'consensus.unavailable': 'Comparación no disponible',
     'consensus.median': 'Valor retenido: {value}',
+    // Alertas: lo que Klima dice sin que se abra la aplicación.
+    'alert.fenetre.title': 'Ventana de tratamiento',
+    'alert.fenetre.body': 'Condiciones reunidas, {score}/100 en la franja.',
+    'alert.gel.title': 'Helada esta noche',
+    'alert.gel.body': 'Hasta {temperature} °C previstos.',
+    'alert.sol.title': 'Suelo oreado',
+    'alert.sol.body': 'Humedad de nuevo en {moisture}: la parcela soporta la maquinaria.',
+    'alert.pluie.title': 'Lluvia tras la ventana',
+    'alert.pluie.body': '{rain} mm previstos: un tratamiento podría lavarse.',
+
+    'plan.libre': 'Klima',
+    'plan.pro': 'Klima Pro',
+    'plan.reason.recoupement': 'Comparar varios institutos requiere la suscripción.',
+    'plan.reason.alertes': 'Recibir avisos sin abrir la aplicación requiere la suscripción.',
+    'plan.reason.cumuls': 'Los acumulados desde una fecha requieren la suscripción.',
+    'plan.reason.registre': 'Exportar las condiciones de tratamiento requiere la suscripción.',
   },
 }

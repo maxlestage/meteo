@@ -82,6 +82,34 @@ final class LocalizationTests: XCTestCase {
         }
     }
 
+    /// Les alertes et les motifs de blocage passent par le même catalogue :
+    /// une clé absente ferait apparaître son identifiant à l'écran.
+    func testAlertAndPlanKeysHaveLabels() throws {
+        let strings = try catalog("Localizable")
+        let keys = AlertKind.allCases.flatMap { ["alert.\($0.rawValue).title", "alert.\($0.rawValue).body"] }
+            + Feature.allCases.map(\.upgradeReasonKey)
+            + Plan.allCases.map { "plan.\($0.rawValue)" }
+        for key in keys {
+            XCTAssertNotNil(strings[key], "« \(key) » absent du catalogue")
+        }
+    }
+
+    /// Un corps d'alerte porte un paramètre : il doit être positionnel, sinon
+    /// il s'affiche tel quel au lieu d'être remplacé.
+    func testAlertBodiesUsePositionalPlaceholders() throws {
+        let strings = try catalog("Localizable")
+        for kind in AlertKind.allCases {
+            let translations = try values(try XCTUnwrap(strings["alert.\(kind.rawValue).body"]))
+            for (language, value) in translations {
+                XCTAssertTrue(
+                    value.contains("%1$@"),
+                    "alert.\(kind.rawValue).body en \(language) n'a pas de trou positionnel"
+                )
+                XCTAssertFalse(value.contains("{"), "trou à la mode TypeScript en \(language)")
+            }
+        }
+    }
+
     private func placeholderCount(_ value: String) -> Int {
         var count = 0
         var index = value.startIndex
