@@ -13,89 +13,92 @@ interface SkyProps {
   raining?: boolean
 }
 
-/** Scène de tête : un ciel au-dessus d'une parcelle, du blé, un horizon. */
+/**
+ * Scène de tête : un bandeau large, dessiné au format où il s'affiche. Le
+ * gabarit est volontairement plat (420 × 96) — un carré rogné dans une bande
+ * perdrait le soleil et l'horizon.
+ */
 export function SkyScene({ isDay = true, raining = false }: SkyProps) {
   return (
     <svg
       className="scene"
-      viewBox="0 0 420 260"
+      viewBox="0 0 420 96"
       role="img"
       aria-label="Parcelle sous un ciel changeant"
       preserveAspectRatio="xMidYMid slice"
     >
       <defs>
         <linearGradient id="skyGradient" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor={isDay ? '#7fb2e5' : '#3c556e'} />
-          <stop offset="100%" stopColor={isDay ? '#cfe3f3' : '#1d2836'} />
+          <stop offset="0%" stopColor="#3c556e" />
+          <stop offset="100%" stopColor="#1d2836" />
         </linearGradient>
+        <radialGradient id="sunGlow">
+          <stop offset="0%" stopColor="#f7c948" stopOpacity="0.45" />
+          <stop offset="100%" stopColor="#f7c948" stopOpacity="0" />
+        </radialGradient>
         <linearGradient id="fieldGradient" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="#9bbf6a" />
-          <stop offset="100%" stopColor="#5d7c3a" />
-        </linearGradient>
-        <linearGradient id="soilGradient" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="#8a6a45" />
-          <stop offset="100%" stopColor="#5c4529" />
+          <stop offset="0%" stopColor="#6f9448" />
+          <stop offset="100%" stopColor="#33491e" />
         </linearGradient>
       </defs>
 
-      <rect width="420" height="260" fill="url(#skyGradient)" />
+      <rect width="420" height="96" fill="url(#skyGradient)" />
 
       {isDay ? (
         <g className="scene__sun">
-          <circle cx="330" cy="62" r="24" fill="#f7c948" />
-          <circle cx="330" cy="62" r="34" fill="#f7c948" opacity="0.22" />
+          <circle cx="352" cy="30" r="13" fill="#f7c948" />
+          <circle cx="352" cy="30" r="30" fill="url(#sunGlow)" />
         </g>
       ) : (
         <g className="scene__moon">
-          <path d="M344 76a26 26 0 1 1-22-33 20 20 0 0 0 22 33Z" fill="#e8edf2" />
+          <path d="M360 38a14 14 0 1 1-12-18 11 11 0 0 0 12 18Z" fill="#e8edf2" />
         </g>
       )}
 
       {/* Trois nuages à des vitesses différentes : le ciel n'est jamais figé. */}
-      <g className="scene__cloud scene__cloud--slow" fill="#ffffff" opacity="0.9">
-        <ellipse cx="90" cy="66" rx="38" ry="18" />
-        <ellipse cx="118" cy="60" rx="26" ry="20" />
-        <ellipse cx="62" cy="60" rx="22" ry="15" />
+      <g className="scene__cloud scene__cloud--slow" fill="#c6d6e4" opacity="0.3">
+        <ellipse cx="88" cy="30" rx="34" ry="10" />
+        <ellipse cx="112" cy="25" rx="22" ry="11" />
+        <ellipse cx="64" cy="26" rx="18" ry="9" />
       </g>
-      <g className="scene__cloud scene__cloud--fast" fill="#ffffff" opacity="0.75">
-        <ellipse cx="240" cy="42" rx="30" ry="14" />
-        <ellipse cx="262" cy="38" rx="20" ry="15" />
+      <g className="scene__cloud scene__cloud--fast" fill="#c6d6e4" opacity="0.22">
+        <ellipse cx="238" cy="19" rx="27" ry="8" />
+        <ellipse cx="258" cy="16" rx="17" ry="8" />
       </g>
-      <g className="scene__cloud scene__cloud--slower" fill="#ffffff" opacity="0.55">
-        <ellipse cx="170" cy="96" rx="34" ry="13" />
-        <ellipse cx="196" cy="92" rx="22" ry="14" />
+      <g className="scene__cloud scene__cloud--slower" fill="#c6d6e4" opacity="0.16">
+        <ellipse cx="168" cy="44" rx="30" ry="8" />
+        <ellipse cx="192" cy="41" rx="19" ry="8" />
       </g>
 
       {raining && (
-        <g className="scene__rain" stroke="#7fd0f5" strokeWidth="2" strokeLinecap="round">
+        <g className="scene__rain" stroke="#7fd0f5" strokeWidth="1.6" strokeLinecap="round">
           {Array.from({ length: 14 }, (_, i) => (
             <line
               key={i}
               x1={30 + i * 27}
-              y1={110}
-              x2={26 + i * 27}
-              y2={124}
+              y1={40}
+              x2={27 + i * 27}
+              y2={50}
               style={{ animationDelay: `${(i % 7) * 0.18}s` }}
             />
           ))}
         </g>
       )}
 
-      {/* Parcelle : sillons en perspective, puis la coupe de sol. */}
-      <path d="M0 168 Q210 146 420 168 L420 214 L0 214 Z" fill="url(#fieldGradient)" />
-      <g stroke="#4d6b2e" strokeWidth="1.4" opacity="0.6">
+      {/* Parcelle : un horizon bombé, puis des sillons en perspective. */}
+      <path d="M0 72 Q210 58 420 72 L420 96 L0 96 Z" fill="url(#fieldGradient)" />
+      <g stroke="#2f4a1c" strokeWidth="1" opacity="0.55">
         {Array.from({ length: 9 }, (_, i) => (
-          <path key={i} d={`M${-40 + i * 60} 214 Q${140 + i * 24} 180 ${180 + i * 30} 166`} fill="none" />
+          <path key={i} d={`M${-40 + i * 60} 96 Q${140 + i * 24} 82 ${180 + i * 30} 70`} fill="none" />
         ))}
       </g>
-      <rect y="212" width="420" height="48" fill="url(#soilGradient)" />
 
       {/* Épis de blé : le vent les fait ployer, doucement. */}
-      <g className="scene__wheat" stroke="#e0c169" strokeWidth="2.4" strokeLinecap="round">
+      <g className="scene__wheat" stroke="#c9a95a" strokeWidth="1.8" strokeLinecap="round">
         {Array.from({ length: 11 }, (_, i) => (
           <g key={i} style={{ animationDelay: `${(i % 5) * 0.35}s` }}>
-            <line x1={22 + i * 38} y1={214} x2={22 + i * 38} y2={182} />
-            <ellipse cx={22 + i * 38} cy={176} rx="4.5" ry="9" fill="#e8cf85" stroke="none" />
+            <line x1={22 + i * 38} y1={96} x2={22 + i * 38} y2={80} />
+            <ellipse cx={22 + i * 38} cy={77} rx="2.4" ry="7" fill="#d6bb72" stroke="none" />
           </g>
         ))}
       </g>
