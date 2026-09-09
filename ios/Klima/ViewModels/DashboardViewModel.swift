@@ -1,4 +1,7 @@
 import Foundation
+#if canImport(WidgetKit)
+import WidgetKit
+#endif
 
 /// État du tableau de bord : parcelle courante, prévision et indicateurs.
 @MainActor
@@ -15,21 +18,16 @@ final class DashboardViewModel: ObservableObject {
 
     private let service: AgroWeatherProviding
     private let location: LocationService
-    private let store: UserDefaults
     private var loadTask: Task<Void, Never>?
     private var searchTask: Task<Void, Never>?
 
-    private static let storageKey = "klima.parcelle"
-
     init(
         service: AgroWeatherProviding = AgroWeatherService(),
-        location: LocationService = LocationService(),
-        store: UserDefaults = .standard
+        location: LocationService = LocationService()
     ) {
         self.service = service
         self.location = location
-        self.store = store
-        self.parcelle = Self.storedParcelle(in: store) ?? .chartres
+        self.parcelle = SharedStore.loadParcelle() ?? .chartres
     }
 
     /// Fuseau de la parcelle, pour dater correctement les créneaux affichés.
@@ -119,13 +117,12 @@ final class DashboardViewModel: ObservableObject {
 
     // MARK: Persistance
 
+    /// La parcelle est écrite dans le groupe partagé : le widget d'écran
+    /// d'accueil la lit de son côté, et on lui demande de se redessiner.
     private func persist(_ parcelle: Parcelle) {
-        guard let data = try? JSONEncoder().encode(parcelle) else { return }
-        store.set(data, forKey: Self.storageKey)
-    }
-
-    private static func storedParcelle(in store: UserDefaults) -> Parcelle? {
-        guard let data = store.data(forKey: storageKey) else { return nil }
-        return try? JSONDecoder().decode(Parcelle.self, from: data)
+        SharedStore.save(parcelle)
+        #if canImport(WidgetKit)
+        WidgetCenter.shared.reloadAllTimelines()
+        #endif
     }
 }

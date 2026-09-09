@@ -101,9 +101,15 @@ Klima/           Application iPhone
   ViewModels/    État du tableau de bord
   Views/         Tableau de bord, bandeau horaire, liste des jours, tuiles
   Resources/     Info.plist, assets, catalogues de chaînes
-KlimaWidgets/    Extension : activité en direct de la fenêtre de traitement
+KlimaWidgets/    Extension iOS : activité en direct et widget d'écran d'accueil
 KlimaWatch/      Application watchOS autonome
+KlimaWatchWidgets/ Extension watchOS : complications de cadran
 ```
+
+Les cinq cibles partagent le noyau `Klima/Models`. L'application, ses widgets et
+la complication lisent la même parcelle via un **groupe d'applications**
+(`group.com.klima.app`) : il doit être déclaré dans le compte développeur avant
+la première compilation signée.
 
 ### Activité en direct
 
@@ -113,9 +119,23 @@ bouton sur la carte de traitement ouvre son suivi ; l'écran verrouillé et l'î
 dynamique affichent alors le verdict courant, le vent et le motif de blocage
 s'il y en a un.
 
-Les mises à jour sont **locales** : elles suivent les rechargements de
-l'application. Un suivi à la minute, application fermée, demanderait des
-notifications poussées et donc un serveur, que Klima n'a pas.
+Le suivi continue application fermée grâce à une tâche d'arrière-plan
+(`BGAppRefreshTask`) : le système réveille Klima de temps à autre, qui recharge
+la prévision, met à jour l'activité et les widgets, puis redemande un réveil. Le
+rythme est décidé par iOS selon l'usage et la batterie — il n'est pas garanti.
+Un suivi à la minute demanderait des notifications poussées, donc un serveur,
+que Klima n'a pas.
+
+### Widget d'écran d'accueil
+
+Deux tailles, petite et moyenne : la prochaine fenêtre de traitement et son
+score, complétés sur la taille moyenne du vent, de l'état du sol et du bilan.
+Le widget va chercher sa propre prévision, une fois par heure.
+
+### Complication de cadran
+
+`KlimaWatchWidgets` fournit les quatre formes de watchOS — circulaire,
+rectangulaire, en ligne et d'angle — avec l'heure de la prochaine fenêtre.
 
 ### Application montre
 
