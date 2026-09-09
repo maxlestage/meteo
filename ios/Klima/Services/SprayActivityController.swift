@@ -51,7 +51,10 @@ final class SprayActivityController: ObservableObject {
         do {
             activity = try Activity.request(
                 attributes: attributes,
-                content: ActivityContent(state: state(from: hours, at: opportunity.start), staleDate: opportunity.end),
+                content: ActivityContent(
+                    state: Self.state(from: hours, at: opportunity.start),
+                    staleDate: opportunity.end
+                ),
                 pushType: nil
             )
             isRunning = true
@@ -74,7 +77,7 @@ final class SprayActivityController: ObservableObject {
 
         await activity.update(
             ActivityContent(
-                state: state(from: hours, at: max(opportunity.start, Date())),
+                state: Self.state(from: hours, at: max(opportunity.start, Date())),
                 staleDate: opportunity.end
             )
         )
@@ -92,7 +95,10 @@ final class SprayActivityController: ObservableObject {
     }
 
     /// Conditions de l'heure la plus proche de `date`.
-    private func state(from hours: [HourlySample], at date: Date) -> SprayActivityAttributes.ContentState {
+    ///
+    /// Statique : la tâche d'arrière-plan la réutilise sans passer par une
+    /// instance, l'application pouvant être fermée.
+    static func state(from hours: [HourlySample], at date: Date) -> SprayActivityAttributes.ContentState {
         let windows = AgroIndicators.sprayWindows(hours)
         let index = hours.firstIndex { $0.time >= date } ?? hours.indices.first ?? 0
         let hour = hours.indices.contains(index) ? hours[index] : nil

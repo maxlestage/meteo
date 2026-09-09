@@ -47,6 +47,8 @@ final class WatchViewModel: ObservableObject {
                 latitude: coordinate.latitude,
                 longitude: coordinate.longitude
             )
+            // La complication de cadran lira la même parcelle.
+            SharedStore.save(parcelle)
         }
 
         do {
