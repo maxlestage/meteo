@@ -120,56 +120,12 @@ struct AgroWeatherService: AgroWeatherProviding {
         return trimmed.isEmpty ? hours : trimmed
     }
 
-    /// Interroge plusieurs modèles pour l'heure en cours et les recoupe.
+    /// Interroge tous les fournisseurs et recoupe leurs réponses.
     ///
-    /// Requête séparée de la prévision principale, à dessein : si la
-    /// comparaison échoue, l'application continue avec sa source habituelle.
+    /// Séparé de la prévision principale, à dessein : si la comparaison échoue,
+    /// l'application continue avec sa source habituelle.
     func modelConsensus(for parcelle: Parcelle) async throws -> Consensus? {
-        var components = URLComponents(url: Self.forecastURL, resolvingAgainstBaseURL: false)!
-        components.queryItems = [
-            URLQueryItem(name: "latitude", value: String(format: "%.4f", parcelle.latitude)),
-            URLQueryItem(name: "longitude", value: String(format: "%.4f", parcelle.longitude)),
-            URLQueryItem(name: "hourly", value: "temperature_2m,precipitation,wind_speed_10m"),
-            URLQueryItem(name: "models", value: WeatherModel.all.map(\.id).joined(separator: ",")),
-            URLQueryItem(name: "wind_speed_unit", value: "kmh"),
-            URLQueryItem(name: "timezone", value: "auto"),
-            URLQueryItem(name: "forecast_days", value: "1"),
-        ]
-
-        let payload: ModelPayload = try await get(components.url!)
-        return ModelConsensus.consensus(Self.readings(from: payload))
-    }
-
-    /// Avec plusieurs modèles, Open-Meteo suffixe chaque variable de
-    /// l'identifiant du modèle. Un modèle qui ne couvre pas la parcelle renvoie
-    /// des `null` : on l'écarte plutôt que de compter un zéro.
-    static func readings(from payload: ModelPayload) -> [ModelReading] {
-        guard let index = currentHourIndex(payload) else { return [] }
-
-        return WeatherModel.all.compactMap { model in
-            guard let temperature = payload.value("temperature_2m_\(model.id)", at: index) else {
-                return nil
-            }
-            return ModelReading(
-                model: model,
-                temperature: temperature,
-                precipitation: payload.value("precipitation_\(model.id)", at: index) ?? 0,
-                windSpeed: payload.value("wind_speed_10m_\(model.id)", at: index) ?? 0
-            )
-        }
-    }
-
-    /// Première heure de la série postérieure ou égale à l'heure en cours.
-    private static func currentHourIndex(_ payload: ModelPayload) -> Int? {
-        let zone = TimeZone(identifier: payload.timezone ?? "") ?? .current
-        let formatter = DateFormatter.openMeteo(format: "yyyy-MM-dd'T'HH:mm", zone: zone)
-        let start = (Date().timeIntervalSince1970 / 3600).rounded(.down) * 3600
-
-        for (index, stamp) in payload.hourly.time.enumerated() {
-            guard let date = formatter.date(from: stamp) else { continue }
-            if date.timeIntervalSince1970 >= start { return index }
-        }
-        return payload.hourly.time.isEmpty ? nil : payload.hourly.time.count - 1
+        await WeatherProviders.consensus(for: parcelle, session: session)
     }
 
     /// Recherche une commune par son nom (géocodage Open-Meteo).

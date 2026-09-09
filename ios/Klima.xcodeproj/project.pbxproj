@@ -12,6 +12,7 @@
 		02825B7A6ECC106FAB1344F6 /* AgroSamples.swift in Sources */ = {isa = PBXBuildFile; fileRef = BADD8CBDBA1033C4EEE1B03A /* AgroSamples.swift */; };
 		051F7EB8CC6EDF3A012314C2 /* SharedStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 137E85AAC01B5E70BF2F6AA4 /* SharedStore.swift */; };
 		0583BDDBF2E24D1ED7F42C11 /* KlimaWatchWidgets.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = E625F95511124789FA8FE9F1 /* KlimaWatchWidgets.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		07E8F10D39DF0B8069E40C58 /* WeatherProviders.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4B4E453BB28B171F48F15B5A /* WeatherProviders.swift */; };
 		143FCCD6E9979C47ACF20FE5 /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = 145293E813FDBB75D86FE163 /* Localizable.xcstrings */; };
 		14BB12A5AD82F316E7029E8B /* SprayLiveActivity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 15BC9252AF56BCD7059F6BCB /* SprayLiveActivity.swift */; };
 		15AF281A183998648F59ACC1 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 4A4D14A0CD244143EBA8AF12 /* Assets.xcassets */; };
@@ -30,6 +31,7 @@
 		4AF47C60363EA95AA1C076D6 /* DailyListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AFBCEFDAC985BD3E67D51C19 /* DailyListView.swift */; };
 		540AF7FBD2BFEA6E2534CE4C /* AgroWeatherService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 313306647B131115CEF93B82 /* AgroWeatherService.swift */; };
 		55A699C86F1E60E85A11B4CB /* KlimaWatchWidgetsBundle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1195252F945857F79646847C /* KlimaWatchWidgetsBundle.swift */; };
+		5B32ED343974BA6D6CE93A7D /* WeatherProviders.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4B4E453BB28B171F48F15B5A /* WeatherProviders.swift */; };
 		5C8BDBFAA854F55D223C211D /* Consensus.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A33555E50392E5108FAD7B5 /* Consensus.swift */; };
 		602B84BB6FE18033AC801366 /* AgroIndicators.swift in Sources */ = {isa = PBXBuildFile; fileRef = FB2A5A352230B9DCF2DDFBA0 /* AgroIndicators.swift */; };
 		60D307E6F1DCF3AEB7907F8B /* Consensus.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A33555E50392E5108FAD7B5 /* Consensus.swift */; };
@@ -49,6 +51,7 @@
 		8DE99597F966A25339F8E8F1 /* SprayActivityAttributes.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0A29C24E198783864797CB1B /* SprayActivityAttributes.swift */; };
 		8F35F202B48FCD67F42B95AD /* KlimaWatchApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = B58B70914027C618ACA1FFBB /* KlimaWatchApp.swift */; };
 		8F4ABDF3C9EB0A340DD1C7CE /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = 145293E813FDBB75D86FE163 /* Localizable.xcstrings */; };
+		8F54EB7D90E313F0274FF409 /* ProvidersTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1F71DE8BA2A7D7D0DAB79232 /* ProvidersTests.swift */; };
 		9017DF37B7FA1969D2E13067 /* LocationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6CFC7F81452FD39F09155334 /* LocationService.swift */; };
 		995C71656399C5579B160490 /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = 145293E813FDBB75D86FE163 /* Localizable.xcstrings */; };
 		9B8B003E783D7F81D5293276 /* SkyBackground.swift in Sources */ = {isa = PBXBuildFile; fileRef = 015B329F345662ADF74A1CEE /* SkyBackground.swift */; };
@@ -56,6 +59,7 @@
 		9CF8D660BD80C16511F6A579 /* InfoPlist.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = FB54FEDD3D1EAAF680B978BE /* InfoPlist.xcstrings */; };
 		9F7054AF8757A76DC31F9EB7 /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = 145293E813FDBB75D86FE163 /* Localizable.xcstrings */; };
 		A37617292043C8B80413498F /* AgroIndicators.swift in Sources */ = {isa = PBXBuildFile; fileRef = FB2A5A352230B9DCF2DDFBA0 /* AgroIndicators.swift */; };
+		A4864E2A44AEE592351EAFFB /* WeatherProviders.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4B4E453BB28B171F48F15B5A /* WeatherProviders.swift */; };
 		A87216485F5DED3CA1B73C8E /* DashboardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A5EE2202CE231585EDF18D8 /* DashboardView.swift */; };
 		AC581D5A5362236AF43D0B0F /* AgroWeatherService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 313306647B131115CEF93B82 /* AgroWeatherService.swift */; };
 		B076B23897D749FEB0FEF5A6 /* WatchViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1B11F5006DDB391C0A11AF78 /* WatchViewModel.swift */; };
@@ -77,6 +81,7 @@
 		EFBD3D376BA2C6155E2B341A /* WeatherCondition.swift in Sources */ = {isa = PBXBuildFile; fileRef = 67F9522F3783E6AF870AA68B /* WeatherCondition.swift */; };
 		F01420F28E0C8B2A03D1664C /* LocationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6CFC7F81452FD39F09155334 /* LocationService.swift */; };
 		F1F2D94D9A0C8C9FB233B5AB /* KlimaApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = E0887B2371E02FA01AC7E59F /* KlimaApp.swift */; };
+		F2BDAC7B279F7814A101A7A6 /* WeatherProviders.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4B4E453BB28B171F48F15B5A /* WeatherProviders.swift */; };
 		F2FDCDF317A69586C636F4B2 /* SharedStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 137E85AAC01B5E70BF2F6AA4 /* SharedStore.swift */; };
 		F330DFC549772806B0FACD7F /* SharedStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 137E85AAC01B5E70BF2F6AA4 /* SharedStore.swift */; };
 		F890209C28FC9E50176B729E /* SprayCardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 39A57C0B024DDA843422AE63 /* SprayCardView.swift */; };
@@ -127,6 +132,7 @@
 		1B11F5006DDB391C0A11AF78 /* WatchViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WatchViewModel.swift; sourceTree = "<group>"; };
 		1C83B9ADD68C4E0D26EF7A95 /* DetailTile.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DetailTile.swift; sourceTree = "<group>"; };
 		1DFF68943B612155D0C66E20 /* SprayComplication.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SprayComplication.swift; sourceTree = "<group>"; };
+		1F71DE8BA2A7D7D0DAB79232 /* ProvidersTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProvidersTests.swift; sourceTree = "<group>"; };
 		1FA8F35C94920D1DD1918F71 /* HeroView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HeroView.swift; sourceTree = "<group>"; };
 		236ED1ED8EB5D8850F417C4F /* SprayWidget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SprayWidget.swift; sourceTree = "<group>"; };
 		2A33555E50392E5108FAD7B5 /* Consensus.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Consensus.swift; sourceTree = "<group>"; };
@@ -140,6 +146,7 @@
 		4656AD6BC13AB291BF8A8C3B /* KlimaWatchWidgets.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = KlimaWatchWidgets.entitlements; sourceTree = "<group>"; };
 		4A4D14A0CD244143EBA8AF12 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		4A8E2E5B1F85F531C5533701 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		4B4E453BB28B171F48F15B5A /* WeatherProviders.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeatherProviders.swift; sourceTree = "<group>"; };
 		56620052CEB0689BCB60B96C /* AgroIndicatorsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AgroIndicatorsTests.swift; sourceTree = "<group>"; };
 		639A3D7AD16336CB1748C8B6 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		67F9522F3783E6AF870AA68B /* WeatherCondition.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeatherCondition.swift; sourceTree = "<group>"; };
@@ -309,6 +316,7 @@
 			isa = PBXGroup;
 			children = (
 				313306647B131115CEF93B82 /* AgroWeatherService.swift */,
+				4B4E453BB28B171F48F15B5A /* WeatherProviders.swift */,
 				6CFC7F81452FD39F09155334 /* LocationService.swift */,
 				C603A2E1789195F82D339AF0 /* SprayActivityController.swift */,
 				4535539581D3C900896A2FAA /* BackgroundRefresh.swift */,
@@ -403,6 +411,7 @@
 				BAEFA7420ACB65854C0C7E46 /* LocalizationTests.swift */,
 				B39E213A58E402574A554A0B /* SprayActivityTests.swift */,
 				2CB663D03DA1AABCC24D8F8F /* ConsensusTests.swift */,
+				1F71DE8BA2A7D7D0DAB79232 /* ProvidersTests.swift */,
 			);
 			path = KlimaTests;
 			sourceTree = "<group>";
@@ -615,6 +624,7 @@
 				5C8BDBFAA854F55D223C211D /* Consensus.swift in Sources */,
 				C0D1A4125A9D5BF789185AE0 /* SprayActivityAttributes.swift in Sources */,
 				D8F56BCE6872ACC91CE259F7 /* AgroWeatherService.swift in Sources */,
+				07E8F10D39DF0B8069E40C58 /* WeatherProviders.swift in Sources */,
 				9017DF37B7FA1969D2E13067 /* LocationService.swift in Sources */,
 				6FF1556A4C81C2FAA5AEF339 /* SprayActivityController.swift in Sources */,
 				021BD6F90746AF8E4EB4D3A3 /* BackgroundRefresh.swift in Sources */,
@@ -642,6 +652,7 @@
 				8B571AD89DE4E95F0E0BAFB6 /* Consensus.swift in Sources */,
 				8DE99597F966A25339F8E8F1 /* SprayActivityAttributes.swift in Sources */,
 				540AF7FBD2BFEA6E2534CE4C /* AgroWeatherService.swift in Sources */,
+				5B32ED343974BA6D6CE93A7D /* WeatherProviders.swift in Sources */,
 				66C30391B1049D265340CEC8 /* KlimaWidgetsBundle.swift in Sources */,
 				14BB12A5AD82F316E7029E8B /* SprayLiveActivity.swift in Sources */,
 				6C75CD524F5F28CB73D85400 /* SprayWidget.swift in Sources */,
@@ -660,6 +671,7 @@
 				F330DFC549772806B0FACD7F /* SharedStore.swift in Sources */,
 				60D307E6F1DCF3AEB7907F8B /* Consensus.swift in Sources */,
 				D30A45021398D510D69ABC46 /* AgroWeatherService.swift in Sources */,
+				A4864E2A44AEE592351EAFFB /* WeatherProviders.swift in Sources */,
 				F01420F28E0C8B2A03D1664C /* LocationService.swift in Sources */,
 				8F35F202B48FCD67F42B95AD /* KlimaWatchApp.swift in Sources */,
 				7EFB2329E3176A037CEFF34F /* WatchDashboardView.swift in Sources */,
@@ -679,6 +691,7 @@
 				C6F776A77324F25233503869 /* SharedStore.swift in Sources */,
 				DE6039826694C8529BC47D54 /* Consensus.swift in Sources */,
 				AC581D5A5362236AF43D0B0F /* AgroWeatherService.swift in Sources */,
+				F2BDAC7B279F7814A101A7A6 /* WeatherProviders.swift in Sources */,
 				55A699C86F1E60E85A11B4CB /* KlimaWatchWidgetsBundle.swift in Sources */,
 				1D3DEE27C6D269B65B359FF9 /* SprayComplication.swift in Sources */,
 			);
@@ -695,6 +708,7 @@
 				1FB389AE880EE714B22698A2 /* LocalizationTests.swift in Sources */,
 				E8ADD8ED06D1079D0959A121 /* SprayActivityTests.swift in Sources */,
 				E5BB2D0B8EA0FE8395CB23A7 /* ConsensusTests.swift in Sources */,
+				8F54EB7D90E313F0274FF409 /* ProvidersTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

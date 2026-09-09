@@ -45,22 +45,38 @@ Les suites de tests vérifient que les trois langues portent exactement les mêm
 clés et les mêmes valeurs à interpoler : une traduction oubliée fait échouer la
 compilation, elle n'apparaît pas en clair dans l'application.
 
-## Plusieurs modèles, recoupés
+## Plusieurs fournisseurs, recoupés
 
-Un seul modèle donne un chiffre ; plusieurs donnent un chiffre **et** une idée
-de sa fiabilité. Klima interroge quatre centres de calcul indépendants —
-Météo-France (AROME/ARPEGE), ECMWF (IFS), Deutscher Wetterdienst (ICON) et NOAA
-(GFS), redistribués par Open-Meteo — et les recoupe pour l'heure en cours.
+Un seul service donne un chiffre ; plusieurs donnent un chiffre **et** une idée
+de sa fiabilité.
 
-La valeur retenue est la **médiane**, moins sensible qu'une moyenne à un modèle
-isolé. L'accord est jugé fort quand les modèles tiennent dans 1,5 °C et
-s'entendent sur la pluie, faible au-delà de 3 °C d'écart. Quand ils divergent,
-l'application le dit plutôt que d'afficher une fausse précision ; un modèle qui
-ne couvre pas la parcelle est écarté au lieu de compter pour zéro.
+| Fournisseur | Sources | Nature | Plateformes |
+| --- | --- | --- | --- |
+| Open-Meteo | Météo-France (AROME/ARPEGE), ECMWF (IFS), DWD (ICON), NOAA (GFS) | Sorties de modèles | Web et natif |
+| MET Norway | Locationforecast 2.0 | Sortie de modèle | **Natif seulement** |
+| Bright Sky | Observation DWD | Mesure de station | Web et natif |
 
-Le recoupement fait l'objet d'une requête séparée : s'il échoue, la prévision
-principale reste servie. Les seuils vivent dans `ConsensusThresholds`, des deux
-côtés, avec les mêmes cas de test.
+MET Norway impose un en-tête `User-Agent` identifiant l'application ; un
+navigateur interdit de le fixer. On l'appelle donc depuis iOS et watchOS, où
+`URLSession` le permet, plutôt que d'envoyer des requêtes anonymes contre leur
+volonté. Bright Sky apporte un point de comparaison d'une autre nature : une
+observation de station, qui dit ce qu'il fait et non ce qui est prévu ; sa
+couverture suit le réseau du DWD.
+
+**Chaque fournisseur est isolé** : une panne, un refus ou une absence de
+couverture n'en écarte qu'un, et l'interface annonce combien ont répondu.
+
+La valeur retenue est la **médiane**, moins sensible qu'une moyenne à une source
+isolée. L'accord est jugé fort quand les sources tiennent dans 1,5 °C et
+s'entendent sur la pluie, faible au-delà de 3 °C d'écart. Quand elles divergent,
+l'application le dit plutôt que d'afficher une fausse précision.
+
+Le recoupement fait l'objet d'appels séparés de la prévision principale : s'il
+échoue entièrement, la prévision reste servie. Les seuils vivent dans
+`ConsensusThresholds`, des deux côtés, avec les mêmes cas de test.
+
+Les licences imposent des mentions : elles sont affichées sous la comparaison,
+une par licence effectivement utilisée.
 
 ## Ce que l'application calcule
 
