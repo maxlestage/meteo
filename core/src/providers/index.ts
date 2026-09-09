@@ -1,6 +1,7 @@
 import { brightSkyProvider } from './brightSky'
 import { metNorwayProvider } from './metNorway'
 import { openMeteoProvider } from './openMeteo'
+import { endpoints } from '../endpoints'
 import type { Platform, Provider, ProviderQuery, SourceReading, WeatherSource } from './types'
 
 export * from './types'
@@ -20,9 +21,20 @@ export const PROVIDERS: readonly Provider[] = [
   brightSkyProvider,
 ]
 
-/** Fournisseurs appelables depuis la plateforme donnée. */
+/**
+ * Fournisseurs interrogeables depuis la plateforme donnée.
+ *
+ * En appel direct, c'est la plateforme qui décide : un navigateur ne peut pas
+ * se nommer auprès de MET Norway, donc il ne l'appelle pas. Par le relais,
+ * c'est le serveur qui appelle et qui se nomme — la plateforme du client
+ * n'entre plus en ligne de compte, et le web gagne les mêmes sources que le
+ * natif.
+ */
 export function providersFor(platform: Platform): Provider[] {
-  return PROVIDERS.filter((provider) => provider.platforms.includes(platform))
+  const viaRelay = endpoints().transport === 'relais'
+  return PROVIDERS.filter((provider) =>
+    viaRelay ? provider.viaRelay : provider.platforms.includes(platform),
+  )
 }
 
 export interface ProviderOutcome {

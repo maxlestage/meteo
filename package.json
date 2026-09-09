@@ -1,7 +1,12 @@
 {
   "name": "klima",
   "private": true,
-  "workspaces": ["core", "web", "site"],
+  "workspaces": [
+    "core",
+    "server",
+    "web",
+    "site"
+  ],
   "scripts": {
     "test": "bun test",
     "typecheck": "bun run --filter '*' typecheck",

@@ -7,12 +7,10 @@
  * L'API est libre d'accès et ne demande aucune clé.
  */
 import type { CurrentSample, DailySample, HourlySample } from './agro'
+import { endpoints } from './endpoints'
 import type { Params } from './i18n'
 import { consensusFromOutcomes, type Consensus } from './consensus'
 import { fetchAllReadings, type Platform } from './providers'
-
-const FORECAST_URL = 'https://api.open-meteo.com/v1/forecast'
-const GEOCODING_URL = 'https://geocoding-api.open-meteo.com/v1/search'
 
 const CURRENT_VARIABLES = [
   'temperature_2m',
@@ -94,7 +92,7 @@ export async function fetchAgroForecast(
   days = 7,
   signal?: AbortSignal,
 ): Promise<AgroForecast> {
-  const url = new URL(FORECAST_URL)
+  const url = new URL(endpoints().openMeteoForecast)
   url.searchParams.set('latitude', parcelle.latitude.toFixed(4))
   url.searchParams.set('longitude', parcelle.longitude.toFixed(4))
   url.searchParams.set('current', CURRENT_VARIABLES.join(','))
@@ -151,7 +149,7 @@ export async function searchParcelles(query: string, signal?: AbortSignal): Prom
   const trimmed = query.trim()
   if (trimmed.length < 2) return []
 
-  const url = new URL(GEOCODING_URL)
+  const url = new URL(endpoints().openMeteoSearch)
   url.searchParams.set('name', trimmed)
   url.searchParams.set('count', '8')
   url.searchParams.set('language', 'fr')

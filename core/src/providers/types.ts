@@ -36,8 +36,14 @@ export interface SourceReading {
 export interface Provider {
   id: string
   institution: string
-  /** Plateformes où l'appel est légitime et techniquement possible. */
+  /** Plateformes d'où l'appel **direct** est légitime et possible. */
   platforms: readonly Platform[]
+  /**
+   * Vrai quand le relais peut l'interroger pour le compte de n'importe quel
+   * client. C'est ce qui ouvre MET Norway au navigateur : l'obstacle n'était
+   * pas la plateforme mais l'en-tête d'identification, que le relais pose.
+   */
+  viaRelay: boolean
   /** Mention à afficher dès qu'une de ses sources est utilisée. */
   attribution: string
   fetch: (parcelle: ProviderQuery, signal?: AbortSignal) => Promise<SourceReading[]>
