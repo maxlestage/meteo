@@ -97,6 +97,10 @@ export const sharedMessages: Record<Language, Catalog> = {
     'plan.reason.alertes': 'Être prévenu sans ouvrir l’application demande l’abonnement.',
     'plan.reason.cumuls': 'Les cumuls depuis une date demandent l’abonnement.',
     'plan.reason.registre': 'L’export des conditions de traitement demande l’abonnement.',
+    'plan.feature.recoupement': 'Cinq instituts recoupés, et leur niveau d’accord',
+    'plan.feature.alertes': 'Prévenu sans ouvrir l’application',
+    'plan.feature.cumuls': 'Cumuls depuis le semis ou le dernier traitement',
+    'plan.feature.registre': 'Export des conditions à l’heure du traitement',
   },
 
   en: {
@@ -189,6 +193,10 @@ export const sharedMessages: Record<Language, Catalog> = {
     'plan.reason.alertes': 'Being warned without opening the app needs the subscription.',
     'plan.reason.cumuls': 'Totals since a chosen date need the subscription.',
     'plan.reason.registre': 'Exporting treatment conditions needs the subscription.',
+    'plan.feature.recoupement': 'Five institutes cross-checked, and how far they agree',
+    'plan.feature.alertes': 'Warned without opening the app',
+    'plan.feature.cumuls': 'Totals since sowing or the last treatment',
+    'plan.feature.registre': 'Export of the conditions at the hour of treatment',
   },
 
   es: {
@@ -281,5 +289,9 @@ export const sharedMessages: Record<Language, Catalog> = {
     'plan.reason.alertes': 'Recibir avisos sin abrir la aplicación requiere la suscripción.',
     'plan.reason.cumuls': 'Los acumulados desde una fecha requieren la suscripción.',
     'plan.reason.registre': 'Exportar las condiciones de tratamiento requiere la suscripción.',
+    'plan.feature.recoupement': 'Cinco institutos contrastados y su nivel de acuerdo',
+    'plan.feature.alertes': 'Avisado sin abrir la aplicación',
+    'plan.feature.cumuls': 'Acumulados desde la siembra o el último tratamiento',
+    'plan.feature.registre': 'Exportación de las condiciones a la hora del tratamiento',
   },
 }

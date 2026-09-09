@@ -5,7 +5,11 @@ import SwiftUI
 struct DashboardView: View {
     @StateObject private var viewModel = DashboardViewModel()
     @StateObject private var activity = SprayActivityController()
+    @StateObject private var subscription = Subscription()
     @State private var query = ""
+    /// Renseigné quand on ouvre l'écran d'abonnement : on sait alors sur quelle
+    /// fonction l'utilisateur a buté.
+    @State private var paywallFor: Feature?
 
     private let tiles = [GridItem(.adaptive(minimum: 150), spacing: 12)]
 
@@ -83,6 +87,19 @@ struct DashboardView: View {
                     }
                     .tint(.white)
                 }
+
+                // L'accès à l'abonnement ne se montre qu'au palier libre :
+                // rappeler à un abonné qu'il paie n'apporte rien.
+                if subscription.plan == .libre {
+                    ToolbarItem(placement: .topBarLeading) {
+                        Button {
+                            paywallFor = .recoupement
+                        } label: {
+                            Label(Localized.text("plan.pro"), systemImage: "sparkles")
+                        }
+                        .tint(.white)
+                    }
+                }
             }
             .searchable(text: $query, prompt: Localized.text("app.search"))
             .onChange(of: query) { _, newValue in
@@ -95,6 +112,14 @@ struct DashboardView: View {
             }
             .refreshable { await reload() }
             .task { await reload() }
+            .sheet(item: $paywallFor) { feature in
+                PaywallView(subscription: subscription, reason: feature)
+            }
+            .task {
+                // À chaque ouverture : StoreKit est la source de vérité, le
+                // stockage partagé n'en est que la copie pour les extensions.
+                await subscription.refresh()
+            }
         }
         .preferredColorScheme(.dark)
     }
@@ -261,6 +286,21 @@ struct DashboardView: View {
                 caption: Localized.text("tile.sowing.caption", AgroFormat.unit(soil.temperature, "°C"))
             ),
         ]
+
+        // Le recoupement est une fonction du palier payant. On ne le cache
+        // pas : on montre la tuile fermée, avec ce qu'elle contiendrait. Une
+        // fonction invisible ne se vend pas, et une fonction qui disparaît
+        // sans explication passe pour une panne.
+        guard subscription.plan.allows(.recoupement) else {
+            tiles.append(
+                TileModel(
+                    label: Localized.text("consensus.title"),
+                    value: Localized.text("tile.locked"),
+                    caption: Localized.text(Feature.recoupement.upgradeReasonKey)
+                )
+            )
+            return tiles
+        }
 
         // Le recoupement des modèles n'apparaît que s'il a abouti.
         if let consensus = viewModel.consensus {
