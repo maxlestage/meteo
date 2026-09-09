@@ -52,6 +52,42 @@ body {
   gap: 14px;
 }
 
+/* Ce que l'abonnement ajoute ------------------------------------------- */
+
+.pro {
+  padding: 16px 18px;
+  border: 1px solid rgb(255 255 255 / 12%);
+  border-radius: 16px;
+  background: rgb(255 255 255 / 6%);
+}
+
+.pro h2 {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+.pro__lead {
+  margin: 4px 0 10px;
+  color: var(--text-muted);
+  font-size: 14px;
+}
+
+.pro__features {
+  margin: 0;
+  padding-left: 18px;
+  display: grid;
+  gap: 5px;
+  font-size: 14px;
+}
+
+.pro__free {
+  margin: 12px 0 0;
+  color: var(--text-muted);
+  font-size: 13px;
+}
+
 /* Bandeau de tête -------------------------------------------------------- */
 
 /* Le signe et la langue, sur une même ligne au-dessus de la recherche. La

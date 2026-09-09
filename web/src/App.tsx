@@ -3,6 +3,7 @@ import { DetailTile } from './components/DetailTile'
 import { Hero } from './components/Hero'
 import { HourlyStrip } from './components/HourlyStrip'
 import { ParcelleSearch } from './components/ParcelleSearch'
+import { ProNote } from './components/ProNote'
 import { SprayCard } from './components/SprayCard'
 import { AgroThresholds } from '@klima/core'
 import { BrandLockup, LanguageSwitcher, useI18n } from '@klima/core/ui'
@@ -151,6 +152,8 @@ export default function App() {
                 })}
               />
             </div>
+
+            <ProNote />
 
             <footer className="footer">
               <p>{t('app.source')}.</p>
