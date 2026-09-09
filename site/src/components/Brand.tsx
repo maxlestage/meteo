@@ -1,26 +1,25 @@
 /**
  * Marque de Klima.
  *
- * Un disque de ciel, une goutte et une feuille qui n'en font qu'un : la météo
- * et l'agronomie tenues dans le même signe. Le trait est épais et les formes
- * peu nombreuses, pour rester lisible à seize pixels comme sur une icône
+ * Un K dont la hampe est droite et les bras cintrés, comme une pousse qui
+ * s'ouvre : la lettre du nom et le geste de la plante dans le même signe. Peu
+ * de formes, un trait épais — il tient à vingt-deux pixels comme sur une icône
  * d'application.
+ *
+ * La géométrie est celle des gabarits de /tmp/brand : favicon, icônes web,
+ * icône iOS et watchOS, image de partage et ce composant sortent du même
+ * dessin, dans le même repère de 1024. Toute retouche se porte des deux côtés.
  */
 
 interface Props {
   size?: number
-  /** Vrai pour la version claire, posée sur un fond sombre. */
-  inverted?: boolean
   title?: string
 }
 
-export function BrandMark({ size = 32, inverted = false, title }: Props) {
-  const leaf = inverted ? '#ffffff' : '#3f6b2b'
-  const drop = inverted ? '#bfe3f7' : '#2f7fb5'
-
+export function BrandMark({ size = 32, title }: Props) {
   return (
     <svg
-      viewBox="0 0 64 64"
+      viewBox="0 0 1024 1024"
       width={size}
       height={size}
       role={title ? 'img' : 'presentation'}
@@ -29,42 +28,42 @@ export function BrandMark({ size = 32, inverted = false, title }: Props) {
       className="brand-mark"
     >
       <defs>
-        <linearGradient id="klimaSky" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor={inverted ? '#4a6d8c' : '#8fc0e4'} />
-          <stop offset="100%" stopColor={inverted ? '#22303f' : '#3f6b2b'} />
+        <linearGradient id="klimaTile" x1="0" y1="0" x2="0.4" y2="1">
+          <stop offset="0%" stopColor="#4e7d33" />
+          <stop offset="100%" stopColor="#22401a" />
         </linearGradient>
       </defs>
 
-      {/* Le ciel et la terre dans un même disque. */}
-      <circle cx="32" cy="32" r="30" fill="url(#klimaSky)" />
+      {/* Le carreau : la parcelle sur laquelle la lettre est posée. */}
+      <rect width="1024" height="1024" rx="229" fill="url(#klimaTile)" />
 
-      {/* La goutte, qui tombe du ciel dans la feuille. */}
+      {/* Les deux bras, cintrés. Le bras haut porte la lumière, le bas la feuille. */}
       <path
-        d="M32 12c5.6 6.6 8.6 11.3 8.6 15.2a8.6 8.6 0 0 1-17.2 0C23.4 23.3 26.4 18.6 32 12Z"
-        fill={drop}
-      />
-
-      {/* La feuille, nervure comprise : le vivant que la météo commande. */}
-      <path
-        d="M18 46c0-10 8-17 26-18-1 13-8 20-18 20a12 12 0 0 1-8-2Z"
-        fill={leaf}
-      />
-      <path
-        d="M24 47c7-5 12-9 18-14"
-        fill="none"
-        stroke={inverted ? '#1d2836' : '#eef3e8'}
-        strokeWidth="2.6"
+        d="M396 512 Q558 466 680 254"
+        stroke="#f2f6ec"
+        strokeWidth="112"
         strokeLinecap="round"
+        fill="none"
       />
+      <path
+        d="M396 512 Q558 558 680 770"
+        stroke="#cfe8a2"
+        strokeWidth="112"
+        strokeLinecap="round"
+        fill="none"
+      />
+
+      {/* La hampe, dessinée en dernier : elle referme la jonction des bras. */}
+      <rect x="288" y="212" width="112" height="600" rx="56" fill="#f2f6ec" />
     </svg>
   )
 }
 
 /** Marque et nom, côte à côte. */
-export function BrandLockup({ size = 30, inverted = false }: Props) {
+export function BrandLockup({ size = 30 }: Props) {
   return (
     <span className="brand">
-      <BrandMark size={size} inverted={inverted} />
+      <BrandMark size={size} />
       <span className="brand__name">Klima</span>
     </span>
   )
