@@ -35,6 +35,9 @@ export function TodaySection({
       <div className="section-head">
         <h2>{t('today.title')}</h2>
         <p>{t('today.lead')}</p>
+        <a className="today__app" href="./app/">
+          {t('app.open')}
+        </a>
       </div>
 
       <CommuneSearch current={parcelle} onSelect={onSelect} />
