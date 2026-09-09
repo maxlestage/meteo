@@ -1,14 +1,6 @@
-import {
-  percent,
-  signedWithUnit,
-  weatherCondition,
-  withUnit,
-  type CurrentSample,
-  type DayDigest,
-  type Parcelle,
-} from '@klima/core'
+import { weatherCondition, type CurrentSample, type DayDigest, type Parcelle } from '@klima/core'
+import { useI18n, WeatherIcon } from '@klima/core/ui'
 import { CommuneSearch } from './CommuneSearch'
-import { WeatherIcon } from '@klima/core/ui'
 
 interface Props {
   parcelle: Parcelle
@@ -36,26 +28,25 @@ export function TodaySection({
   onRetry,
   timeZone,
 }: Props) {
+  const { t } = useI18n()
+
   return (
     <section className="today" id="aujourdhui">
       <div className="section-head">
-        <h2>La météo du jour</h2>
-        <p>
-          Essayez sur votre commune. Le site s'en tient à aujourd'hui ; la semaine et le détail
-          heure par heure sont dans l'application.
-        </p>
+        <h2>{t('today.title')}</h2>
+        <p>{t('today.lead')}</p>
       </div>
 
       <CommuneSearch current={parcelle} onSelect={onSelect} />
 
       <div className="today__card">
-        {loading && <p className="today__state">Chargement de la journée…</p>}
+        {loading && <p className="today__state">{t('today.loading')}</p>}
 
         {error && (
           <div className="today__state" role="alert">
             <p>{error}</p>
             <button type="button" className="button button--ghost" onClick={onRetry}>
-              Réessayer
+              {t('today.retry')}
             </button>
           </div>
         )}
@@ -79,13 +70,15 @@ function Content({
   current: CurrentSample
   timeZone: string
 }) {
+  const { t, f, locale } = useI18n()
   const condition = weatherCondition(current.weatherCode)
+
   const time = (date: Date | null) =>
     date
-      ? new Intl.DateTimeFormat('fr-FR', { hour: '2-digit', minute: '2-digit', timeZone }).format(date)
+      ? new Intl.DateTimeFormat(locale, { hour: '2-digit', minute: '2-digit', timeZone }).format(date)
       : '—'
-  const range = (start: Date, end: Date) =>
-    `${new Intl.DateTimeFormat('fr-FR', { hour: 'numeric', timeZone }).format(start)} → ${new Intl.DateTimeFormat('fr-FR', { hour: 'numeric', timeZone }).format(end)}`
+  const hour = (date: Date) =>
+    new Intl.DateTimeFormat(locale, { hour: 'numeric', timeZone }).format(date)
 
   return (
     <>
@@ -93,7 +86,7 @@ function Content({
         <div>
           <p className="today__place">{parcelle.name}</p>
           <p className="today__date">
-            {new Intl.DateTimeFormat('fr-FR', {
+            {new Intl.DateTimeFormat(locale, {
               weekday: 'long',
               day: 'numeric',
               month: 'long',
@@ -103,12 +96,12 @@ function Content({
         </div>
 
         <div className="today__now">
-          <WeatherIcon icon={condition.icon} size={54} title={condition.label} />
-          <p className="today__temperature">{Math.round(current.temperature)}°</p>
+          <WeatherIcon icon={condition.icon} size={54} title={t(condition.labelKey)} />
+          <p className="today__temperature">{f.temperature(current.temperature)}</p>
           <div>
-            <p className="today__condition">{condition.label}</p>
+            <p className="today__condition">{t(condition.labelKey)}</p>
             <p className="today__range">
-              ↑ {Math.round(digest.temperatureMax)}° &nbsp; ↓ {Math.round(digest.temperatureMin)}°
+              ↑ {f.temperature(digest.temperatureMax)} &nbsp; ↓ {f.temperature(digest.temperatureMin)}
             </p>
           </div>
         </div>
@@ -116,58 +109,64 @@ function Content({
 
       <dl className="today__facts">
         <Fact
-          label="Pluie"
-          value={withUnit(digest.precipitationSum, 'mm')}
-          detail={`${percent(digest.precipitationProbabilityMax)} de probabilité`}
+          label={t('today.rain')}
+          value={f.unit(digest.precipitationSum, 'mm')}
+          detail={t('today.rain.detail', { probability: f.percent(digest.precipitationProbabilityMax) })}
         />
         <Fact
-          label="Rafales"
-          value={withUnit(digest.windGustsMax, 'km/h', 0)}
-          detail="Maximum de la journée"
+          label={t('today.gusts')}
+          value={f.unit(digest.windGustsMax, 'km/h', 0)}
+          detail={t('today.gusts.detail')}
         />
-        <Fact label="Lever" value={time(digest.sunrise)} detail={`Coucher à ${time(digest.sunset)}`} />
         <Fact
-          label="ET0"
-          value={withUnit(digest.et0Sum, 'mm')}
-          detail="Évapotranspiration de référence"
+          label={t('today.sunrise')}
+          value={time(digest.sunrise)}
+          detail={t('today.sunrise.detail', { time: time(digest.sunset) })}
+        />
+        <Fact
+          label={t('today.et0')}
+          value={f.unit(digest.et0Sum, 'mm')}
+          detail={t('today.et0.detail')}
         />
       </dl>
 
       <div className="today__agro">
         <Advice
-          label="Fenêtre de traitement"
-          value={digest.spray ? range(digest.spray.start, digest.spray.end) : 'Aucune d’ici ce soir'}
+          label={t('today.spray')}
+          value={
+            digest.spray
+              ? `${hour(digest.spray.start)} → ${hour(digest.spray.end)}`
+              : t('today.spray.none')
+          }
           detail={
             digest.spray
-              ? `Score ${digest.spray.score}/100 sur la plage`
-              : 'Vent, pluie ou température hors des clous'
+              ? t('today.spray.score', { score: digest.spray.score })
+              : t('today.spray.blocked')
           }
           tone={digest.spray ? (digest.spray.score >= 80 ? 'good' : 'warn') : 'bad'}
         />
         <Advice
-          label="Bilan du jour"
-          value={signedWithUnit(digest.balance, 'mm')}
-          detail={
-            digest.balance < 0
-              ? 'La parcelle puise dans sa réserve'
-              : 'La pluie couvre l’évapotranspiration'
-          }
+          label={t('today.balance')}
+          value={f.signedUnit(digest.balance, 'mm')}
+          detail={t(digest.balance < 0 ? 'today.balance.deficit' : 'today.balance.ok')}
           tone={digest.balance < 0 ? 'warn' : 'good'}
         />
         <Advice
-          label="État du sol"
-          value={soilLabel(digest.soil.state)}
-          detail={`${percent(digest.soil.moisture * 100)} vol. · ${
-            digest.soil.trafficable ? 'portance correcte' : 'risque de tassement'
-          }`}
+          label={t('today.soil')}
+          value={t(`soil.${digest.soil.state}`)}
+          detail={t('today.soil.detail', {
+            moisture: f.percent(digest.soil.moisture * 100),
+            state: t(digest.soil.trafficable ? 'soil.trafficable' : 'soil.compaction').toLowerCase(),
+          })}
           tone={digest.soil.state === 'sature' ? 'bad' : digest.soil.state === 'sec' ? 'warn' : 'good'}
         />
         <Advice
-          label="Gel cette nuit"
-          value={frostLabel(digest.frost.severity)}
-          detail={`Mini ${withUnit(digest.frost.minTemperature, '°C')}${
-            digest.frost.hoarFrost ? ' · gelée blanche probable' : ''
-          }`}
+          label={t('today.frost')}
+          value={t(`frost.${digest.frost.severity}`)}
+          detail={t('today.frost.detail', {
+            temperature: f.unit(digest.frost.minTemperature, '°C'),
+            hoarFrost: digest.frost.hoarFrost ? ` · ${t('frost.hoarFrost')}` : '',
+          })}
           tone={
             digest.frost.severity === 'aucun'
               ? 'good'
@@ -211,12 +210,4 @@ function Advice({
       <p className="advice__detail">{detail}</p>
     </article>
   )
-}
-
-function soilLabel(state: 'sature' | 'ressuye' | 'sec'): string {
-  return { sature: 'Saturé', ressuye: 'Ressuyé', sec: 'Sec' }[state]
-}
-
-function frostLabel(severity: 'aucun' | 'faible' | 'modere' | 'severe'): string {
-  return { aucun: 'Aucun', faible: 'Faible', modere: 'Modéré', severe: 'Sévère' }[severity]
 }

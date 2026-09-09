@@ -4,11 +4,13 @@ import { Hero } from './components/Hero'
 import { HourlyStrip } from './components/HourlyStrip'
 import { ParcelleSearch } from './components/ParcelleSearch'
 import { SprayCard } from './components/SprayCard'
-import { AgroThresholds, percent, signedWithUnit, withUnit } from '@klima/core'
+import { AgroThresholds } from '@klima/core'
+import { LanguageSwitcher, useI18n } from '@klima/core/ui'
 import { useAgroForecast } from './hooks/useAgroForecast'
 import { useParcelle } from './hooks/useParcelle'
 
 export default function App() {
+  const { t, f, locale } = useI18n()
   const [parcelle, setParcelle] = useParcelle()
   const { forecast, summary, loading, error, reload } = useAgroForecast(parcelle)
 
@@ -17,15 +19,18 @@ export default function App() {
   return (
     <div className={`sky sky--${sky}`}>
       <div className="shell">
-        <ParcelleSearch current={parcelle} onSelect={setParcelle} />
+        <div className="topbar">
+          <ParcelleSearch current={parcelle} onSelect={setParcelle} />
+          <LanguageSwitcher className="lang" label={t('language.label')} />
+        </div>
 
-        {loading && !forecast && <p className="state">Chargement…</p>}
+        {loading && !forecast && <p className="state">{t('app.loading')}</p>}
 
         {error && (
           <div className="state state--error" role="alert">
             <p>{error}</p>
             <button type="button" className="button" onClick={reload}>
-              Réessayer
+              {t('app.retry')}
             </button>
           </div>
         )}
@@ -51,14 +56,13 @@ export default function App() {
 
             <div className="tiles">
               <DetailTile
-                label="Humidité du sol"
-                value={summary.soil.state === 'ressuye' ? 'Ressuyé' : summary.soil.state === 'sature' ? 'Saturé' : 'Sec'}
-                caption={`${percent(summary.soil.moisture * 100)} vol. · ${withUnit(
-                  summary.soil.temperature,
-                  '°C',
-                )} à 6 cm. ${
-                  summary.soil.trafficable ? 'Le sol porte les engins.' : 'Risque de tassement.'
-                }`}
+                label={t('tile.soil')}
+                value={t(`soil.${summary.soil.state}`)}
+                caption={t('tile.soil.caption', {
+                  moisture: f.percent(summary.soil.moisture * 100),
+                  temperature: f.unit(summary.soil.temperature, '°C'),
+                  state: t(summary.soil.trafficable ? 'soil.trafficable' : 'soil.compaction'),
+                })}
                 gauge={{
                   position: summary.soil.moisture / 0.5,
                   gradient:
@@ -67,68 +71,71 @@ export default function App() {
               />
 
               <DetailTile
-                label="Bilan hydrique"
-                value={signedWithUnit(summary.water.balance, 'mm')}
+                label={t('tile.water')}
+                value={f.signedUnit(summary.water.balance, 'mm')}
                 caption={
                   summary.water.irrigationAdvice > 0
-                    ? `Irrigation conseillée : ${Math.round(summary.water.irrigationAdvice)} mm sur 7 jours.`
-                    : `Pluie ${withUnit(summary.water.precipitation, 'mm')}, ET0 ${withUnit(
-                        summary.water.evapotranspiration,
-                        'mm',
-                      )} sur 7 jours.`
+                    ? t('tile.water.irrigation', {
+                        amount: f.unit(summary.water.irrigationAdvice, 'mm', 0),
+                      })
+                    : t('tile.water.caption', {
+                        rain: f.unit(summary.water.precipitation, 'mm'),
+                        et0: f.unit(summary.water.evapotranspiration, 'mm'),
+                      })
                 }
               />
 
               <DetailTile
-                label="Vent"
-                value={withUnit(forecast.current.windSpeed, 'km/h', 0)}
-                caption={`Rafales ${withUnit(forecast.current.windGusts, 'km/h', 0)}. Limite de pulvérisation : ${withUnit(
-                  AgroThresholds.sprayWindMax,
-                  'km/h',
-                  0,
-                )}.`}
+                label={t('tile.wind')}
+                value={f.unit(forecast.current.windSpeed, 'km/h', 0)}
+                caption={t('tile.wind.caption', {
+                  gusts: f.unit(forecast.current.windGusts, 'km/h', 0),
+                  limit: f.unit(AgroThresholds.sprayWindMax, 'km/h', 0),
+                })}
               />
 
               <DetailTile
-                label="Risque de gel"
-                value={frostLabel(summary.frost.severity)}
-                caption={`Mini ${withUnit(summary.frost.minTemperature, '°C')} cette nuit${
-                  summary.frost.hoarFrost ? ', gelée blanche probable' : ''
-                }.`}
+                label={t('tile.frost')}
+                value={t(`frost.${summary.frost.severity}`)}
+                caption={t('tile.frost.caption', {
+                  temperature: f.unit(summary.frost.minTemperature, '°C'),
+                  hoarFrost: summary.frost.hoarFrost ? `, ${t('frost.hoarFrost')}` : '',
+                })}
               />
 
               <DetailTile
-                label="Pression maladie"
-                value={diseaseLabel(summary.disease.level)}
-                caption={`${summary.disease.leafWetnessHours} h d’humectation du feuillage sur 24 h.`}
+                label={t('tile.disease')}
+                value={t(`disease.${summary.disease.level}`)}
+                caption={t('tile.disease.caption', { hours: summary.disease.leafWetnessHours })}
               />
 
               <DetailTile
-                label="Degrés-jours"
-                value={withUnit(summary.gdd, '°C·j')}
-                caption={`Cumul sur 7 jours, base ${AgroThresholds.gddBase} °C.`}
+                label={t('tile.gdd')}
+                value={f.unit(summary.gdd, '°C·j')}
+                caption={t('tile.gdd.caption', { base: f.unit(AgroThresholds.gddBase, '°C', 0) })}
               />
 
               <DetailTile
-                label="Lever"
-                value={time(forecast.daily[0]?.sunrise, forecast.timezone)}
-                caption={`Coucher à ${time(forecast.daily[0]?.sunset, forecast.timezone)}.`}
+                label={t('tile.sunrise')}
+                value={time(forecast.daily[0]?.sunrise, forecast.timezone, locale)}
+                caption={t('tile.sunrise.caption', {
+                  time: time(forecast.daily[0]?.sunset, forecast.timezone, locale),
+                })}
               />
 
               <DetailTile
-                label="Semis"
-                value={summary.soil.sowable ? 'Possible' : 'Déconseillé'}
-                caption={`Sol à ${withUnit(summary.soil.temperature, '°C')} à 6 cm ; il faut 8 °C et un sol ressuyé.`}
+                label={t('tile.sowing')}
+                value={t(summary.soil.sowable ? 'tile.sowing.yes' : 'tile.sowing.no')}
+                caption={t('tile.sowing.caption', {
+                  temperature: f.unit(summary.soil.temperature, '°C'),
+                })}
               />
             </div>
 
             <footer className="footer">
-              <p>
-                Données Open-Meteo — modèle agricole : humidité et température du sol, ET0 FAO-56,
-                déficit de pression de vapeur.
-              </p>
+              <p>{t('app.source')}.</p>
               <button type="button" className="button" onClick={reload}>
-                Actualiser
+                {t('app.refresh')}
               </button>
             </footer>
           </>
@@ -144,15 +151,7 @@ function skyFor(isDay: boolean, code: number): 'night' | 'grey' | 'day' {
   return code >= 45 ? 'grey' : 'day'
 }
 
-function frostLabel(severity: 'aucun' | 'faible' | 'modere' | 'severe'): string {
-  return { aucun: 'Aucun', faible: 'Faible', modere: 'Modéré', severe: 'Sévère' }[severity]
-}
-
-function diseaseLabel(level: 'faible' | 'moyenne' | 'elevee'): string {
-  return { faible: 'Faible', moyenne: 'Moyenne', elevee: 'Élevée' }[level]
-}
-
-function time(date: Date | null | undefined, timeZone: string): string {
+function time(date: Date | null | undefined, timeZone: string, locale: string): string {
   if (!date) return '—'
-  return new Intl.DateTimeFormat('fr-FR', { hour: '2-digit', minute: '2-digit', timeZone }).format(date)
+  return new Intl.DateTimeFormat(locale, { hour: '2-digit', minute: '2-digit', timeZone }).format(date)
 }

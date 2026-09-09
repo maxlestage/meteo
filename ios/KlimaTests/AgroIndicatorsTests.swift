@@ -109,20 +109,20 @@ final class AgroIndicatorsTests: XCTestCase {
     func testWindAboveLegalLimitIsDisqualifying() throws {
         let window = try XCTUnwrap(AgroIndicators.evaluateSprayHour([hour(windSpeed: 24)], at: 0))
         XCTAssertEqual(window.verdict, .defavorable)
-        XCTAssertEqual(window.blockers.first, "Vent 24 km/h (max 19)")
+        XCTAssertEqual(window.blockers.first, .windTooStrong(wind: 24, limit: 19))
     }
 
     func testRainInTheNextHourIsDisqualifying() throws {
         let hours = [hour(), hour(index: 1, precipitation: 1.4)]
         let window = try XCTUnwrap(AgroIndicators.evaluateSprayHour(hours, at: 0))
         XCTAssertEqual(window.verdict, .defavorable)
-        XCTAssertTrue(window.blockers.contains { $0.contains("Pluie") })
+        XCTAssertTrue(window.blockers.contains(.rain(1.4)))
     }
 
     func testStillAirWarnsAboutThermalInversion() throws {
         let window = try XCTUnwrap(AgroIndicators.evaluateSprayHour([hour(windSpeed: 1)], at: 0))
         XCTAssertEqual(window.verdict, .acceptable)
-        XCTAssertTrue(window.blockers.contains { $0.contains("inversion thermique") })
+        XCTAssertTrue(window.blockers.contains(.windTooWeak))
     }
 
     func testScoreNeverGoesNegative() throws {

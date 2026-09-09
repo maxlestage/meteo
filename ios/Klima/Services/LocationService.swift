@@ -8,9 +8,9 @@ enum LocationError: LocalizedError {
     var errorDescription: String? {
         switch self {
         case .denied:
-            return "Localisation refusée. Recherchez la commune à la main."
+            return Localized.text("location.denied")
         case .unavailable:
-            return "Position indisponible pour le moment."
+            return Localized.text("location.unavailable")
         }
     }
 }

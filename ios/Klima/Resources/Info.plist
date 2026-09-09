@@ -3,7 +3,7 @@
 <plist version="1.0">
 <dict>
 	<key>CFBundleDevelopmentRegion</key>
-	<string>fr_FR</string>
+	<string>fr</string>
 	<key>CFBundleDisplayName</key>
 	<string>Klima</string>
 	<key>CFBundleExecutable</key>

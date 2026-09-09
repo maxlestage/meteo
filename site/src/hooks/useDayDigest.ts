@@ -7,6 +7,7 @@ import {
   type DayDigest,
   type Parcelle,
 } from '@klima/core'
+import { useI18n } from '@klima/core/ui'
 
 interface State {
   forecast: AgroForecast | null
@@ -22,6 +23,7 @@ export function useDayDigest(parcelle: Parcelle): State & {
   digest: DayDigest | null
   reload: () => void
 } {
+  const { t } = useI18n()
   const [state, setState] = useState<State>({ forecast: null, loading: true, error: null })
   const [nonce, setNonce] = useState(0)
 
@@ -38,11 +40,15 @@ export function useDayDigest(parcelle: Parcelle): State & {
           forecast: null,
           loading: false,
           error:
-            error instanceof AgroApiError ? error.message : 'Impossible de charger la météo du jour.',
+            error instanceof AgroApiError
+              ? t(error.messageKey, error.params)
+              : t('today.error'),
         })
       })
 
     return () => controller.abort()
+    // `t` change avec la langue ; le rechargement n'a pas à en dépendre.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [parcelle, nonce])
 
   const digest = useMemo(() => (state.forecast ? dayDigest(state.forecast) : null), [state.forecast])

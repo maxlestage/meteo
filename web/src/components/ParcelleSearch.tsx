@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { searchParcelles, type Parcelle } from '@klima/core'
+import { useI18n } from '@klima/core/ui'
 
 interface Props {
   current: Parcelle
@@ -8,6 +9,7 @@ interface Props {
 
 /** Barre de recherche de commune, avec repli sur la géolocalisation du navigateur. */
 export function ParcelleSearch({ current, onSelect }: Props) {
+  const { t } = useI18n()
   const [query, setQuery] = useState('')
   const [results, setResults] = useState<Parcelle[]>([])
   const [locating, setLocating] = useState(false)
@@ -52,7 +54,7 @@ export function ParcelleSearch({ current, onSelect }: Props) {
 
   const locate = () => {
     if (!navigator.geolocation) {
-      setError('Géolocalisation indisponible sur ce navigateur.')
+      setError(t('search.unsupported'))
       return
     }
     setLocating(true)
@@ -60,14 +62,14 @@ export function ParcelleSearch({ current, onSelect }: Props) {
       (position) => {
         setLocating(false)
         choose({
-          name: 'Ma parcelle',
+          name: t('search.myField'),
           latitude: position.coords.latitude,
           longitude: position.coords.longitude,
         })
       },
       () => {
         setLocating(false)
-        setError('Position refusée. Recherchez la commune à la main.')
+        setError(t('search.denied'))
       },
       { timeout: 10_000 },
     )
@@ -81,11 +83,11 @@ export function ParcelleSearch({ current, onSelect }: Props) {
           className="search__input"
           value={query}
           onChange={(event) => setQuery(event.target.value)}
-          placeholder={`${current.name} — changer de parcelle`}
-          aria-label="Rechercher une commune"
+          placeholder={t('search.placeholder', { parcelle: current.name })}
+          aria-label={t('search.label')}
         />
         <button type="button" className="button" onClick={locate} disabled={locating}>
-          {locating ? 'Localisation…' : 'Me localiser'}
+          {locating ? t('search.locating') : t('search.locate')}
         </button>
       </div>
 
