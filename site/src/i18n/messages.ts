@@ -6,6 +6,7 @@ export const siteMessages: Record<Language, Catalog> = {
     'nav.today': 'Météo du jour',
     'nav.indicators': 'Indicateurs',
     'nav.data': 'Données',
+    'app.open': 'Ouvrir l’application',
 
     'hero.eyebrow': 'Application iOS et web',
     'hero.title': 'La météo qui parle agronomie.',
@@ -114,6 +115,7 @@ export const siteMessages: Record<Language, Catalog> = {
 
     'footer.tagline': 'La météo qui parle agronomie. Sur iPhone, sur la montre et sur le web.',
     'footer.product': 'Le produit',
+    'footer.app': 'Application web',
     'footer.dataTitle': 'Les données',
     'footer.credits': 'Crédits',
     'footer.author': 'Maxime Nathan Lestage',
@@ -130,6 +132,7 @@ export const siteMessages: Record<Language, Catalog> = {
     'nav.today': 'Today',
     'nav.indicators': 'Indicators',
     'nav.data': 'Data',
+    'app.open': 'Open the app',
 
     'hero.eyebrow': 'iOS and web app',
     'hero.title': 'Weather that speaks agronomy.',
@@ -238,6 +241,7 @@ export const siteMessages: Record<Language, Catalog> = {
 
     'footer.tagline': 'Weather that speaks agronomy. On iPhone, on the watch and on the web.',
     'footer.product': 'Product',
+    'footer.app': 'Web app',
     'footer.dataTitle': 'Data',
     'footer.credits': 'Credits',
     'footer.author': 'Maxime Nathan Lestage',
@@ -254,6 +258,7 @@ export const siteMessages: Record<Language, Catalog> = {
     'nav.today': 'El tiempo de hoy',
     'nav.indicators': 'Indicadores',
     'nav.data': 'Datos',
+    'app.open': 'Abrir la aplicación',
 
     'hero.eyebrow': 'Aplicación iOS y web',
     'hero.title': 'La meteorología que habla de agronomía.',
@@ -362,6 +367,7 @@ export const siteMessages: Record<Language, Catalog> = {
 
     'footer.tagline': 'La meteorología que habla de agronomía. En el iPhone, en el reloj y en la web.',
     'footer.product': 'El producto',
+    'footer.app': 'Aplicación web',
     'footer.dataTitle': 'Los datos',
     'footer.credits': 'Créditos',
     'footer.author': 'Maxime Nathan Lestage',

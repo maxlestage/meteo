@@ -41,6 +41,7 @@ export function Footer() {
             <li><a href="#indicateurs">{t('nav.indicators')}</a></li>
             <li><a href="#sources">{t('nav.sources')}</a></li>
             <li><a href="#donnees">{t('nav.data')}</a></li>
+            <li><a href="./app/">{t('footer.app')}</a></li>
           </ul>
         </nav>
 
