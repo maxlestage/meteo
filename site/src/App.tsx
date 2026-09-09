@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { AgroThresholds, type Parcelle } from '@klima/core'
+import { LanguageSwitcher, useI18n } from '@klima/core/ui'
 import { Features } from './components/Features'
 import { PhoneMockup } from './components/PhoneMockup'
 import { TodaySection } from './components/TodaySection'
@@ -15,8 +16,13 @@ const DEFAULT_PARCELLE: Parcelle = {
 }
 
 export default function App() {
+  const { t, f } = useI18n()
   const [parcelle, setParcelle] = useState<Parcelle>(DEFAULT_PARCELLE)
   const { digest, loading, error, reload, forecast } = useDayDigest(parcelle)
+
+  // Le crédit encadre un lien : on coupe la phrase autour de son jeton.
+  const [creditBefore = '', creditAfter = ''] = t('footer.credit', { link: '\u0000' }).split('\u0000')
+  const credit = { before: creditBefore, after: creditAfter }
 
   return (
     <>
@@ -24,34 +30,31 @@ export default function App() {
         <a className="nav__brand" href="#top">
           Klima
         </a>
-        <nav>
-          <a href="#aujourdhui">Météo du jour</a>
-          <a href="#indicateurs">Indicateurs</a>
-          <a href="#donnees">Données</a>
-        </nav>
+        <div className="nav__end">
+          <nav>
+            <a href="#aujourdhui">{t('nav.today')}</a>
+            <a href="#indicateurs">{t('nav.indicators')}</a>
+            <a href="#donnees">{t('nav.data')}</a>
+          </nav>
+          <LanguageSwitcher className="lang" label={t('language.label')} />
+        </div>
       </header>
 
       <main id="top">
         <section className="hero">
           <div className="hero__text">
-            <p className="hero__eyebrow">Application iOS et web</p>
-            <h1>La météo qui parle agronomie.</h1>
-            <p className="hero__lead">
-              Klima lit la météo comme un agronome : humidité et température du sol,
-              évapotranspiration de référence, fenêtres de pulvérisation, degrés-jours. Les
-              variables agricoles brutes, traduites en décisions pour la parcelle.
-            </p>
+            <p className="hero__eyebrow">{t('hero.eyebrow')}</p>
+            <h1>{t('hero.title')}</h1>
+            <p className="hero__lead">{t('hero.lead')}</p>
             <div className="hero__actions">
               <a className="button" href="#aujourdhui">
-                Voir la météo du jour
+                {t('hero.cta.today')}
               </a>
               <a className="button button--ghost" href="#indicateurs">
-                Ce que Klima calcule
+                {t('hero.cta.indicators')}
               </a>
             </div>
-            <p className="hero__note">
-              Données Open-Meteo, sans compte ni clé d'API. Gratuit, sans publicité.
-            </p>
+            <p className="hero__note">{t('hero.note')}</p>
           </div>
 
           <PhoneMockup parcelle={parcelle} digest={digest} current={forecast?.current ?? null} />
@@ -72,33 +75,20 @@ export default function App() {
 
         <section className="data" id="donnees">
           <div className="section-head">
-            <h2>D'où viennent les chiffres</h2>
+            <h2>{t('data.title')}</h2>
           </div>
           <div className="data__grid">
             <article>
-              <h3>Un modèle agricole, pas une météo grand public</h3>
-              <p>
-                Klima n'interroge que les variables agronomiques de l'API Open-Meteo : température
-                et humidité du sol par couche, évapotranspiration de référence FAO-56, déficit de
-                pression de vapeur — auxquelles s'ajoutent le vent, la pluie et l'hygrométrie
-                nécessaires aux fenêtres de traitement.
-              </p>
+              <h3>{t('data.model.title')}</h3>
+              <p>{t('data.model.body')}</p>
             </article>
             <article>
-              <h3>Les mêmes règles sur les deux plateformes</h3>
-              <p>
-                Les seuils vivent au même endroit pour le web et pour iOS, et les deux suites de
-                tests couvrent les mêmes cas. Le conseil rendu au champ est identique, quel que
-                soit l'écran par lequel on le lit.
-              </p>
+              <h3>{t('data.rules.title')}</h3>
+              <p>{t('data.rules.body')}</p>
             </article>
             <article>
-              <h3>Le vent fait loi</h3>
-              <p>
-                Un vent au-delà de {AgroThresholds.sprayWindMax} km/h, des rafales fortes ou une pluie imminente rendent
-                l'heure inexploitable pour un traitement, quel que soit le reste des conditions.
-                Klima ne propose jamais une fenêtre hors des clous.
-              </p>
+              <h3>{t('data.wind.title')}</h3>
+              <p>{t('data.wind.body', { limit: f.unit(AgroThresholds.sprayWindMax, 'km/h', 0) })}</p>
             </article>
           </div>
         </section>
@@ -106,13 +96,11 @@ export default function App() {
 
       <footer className="footer">
         <p>
-          Klima — météo agricole. Données <a href="https://open-meteo.com/">Open-Meteo</a>, sans
-          clé d'API.
+          {credit.before}
+          <a href="https://open-meteo.com/">Open-Meteo</a>
+          {credit.after}
         </p>
-        <p className="footer__note">
-          Les indicateurs sont des aides à la décision ; ils ne remplacent ni l'observation de la
-          parcelle ni la réglementation en vigueur.
-        </p>
+        <p className="footer__note">{t('footer.note')}</p>
       </footer>
     </>
   )

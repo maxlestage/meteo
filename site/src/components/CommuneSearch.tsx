@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { searchParcelles, type Parcelle } from '@klima/core'
+import { useI18n } from '@klima/core/ui'
 
 interface Props {
   current: Parcelle
@@ -8,6 +9,7 @@ interface Props {
 
 /** Petit sélecteur de commune, pour essayer la section sur sa propre parcelle. */
 export function CommuneSearch({ current, onSelect }: Props) {
+  const { t } = useI18n()
   const [query, setQuery] = useState('')
   const [results, setResults] = useState<Parcelle[]>([])
   const container = useRef<HTMLDivElement>(null)
@@ -47,8 +49,8 @@ export function CommuneSearch({ current, onSelect }: Props) {
         className="commune__input"
         value={query}
         onChange={(event) => setQuery(event.target.value)}
-        placeholder={`${current.name} — changer de commune`}
-        aria-label="Rechercher une commune"
+        placeholder={t('search.placeholder', { commune: current.name })}
+        aria-label={t('search.label')}
       />
       {results.length > 0 && (
         <ul className="commune__results">

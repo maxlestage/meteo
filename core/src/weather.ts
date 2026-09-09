@@ -1,8 +1,9 @@
 /**
  * Traduction des codes météo WMO renvoyés par Open-Meteo.
  *
- * La même table est implémentée côté iOS
- * (ios/Klima/Models/WeatherCondition.swift).
+ * Le code renvoie une clé, pas un libellé : le texte affiché dépend de la
+ * langue et vit dans les catalogues (`sharedMessages`, et leur équivalent iOS).
+ * La même table est implémentée dans `ios/Klima/Models/WeatherCondition.swift`.
  */
 
 /** Famille de pictogramme, déclinée jour / nuit à l'affichage. */
@@ -18,42 +19,50 @@ export type ConditionIcon =
   | 'thunder'
 
 export interface WeatherCondition {
-  label: string
+  /** Clé de catalogue, par exemple « wmo.drizzle ». */
+  labelKey: string
   icon: ConditionIcon
 }
 
+const condition = (name: string, icon: ConditionIcon): WeatherCondition => ({
+  labelKey: `wmo.${name}`,
+  icon,
+})
+
 const CONDITIONS: ReadonlyMap<number, WeatherCondition> = new Map([
-  [0, { label: 'Ciel dégagé', icon: 'clear' }],
-  [1, { label: 'Peu nuageux', icon: 'partly' }],
-  [2, { label: 'Partiellement nuageux', icon: 'partly' }],
-  [3, { label: 'Couvert', icon: 'cloudy' }],
-  [45, { label: 'Brouillard', icon: 'fog' }],
-  [48, { label: 'Brouillard givrant', icon: 'fog' }],
-  [51, { label: 'Bruine légère', icon: 'drizzle' }],
-  [53, { label: 'Bruine', icon: 'drizzle' }],
-  [55, { label: 'Bruine dense', icon: 'drizzle' }],
-  [56, { label: 'Bruine verglaçante', icon: 'drizzle' }],
-  [57, { label: 'Bruine verglaçante dense', icon: 'drizzle' }],
-  [61, { label: 'Pluie faible', icon: 'rain' }],
-  [63, { label: 'Pluie', icon: 'rain' }],
-  [65, { label: 'Pluie forte', icon: 'rain' }],
-  [66, { label: 'Pluie verglaçante', icon: 'rain' }],
-  [67, { label: 'Pluie verglaçante forte', icon: 'rain' }],
-  [71, { label: 'Neige faible', icon: 'snow' }],
-  [73, { label: 'Neige', icon: 'snow' }],
-  [75, { label: 'Neige forte', icon: 'snow' }],
-  [77, { label: 'Grains de neige', icon: 'snow' }],
-  [80, { label: 'Averses', icon: 'showers' }],
-  [81, { label: 'Averses modérées', icon: 'showers' }],
-  [82, { label: 'Averses violentes', icon: 'showers' }],
-  [85, { label: 'Averses de neige', icon: 'snow' }],
-  [86, { label: 'Averses de neige fortes', icon: 'snow' }],
-  [95, { label: 'Orage', icon: 'thunder' }],
-  [96, { label: 'Orage et grêle', icon: 'thunder' }],
-  [99, { label: 'Orage et forte grêle', icon: 'thunder' }],
+  [0, condition('clearSky', 'clear')],
+  [1, condition('mainlyClear', 'partly')],
+  [2, condition('partlyCloudy', 'partly')],
+  [3, condition('overcast', 'cloudy')],
+  [45, condition('fog', 'fog')],
+  [48, condition('rimeFog', 'fog')],
+  [51, condition('lightDrizzle', 'drizzle')],
+  [53, condition('drizzle', 'drizzle')],
+  [55, condition('denseDrizzle', 'drizzle')],
+  [56, condition('freezingDrizzle', 'drizzle')],
+  [57, condition('denseFreezingDrizzle', 'drizzle')],
+  [61, condition('slightRain', 'rain')],
+  [63, condition('rain', 'rain')],
+  [65, condition('heavyRain', 'rain')],
+  [66, condition('freezingRain', 'rain')],
+  [67, condition('heavyFreezingRain', 'rain')],
+  [71, condition('slightSnow', 'snow')],
+  [73, condition('snow', 'snow')],
+  [75, condition('heavySnow', 'snow')],
+  [77, condition('snowGrains', 'snow')],
+  [80, condition('showers', 'showers')],
+  [81, condition('moderateShowers', 'showers')],
+  [82, condition('violentShowers', 'showers')],
+  [85, condition('snowShowers', 'snow')],
+  [86, condition('heavySnowShowers', 'snow')],
+  [95, condition('thunderstorm', 'thunder')],
+  [96, condition('thunderstormHail', 'thunder')],
+  [99, condition('thunderstormHeavyHail', 'thunder')],
 ])
 
-/** Libellé et pictogramme d'un code WMO. Un code inconnu retombe sur « Couvert ». */
+const UNKNOWN = condition('overcast', 'cloudy')
+
+/** Clé de libellé et pictogramme d'un code WMO. Un code inconnu retombe sur « couvert ». */
 export function weatherCondition(code: number): WeatherCondition {
-  return CONDITIONS.get(code) ?? { label: 'Couvert', icon: 'cloudy' }
+  return CONDITIONS.get(code) ?? UNKNOWN
 }

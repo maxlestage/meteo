@@ -170,13 +170,27 @@ export function waterBalance(days: readonly DailySample[]): WaterBalance {
 
 export type SprayVerdict = 'favorable' | 'acceptable' | 'defavorable'
 
+/**
+ * Motif de dégradation d'une heure, sous forme structurée : le domaine dit ce
+ * qui cloche et avec quelles valeurs, l'interface le formule dans sa langue.
+ */
+export type SprayBlocker =
+  | { kind: 'windTooStrong'; wind: number; limit: number }
+  | { kind: 'windTooWeak' }
+  | { kind: 'gusts'; gusts: number }
+  | { kind: 'rain'; amount: number }
+  | { kind: 'tooHot'; temperature: number }
+  | { kind: 'tooCold'; temperature: number }
+  | { kind: 'dryAir'; humidity: number }
+  | { kind: 'vapourPressureDeficit'; vpd: number }
+
 export interface SprayWindow {
   time: Date
   verdict: SprayVerdict
   /** Score 0–100 : 100 = conditions idéales. */
   score: number
-  /** Motifs de dégradation, en clair, pour l'affichage. */
-  blockers: string[]
+  /** Motifs de dégradation, à traduire à l'affichage. */
+  blockers: SprayBlocker[]
 }
 
 /**
@@ -192,48 +206,52 @@ export function evaluateSprayHour(hours: readonly HourlySample[], index: number)
   if (!h) throw new RangeError(`Heure hors série : ${index}`)
 
   const next = hours[index + 1]
-  const blockers: string[] = []
+  const blockers: SprayBlocker[] = []
   let score = 100
   /** Un critère rédhibitoire interdit le passage, quel que soit le reste. */
   let disqualified = false
 
   if (h.windSpeed > AgroThresholds.sprayWindMax) {
-    blockers.push(`Vent ${Math.round(h.windSpeed)} km/h (max ${AgroThresholds.sprayWindMax})`)
+    blockers.push({
+      kind: 'windTooStrong',
+      wind: h.windSpeed,
+      limit: AgroThresholds.sprayWindMax,
+    })
     score -= 45
     disqualified = true
   } else if (h.windSpeed < AgroThresholds.sprayWindMin) {
-    blockers.push('Vent trop faible, risque d’inversion thermique')
+    blockers.push({ kind: 'windTooWeak' })
     score -= 25
   }
 
   if (h.windGusts > AgroThresholds.sprayGustMax) {
-    blockers.push(`Rafales ${Math.round(h.windGusts)} km/h`)
+    blockers.push({ kind: 'gusts', gusts: h.windGusts })
     score -= 20
     disqualified = true
   }
 
   const rainSoon = h.precipitation + (next?.precipitation ?? 0)
   if (rainSoon > AgroThresholds.sprayRainMax) {
-    blockers.push(`Pluie ${round(rainSoon, 1)} mm dans les 2 h`)
+    blockers.push({ kind: 'rain', amount: round(rainSoon, 1) })
     score -= 45
     disqualified = true
   }
 
   if (h.temperature > AgroThresholds.sprayTempMax) {
-    blockers.push(`Température ${Math.round(h.temperature)} °C`)
+    blockers.push({ kind: 'tooHot', temperature: h.temperature })
     score -= 20
   } else if (h.temperature < AgroThresholds.sprayTempMin) {
-    blockers.push(`Température ${Math.round(h.temperature)} °C, trop froid`)
+    blockers.push({ kind: 'tooCold', temperature: h.temperature })
     score -= 20
   }
 
   if (h.relativeHumidity < AgroThresholds.sprayHumidityMin) {
-    blockers.push(`Hygrométrie ${Math.round(h.relativeHumidity)} %`)
+    blockers.push({ kind: 'dryAir', humidity: h.relativeHumidity })
     score -= 15
   }
 
   if (h.vapourPressureDeficit > AgroThresholds.sprayVpdMax) {
-    blockers.push(`VPD ${round(h.vapourPressureDeficit, 2)} kPa, évaporation des gouttelettes`)
+    blockers.push({ kind: 'vapourPressureDeficit', vpd: round(h.vapourPressureDeficit, 2) })
     score -= 15
   }
 

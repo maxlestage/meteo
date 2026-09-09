@@ -4,6 +4,7 @@ import SwiftUI
 /// comme l'application Météo du système.
 struct DashboardView: View {
     @StateObject private var viewModel = DashboardViewModel()
+    @StateObject private var activity = SprayActivityController()
     @State private var query = ""
 
     private let tiles = [GridItem(.adaptive(minimum: 150), spacing: 12)]
@@ -19,7 +20,7 @@ struct DashboardView: View {
                 ScrollView {
                     VStack(spacing: 12) {
                         if viewModel.isLoading && viewModel.forecast == nil {
-                            ProgressView()
+                            ProgressView(Localized.text("app.loading"))
                                 .tint(.white)
                                 .padding(.top, 80)
                         }
@@ -46,7 +47,10 @@ struct DashboardView: View {
                             SprayCardView(
                                 hours: forecast.hourly,
                                 nextSpray: summary.nextSpray,
-                                timeZone: viewModel.timeZone
+                                timeZone: viewModel.timeZone,
+                                isFollowing: activity.isRunning,
+                                canFollow: activity.isAvailable,
+                                onFollow: { toggleFollow(forecast, summary) }
                             )
 
                             LazyVGrid(columns: tiles, spacing: 12) {
@@ -75,12 +79,12 @@ struct DashboardView: View {
                     Button {
                         viewModel.useCurrentLocation()
                     } label: {
-                        Label("Me localiser", systemImage: "location")
+                        Label(Localized.text("app.locate"), systemImage: "location")
                     }
                     .tint(.white)
                 }
             }
-            .searchable(text: $query, prompt: "Rechercher une commune")
+            .searchable(text: $query, prompt: Localized.text("app.search"))
             .onChange(of: query) { _, newValue in
                 viewModel.search(newValue)
             }
@@ -89,10 +93,34 @@ struct DashboardView: View {
                     searchResults
                 }
             }
-            .refreshable { await viewModel.load() }
-            .task { await viewModel.load() }
+            .refreshable { await reload() }
+            .task { await reload() }
         }
         .preferredColorScheme(.dark)
+    }
+
+    // MARK: Activité en direct
+
+    /// Recharge la prévision, puis répercute les nouvelles conditions sur
+    /// l'activité en direct si elle est en cours.
+    private func reload() async {
+        await viewModel.load()
+        guard let forecast = viewModel.forecast, let summary = viewModel.summary else { return }
+        await activity.refresh(hours: forecast.hourly, opportunity: summary.nextSpray)
+    }
+
+    private func toggleFollow(_ forecast: AgroForecast, _ summary: AgroSummary) {
+        guard let opportunity = summary.nextSpray else { return }
+        if activity.isRunning {
+            Task { await activity.stop() }
+        } else {
+            activity.start(
+                parcelle: forecast.parcelle,
+                opportunity: opportunity,
+                timeZone: viewModel.timeZone,
+                hours: forecast.hourly
+            )
+        }
     }
 
     // MARK: Sous-vues
@@ -127,7 +155,7 @@ struct DashboardView: View {
         VStack(spacing: 10) {
             Text(message)
                 .multilineTextAlignment(.center)
-            Button("Réessayer") { Task { await viewModel.load() } }
+            Button(Localized.text("app.retry")) { Task { await viewModel.load() } }
                 .buttonStyle(.bordered)
                 .tint(.white)
         }
@@ -135,7 +163,7 @@ struct DashboardView: View {
     }
 
     private func source(_ forecast: AgroForecast) -> some View {
-        Text("Données Open-Meteo — modèle agricole : humidité et température du sol, ET0 FAO-56, déficit de pression de vapeur. Parcelle à \(Int(forecast.elevation.rounded())) m.")
+        Text(Localized.text("app.source", AgroFormat.unit(forecast.elevation, "m", decimals: 0)))
             .font(.caption2)
             .foregroundStyle(.white.opacity(0.62))
             .multilineTextAlignment(.center)
@@ -159,13 +187,13 @@ struct DashboardView: View {
 
         return [
             TileModel(
-                label: "Humidité du sol",
+                label: Localized.text("tile.soil"),
                 value: soil.state.label,
-                caption: String(
-                    format: "%.0f %% vol. · %.1f °C à 6 cm. %@",
-                    soil.moisture * 100,
-                    soil.temperature,
-                    soil.trafficable ? "Le sol porte les engins." : "Risque de tassement."
+                caption: Localized.text(
+                    "tile.soil.caption",
+                    AgroFormat.percent(soil.moisture * 100),
+                    AgroFormat.unit(soil.temperature, "°C"),
+                    Localized.text(soil.trafficable ? "soil.trafficable" : "soil.compaction")
                 ),
                 gauge: (
                     position: soil.moisture / 0.5,
@@ -178,53 +206,59 @@ struct DashboardView: View {
                 )
             ),
             TileModel(
-                label: "Bilan hydrique",
-                value: String(format: "%@%.1f mm", water.balance > 0 ? "+" : "", water.balance),
+                label: Localized.text("tile.water"),
+                value: AgroFormat.signedUnit(water.balance, "mm"),
                 caption: water.irrigationAdvice > 0
-                    ? "Irrigation conseillée : \(Int(water.irrigationAdvice.rounded())) mm sur 7 jours."
-                    : String(
-                        format: "Pluie %.1f mm, ET0 %.1f mm sur 7 jours.",
-                        water.precipitation,
-                        water.evapotranspiration
+                    ? Localized.text(
+                        "tile.water.irrigation",
+                        AgroFormat.unit(water.irrigationAdvice, "mm", decimals: 0)
+                    )
+                    : Localized.text(
+                        "tile.water.caption",
+                        AgroFormat.unit(water.precipitation, "mm"),
+                        AgroFormat.unit(water.evapotranspiration, "mm")
                     )
             ),
             TileModel(
-                label: "Vent",
-                value: "\(Int(forecast.current.windSpeed.rounded())) km/h",
-                caption: String(
-                    format: "Rafales %d km/h. Limite de pulvérisation : %d km/h.",
-                    Int(forecast.current.windGusts.rounded()),
-                    Int(AgroThresholds.sprayWindMax)
+                label: Localized.text("tile.wind"),
+                value: AgroFormat.unit(forecast.current.windSpeed, "km/h", decimals: 0),
+                caption: Localized.text(
+                    "tile.wind.caption",
+                    AgroFormat.unit(forecast.current.windGusts, "km/h", decimals: 0),
+                    AgroFormat.unit(AgroThresholds.sprayWindMax, "km/h", decimals: 0)
                 )
             ),
             TileModel(
-                label: "Risque de gel",
+                label: Localized.text("tile.frost"),
                 value: summary.frost.severity.label,
-                caption: String(format: "Mini %.1f °C cette nuit", summary.frost.minTemperature)
-                    + (summary.frost.hoarFrost ? ", gelée blanche probable." : ".")
-            ),
-            TileModel(
-                label: "Pression maladie",
-                value: summary.disease.level.label,
-                caption: "\(summary.disease.leafWetnessHours) h d’humectation du feuillage sur 24 h."
-            ),
-            TileModel(
-                label: "Degrés-jours",
-                value: String(format: "%.1f °C·j", summary.gdd),
-                caption: "Cumul sur 7 jours, base \(Int(AgroThresholds.gddBase)) °C."
-            ),
-            TileModel(
-                label: "Lever",
-                value: AgroFormat.time(today?.sunrise, in: zone),
-                caption: "Coucher à \(AgroFormat.time(today?.sunset, in: zone))."
-            ),
-            TileModel(
-                label: "Semis",
-                value: soil.sowable ? "Possible" : "Déconseillé",
-                caption: String(
-                    format: "Sol à %.1f °C à 6 cm ; il faut 8 °C et un sol ressuyé.",
-                    soil.temperature
+                caption: Localized.text(
+                    "tile.frost.caption",
+                    AgroFormat.unit(summary.frost.minTemperature, "°C"),
+                    summary.frost.hoarFrost ? ", " + Localized.text("frost.hoarFrost") : ""
                 )
+            ),
+            TileModel(
+                label: Localized.text("tile.disease"),
+                value: summary.disease.level.label,
+                caption: Localized.text("tile.disease.caption", String(summary.disease.leafWetnessHours))
+            ),
+            TileModel(
+                label: Localized.text("tile.gdd"),
+                value: AgroFormat.unit(summary.gdd, "°C·j"),
+                caption: Localized.text(
+                    "tile.gdd.caption",
+                    AgroFormat.unit(AgroThresholds.gddBase, "°C", decimals: 0)
+                )
+            ),
+            TileModel(
+                label: Localized.text("tile.sunrise"),
+                value: AgroFormat.time(today?.sunrise, in: zone),
+                caption: Localized.text("tile.sunrise.caption", AgroFormat.time(today?.sunset, in: zone))
+            ),
+            TileModel(
+                label: Localized.text("tile.sowing"),
+                value: Localized.text(soil.sowable ? "tile.sowing.yes" : "tile.sowing.no"),
+                caption: Localized.text("tile.sowing.caption", AgroFormat.unit(soil.temperature, "°C"))
             ),
         ]
     }

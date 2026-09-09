@@ -13,7 +13,7 @@ struct HeroView: View {
                 .lineLimit(1)
                 .minimumScaleFactor(0.6)
 
-            Text("\(Int(forecast.current.temperature.rounded()))°")
+            Text(AgroFormat.temperature(forecast.current.temperature))
                 .font(.system(size: 96, weight: .thin))
                 .padding(.top, -6)
 
@@ -22,7 +22,7 @@ struct HeroView: View {
                 .foregroundStyle(.white.opacity(0.62))
 
             if let today = forecast.daily.first {
-                Text("↑ \(Int(today.temperatureMax.rounded()))°   ↓ \(Int(today.temperatureMin.rounded()))°")
+                Text("↑ \(AgroFormat.temperature(today.temperatureMax))   ↓ \(AgroFormat.temperature(today.temperatureMin))")
                     .font(.title3)
             }
         }

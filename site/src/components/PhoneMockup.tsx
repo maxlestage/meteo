@@ -1,5 +1,5 @@
-import { signedWithUnit, weatherCondition, type CurrentSample, type DayDigest, type Parcelle } from '@klima/core'
-import { WeatherIcon } from '@klima/core/ui'
+import { weatherCondition, type CurrentSample, type DayDigest, type Parcelle } from '@klima/core'
+import { useI18n, WeatherIcon } from '@klima/core/ui'
 
 interface Props {
   parcelle: Parcelle
@@ -12,6 +12,7 @@ interface Props {
  * ce que le visiteur voit ici, il le retrouve sur son téléphone.
  */
 export function PhoneMockup({ parcelle, digest, current }: Props) {
+  const { t, f } = useI18n()
   const condition = current ? weatherCondition(current.weatherCode) : null
 
   return (
@@ -24,17 +25,19 @@ export function PhoneMockup({ parcelle, digest, current }: Props) {
 
         <p className="phone__place">{parcelle.name}</p>
         <p className="phone__temperature">
-          {current ? `${Math.round(current.temperature)}°` : '—'}
+          {current ? f.temperature(current.temperature) : '—'}
         </p>
-        <p className="phone__condition">{condition?.label ?? 'Chargement'}</p>
+        <p className="phone__condition">
+          {condition ? t(condition.labelKey) : t('phone.loading')}
+        </p>
         <p className="phone__range">
           {digest
-            ? `↑ ${Math.round(digest.temperatureMax)}°   ↓ ${Math.round(digest.temperatureMin)}°`
+            ? `↑ ${f.temperature(digest.temperatureMax)}   ↓ ${f.temperature(digest.temperatureMin)}`
             : ''}
         </p>
 
         <div className="phone__card">
-          <p className="phone__label">Conditions météo</p>
+          <p className="phone__label">{t('phone.conditions')}</p>
           <div className="phone__hours">
             {(digest?.remainingHours ?? []).slice(0, 5).map((hour) => (
               <div className="phone__hour" key={hour.time.toISOString()}>
@@ -44,7 +47,7 @@ export function PhoneMockup({ parcelle, digest, current }: Props) {
                   isDay={hour.isDay}
                   size={18}
                 />
-                <span>{Math.round(hour.temperature)}°</span>
+                <span>{f.temperature(hour.temperature)}</span>
               </div>
             ))}
           </div>
@@ -52,14 +55,14 @@ export function PhoneMockup({ parcelle, digest, current }: Props) {
 
         <div className="phone__tiles">
           <div className="phone__tile">
-            <p className="phone__label">Bilan hydrique</p>
+            <p className="phone__label">{t('phone.balance')}</p>
             <p className="phone__value">
-              {digest ? signedWithUnit(digest.balance, 'mm') : '—'}
+              {digest ? f.signedUnit(digest.balance, 'mm') : '—'}
             </p>
           </div>
           <div className="phone__tile">
-            <p className="phone__label">Traitement</p>
-            <p className="phone__value">{digest?.spray ? 'Possible' : 'Non'}</p>
+            <p className="phone__label">{t('phone.spray')}</p>
+            <p className="phone__value">{t(digest?.spray ? 'phone.spray.yes' : 'phone.spray.no')}</p>
           </div>
         </div>
       </div>
