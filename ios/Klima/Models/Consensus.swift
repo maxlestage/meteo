@@ -1,45 +1,35 @@
 import Foundation
 
-/// Un modèle de prévision et le service qui le produit.
+/// Une source de prévision et le service qui la produit.
 ///
-/// Open-Meteo redistribue les sorties brutes de plusieurs services météo
-/// nationaux. Les comparer, c'est comparer de vraies sources indépendantes —
-/// quatre centres de calcul différents, pas quatre habillages du même modèle.
-/// Miroir de `core/src/models.ts`.
-struct WeatherModel: Equatable, Hashable {
-    /// Identifiant Open-Meteo, passé au paramètre `models`.
+/// Un fournisseur peut en livrer plusieurs : Open-Meteo redistribue quatre
+/// modèles nationaux, MET Norway n'en livre qu'un. Ce que le recoupement
+/// compare, ce sont les sources. Miroir de `core/src/providers/`.
+struct WeatherSource: Equatable, Hashable {
     let id: String
-    /// Nom du modèle, tel que le nomme son service.
+    /// Nom du modèle ou du produit.
     let name: String
     /// Service qui le produit.
     let institution: String
-    /// Code pays du service.
+    /// Code pays ou zone du service.
     let country: String
-
-    static let all: [WeatherModel] = [
-        WeatherModel(id: "meteofrance_seamless", name: "AROME / ARPEGE",
-                     institution: "Météo-France", country: "FR"),
-        WeatherModel(id: "ecmwf_ifs025", name: "IFS", institution: "ECMWF", country: "EU"),
-        WeatherModel(id: "icon_seamless", name: "ICON",
-                     institution: "Deutscher Wetterdienst", country: "DE"),
-        WeatherModel(id: "gfs_seamless", name: "GFS", institution: "NOAA", country: "US"),
-    ]
-
-    static func named(_ id: String) -> WeatherModel? {
-        all.first { $0.id == id }
-    }
+    /// Fournisseur par lequel on l'obtient.
+    let provider: String
+    /// Mention que la licence impose d'afficher.
+    let attribution: String
 }
 
-/// Relevé d'un modèle pour une échéance donnée.
-struct ModelReading: Equatable {
-    let model: WeatherModel
+/// Relevé d'une source pour l'heure en cours.
+struct SourceReading: Equatable {
+    let source: WeatherSource
     let temperature: Double
     /// Précipitations sur l'heure (mm).
     let precipitation: Double
+    /// Vent moyen (km/h).
     let windSpeed: Double
 }
 
-/// Degré d'accord entre les modèles.
+/// Degré d'accord entre les sources.
 enum Agreement: String {
     case forte, moyenne, faible
 
@@ -58,7 +48,10 @@ struct Spread: Equatable {
 }
 
 struct Consensus: Equatable {
-    let readings: [ModelReading]
+    let readings: [SourceReading]
+    /// Fournisseurs ayant répondu, sur ceux qui ont été interrogés.
+    let providersAnswered: Int
+    let providersQueried: Int
     let temperature: Spread
     let precipitation: Spread
     let windSpeed: Spread
@@ -80,10 +73,14 @@ enum ConsensusThresholds {
 
 enum ModelConsensus {
 
-    /// Recoupe les relevés. Renvoie `nil` s'il n'y a rien à comparer : un seul
-    /// modèle ne fait pas un consensus, et le dire vaut mieux que de le laisser
-    /// croire.
-    static func consensus(_ readings: [ModelReading]) -> Consensus? {
+    /// Recoupe les relevés. Renvoie `nil` s'il n'y a rien à comparer : une
+    /// seule source ne fait pas un consensus, et le dire vaut mieux que de le
+    /// laisser croire.
+    static func consensus(
+        _ readings: [SourceReading],
+        answered: Int = 0,
+        queried: Int = 0
+    ) -> Consensus? {
         guard readings.count >= 2 else { return nil }
 
         let temperature = spread(readings.map(\.temperature))
@@ -93,8 +90,12 @@ enum ModelConsensus {
         let rainy = readings.map { $0.precipitation >= ConsensusThresholds.rainThreshold }
         let agreeOnRain = rainy.allSatisfy { $0 == rainy[0] }
 
+        let distinct = Set(readings.map(\.source.provider)).count
+
         return Consensus(
             readings: readings,
+            providersAnswered: answered == 0 ? distinct : answered,
+            providersQueried: queried == 0 ? distinct : queried,
             temperature: temperature,
             precipitation: precipitation,
             windSpeed: windSpeed,

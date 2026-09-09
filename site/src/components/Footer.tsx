@@ -49,6 +49,16 @@ export function Footer() {
                 Open-Meteo
               </a>
             </li>
+            <li>
+              <a href="https://api.met.no/" rel="noreferrer noopener" target="_blank">
+                MET Norway
+              </a>
+            </li>
+            <li>
+              <a href="https://brightsky.dev/" rel="noreferrer noopener" target="_blank">
+                Bright Sky / DWD
+              </a>
+            </li>
             <li>{t('footer.models')}</li>
             <li>{t('footer.method')}</li>
           </ul>
