@@ -13,12 +13,37 @@ web/    Application web complète (Bun + TypeScript + Vite + React)
 site/   Site de présentation, avec la météo du jour
 ```
 
+Le tout est traduit en **français, anglais et espagnol**.
+
 Les trois paquets JavaScript forment un espace de travail Bun : `bun install` à la
 racine les installe ensemble, et `bun test` y exécute la suite du cœur partagé.
 
 L'application reprend la présentation de l'application Météo du système —
 commune, température, bandeau horaire, liste des sept jours — et range les
 indicateurs agronomiques dans les tuiles de détail.
+
+## Langues
+
+Le domaine ne fabrique jamais de phrase : il renvoie des états et des motifs
+structurés — `SoilState.sature`, `SprayBlocker.windTooStrong(wind:limit:)` — que
+l'interface traduit. Les textes vivent donc dans des catalogues, jamais dans le
+code de calcul.
+
+| Surface | Catalogue | Choix de la langue |
+| --- | --- | --- |
+| Commun web et site | `core/src/messages.ts` | — |
+| Application web | `web/src/i18n/messages.ts` | Sélecteur, sinon le navigateur |
+| Site de présentation | `site/src/i18n/messages.ts` | Sélecteur, sinon le navigateur |
+| iOS | `ios/Klima/Resources/Localizable.xcstrings` | Réglages du système |
+
+Les nombres et les dates suivent la langue : virgule décimale en français et en
+espagnol, point en anglais ; horloge sur 24 h en français, sur 12 h en anglais
+américain. Les heures restent en revanche celles du fuseau de la parcelle, pas
+celui du lecteur.
+
+Les suites de tests vérifient que les trois langues portent exactement les mêmes
+clés et les mêmes valeurs à interpoler : une traduction oubliée fait échouer la
+compilation, elle n'apparaît pas en clair dans l'application.
 
 ## Ce que l'application calcule
 
@@ -66,16 +91,62 @@ Avant la première exécution sur appareil, renseignez votre équipe de signatur
 (`DEVELOPMENT_TEAM`) et, si besoin, votre propre `PRODUCT_BUNDLE_IDENTIFIER`
 dans les réglages de la cible.
 
-Organisation :
+Trois cibles se partagent le même noyau (`Klima/Models`) :
 
 ```
-Klima/
-  App/          Point d'entrée SwiftUI
-  Models/       Types de mesure et cœur agronomique (AgroIndicators)
-  Services/     Client Open-Meteo, relevé de position
-  ViewModels/   État du tableau de bord
-  Views/        Tableau de bord, bandeau horaire, liste des jours, tuiles
-  Resources/    Info.plist, catalogue d'assets
+Klima/           Application iPhone
+  App/           Point d'entrée SwiftUI
+  Models/        Types de mesure, cœur agronomique, formats, textes
+  Services/      Client Open-Meteo, position, activité en direct
+  ViewModels/    État du tableau de bord
+  Views/         Tableau de bord, bandeau horaire, liste des jours, tuiles
+  Resources/     Info.plist, assets, catalogues de chaînes
+KlimaWidgets/    Extension iOS : activité en direct et widget d'écran d'accueil
+KlimaWatch/      Application watchOS autonome
+KlimaWatchWidgets/ Extension watchOS : complications de cadran
+```
+
+Les cinq cibles partagent le noyau `Klima/Models`. L'application, ses widgets et
+la complication lisent la même parcelle via un **groupe d'applications**
+(`group.com.klima.app`) : il doit être déclaré dans le compte développeur avant
+la première compilation signée.
+
+### Activité en direct
+
+La fenêtre de traitement est le seul élément vraiment vivant de Klima : elle a
+un début, une fin, et des conditions qui peuvent se dégrader entre-temps. Un
+bouton sur la carte de traitement ouvre son suivi ; l'écran verrouillé et l'île
+dynamique affichent alors le verdict courant, le vent et le motif de blocage
+s'il y en a un.
+
+Le suivi continue application fermée grâce à une tâche d'arrière-plan
+(`BGAppRefreshTask`) : le système réveille Klima de temps à autre, qui recharge
+la prévision, met à jour l'activité et les widgets, puis redemande un réveil. Le
+rythme est décidé par iOS selon l'usage et la batterie — il n'est pas garanti.
+Un suivi à la minute demanderait des notifications poussées, donc un serveur,
+que Klima n'a pas.
+
+### Widget d'écran d'accueil
+
+Deux tailles, petite et moyenne : la prochaine fenêtre de traitement et son
+score, complétés sur la taille moyenne du vent, de l'état du sol et du bilan.
+Le widget va chercher sa propre prévision, une fois par heure.
+
+### Complication de cadran
+
+`KlimaWatchWidgets` fournit les quatre formes de watchOS — circulaire,
+rectangulaire, en ligne et d'angle — avec l'heure de la prochaine fenêtre.
+
+### Application montre
+
+`KlimaWatch` est une application watchOS autonome : elle interroge l'API
+elle-même et se cale sur la position du poignet, sans passer par le téléphone.
+Elle montre la température, la prochaine fenêtre de traitement, le vent, l'état
+du sol, le gel et le bilan — les réponses qu'on vient chercher au champ.
+
+```bash
+xcodebuild -project ios/Klima.xcodeproj -scheme KlimaWatch \
+  -destination 'platform=watchOS Simulator,name=Apple Watch Series 9 (45mm)' build
 ```
 
 ## Web

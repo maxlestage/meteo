@@ -9,7 +9,7 @@ struct HourlyStripView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
-            CardLabel(text: "Conditions météo")
+            CardLabel(text: Localized.text("hourly.title"))
 
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: 4) {
@@ -31,7 +31,7 @@ struct HourlyStripView: View {
         let temperature = isFirst ? current.temperature : hour.temperature
 
         return VStack(spacing: 7) {
-            Text(isFirst ? "Maint." : AgroFormat.hour(hour.time, in: timeZone))
+            Text(isFirst ? Localized.text("hourly.now") : AgroFormat.hour(hour.time, in: timeZone))
                 .font(.subheadline.weight(.semibold))
 
             Image(systemName: condition.icon.symbolName(isDay: isDay))
@@ -40,12 +40,12 @@ struct HourlyStripView: View {
                 .frame(height: 24)
 
             Text(hour.precipitationProbability >= 10
-                 ? "\(Int(hour.precipitationProbability.rounded())) %"
+                 ? AgroFormat.percent(hour.precipitationProbability)
                  : " ")
                 .font(.caption2.weight(.semibold))
                 .foregroundStyle(Color(red: 0.498, green: 0.816, blue: 0.961))
 
-            Text("\(Int(temperature.rounded()))°")
+            Text(AgroFormat.temperature(temperature))
                 .font(.title3)
         }
         .frame(width: 58)

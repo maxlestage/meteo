@@ -37,13 +37,11 @@ enum AgroThresholds {
 enum WaterStatus: String {
     case deficit, equilibre, excedent
 
-    var label: String {
-        switch self {
-        case .deficit: return "Déficit"
-        case .equilibre: return "Équilibre"
-        case .excedent: return "Excédent"
-        }
-    }
+    /// Clé de catalogue, par exemple « water.deficit ».
+    var labelKey: String { "water.\(rawValue)" }
+
+    /// Libellé traduit dans la langue de l'appareil.
+    var label: String { Localized.text(labelKey) }
 }
 
 struct WaterBalance: Equatable {
@@ -60,14 +58,54 @@ struct WaterBalance: Equatable {
 
 // MARK: - Pulvérisation
 
-enum SprayVerdict: String {
+enum SprayVerdict: String, Codable {
     case favorable, acceptable, defavorable
 
-    var label: String {
+    /// Clé de catalogue, par exemple « spray.favorable ».
+    var labelKey: String { "spray.\(rawValue)" }
+
+    /// Libellé traduit dans la langue de l'appareil.
+    var label: String { Localized.text(labelKey) }
+}
+
+/// Motif de dégradation d'une heure, sous forme structurée : le domaine dit ce
+/// qui cloche et avec quelles valeurs, l'interface le formule dans sa langue.
+enum SprayBlocker: Equatable, Hashable, Codable {
+    case windTooStrong(wind: Double, limit: Double)
+    case windTooWeak
+    case gusts(Double)
+    case rain(Double)
+    case tooHot(Double)
+    case tooCold(Double)
+    case dryAir(Double)
+    case vapourPressureDeficit(Double)
+
+    /// Motif formulé dans la langue de l'appareil, unités comprises.
+    var text: String {
         switch self {
-        case .favorable: return "Favorable"
-        case .acceptable: return "Acceptable"
-        case .defavorable: return "Défavorable"
+        case let .windTooStrong(wind, limit):
+            return Localized.text(
+                "spray.windTooStrong",
+                AgroFormat.unit(wind, "km/h", decimals: 0),
+                AgroFormat.unit(limit, "km/h", decimals: 0)
+            )
+        case .windTooWeak:
+            return Localized.text("spray.windTooWeak")
+        case let .gusts(gusts):
+            return Localized.text("spray.gusts", AgroFormat.unit(gusts, "km/h", decimals: 0))
+        case let .rain(amount):
+            return Localized.text("spray.rain", AgroFormat.unit(amount, "mm"))
+        case let .tooHot(temperature):
+            return Localized.text("spray.tooHot", AgroFormat.unit(temperature, "°C", decimals: 0))
+        case let .tooCold(temperature):
+            return Localized.text("spray.tooCold", AgroFormat.unit(temperature, "°C", decimals: 0))
+        case let .dryAir(humidity):
+            return Localized.text("spray.dryAir", AgroFormat.percent(humidity))
+        case let .vapourPressureDeficit(vpd):
+            return Localized.text(
+                "spray.vapourPressureDeficit",
+                AgroFormat.unit(vpd, "kPa", decimals: 2)
+            )
         }
     }
 }
@@ -77,8 +115,8 @@ struct SprayWindow: Equatable, Identifiable {
     let verdict: SprayVerdict
     /// Score 0–100 : 100 = conditions idéales.
     let score: Int
-    /// Motifs de dégradation, en clair, pour l'affichage.
-    let blockers: [String]
+    /// Motifs de dégradation, à traduire à l'affichage.
+    let blockers: [SprayBlocker]
 
     var id: Date { time }
 }
@@ -95,14 +133,11 @@ struct SprayOpportunity: Equatable {
 enum FrostSeverity: String {
     case aucun, faible, modere, severe
 
-    var label: String {
-        switch self {
-        case .aucun: return "Aucun"
-        case .faible: return "Faible"
-        case .modere: return "Modéré"
-        case .severe: return "Sévère"
-        }
-    }
+    /// Clé de catalogue, par exemple « frost.aucun ».
+    var labelKey: String { "frost.\(rawValue)" }
+
+    /// Libellé traduit dans la langue de l'appareil.
+    var label: String { Localized.text(labelKey) }
 }
 
 struct FrostRisk: Equatable {
@@ -118,13 +153,11 @@ struct FrostRisk: Equatable {
 enum DiseaseLevel: String {
     case faible, moyenne, elevee
 
-    var label: String {
-        switch self {
-        case .faible: return "Faible"
-        case .moyenne: return "Moyenne"
-        case .elevee: return "Élevée"
-        }
-    }
+    /// Clé de catalogue, par exemple « disease.faible ».
+    var labelKey: String { "disease.\(rawValue)" }
+
+    /// Libellé traduit dans la langue de l'appareil.
+    var label: String { Localized.text(labelKey) }
 }
 
 struct DiseasePressure: Equatable {
@@ -138,13 +171,11 @@ struct DiseasePressure: Equatable {
 enum SoilState: String {
     case sature, ressuye, sec
 
-    var label: String {
-        switch self {
-        case .sature: return "Saturé"
-        case .ressuye: return "Ressuyé"
-        case .sec: return "Sec"
-        }
-    }
+    /// Clé de catalogue, par exemple « soil.sature ».
+    var labelKey: String { "soil.\(rawValue)" }
+
+    /// Libellé traduit dans la langue de l'appareil.
+    var label: String { Localized.text(labelKey) }
 }
 
 struct SoilCondition: Equatable {
@@ -241,48 +272,48 @@ enum AgroIndicators {
         let hour = hours[index]
         let next = hours.indices.contains(index + 1) ? hours[index + 1] : nil
 
-        var blockers: [String] = []
+        var blockers: [SprayBlocker] = []
         var score = 100
         /// Un critère rédhibitoire interdit le passage, quel que soit le reste.
         var disqualified = false
 
         if hour.windSpeed > AgroThresholds.sprayWindMax {
-            blockers.append("Vent \(Int(hour.windSpeed.rounded())) km/h (max \(Int(AgroThresholds.sprayWindMax)))")
+            blockers.append(.windTooStrong(wind: hour.windSpeed, limit: AgroThresholds.sprayWindMax))
             score -= 45
             disqualified = true
         } else if hour.windSpeed < AgroThresholds.sprayWindMin {
-            blockers.append("Vent trop faible, risque d’inversion thermique")
+            blockers.append(.windTooWeak)
             score -= 25
         }
 
         if hour.windGusts > AgroThresholds.sprayGustMax {
-            blockers.append("Rafales \(Int(hour.windGusts.rounded())) km/h")
+            blockers.append(.gusts(hour.windGusts))
             score -= 20
             disqualified = true
         }
 
         let rainSoon = hour.precipitation + (next?.precipitation ?? 0)
         if rainSoon > AgroThresholds.sprayRainMax {
-            blockers.append("Pluie \(format(rainSoon, decimals: 1)) mm dans les 2 h")
+            blockers.append(.rain(round(rainSoon, decimals: 1)))
             score -= 45
             disqualified = true
         }
 
         if hour.temperature > AgroThresholds.sprayTempMax {
-            blockers.append("Température \(Int(hour.temperature.rounded())) °C")
+            blockers.append(.tooHot(hour.temperature))
             score -= 20
         } else if hour.temperature < AgroThresholds.sprayTempMin {
-            blockers.append("Température \(Int(hour.temperature.rounded())) °C, trop froid")
+            blockers.append(.tooCold(hour.temperature))
             score -= 20
         }
 
         if hour.relativeHumidity < AgroThresholds.sprayHumidityMin {
-            blockers.append("Hygrométrie \(Int(hour.relativeHumidity.rounded())) %")
+            blockers.append(.dryAir(hour.relativeHumidity))
             score -= 15
         }
 
         if hour.vapourPressureDeficit > AgroThresholds.sprayVpdMax {
-            blockers.append("VPD \(format(hour.vapourPressureDeficit, decimals: 2)) kPa, évaporation des gouttelettes")
+            blockers.append(.vapourPressureDeficit(round(hour.vapourPressureDeficit, decimals: 2)))
             score -= 15
         }
 
@@ -434,9 +465,5 @@ enum AgroIndicators {
     private static func round(_ value: Double, decimals: Int) -> Double {
         let factor = pow(10.0, Double(decimals))
         return (value * factor).rounded() / factor
-    }
-
-    private static func format(_ value: Double, decimals: Int) -> String {
-        String(format: "%.\(decimals)f", value)
     }
 }

@@ -1,4 +1,5 @@
-import { sprayWindows, type HourlySample, type SprayOpportunity } from '@klima/core'
+import { describeBlocker, sprayWindows, type HourlySample, type SprayOpportunity } from '@klima/core'
+import { useI18n } from '@klima/core/ui'
 
 interface Props {
   hours: readonly HourlySample[]
@@ -11,34 +12,35 @@ interface Props {
  * en clair, puis une frise des 24 prochaines heures.
  */
 export function SprayCard({ hours, nextSpray, timeZone }: Props) {
+  const { t, f, locale } = useI18n()
   const windows = sprayWindows(hours).slice(0, 24)
-  const rangeFormat = new Intl.DateTimeFormat('fr-FR', {
+  const rangeFormat = new Intl.DateTimeFormat(locale, {
     weekday: 'short',
     hour: 'numeric',
     timeZone,
   })
-  const endFormat = new Intl.DateTimeFormat('fr-FR', { hour: 'numeric', timeZone })
-  const hourFormat = new Intl.DateTimeFormat('fr-FR', { hour: 'numeric', timeZone })
+  const endFormat = new Intl.DateTimeFormat(locale, { hour: 'numeric', timeZone })
+  const hourFormat = new Intl.DateTimeFormat(locale, { hour: 'numeric', timeZone })
 
-  // Le motif de blocage le plus fréquent des 24 h résume la situation.
-  const blocked = windows.filter((w) => w.verdict === 'defavorable' && w.blockers.length > 0)
-  const mainBlocker = blocked.length > 0 ? shorten(blocked[0]!.blockers[0]!) : null
+  // Le premier motif de blocage des 24 h résume la situation.
+  const blocked = windows.find((w) => w.verdict === 'defavorable' && w.blockers.length > 0)
+  const mainBlocker = blocked ? describeBlocker(blocked.blockers[0]!, t, f) : null
 
   return (
-    <section className="card" aria-label="Fenêtre de traitement">
-      <h2 className="card__label">Fenêtre de traitement</h2>
+    <section className="card" aria-label={t('spray.title')}>
+      <h2 className="card__label">{t('spray.title')}</h2>
 
       <p className="spray__headline">
         {nextSpray
           ? `${capitalize(rangeFormat.format(nextSpray.start))} → ${endFormat.format(nextSpray.end)}`
-          : 'Aucune fenêtre sur 7 jours'}
+          : t('spray.none')}
       </p>
       <p className="spray__caption">
         {nextSpray
-          ? `Score ${nextSpray.score}/100 sur la plage`
+          ? t('spray.score', { score: nextSpray.score })
           : mainBlocker
-            ? `Blocage principal : ${mainBlocker}`
-            : 'Conditions défavorables'}
+            ? t('spray.mainBlocker', { blocker: mainBlocker.toLowerCase() })
+            : t('spray.unsuitable')}
       </p>
 
       <div className="spray__strip">
@@ -47,15 +49,17 @@ export function SprayCard({ hours, nextSpray, timeZone }: Props) {
             key={window.time.toISOString()}
             className={`spray__hour spray__hour--${window.verdict}`}
             title={`${hourFormat.format(window.time)} — ${window.score}/100${
-              window.blockers.length ? ` · ${window.blockers.join(' · ')}` : ''
+              window.blockers.length
+                ? ` · ${window.blockers.map((blocker) => describeBlocker(blocker, t, f)).join(' · ')}`
+                : ''
             }`}
           />
         ))}
       </div>
       <div className="spray__scale">
-        <span>Maintenant</span>
-        <span>+12 h</span>
-        <span>+24 h</span>
+        <span>{t('spray.now')}</span>
+        <span>{t('spray.plus12')}</span>
+        <span>{t('spray.plus24')}</span>
       </div>
     </section>
   )
@@ -65,7 +69,3 @@ function capitalize(value: string): string {
   return value.charAt(0).toUpperCase() + value.slice(1)
 }
 
-/** Retire la valeur chiffrée pour ne garder que le motif. */
-function shorten(blocker: string): string {
-  return blocker.toLowerCase().replace(/\s*\(.*\)$/, '')
-}

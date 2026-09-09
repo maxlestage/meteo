@@ -6,12 +6,12 @@ final class WeatherConditionTests: XCTestCase {
 
     func testClearSky() {
         let condition = WeatherCondition.forCode(0)
-        XCTAssertEqual(condition.label, "Ciel dégagé")
+        XCTAssertEqual(condition.labelKey, "wmo.clearSky")
         XCTAssertEqual(condition.icon, .clear)
     }
 
     func testDrizzle() {
-        XCTAssertEqual(WeatherCondition.forCode(53).label, "Bruine")
+        XCTAssertEqual(WeatherCondition.forCode(53).labelKey, "wmo.drizzle")
         XCTAssertEqual(WeatherCondition.forCode(53).icon, .drizzle)
     }
 
@@ -24,7 +24,10 @@ final class WeatherConditionTests: XCTestCase {
     }
 
     func testUnknownCodeFallsBack() {
-        XCTAssertEqual(WeatherCondition.forCode(42), WeatherCondition(label: "Couvert", icon: .cloudy))
+        XCTAssertEqual(
+            WeatherCondition.forCode(42),
+            WeatherCondition(labelKey: "wmo.overcast", icon: .cloudy)
+        )
     }
 
     func testSymbolsFollowDayAndNight() {

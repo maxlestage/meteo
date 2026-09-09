@@ -7,6 +7,7 @@
  * L'API est libre d'accès et ne demande aucune clé.
  */
 import type { CurrentSample, DailySample, HourlySample } from './agro'
+import type { Params } from './i18n'
 
 const FORECAST_URL = 'https://api.open-meteo.com/v1/forecast'
 const GEOCODING_URL = 'https://geocoding-api.open-meteo.com/v1/search'
@@ -70,9 +71,17 @@ export interface AgroForecast {
   fetchedAt: Date
 }
 
+/**
+ * Panne côté service. L'erreur porte une clé de catalogue, pas une phrase :
+ * c'est l'interface qui la formule dans la langue de l'utilisateur.
+ */
 export class AgroApiError extends Error {
-  constructor(message: string, readonly cause?: unknown) {
-    super(message)
+  constructor(
+    readonly messageKey: string,
+    readonly params?: Params,
+    readonly cause?: unknown,
+  ) {
+    super(messageKey)
     this.name = 'AgroApiError'
   }
 }
@@ -143,11 +152,11 @@ async function getJson<T>(url: URL, signal?: AbortSignal): Promise<T> {
     response = await fetch(url, { signal })
   } catch (error) {
     if (error instanceof DOMException && error.name === 'AbortError') throw error
-    throw new AgroApiError('Service météo injoignable. Vérifiez votre connexion.', error)
+    throw new AgroApiError('api.unreachable', undefined, error)
   }
 
   if (!response.ok) {
-    throw new AgroApiError(`Le service météo a répondu ${response.status}.`)
+    throw new AgroApiError('api.status', { status: response.status })
   }
   return (await response.json()) as T
 }
