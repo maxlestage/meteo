@@ -6,6 +6,11 @@ struct SprayCardView: View {
     let hours: [HourlySample]
     let nextSpray: SprayOpportunity?
     let timeZone: TimeZone
+    /// Vrai si une activité en direct suit déjà cette fenêtre.
+    var isFollowing = false
+    /// Faux si l'appareil ou les réglages refusent les activités en direct.
+    var canFollow = false
+    var onFollow: () -> Void = {}
 
     private var windows: [SprayWindow] {
         Array(AgroIndicators.sprayWindows(hours).prefix(24))
@@ -44,6 +49,21 @@ struct SprayCardView: View {
             .font(.system(size: 11))
             .foregroundStyle(.white.opacity(0.62))
             .padding(.top, 5)
+
+            if canFollow, nextSpray != nil {
+                Button(action: onFollow) {
+                    Label(
+                        Localized.text(isFollowing ? "activity.stop" : "activity.follow"),
+                        systemImage: isFollowing ? "bell.slash" : "bell"
+                    )
+                    .font(.subheadline)
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 8)
+                    .background(Color.white.opacity(0.14), in: RoundedRectangle(cornerRadius: 10))
+                }
+                .buttonStyle(.plain)
+                .padding(.top, 10)
+            }
         }
         .cardBackground()
     }

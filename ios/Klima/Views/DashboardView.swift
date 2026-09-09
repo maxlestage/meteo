@@ -4,6 +4,7 @@ import SwiftUI
 /// comme l'application Météo du système.
 struct DashboardView: View {
     @StateObject private var viewModel = DashboardViewModel()
+    @StateObject private var activity = SprayActivityController()
     @State private var query = ""
 
     private let tiles = [GridItem(.adaptive(minimum: 150), spacing: 12)]
@@ -46,7 +47,10 @@ struct DashboardView: View {
                             SprayCardView(
                                 hours: forecast.hourly,
                                 nextSpray: summary.nextSpray,
-                                timeZone: viewModel.timeZone
+                                timeZone: viewModel.timeZone,
+                                isFollowing: activity.isRunning,
+                                canFollow: activity.isAvailable,
+                                onFollow: { toggleFollow(forecast, summary) }
                             )
 
                             LazyVGrid(columns: tiles, spacing: 12) {
@@ -89,10 +93,34 @@ struct DashboardView: View {
                     searchResults
                 }
             }
-            .refreshable { await viewModel.load() }
-            .task { await viewModel.load() }
+            .refreshable { await reload() }
+            .task { await reload() }
         }
         .preferredColorScheme(.dark)
+    }
+
+    // MARK: Activité en direct
+
+    /// Recharge la prévision, puis répercute les nouvelles conditions sur
+    /// l'activité en direct si elle est en cours.
+    private func reload() async {
+        await viewModel.load()
+        guard let forecast = viewModel.forecast, let summary = viewModel.summary else { return }
+        await activity.refresh(hours: forecast.hourly, opportunity: summary.nextSpray)
+    }
+
+    private func toggleFollow(_ forecast: AgroForecast, _ summary: AgroSummary) {
+        guard let opportunity = summary.nextSpray else { return }
+        if activity.isRunning {
+            Task { await activity.stop() }
+        } else {
+            activity.start(
+                parcelle: forecast.parcelle,
+                opportunity: opportunity,
+                timeZone: viewModel.timeZone,
+                hours: forecast.hourly
+            )
+        }
     }
 
     // MARK: Sous-vues
