@@ -45,6 +45,23 @@ Les suites de tests vérifient que les trois langues portent exactement les mêm
 clés et les mêmes valeurs à interpoler : une traduction oubliée fait échouer la
 compilation, elle n'apparaît pas en clair dans l'application.
 
+## Plusieurs modèles, recoupés
+
+Un seul modèle donne un chiffre ; plusieurs donnent un chiffre **et** une idée
+de sa fiabilité. Klima interroge quatre centres de calcul indépendants —
+Météo-France (AROME/ARPEGE), ECMWF (IFS), Deutscher Wetterdienst (ICON) et NOAA
+(GFS), redistribués par Open-Meteo — et les recoupe pour l'heure en cours.
+
+La valeur retenue est la **médiane**, moins sensible qu'une moyenne à un modèle
+isolé. L'accord est jugé fort quand les modèles tiennent dans 1,5 °C et
+s'entendent sur la pluie, faible au-delà de 3 °C d'écart. Quand ils divergent,
+l'application le dit plutôt que d'afficher une fausse précision ; un modèle qui
+ne couvre pas la parcelle est écarté au lieu de compter pour zéro.
+
+Le recoupement fait l'objet d'une requête séparée : s'il échoue, la prévision
+principale reste servie. Les seuils vivent dans `ConsensusThresholds`, des deux
+côtés, avec les mêmes cas de test.
+
 ## Ce que l'application calcule
 
 iOS et web appliquent les mêmes règles, avec les mêmes seuils :
@@ -180,6 +197,12 @@ bun run build      # dist/
 
 Les seuils affichés dans la page sont lus dans `AgroThresholds` : la vitrine ne
 peut pas annoncer autre chose que ce que l'application applique.
+
+Les illustrations sont dessinées en SVG — rien à licencier, rien à charger, et
+le trait reste net à toutes les tailles. Les animations sont en CSS et se
+coupent d'elles-mêmes sous `prefers-reduced-motion`. Les apparitions au
+défilement ne masquent jamais un contenu sans savoir pouvoir le ramener : sans
+JavaScript ou sans `IntersectionObserver`, la page reste lisible.
 
 ### Publication sur GitHub Pages
 
