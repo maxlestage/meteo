@@ -4,6 +4,8 @@ import react from '@vitejs/plugin-react'
 
 export default defineConfig({
   plugins: [react()],
+  // Chemins relatifs : l'application se déplace sans reconfiguration.
+  base: './',
   // Le cœur partagé est consommé en TypeScript, sans étape de compilation.
   resolve: {
     alias: {
