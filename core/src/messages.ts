@@ -71,6 +71,15 @@ export const sharedMessages: Record<Language, Catalog> = {
     'api.unreachable': 'Service météo injoignable. Vérifiez votre connexion.',
     'api.status': 'Le service météo a répondu {status}.',
     'api.malformed': 'Réponse illisible du service météo.',
+
+    'consensus.title': 'Accord des modèles',
+    'consensus.forte': 'Fort',
+    'consensus.moyenne': 'Moyen',
+    'consensus.faible': 'Faible',
+    'consensus.detail': '{count} modèles · écart {spread}',
+    'consensus.rainDisagreement': 'désaccord sur la pluie',
+    'consensus.unavailable': 'Comparaison indisponible',
+    'consensus.median': 'Valeur retenue : {value}',
   },
 
   en: {
@@ -138,6 +147,15 @@ export const sharedMessages: Record<Language, Catalog> = {
     'api.unreachable': 'Weather service unreachable. Check your connection.',
     'api.status': 'The weather service replied {status}.',
     'api.malformed': 'Unreadable response from the weather service.',
+
+    'consensus.title': 'Model agreement',
+    'consensus.forte': 'Strong',
+    'consensus.moyenne': 'Moderate',
+    'consensus.faible': 'Weak',
+    'consensus.detail': '{count} models · {spread} apart',
+    'consensus.rainDisagreement': 'they disagree on rain',
+    'consensus.unavailable': 'Comparison unavailable',
+    'consensus.median': 'Value used: {value}',
   },
 
   es: {
@@ -205,5 +223,14 @@ export const sharedMessages: Record<Language, Catalog> = {
     'api.unreachable': 'Servicio meteorológico inaccesible. Compruebe su conexión.',
     'api.status': 'El servicio meteorológico ha respondido {status}.',
     'api.malformed': 'Respuesta ilegible del servicio meteorológico.',
+
+    'consensus.title': 'Acuerdo de los modelos',
+    'consensus.forte': 'Fuerte',
+    'consensus.moyenne': 'Medio',
+    'consensus.faible': 'Débil',
+    'consensus.detail': '{count} modelos · diferencia de {spread}',
+    'consensus.rainDisagreement': 'discrepan sobre la lluvia',
+    'consensus.unavailable': 'Comparación no disponible',
+    'consensus.median': 'Valor retenido: {value}',
   },
 }

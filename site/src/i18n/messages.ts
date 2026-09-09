@@ -96,6 +96,32 @@ export const siteMessages: Record<Language, Catalog> = {
     'footer.note':
       'Les indicateurs sont des aides à la décision ; ils ne remplacent ni l’observation de la parcelle ni la réglementation en vigueur.',
 
+
+    'nav.sources': 'Sources',
+
+    'sources.title': 'Quatre services météo, une seule réponse',
+    'sources.lead':
+      'Un seul modèle donne un chiffre. Quatre modèles donnent un chiffre et une idée de sa fiabilité. Klima interroge les sorties de quatre centres de calcul nationaux et les recoupe pour l’heure en cours.',
+    'sources.method': 'Comment se lit l’accord',
+    'sources.methodBody':
+      'La valeur retenue est la médiane, moins sensible qu’une moyenne à un modèle isolé. L’accord est jugé fort quand les modèles tiennent dans 1,5 °C et s’entendent sur la pluie ; faible au-delà de 3 °C d’écart. Quand ils divergent, Klima le dit plutôt que d’afficher une fausse précision.',
+    'sources.note':
+      'Les quatre modèles sont redistribués par Open-Meteo, qui n’en produit aucun : ce sont bien quatre centres de calcul indépendants.',
+    'sources.loading': 'Recoupement en cours…',
+    'sources.unavailable': 'Comparaison indisponible pour cette commune.',
+    'sources.now': 'Température à l’heure en cours',
+
+    'footer.tagline': 'La météo qui parle agronomie. Sur iPhone, sur la montre et sur le web.',
+    'footer.product': 'Le produit',
+    'footer.dataTitle': 'Les données',
+    'footer.credits': 'Crédits',
+    'footer.author': 'Maxime Nathan Lestage',
+    'footer.role': 'Conception et développement',
+    'footer.rights': '© {year} Klima — Maxime Nathan Lestage. Tous droits réservés.',
+    'footer.legal':
+      'Les indicateurs sont des aides à la décision. Ils ne remplacent ni l’observation de la parcelle, ni les conseils d’un technicien, ni la réglementation en vigueur sur les produits phytosanitaires.',
+    'footer.models': 'Quatre modèles recoupés',
+    'footer.method': 'ET0 FAO-56, humidité du sol par couche',
     'language.label': 'Langue',
   },
 
@@ -193,6 +219,32 @@ export const siteMessages: Record<Language, Catalog> = {
     'footer.note':
       'These indicators support a decision; they replace neither walking the field nor the regulations in force.',
 
+
+    'nav.sources': 'Sources',
+
+    'sources.title': 'Four weather services, one answer',
+    'sources.lead':
+      'One model gives you a figure. Four models give you a figure and a sense of how much to trust it. Klima queries the output of four national forecasting centres and cross-checks them for the current hour.',
+    'sources.method': 'How agreement is read',
+    'sources.methodBody':
+      'The value used is the median, less sensitive than an average to a single outlying model. Agreement counts as strong when the models sit within 1.5 °C and concur on rain; weak beyond 3 °C apart. When they diverge, Klima says so rather than displaying false precision.',
+    'sources.note':
+      'The four models are redistributed by Open-Meteo, which produces none of them: these really are four independent forecasting centres.',
+    'sources.loading': 'Cross-checking…',
+    'sources.unavailable': 'Comparison unavailable for this town.',
+    'sources.now': 'Temperature for the current hour',
+
+    'footer.tagline': 'Weather that speaks agronomy. On iPhone, on the watch and on the web.',
+    'footer.product': 'Product',
+    'footer.dataTitle': 'Data',
+    'footer.credits': 'Credits',
+    'footer.author': 'Maxime Nathan Lestage',
+    'footer.role': 'Design and development',
+    'footer.rights': '© {year} Klima — Maxime Nathan Lestage. All rights reserved.',
+    'footer.legal':
+      'These indicators support a decision. They replace neither walking the field, nor an agronomist’s advice, nor the regulations in force on plant protection products.',
+    'footer.models': 'Four models cross-checked',
+    'footer.method': 'FAO-56 ET0, soil moisture by layer',
     'language.label': 'Language',
   },
 
@@ -290,6 +342,32 @@ export const siteMessages: Record<Language, Catalog> = {
     'footer.note':
       'Los indicadores son una ayuda a la decisión; no sustituyen ni la observación de la parcela ni la normativa vigente.',
 
+
+    'nav.sources': 'Fuentes',
+
+    'sources.title': 'Cuatro servicios meteorológicos, una sola respuesta',
+    'sources.lead':
+      'Un solo modelo da una cifra. Cuatro modelos dan una cifra y una idea de su fiabilidad. Klima consulta las salidas de cuatro centros de cálculo nacionales y las contrasta para la hora en curso.',
+    'sources.method': 'Cómo se lee el acuerdo',
+    'sources.methodBody':
+      'El valor retenido es la mediana, menos sensible que una media a un modelo aislado. El acuerdo se considera fuerte cuando los modelos caben en 1,5 °C y coinciden sobre la lluvia; débil más allá de 3 °C de diferencia. Cuando discrepan, Klima lo dice en lugar de mostrar una falsa precisión.',
+    'sources.note':
+      'Open-Meteo redistribuye los cuatro modelos, pero no produce ninguno: son realmente cuatro centros de cálculo independientes.',
+    'sources.loading': 'Contrastando…',
+    'sources.unavailable': 'Comparación no disponible para este municipio.',
+    'sources.now': 'Temperatura de la hora en curso',
+
+    'footer.tagline': 'La meteorología que habla de agronomía. En el iPhone, en el reloj y en la web.',
+    'footer.product': 'El producto',
+    'footer.dataTitle': 'Los datos',
+    'footer.credits': 'Créditos',
+    'footer.author': 'Maxime Nathan Lestage',
+    'footer.role': 'Diseño y desarrollo',
+    'footer.rights': '© {year} Klima — Maxime Nathan Lestage. Todos los derechos reservados.',
+    'footer.legal':
+      'Los indicadores son una ayuda a la decisión. No sustituyen ni la observación de la parcela, ni el consejo de un técnico, ni la normativa vigente sobre productos fitosanitarios.',
+    'footer.models': 'Cuatro modelos contrastados',
+    'footer.method': 'ET0 FAO-56, humedad del suelo por capa',
     'language.label': 'Idioma',
   },
 }

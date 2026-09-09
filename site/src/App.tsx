@@ -1,10 +1,14 @@
 import { useState } from 'react'
-import { AgroThresholds, type Parcelle } from '@klima/core'
+import { AgroThresholds, weatherCondition, type Parcelle } from '@klima/core'
 import { LanguageSwitcher, useI18n } from '@klima/core/ui'
 import { Features } from './components/Features'
+import { Footer } from './components/Footer'
+import { SkyScene, SoilProfile, SprayScene } from './components/Illustrations'
+import { Sources } from './components/Sources'
 import { PhoneMockup } from './components/PhoneMockup'
 import { TodaySection } from './components/TodaySection'
 import { useDayDigest } from './hooks/useDayDigest'
+import { useReveal } from './hooks/useReveal'
 
 /** Plaine céréalière de Beauce, au premier chargement. */
 const DEFAULT_PARCELLE: Parcelle = {
@@ -18,11 +22,13 @@ const DEFAULT_PARCELLE: Parcelle = {
 export default function App() {
   const { t, f } = useI18n()
   const [parcelle, setParcelle] = useState<Parcelle>(DEFAULT_PARCELLE)
-  const { digest, loading, error, reload, forecast } = useDayDigest(parcelle)
+  const { digest, loading, error, reload, forecast, consensus } = useDayDigest(parcelle)
+  const featuresReveal = useReveal<HTMLDivElement>()
+  const dataReveal = useReveal<HTMLDivElement>()
 
-  // Le crédit encadre un lien : on coupe la phrase autour de son jeton.
-  const [creditBefore = '', creditAfter = ''] = t('footer.credit', { link: '\u0000' }).split('\u0000')
-  const credit = { before: creditBefore, after: creditAfter }
+  const current = forecast?.current
+  const raining = current ? weatherCondition(current.weatherCode).icon !== 'clear' &&
+    ['drizzle', 'rain', 'showers', 'thunder'].includes(weatherCondition(current.weatherCode).icon) : false
 
   return (
     <>
@@ -34,6 +40,7 @@ export default function App() {
           <nav>
             <a href="#aujourdhui">{t('nav.today')}</a>
             <a href="#indicateurs">{t('nav.indicators')}</a>
+            <a href="#sources">{t('nav.sources')}</a>
             <a href="#donnees">{t('nav.data')}</a>
           </nav>
           <LanguageSwitcher className="lang" label={t('language.label')} />
@@ -60,6 +67,10 @@ export default function App() {
           <PhoneMockup parcelle={parcelle} digest={digest} current={forecast?.current ?? null} />
         </section>
 
+        <div className="banner">
+          <SkyScene isDay={current?.isDay ?? true} raining={raining} />
+        </div>
+
         <TodaySection
           parcelle={parcelle}
           digest={digest}
@@ -71,13 +82,31 @@ export default function App() {
           timeZone={forecast?.timezone ?? 'Europe/Paris'}
         />
 
-        <Features />
+        <Sources consensus={consensus} loading={loading} />
 
-        <section className="data" id="donnees">
+        <div ref={featuresReveal.ref} className={featuresReveal.className}>
+          <Features />
+          <div className="figures">
+            <figure>
+              <SoilProfile />
+              <figcaption>{t('feature.soil.rule')}</figcaption>
+            </figure>
+            <figure>
+              <SprayScene />
+              <figcaption>{t('feature.spray.rule', {
+                min: f.unit(AgroThresholds.sprayWindMin, 'km/h', 0),
+                max: f.unit(AgroThresholds.sprayWindMax, 'km/h', 0),
+                gusts: f.unit(AgroThresholds.sprayGustMax, 'km/h', 0),
+              })}</figcaption>
+            </figure>
+          </div>
+        </div>
+
+        <section className="data" id="donnees" ref={dataReveal.ref}>
           <div className="section-head">
             <h2>{t('data.title')}</h2>
           </div>
-          <div className="data__grid">
+          <div className={`data__grid ${dataReveal.className}`}>
             <article>
               <h3>{t('data.model.title')}</h3>
               <p>{t('data.model.body')}</p>
@@ -94,14 +123,7 @@ export default function App() {
         </section>
       </main>
 
-      <footer className="footer">
-        <p>
-          {credit.before}
-          <a href="https://open-meteo.com/">Open-Meteo</a>
-          {credit.after}
-        </p>
-        <p className="footer__note">{t('footer.note')}</p>
-      </footer>
+      <Footer />
     </>
   )
 }
