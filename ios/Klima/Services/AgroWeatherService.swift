@@ -22,6 +22,7 @@ enum AgroWeatherError: LocalizedError, Equatable {
 protocol AgroWeatherProviding {
     func forecast(for parcelle: Parcelle, days: Int) async throws -> AgroForecast
     func search(commune query: String) async throws -> [Parcelle]
+    func modelConsensus(for parcelle: Parcelle) async throws -> Consensus?
 }
 
 /// Client de l'API agricole Open-Meteo.
@@ -117,6 +118,58 @@ struct AgroWeatherService: AgroWeatherProviding {
         let trimmed = hours.filter { $0.time.timeIntervalSince1970 >= start }
         // Si l'heure courante sort de la série, on garde la série telle quelle.
         return trimmed.isEmpty ? hours : trimmed
+    }
+
+    /// Interroge plusieurs modèles pour l'heure en cours et les recoupe.
+    ///
+    /// Requête séparée de la prévision principale, à dessein : si la
+    /// comparaison échoue, l'application continue avec sa source habituelle.
+    func modelConsensus(for parcelle: Parcelle) async throws -> Consensus? {
+        var components = URLComponents(url: Self.forecastURL, resolvingAgainstBaseURL: false)!
+        components.queryItems = [
+            URLQueryItem(name: "latitude", value: String(format: "%.4f", parcelle.latitude)),
+            URLQueryItem(name: "longitude", value: String(format: "%.4f", parcelle.longitude)),
+            URLQueryItem(name: "hourly", value: "temperature_2m,precipitation,wind_speed_10m"),
+            URLQueryItem(name: "models", value: WeatherModel.all.map(\.id).joined(separator: ",")),
+            URLQueryItem(name: "wind_speed_unit", value: "kmh"),
+            URLQueryItem(name: "timezone", value: "auto"),
+            URLQueryItem(name: "forecast_days", value: "1"),
+        ]
+
+        let payload: ModelPayload = try await get(components.url!)
+        return ModelConsensus.consensus(Self.readings(from: payload))
+    }
+
+    /// Avec plusieurs modèles, Open-Meteo suffixe chaque variable de
+    /// l'identifiant du modèle. Un modèle qui ne couvre pas la parcelle renvoie
+    /// des `null` : on l'écarte plutôt que de compter un zéro.
+    static func readings(from payload: ModelPayload) -> [ModelReading] {
+        guard let index = currentHourIndex(payload) else { return [] }
+
+        return WeatherModel.all.compactMap { model in
+            guard let temperature = payload.value("temperature_2m_\(model.id)", at: index) else {
+                return nil
+            }
+            return ModelReading(
+                model: model,
+                temperature: temperature,
+                precipitation: payload.value("precipitation_\(model.id)", at: index) ?? 0,
+                windSpeed: payload.value("wind_speed_10m_\(model.id)", at: index) ?? 0
+            )
+        }
+    }
+
+    /// Première heure de la série postérieure ou égale à l'heure en cours.
+    private static func currentHourIndex(_ payload: ModelPayload) -> Int? {
+        let zone = TimeZone(identifier: payload.timezone ?? "") ?? .current
+        let formatter = DateFormatter.openMeteo(format: "yyyy-MM-dd'T'HH:mm", zone: zone)
+        let start = (Date().timeIntervalSince1970 / 3600).rounded(.down) * 3600
+
+        for (index, stamp) in payload.hourly.time.enumerated() {
+            guard let date = formatter.date(from: stamp) else { continue }
+            if date.timeIntervalSince1970 >= start { return index }
+        }
+        return payload.hourly.time.isEmpty ? nil : payload.hourly.time.count - 1
     }
 
     /// Recherche une commune par son nom (géocodage Open-Meteo).
@@ -341,6 +394,45 @@ struct ForecastPayload: Decodable {
                 )
             }
         }
+    }
+}
+
+/// Réponse d'une requête multi-modèles : des colonnes suffixées, lues à la
+/// demande plutôt que déclarées une par une.
+struct ModelPayload: Decodable {
+    let timezone: String?
+    let hourly: Block
+
+    struct Block: Decodable {
+        let time: [String]
+        /// Colonnes restantes, indexées par nom.
+        let columns: [String: [Double?]]
+
+        private struct Key: CodingKey {
+            let stringValue: String
+            init?(stringValue: String) { self.stringValue = stringValue }
+            var intValue: Int? { nil }
+            init?(intValue: Int) { nil }
+        }
+
+        init(from decoder: Decoder) throws {
+            let container = try decoder.container(keyedBy: Key.self)
+            time = try container.decode([String].self, forKey: Key(stringValue: "time")!)
+
+            var columns: [String: [Double?]] = [:]
+            for key in container.allKeys where key.stringValue != "time" {
+                if let values = try? container.decode([Double?].self, forKey: key) {
+                    columns[key.stringValue] = values
+                }
+            }
+            self.columns = columns
+        }
+    }
+
+    func value(_ column: String, at index: Int) -> Double? {
+        guard let values = hourly.columns[column], values.indices.contains(index) else { return nil }
+        guard let value = values[index], value.isFinite else { return nil }
+        return value
     }
 }
 

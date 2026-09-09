@@ -10,6 +10,8 @@ final class DashboardViewModel: ObservableObject {
     @Published private(set) var parcelle: Parcelle
     @Published private(set) var forecast: AgroForecast?
     @Published private(set) var summary: AgroSummary?
+    /// Recoupement des modèles ; absent si la comparaison a échoué.
+    @Published private(set) var consensus: Consensus?
     @Published private(set) var isLoading = false
     @Published var errorMessage: String?
 
@@ -52,12 +54,15 @@ final class DashboardViewModel: ObservableObject {
                 guard !Task.isCancelled else { return }
                 self.forecast = forecast
                 self.summary = AgroIndicators.summarize(hours: forecast.hourly, days: forecast.daily)
+                // Le recoupement est un plus : son échec ne prive de rien.
+                self.consensus = try? await service.modelConsensus(for: parcelle)
             } catch is CancellationError {
                 return
             } catch {
                 guard !Task.isCancelled else { return }
                 self.forecast = nil
                 self.summary = nil
+                self.consensus = nil
                 self.errorMessage = (error as? LocalizedError)?.errorDescription
                     ?? Localized.text("app.error")
             }
