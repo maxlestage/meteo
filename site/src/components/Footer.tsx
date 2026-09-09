@@ -1,6 +1,5 @@
 import { LANGUAGE_NAMES, LANGUAGES } from '@klima/core'
-import { useI18n } from '@klima/core/ui'
-import { BrandMark } from './Brand'
+import { BrandMark, useI18n } from '@klima/core/ui'
 
 /**
  * Pied de page : ce que le produit couvre, d'où viennent ses chiffres, qui l'a
