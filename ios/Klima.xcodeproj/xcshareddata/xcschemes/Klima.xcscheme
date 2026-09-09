@@ -14,7 +14,7 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "E3435DDA2687639586BF0B70"
+               BlueprintIdentifier = "55F3739A6E9AB03B1D740E52"
                BuildableName = "Klima.app"
                BlueprintName = "Klima"
                ReferencedContainer = "container:Klima.xcodeproj">
@@ -32,7 +32,7 @@
             skipped = "NO">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "A700229C3AC2DAE057FE5B27"
+               BlueprintIdentifier = "A5D14E7D3C5348865D20B96C"
                BuildableName = "KlimaTests.xctest"
                BlueprintName = "KlimaTests"
                ReferencedContainer = "container:Klima.xcodeproj">
@@ -53,12 +53,12 @@
       <BuildableProductRunnable
          runnableDebuggingMode = "0">
          <BuildableReference
-            BuildableIdentifier = "primary"
-            BlueprintIdentifier = "E3435DDA2687639586BF0B70"
-            BuildableName = "Klima.app"
-            BlueprintName = "Klima"
-            ReferencedContainer = "container:Klima.xcodeproj">
-         </BuildableReference>
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "55F3739A6E9AB03B1D740E52"
+               BuildableName = "Klima.app"
+               BlueprintName = "Klima"
+               ReferencedContainer = "container:Klima.xcodeproj">
+            </BuildableReference>
       </BuildableProductRunnable>
    </LaunchAction>
    <ProfileAction
@@ -70,12 +70,12 @@
       <BuildableProductRunnable
          runnableDebuggingMode = "0">
          <BuildableReference
-            BuildableIdentifier = "primary"
-            BlueprintIdentifier = "E3435DDA2687639586BF0B70"
-            BuildableName = "Klima.app"
-            BlueprintName = "Klima"
-            ReferencedContainer = "container:Klima.xcodeproj">
-         </BuildableReference>
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "55F3739A6E9AB03B1D740E52"
+               BuildableName = "Klima.app"
+               BlueprintName = "Klima"
+               ReferencedContainer = "container:Klima.xcodeproj">
+            </BuildableReference>
       </BuildableProductRunnable>
    </ProfileAction>
    <AnalyzeAction

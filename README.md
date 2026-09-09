@@ -91,16 +91,42 @@ Avant la première exécution sur appareil, renseignez votre équipe de signatur
 (`DEVELOPMENT_TEAM`) et, si besoin, votre propre `PRODUCT_BUNDLE_IDENTIFIER`
 dans les réglages de la cible.
 
-Organisation :
+Trois cibles se partagent le même noyau (`Klima/Models`) :
 
 ```
-Klima/
-  App/          Point d'entrée SwiftUI
-  Models/       Types de mesure et cœur agronomique (AgroIndicators)
-  Services/     Client Open-Meteo, relevé de position
-  ViewModels/   État du tableau de bord
-  Views/        Tableau de bord, bandeau horaire, liste des jours, tuiles
-  Resources/    Info.plist, catalogue d'assets
+Klima/           Application iPhone
+  App/           Point d'entrée SwiftUI
+  Models/        Types de mesure, cœur agronomique, formats, textes
+  Services/      Client Open-Meteo, position, activité en direct
+  ViewModels/    État du tableau de bord
+  Views/         Tableau de bord, bandeau horaire, liste des jours, tuiles
+  Resources/     Info.plist, assets, catalogues de chaînes
+KlimaWidgets/    Extension : activité en direct de la fenêtre de traitement
+KlimaWatch/      Application watchOS autonome
+```
+
+### Activité en direct
+
+La fenêtre de traitement est le seul élément vraiment vivant de Klima : elle a
+un début, une fin, et des conditions qui peuvent se dégrader entre-temps. Un
+bouton sur la carte de traitement ouvre son suivi ; l'écran verrouillé et l'île
+dynamique affichent alors le verdict courant, le vent et le motif de blocage
+s'il y en a un.
+
+Les mises à jour sont **locales** : elles suivent les rechargements de
+l'application. Un suivi à la minute, application fermée, demanderait des
+notifications poussées et donc un serveur, que Klima n'a pas.
+
+### Application montre
+
+`KlimaWatch` est une application watchOS autonome : elle interroge l'API
+elle-même et se cale sur la position du poignet, sans passer par le téléphone.
+Elle montre la température, la prochaine fenêtre de traitement, le vent, l'état
+du sol, le gel et le bilan — les réponses qu'on vient chercher au champ.
+
+```bash
+xcodebuild -project ios/Klima.xcodeproj -scheme KlimaWatch \
+  -destination 'platform=watchOS Simulator,name=Apple Watch Series 9 (45mm)' build
 ```
 
 ## Web

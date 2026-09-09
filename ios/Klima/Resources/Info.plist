@@ -22,6 +22,10 @@
 	<string>$(CURRENT_PROJECT_VERSION)</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
+	<key>NSSupportsLiveActivities</key>
+	<true/>
+	<key>NSSupportsLiveActivitiesFrequentUpdates</key>
+	<false/>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>Votre position sert à caler la prévision agricole sur votre parcelle.</string>
 	<key>UILaunchScreen</key>

@@ -7,81 +7,174 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		1A130F063342B72B457FC015 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 8D7172619DB15AD08404D409 /* Assets.xcassets */; };
-		2464C2E49CFAC0B3B4CA09A1 /* HeroView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 39D975AAB74D8A287A6B7254 /* HeroView.swift */; };
-		2480C8BED00599CB4A37BE3A /* AgroFormatTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E22F9EBB5D794EB26C40EE42 /* AgroFormatTests.swift */; };
-		24CA7F13131AEBCF7A64E4F3 /* KlimaApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84116E324F300217E14A7D80 /* KlimaApp.swift */; };
-		283A94658C4BF890014C510B /* LocationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 08707F96197B8A0C91B93434 /* LocationService.swift */; };
-		4AAC6C51457C1BDE9ADA4C30 /* AgroFormat.swift in Sources */ = {isa = PBXBuildFile; fileRef = C7341EAFF0E4443B5ABD02E9 /* AgroFormat.swift */; };
-		51054172AD319320D71CEA33 /* AgroIndicators.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B0DC023C950B262ED20013F /* AgroIndicators.swift */; };
-		566DADF1BB936E66C038F7E7 /* AgroWeatherDecodingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3F0452B25BE676E099C8DFF9 /* AgroWeatherDecodingTests.swift */; };
-		5A55EF8272D960B4FC47FB3D /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = 4F3133CB82A42C2405ECFE76 /* Localizable.xcstrings */; };
-		5CB1DC4D9E9EF3CBD328F32A /* DetailTile.swift in Sources */ = {isa = PBXBuildFile; fileRef = 57C0845A4CF93D4730923065 /* DetailTile.swift */; };
-		67FC76359AD16BC4695DEADF /* DailyListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A2507732A1784A4B8EB0921 /* DailyListView.swift */; };
-		6CA0879E8E9DEEB22B32B61F /* DashboardViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EAC6CF1F72EC8295D30BFC0 /* DashboardViewModel.swift */; };
-		719AE84CF3AE3953C830D50B /* WeatherConditionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F71CC5F308473AF0D312F14C /* WeatherConditionTests.swift */; };
-		82D02C519B480C193578D0CB /* SprayCardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40839EA4E38B24E6B555CC61 /* SprayCardView.swift */; };
-		85CA810AE3589C6B30CAFB6F /* AgroSamples.swift in Sources */ = {isa = PBXBuildFile; fileRef = 55D9837846F076DA896F495A /* AgroSamples.swift */; };
-		861A80365F23BD9F86CFDA99 /* AgroIndicatorsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7B37E35ECA785B0C85EB31B2 /* AgroIndicatorsTests.swift */; };
-		8E2514CD7022B11A162D60FF /* HourlyStripView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 009B9C142273FBBEE0BD6576 /* HourlyStripView.swift */; };
-		92ED5AA3CD3F48E0A5F3C553 /* AgroWeatherService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 01CA31D408493CD502FD9260 /* AgroWeatherService.swift */; };
-		98784EE749DEEF1017EDF486 /* WeatherCondition.swift in Sources */ = {isa = PBXBuildFile; fileRef = 825B4E58277E1D7A0598F0B6 /* WeatherCondition.swift */; };
-		A1DE9873B96987414F2F42C6 /* InfoPlist.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = 7B6FF51FE076902715B4B924 /* InfoPlist.xcstrings */; };
-		C21D9E9AB4672C6217F0C805 /* Localized.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0F39F13CE4421E38A88D16C2 /* Localized.swift */; };
-		C854772C2CA5284C54066F33 /* DashboardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 93EC2AB4F329AF5B76E33693 /* DashboardView.swift */; };
-		DA25062AA566C57EA1E5EA85 /* LocalizationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7243F4B117C994C20AEFEEF0 /* LocalizationTests.swift */; };
-		ED5D6480274C408C81A1C888 /* SkyBackground.swift in Sources */ = {isa = PBXBuildFile; fileRef = 27B0E714FCA793075A26FF7C /* SkyBackground.swift */; };
+		0256D619F04213CEAC6C106B /* AgroFormat.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C1222B4B64AF04F61E89F4D /* AgroFormat.swift */; };
+		0E3AB8B5E126CF6A9B21D80F /* KlimaWatch.app in Embed Watch Content */ = {isa = PBXBuildFile; fileRef = 8ADB8583EF552F6554CC2E29 /* KlimaWatch.app */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		143FCCD6E9979C47ACF20FE5 /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = 145293E813FDBB75D86FE163 /* Localizable.xcstrings */; };
+		14BB12A5AD82F316E7029E8B /* SprayLiveActivity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 15BC9252AF56BCD7059F6BCB /* SprayLiveActivity.swift */; };
+		15AF281A183998648F59ACC1 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 4A4D14A0CD244143EBA8AF12 /* Assets.xcassets */; };
+		1FB389AE880EE714B22698A2 /* LocalizationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAEFA7420ACB65854C0C7E46 /* LocalizationTests.swift */; };
+		2478C9864199FBD7DD2226C5 /* WeatherCondition.swift in Sources */ = {isa = PBXBuildFile; fileRef = 67F9522F3783E6AF870AA68B /* WeatherCondition.swift */; };
+		24DB452F955D14B178404253 /* HeroView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1FA8F35C94920D1DD1918F71 /* HeroView.swift */; };
+		28B2704869652BED6F7B0A78 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 07F93D3478687B46CFBA434A /* Assets.xcassets */; };
+		3E78F3646BB89AAAC89A32AB /* AgroFormat.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C1222B4B64AF04F61E89F4D /* AgroFormat.swift */; };
+		3EA870888C47D1ABACF99147 /* WeatherConditionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FFCE9C51C6822FF894EE5B65 /* WeatherConditionTests.swift */; };
+		3F1E657C6B72EB44CCCA881A /* Localized.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6EB43A279CAF3D5B5150DBB1 /* Localized.swift */; };
+		4509EEF2DC8E4C62D9DA8BCB /* AgroIndicators.swift in Sources */ = {isa = PBXBuildFile; fileRef = FB2A5A352230B9DCF2DDFBA0 /* AgroIndicators.swift */; };
+		4710127FBDF50C9A3F97F851 /* DetailTile.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1C83B9ADD68C4E0D26EF7A95 /* DetailTile.swift */; };
+		4AF47C60363EA95AA1C076D6 /* DailyListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AFBCEFDAC985BD3E67D51C19 /* DailyListView.swift */; };
+		566D730C800918525009587B /* KlimaWidgets.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 4077333AD42A51BF703B7125 /* KlimaWidgets.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		602B84BB6FE18033AC801366 /* AgroIndicators.swift in Sources */ = {isa = PBXBuildFile; fileRef = FB2A5A352230B9DCF2DDFBA0 /* AgroIndicators.swift */; };
+		61C5B7447331C9ABBBFE1CED /* AgroSamples.swift in Sources */ = {isa = PBXBuildFile; fileRef = BADD8CBDBA1033C4EEE1B03A /* AgroSamples.swift */; };
+		66C30391B1049D265340CEC8 /* KlimaWidgetsBundle.swift in Sources */ = {isa = PBXBuildFile; fileRef = E80E2807FAFBF494008563E8 /* KlimaWidgetsBundle.swift */; };
+		6BD2114F82806CCB846FDDA1 /* AgroFormat.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C1222B4B64AF04F61E89F4D /* AgroFormat.swift */; };
+		6E4137A83B7EEE29C714FE18 /* AgroFormatTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 136349A85F9630419DB28D51 /* AgroFormatTests.swift */; };
+		6FF1556A4C81C2FAA5AEF339 /* SprayActivityController.swift in Sources */ = {isa = PBXBuildFile; fileRef = C603A2E1789195F82D339AF0 /* SprayActivityController.swift */; };
+		7104F09347A3640DA78E7B52 /* AgroSamples.swift in Sources */ = {isa = PBXBuildFile; fileRef = BADD8CBDBA1033C4EEE1B03A /* AgroSamples.swift */; };
+		7A6AD956B3316B2F2FC4D878 /* AgroIndicatorsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 56620052CEB0689BCB60B96C /* AgroIndicatorsTests.swift */; };
+		7EFB2329E3176A037CEFF34F /* WatchDashboardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FD22E1D75286167B15BACB5D /* WatchDashboardView.swift */; };
+		87931FAE298B0068A30DC209 /* AgroSamples.swift in Sources */ = {isa = PBXBuildFile; fileRef = BADD8CBDBA1033C4EEE1B03A /* AgroSamples.swift */; };
+		8856032700C80DED798CBF9A /* InfoPlist.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = FB54FEDD3D1EAAF680B978BE /* InfoPlist.xcstrings */; };
+		8DE99597F966A25339F8E8F1 /* SprayActivityAttributes.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0A29C24E198783864797CB1B /* SprayActivityAttributes.swift */; };
+		8F35F202B48FCD67F42B95AD /* KlimaWatchApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = B58B70914027C618ACA1FFBB /* KlimaWatchApp.swift */; };
+		8F4ABDF3C9EB0A340DD1C7CE /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = 145293E813FDBB75D86FE163 /* Localizable.xcstrings */; };
+		9017DF37B7FA1969D2E13067 /* LocationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6CFC7F81452FD39F09155334 /* LocationService.swift */; };
+		995C71656399C5579B160490 /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = 145293E813FDBB75D86FE163 /* Localizable.xcstrings */; };
+		9B8B003E783D7F81D5293276 /* SkyBackground.swift in Sources */ = {isa = PBXBuildFile; fileRef = 015B329F345662ADF74A1CEE /* SkyBackground.swift */; };
+		9B9F9FEBE27BA3A5FE7E1001 /* AgroIndicators.swift in Sources */ = {isa = PBXBuildFile; fileRef = FB2A5A352230B9DCF2DDFBA0 /* AgroIndicators.swift */; };
+		9CF8D660BD80C16511F6A579 /* InfoPlist.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = FB54FEDD3D1EAAF680B978BE /* InfoPlist.xcstrings */; };
+		A87216485F5DED3CA1B73C8E /* DashboardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A5EE2202CE231585EDF18D8 /* DashboardView.swift */; };
+		B076B23897D749FEB0FEF5A6 /* WatchViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1B11F5006DDB391C0A11AF78 /* WatchViewModel.swift */; };
+		BB0614F698FDEF8B31CE7353 /* AgroWeatherDecodingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A9578A11AFEA7C45890987A8 /* AgroWeatherDecodingTests.swift */; };
+		C0D1A4125A9D5BF789185AE0 /* SprayActivityAttributes.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0A29C24E198783864797CB1B /* SprayActivityAttributes.swift */; };
+		C6F1C0E338F2738E2E902848 /* Localized.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6EB43A279CAF3D5B5150DBB1 /* Localized.swift */; };
+		C7184BB4BE971C1C3F11573D /* HourlyStripView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 680908C9F90E1607BD3033A3 /* HourlyStripView.swift */; };
+		D30A45021398D510D69ABC46 /* AgroWeatherService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 313306647B131115CEF93B82 /* AgroWeatherService.swift */; };
+		D88BF4697C3B50D53A77A33E /* WeatherCondition.swift in Sources */ = {isa = PBXBuildFile; fileRef = 67F9522F3783E6AF870AA68B /* WeatherCondition.swift */; };
+		D8F56BCE6872ACC91CE259F7 /* AgroWeatherService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 313306647B131115CEF93B82 /* AgroWeatherService.swift */; };
+		DE5954421E594FA29815EB12 /* DashboardViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0640B519988FD1B65B710760 /* DashboardViewModel.swift */; };
+		DE8D9920A12CBEBB4DDA2C9E /* Localized.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6EB43A279CAF3D5B5150DBB1 /* Localized.swift */; };
+		E8ADD8ED06D1079D0959A121 /* SprayActivityTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B39E213A58E402574A554A0B /* SprayActivityTests.swift */; };
+		EFBD3D376BA2C6155E2B341A /* WeatherCondition.swift in Sources */ = {isa = PBXBuildFile; fileRef = 67F9522F3783E6AF870AA68B /* WeatherCondition.swift */; };
+		F01420F28E0C8B2A03D1664C /* LocationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6CFC7F81452FD39F09155334 /* LocationService.swift */; };
+		F1F2D94D9A0C8C9FB233B5AB /* KlimaApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = E0887B2371E02FA01AC7E59F /* KlimaApp.swift */; };
+		F890209C28FC9E50176B729E /* SprayCardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 39A57C0B024DDA843422AE63 /* SprayCardView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
-		193D0A8035DE97CF1A3652FD /* PBXContainerItemProxy */ = {
+		7E9D5430C1F53E9E44D0CC96 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 46F86FAA6BBF9AC94A7E4595 /* Project object */;
 			proxyType = 1;
-			remoteGlobalIDString = E3435DDA2687639586BF0B70;
+			remoteGlobalIDString = CF84E7D1CEC713C260FD9DA1;
+			remoteInfo = KlimaWidgets;
+		};
+		5512985A23C67F721E34796D /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 46F86FAA6BBF9AC94A7E4595 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = B11F7CCFABB3F5A4405AE770;
+			remoteInfo = KlimaWatch;
+		};
+		CD2B519EFE7A9C8A41065E10 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 46F86FAA6BBF9AC94A7E4595 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 55F3739A6E9AB03B1D740E52;
 			remoteInfo = Klima;
 		};
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		009B9C142273FBBEE0BD6576 /* HourlyStripView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HourlyStripView.swift; sourceTree = "<group>"; };
-		01CA31D408493CD502FD9260 /* AgroWeatherService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AgroWeatherService.swift; sourceTree = "<group>"; };
-		08707F96197B8A0C91B93434 /* LocationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationService.swift; sourceTree = "<group>"; };
-		0F39F13CE4421E38A88D16C2 /* Localized.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Localized.swift; sourceTree = "<group>"; };
-		27B0E714FCA793075A26FF7C /* SkyBackground.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SkyBackground.swift; sourceTree = "<group>"; };
-		39D975AAB74D8A287A6B7254 /* HeroView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HeroView.swift; sourceTree = "<group>"; };
-		3F0452B25BE676E099C8DFF9 /* AgroWeatherDecodingTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AgroWeatherDecodingTests.swift; sourceTree = "<group>"; };
-		40839EA4E38B24E6B555CC61 /* SprayCardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SprayCardView.swift; sourceTree = "<group>"; };
-		4A2507732A1784A4B8EB0921 /* DailyListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DailyListView.swift; sourceTree = "<group>"; };
-		4F3133CB82A42C2405ECFE76 /* Localizable.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = Localizable.xcstrings; sourceTree = "<group>"; };
-		55D9837846F076DA896F495A /* AgroSamples.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AgroSamples.swift; sourceTree = "<group>"; };
-		57C0845A4CF93D4730923065 /* DetailTile.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DetailTile.swift; sourceTree = "<group>"; };
-		7243F4B117C994C20AEFEEF0 /* LocalizationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalizationTests.swift; sourceTree = "<group>"; };
-		7B37E35ECA785B0C85EB31B2 /* AgroIndicatorsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AgroIndicatorsTests.swift; sourceTree = "<group>"; };
-		7B6FF51FE076902715B4B924 /* InfoPlist.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = InfoPlist.xcstrings; sourceTree = "<group>"; };
-		825B4E58277E1D7A0598F0B6 /* WeatherCondition.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeatherCondition.swift; sourceTree = "<group>"; };
-		84116E324F300217E14A7D80 /* KlimaApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KlimaApp.swift; sourceTree = "<group>"; };
-		84337AD8D27FCD69AF2C4FC2 /* Klima.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Klima.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		8B0DC023C950B262ED20013F /* AgroIndicators.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AgroIndicators.swift; sourceTree = "<group>"; };
-		8D7172619DB15AD08404D409 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
-		8EAC6CF1F72EC8295D30BFC0 /* DashboardViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DashboardViewModel.swift; sourceTree = "<group>"; };
-		93EC2AB4F329AF5B76E33693 /* DashboardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DashboardView.swift; sourceTree = "<group>"; };
-		C7341EAFF0E4443B5ABD02E9 /* AgroFormat.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AgroFormat.swift; sourceTree = "<group>"; };
-		DFDED23FA58339F9273F6C84 /* KlimaTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = KlimaTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-		E17880A312A4AE0F1F118119 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		E22F9EBB5D794EB26C40EE42 /* AgroFormatTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AgroFormatTests.swift; sourceTree = "<group>"; };
-		F71CC5F308473AF0D312F14C /* WeatherConditionTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeatherConditionTests.swift; sourceTree = "<group>"; };
+		015B329F345662ADF74A1CEE /* SkyBackground.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SkyBackground.swift; sourceTree = "<group>"; };
+		0640B519988FD1B65B710760 /* DashboardViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DashboardViewModel.swift; sourceTree = "<group>"; };
+		07F93D3478687B46CFBA434A /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		0A29C24E198783864797CB1B /* SprayActivityAttributes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SprayActivityAttributes.swift; sourceTree = "<group>"; };
+		136349A85F9630419DB28D51 /* AgroFormatTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AgroFormatTests.swift; sourceTree = "<group>"; };
+		145293E813FDBB75D86FE163 /* Localizable.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = Localizable.xcstrings; sourceTree = "<group>"; };
+		15BC9252AF56BCD7059F6BCB /* SprayLiveActivity.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SprayLiveActivity.swift; sourceTree = "<group>"; };
+		1A5EE2202CE231585EDF18D8 /* DashboardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DashboardView.swift; sourceTree = "<group>"; };
+		1B11F5006DDB391C0A11AF78 /* WatchViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WatchViewModel.swift; sourceTree = "<group>"; };
+		1C83B9ADD68C4E0D26EF7A95 /* DetailTile.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DetailTile.swift; sourceTree = "<group>"; };
+		1FA8F35C94920D1DD1918F71 /* HeroView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HeroView.swift; sourceTree = "<group>"; };
+		313306647B131115CEF93B82 /* AgroWeatherService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AgroWeatherService.swift; sourceTree = "<group>"; };
+		39A57C0B024DDA843422AE63 /* SprayCardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SprayCardView.swift; sourceTree = "<group>"; };
+		4077333AD42A51BF703B7125 /* KlimaWidgets.appex */ = {isa = PBXFileReference; explicitFileType = wrapper.app-extension; includeInIndex = 0; path = KlimaWidgets.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		4A4D14A0CD244143EBA8AF12 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		4A8E2E5B1F85F531C5533701 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		56620052CEB0689BCB60B96C /* AgroIndicatorsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AgroIndicatorsTests.swift; sourceTree = "<group>"; };
+		639A3D7AD16336CB1748C8B6 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		67F9522F3783E6AF870AA68B /* WeatherCondition.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeatherCondition.swift; sourceTree = "<group>"; };
+		680908C9F90E1607BD3033A3 /* HourlyStripView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HourlyStripView.swift; sourceTree = "<group>"; };
+		6CFC7F81452FD39F09155334 /* LocationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationService.swift; sourceTree = "<group>"; };
+		6EB43A279CAF3D5B5150DBB1 /* Localized.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Localized.swift; sourceTree = "<group>"; };
+		7C1222B4B64AF04F61E89F4D /* AgroFormat.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AgroFormat.swift; sourceTree = "<group>"; };
+		86A6EAACF40EC163F0CE63DA /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		8ADB8583EF552F6554CC2E29 /* KlimaWatch.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = KlimaWatch.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		8F5D96498B4A7C90EE589A6A /* KlimaTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = KlimaTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		A9578A11AFEA7C45890987A8 /* AgroWeatherDecodingTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AgroWeatherDecodingTests.swift; sourceTree = "<group>"; };
+		AFBCEFDAC985BD3E67D51C19 /* DailyListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DailyListView.swift; sourceTree = "<group>"; };
+		B39E213A58E402574A554A0B /* SprayActivityTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SprayActivityTests.swift; sourceTree = "<group>"; };
+		B58B70914027C618ACA1FFBB /* KlimaWatchApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KlimaWatchApp.swift; sourceTree = "<group>"; };
+		BADD8CBDBA1033C4EEE1B03A /* AgroSamples.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AgroSamples.swift; sourceTree = "<group>"; };
+		BAEFA7420ACB65854C0C7E46 /* LocalizationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalizationTests.swift; sourceTree = "<group>"; };
+		C603A2E1789195F82D339AF0 /* SprayActivityController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SprayActivityController.swift; sourceTree = "<group>"; };
+		E0887B2371E02FA01AC7E59F /* KlimaApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KlimaApp.swift; sourceTree = "<group>"; };
+		E80E2807FAFBF494008563E8 /* KlimaWidgetsBundle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KlimaWidgetsBundle.swift; sourceTree = "<group>"; };
+		EC3EFF4AD74427D38FFCF915 /* Klima.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Klima.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		FB2A5A352230B9DCF2DDFBA0 /* AgroIndicators.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AgroIndicators.swift; sourceTree = "<group>"; };
+		FB54FEDD3D1EAAF680B978BE /* InfoPlist.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = InfoPlist.xcstrings; sourceTree = "<group>"; };
+		FD22E1D75286167B15BACB5D /* WatchDashboardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WatchDashboardView.swift; sourceTree = "<group>"; };
+		FFCE9C51C6822FF894EE5B65 /* WeatherConditionTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeatherConditionTests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
+/* Begin PBXCopyFilesBuildPhase section */
+		1D696D67E5E0EE802DD13FAF /* Embed Foundation Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				566D730C800918525009587B /* KlimaWidgets.appex in Embed Foundation Extensions */,
+			);
+			name = "Embed Foundation Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		D5B42939FF27B6A4E46FC06F /* Embed Watch Content */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "$(CONTENTS_FOLDER_PATH)/Watch";
+			dstSubfolderSpec = 16;
+			files = (
+				0E3AB8B5E126CF6A9B21D80F /* KlimaWatch.app in Embed Watch Content */,
+			);
+			name = "Embed Watch Content";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
 /* Begin PBXFrameworksBuildPhase section */
-		6EFAB1ECC0D092E20FE51FCD /* Frameworks */ = {
+		5D20CA606BBA1E6F45C03291 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		35F1006C97E0D485FB4F1132 /* Frameworks */ = {
+		531ED3AC5FBF22385B483690 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		D2F577CBDED48A39A61417A6 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		54F5D582B7CE6A2CCD46F0AA /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -91,10 +184,12 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		518DA81DB9B99529C0C0AEBE /*  */ = {
+		518DA81DB9B99529C0C0AEBE /* None */ = {
 			isa = PBXGroup;
 			children = (
 				82CF2A43A7100F086D7FCFDD /* Klima */,
+				EC78298F69778BA6D4D34D39 /* KlimaWidgets */,
+				8DEF79DD9DC5039093C09752 /* KlimaWatch */,
 				A0937472EE5878FA82CB0F7E /* KlimaTests */,
 				547D009064F7C3F13BEF3460 /* Products */,
 			);
@@ -103,8 +198,10 @@
 		547D009064F7C3F13BEF3460 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				84337AD8D27FCD69AF2C4FC2 /* Klima.app */,
-				DFDED23FA58339F9273F6C84 /* KlimaTests.xctest */,
+				EC3EFF4AD74427D38FFCF915 /* Klima.app */,
+				4077333AD42A51BF703B7125 /* KlimaWidgets.appex */,
+				8ADB8583EF552F6554CC2E29 /* KlimaWatch.app */,
+				8F5D96498B4A7C90EE589A6A /* KlimaTests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -125,7 +222,7 @@
 		1D2F5BF9FB339F234299CFC8 /* App */ = {
 			isa = PBXGroup;
 			children = (
-				84116E324F300217E14A7D80 /* KlimaApp.swift */,
+				E0887B2371E02FA01AC7E59F /* KlimaApp.swift */,
 			);
 			path = App;
 			sourceTree = "<group>";
@@ -133,11 +230,12 @@
 		DD131EC962237671D266DB34 /* Models */ = {
 			isa = PBXGroup;
 			children = (
-				55D9837846F076DA896F495A /* AgroSamples.swift */,
-				8B0DC023C950B262ED20013F /* AgroIndicators.swift */,
-				825B4E58277E1D7A0598F0B6 /* WeatherCondition.swift */,
-				C7341EAFF0E4443B5ABD02E9 /* AgroFormat.swift */,
-				0F39F13CE4421E38A88D16C2 /* Localized.swift */,
+				BADD8CBDBA1033C4EEE1B03A /* AgroSamples.swift */,
+				FB2A5A352230B9DCF2DDFBA0 /* AgroIndicators.swift */,
+				67F9522F3783E6AF870AA68B /* WeatherCondition.swift */,
+				7C1222B4B64AF04F61E89F4D /* AgroFormat.swift */,
+				6EB43A279CAF3D5B5150DBB1 /* Localized.swift */,
+				0A29C24E198783864797CB1B /* SprayActivityAttributes.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -145,8 +243,9 @@
 		985CEF4416785ACB588F8DB4 /* Services */ = {
 			isa = PBXGroup;
 			children = (
-				01CA31D408493CD502FD9260 /* AgroWeatherService.swift */,
-				08707F96197B8A0C91B93434 /* LocationService.swift */,
+				313306647B131115CEF93B82 /* AgroWeatherService.swift */,
+				6CFC7F81452FD39F09155334 /* LocationService.swift */,
+				C603A2E1789195F82D339AF0 /* SprayActivityController.swift */,
 			);
 			path = Services;
 			sourceTree = "<group>";
@@ -154,7 +253,7 @@
 		88A1FCEFDEAB7A65D51A627F /* ViewModels */ = {
 			isa = PBXGroup;
 			children = (
-				8EAC6CF1F72EC8295D30BFC0 /* DashboardViewModel.swift */,
+				0640B519988FD1B65B710760 /* DashboardViewModel.swift */,
 			);
 			path = ViewModels;
 			sourceTree = "<group>";
@@ -162,13 +261,13 @@
 		0CCEE07ECE9D2EC579E24F2E /* Views */ = {
 			isa = PBXGroup;
 			children = (
-				93EC2AB4F329AF5B76E33693 /* DashboardView.swift */,
-				4A2507732A1784A4B8EB0921 /* DailyListView.swift */,
-				57C0845A4CF93D4730923065 /* DetailTile.swift */,
-				39D975AAB74D8A287A6B7254 /* HeroView.swift */,
-				009B9C142273FBBEE0BD6576 /* HourlyStripView.swift */,
-				27B0E714FCA793075A26FF7C /* SkyBackground.swift */,
-				40839EA4E38B24E6B555CC61 /* SprayCardView.swift */,
+				1A5EE2202CE231585EDF18D8 /* DashboardView.swift */,
+				AFBCEFDAC985BD3E67D51C19 /* DailyListView.swift */,
+				1C83B9ADD68C4E0D26EF7A95 /* DetailTile.swift */,
+				1FA8F35C94920D1DD1918F71 /* HeroView.swift */,
+				680908C9F90E1607BD3033A3 /* HourlyStripView.swift */,
+				015B329F345662ADF74A1CEE /* SkyBackground.swift */,
+				39A57C0B024DDA843422AE63 /* SprayCardView.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -176,10 +275,40 @@
 		BED87D8D27E536A8E36A49DA /* Resources */ = {
 			isa = PBXGroup;
 			children = (
-				8D7172619DB15AD08404D409 /* Assets.xcassets */,
-				4F3133CB82A42C2405ECFE76 /* Localizable.xcstrings */,
-				7B6FF51FE076902715B4B924 /* InfoPlist.xcstrings */,
-				E17880A312A4AE0F1F118119 /* Info.plist */,
+				4A4D14A0CD244143EBA8AF12 /* Assets.xcassets */,
+				145293E813FDBB75D86FE163 /* Localizable.xcstrings */,
+				FB54FEDD3D1EAAF680B978BE /* InfoPlist.xcstrings */,
+				86A6EAACF40EC163F0CE63DA /* Info.plist */,
+			);
+			path = Resources;
+			sourceTree = "<group>";
+		};
+		EC78298F69778BA6D4D34D39 /* KlimaWidgets */ = {
+			isa = PBXGroup;
+			children = (
+				E80E2807FAFBF494008563E8 /* KlimaWidgetsBundle.swift */,
+				15BC9252AF56BCD7059F6BCB /* SprayLiveActivity.swift */,
+				639A3D7AD16336CB1748C8B6 /* Info.plist */,
+			);
+			path = KlimaWidgets;
+			sourceTree = "<group>";
+		};
+		8DEF79DD9DC5039093C09752 /* KlimaWatch */ = {
+			isa = PBXGroup;
+			children = (
+				B58B70914027C618ACA1FFBB /* KlimaWatchApp.swift */,
+				FD22E1D75286167B15BACB5D /* WatchDashboardView.swift */,
+				1B11F5006DDB391C0A11AF78 /* WatchViewModel.swift */,
+				F7242AF3D61558B805415283 /* Resources */,
+			);
+			path = KlimaWatch;
+			sourceTree = "<group>";
+		};
+		F7242AF3D61558B805415283 /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				07F93D3478687B46CFBA434A /* Assets.xcassets */,
+				4A8E2E5B1F85F531C5533701 /* Info.plist */,
 			);
 			path = Resources;
 			sourceTree = "<group>";
@@ -187,11 +316,12 @@
 		A0937472EE5878FA82CB0F7E /* KlimaTests */ = {
 			isa = PBXGroup;
 			children = (
-				7B37E35ECA785B0C85EB31B2 /* AgroIndicatorsTests.swift */,
-				3F0452B25BE676E099C8DFF9 /* AgroWeatherDecodingTests.swift */,
-				F71CC5F308473AF0D312F14C /* WeatherConditionTests.swift */,
-				E22F9EBB5D794EB26C40EE42 /* AgroFormatTests.swift */,
-				7243F4B117C994C20AEFEEF0 /* LocalizationTests.swift */,
+				56620052CEB0689BCB60B96C /* AgroIndicatorsTests.swift */,
+				A9578A11AFEA7C45890987A8 /* AgroWeatherDecodingTests.swift */,
+				FFCE9C51C6822FF894EE5B65 /* WeatherConditionTests.swift */,
+				136349A85F9630419DB28D51 /* AgroFormatTests.swift */,
+				BAEFA7420ACB65854C0C7E46 /* LocalizationTests.swift */,
+				B39E213A58E402574A554A0B /* SprayActivityTests.swift */,
 			);
 			path = KlimaTests;
 			sourceTree = "<group>";
@@ -199,39 +329,77 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		E3435DDA2687639586BF0B70 /* Klima */ = {
+		55F3739A6E9AB03B1D740E52 /* Klima */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 1D97B77EAD2380603A3F2A82 /* Build configuration list for PBXNativeTarget "Klima" */;
+			buildConfigurationList = 3EC7BAEFA0A10C87A2AF8004 /* Build configuration list for PBXNativeTarget "Klima" */;
 			buildPhases = (
-				4821909E9BF9E73E471FEA84 /* Sources */,
-				6EFAB1ECC0D092E20FE51FCD /* Frameworks */,
-				F667297ED3AB90EAC07798D4 /* Resources */,
+				B040E6048FE13CEC8A3B2A87 /* Sources */,
+				5D20CA606BBA1E6F45C03291 /* Frameworks */,
+				F2DD78B21274FDC18D92FFCD /* Resources */,
+				1D696D67E5E0EE802DD13FAF /* Embed Foundation Extensions */,
+				D5B42939FF27B6A4E46FC06F /* Embed Watch Content */,
 			);
 			buildRules = (
 			);
 			dependencies = (
+				9B79C6C49EB89762EDC11A02 /* PBXTargetDependency */,
+				66E9B317BEFD0442AB6574F3 /* PBXTargetDependency */,
 			);
 			name = Klima;
 			productName = Klima;
-			productReference = 84337AD8D27FCD69AF2C4FC2 /* Klima.app */;
+			productReference = EC3EFF4AD74427D38FFCF915 /* Klima.app */;
 			productType = "com.apple.product-type.application";
 		};
-		A700229C3AC2DAE057FE5B27 /* KlimaTests */ = {
+		CF84E7D1CEC713C260FD9DA1 /* KlimaWidgets */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 0F471B4923D46E58DCE40A0E /* Build configuration list for PBXNativeTarget "KlimaTests" */;
+			buildConfigurationList = 1A119550025DA1718939AE72 /* Build configuration list for PBXNativeTarget "KlimaWidgets" */;
 			buildPhases = (
-				D3B6D4B6799995BE6A7BCB75 /* Sources */,
-				35F1006C97E0D485FB4F1132 /* Frameworks */,
-				6D500EBBE8103AB1D9AC843C /* Resources */,
+				81844F7DD0377649C444DE2D /* Sources */,
+				531ED3AC5FBF22385B483690 /* Frameworks */,
+				1E63F06E895044CE51C30EBC /* Resources */,
 			);
 			buildRules = (
 			);
 			dependencies = (
-				5A0AB56B64A077C4F9DAD608 /* PBXTargetDependency */,
+			);
+			name = KlimaWidgets;
+			productName = KlimaWidgets;
+			productReference = 4077333AD42A51BF703B7125 /* KlimaWidgets.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
+		B11F7CCFABB3F5A4405AE770 /* KlimaWatch */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 2419B76D4674E397AF278F0E /* Build configuration list for PBXNativeTarget "KlimaWatch" */;
+			buildPhases = (
+				94A4FAE67BA67F18D5E7594E /* Sources */,
+				D2F577CBDED48A39A61417A6 /* Frameworks */,
+				0714B9CC24A6FC2753E4FE51 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = KlimaWatch;
+			productName = KlimaWatch;
+			productReference = 8ADB8583EF552F6554CC2E29 /* KlimaWatch.app */;
+			productType = "com.apple.product-type.application";
+		};
+		A5D14E7D3C5348865D20B96C /* KlimaTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 90EFBE48AEFC1DC0FA53C3A6 /* Build configuration list for PBXNativeTarget "KlimaTests" */;
+			buildPhases = (
+				FCE344431A4896B6088AD9BF /* Sources */,
+				54F5D582B7CE6A2CCD46F0AA /* Frameworks */,
+				6C9D57CFDF64213B0FB18F71 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				9F142A8F658CA0C516AA4072 /* PBXTargetDependency */,
 			);
 			name = KlimaTests;
 			productName = KlimaTests;
-			productReference = DFDED23FA58339F9273F6C84 /* KlimaTests.xctest */;
+			productReference = 8F5D96498B4A7C90EE589A6A /* KlimaTests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
 		};
 /* End PBXNativeTarget section */
@@ -244,12 +412,18 @@
 				LastSwiftUpdateCheck = 1500;
 				LastUpgradeCheck = 1500;
 				TargetAttributes = {
-					E3435DDA2687639586BF0B70 = {
+					55F3739A6E9AB03B1D740E52 = {
 						CreatedOnToolsVersion = 15.0;
 					};
-					A700229C3AC2DAE057FE5B27 = {
+					CF84E7D1CEC713C260FD9DA1 = {
 						CreatedOnToolsVersion = 15.0;
-						TestTargetID = E3435DDA2687639586BF0B70;
+					};
+					B11F7CCFABB3F5A4405AE770 = {
+						CreatedOnToolsVersion = 15.0;
+					};
+					A5D14E7D3C5348865D20B96C = {
+						CreatedOnToolsVersion = 15.0;
+						TestTargetID = 55F3739A6E9AB03B1D740E52;
 					};
 				};
 			};
@@ -268,24 +442,44 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				E3435DDA2687639586BF0B70 /* Klima */,
-				A700229C3AC2DAE057FE5B27 /* KlimaTests */,
+				55F3739A6E9AB03B1D740E52 /* Klima */,
+				CF84E7D1CEC713C260FD9DA1 /* KlimaWidgets */,
+				B11F7CCFABB3F5A4405AE770 /* KlimaWatch */,
+				A5D14E7D3C5348865D20B96C /* KlimaTests */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
-		F667297ED3AB90EAC07798D4 /* Resources */ = {
+		F2DD78B21274FDC18D92FFCD /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				1A130F063342B72B457FC015 /* Assets.xcassets in Resources */,
-				5A55EF8272D960B4FC47FB3D /* Localizable.xcstrings in Resources */,
-				A1DE9873B96987414F2F42C6 /* InfoPlist.xcstrings in Resources */,
+				15AF281A183998648F59ACC1 /* Assets.xcassets in Resources */,
+				143FCCD6E9979C47ACF20FE5 /* Localizable.xcstrings in Resources */,
+				8856032700C80DED798CBF9A /* InfoPlist.xcstrings in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		6D500EBBE8103AB1D9AC843C /* Resources */ = {
+		1E63F06E895044CE51C30EBC /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				995C71656399C5579B160490 /* Localizable.xcstrings in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		0714B9CC24A6FC2753E4FE51 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				28B2704869652BED6F7B0A78 /* Assets.xcassets in Resources */,
+				8F4ABDF3C9EB0A340DD1C7CE /* Localizable.xcstrings in Resources */,
+				9CF8D660BD80C16511F6A579 /* InfoPlist.xcstrings in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		6C9D57CFDF64213B0FB18F71 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -295,48 +489,93 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
-		4821909E9BF9E73E471FEA84 /* Sources */ = {
+		B040E6048FE13CEC8A3B2A87 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				24CA7F13131AEBCF7A64E4F3 /* KlimaApp.swift in Sources */,
-				85CA810AE3589C6B30CAFB6F /* AgroSamples.swift in Sources */,
-				51054172AD319320D71CEA33 /* AgroIndicators.swift in Sources */,
-				98784EE749DEEF1017EDF486 /* WeatherCondition.swift in Sources */,
-				4AAC6C51457C1BDE9ADA4C30 /* AgroFormat.swift in Sources */,
-				C21D9E9AB4672C6217F0C805 /* Localized.swift in Sources */,
-				92ED5AA3CD3F48E0A5F3C553 /* AgroWeatherService.swift in Sources */,
-				283A94658C4BF890014C510B /* LocationService.swift in Sources */,
-				6CA0879E8E9DEEB22B32B61F /* DashboardViewModel.swift in Sources */,
-				C854772C2CA5284C54066F33 /* DashboardView.swift in Sources */,
-				67FC76359AD16BC4695DEADF /* DailyListView.swift in Sources */,
-				5CB1DC4D9E9EF3CBD328F32A /* DetailTile.swift in Sources */,
-				2464C2E49CFAC0B3B4CA09A1 /* HeroView.swift in Sources */,
-				8E2514CD7022B11A162D60FF /* HourlyStripView.swift in Sources */,
-				ED5D6480274C408C81A1C888 /* SkyBackground.swift in Sources */,
-				82D02C519B480C193578D0CB /* SprayCardView.swift in Sources */,
+				F1F2D94D9A0C8C9FB233B5AB /* KlimaApp.swift in Sources */,
+				87931FAE298B0068A30DC209 /* AgroSamples.swift in Sources */,
+				9B9F9FEBE27BA3A5FE7E1001 /* AgroIndicators.swift in Sources */,
+				2478C9864199FBD7DD2226C5 /* WeatherCondition.swift in Sources */,
+				0256D619F04213CEAC6C106B /* AgroFormat.swift in Sources */,
+				DE8D9920A12CBEBB4DDA2C9E /* Localized.swift in Sources */,
+				C0D1A4125A9D5BF789185AE0 /* SprayActivityAttributes.swift in Sources */,
+				D8F56BCE6872ACC91CE259F7 /* AgroWeatherService.swift in Sources */,
+				9017DF37B7FA1969D2E13067 /* LocationService.swift in Sources */,
+				6FF1556A4C81C2FAA5AEF339 /* SprayActivityController.swift in Sources */,
+				DE5954421E594FA29815EB12 /* DashboardViewModel.swift in Sources */,
+				A87216485F5DED3CA1B73C8E /* DashboardView.swift in Sources */,
+				4AF47C60363EA95AA1C076D6 /* DailyListView.swift in Sources */,
+				4710127FBDF50C9A3F97F851 /* DetailTile.swift in Sources */,
+				24DB452F955D14B178404253 /* HeroView.swift in Sources */,
+				C7184BB4BE971C1C3F11573D /* HourlyStripView.swift in Sources */,
+				9B8B003E783D7F81D5293276 /* SkyBackground.swift in Sources */,
+				F890209C28FC9E50176B729E /* SprayCardView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		D3B6D4B6799995BE6A7BCB75 /* Sources */ = {
+		81844F7DD0377649C444DE2D /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				861A80365F23BD9F86CFDA99 /* AgroIndicatorsTests.swift in Sources */,
-				566DADF1BB936E66C038F7E7 /* AgroWeatherDecodingTests.swift in Sources */,
-				719AE84CF3AE3953C830D50B /* WeatherConditionTests.swift in Sources */,
-				2480C8BED00599CB4A37BE3A /* AgroFormatTests.swift in Sources */,
-				DA25062AA566C57EA1E5EA85 /* LocalizationTests.swift in Sources */,
+				7104F09347A3640DA78E7B52 /* AgroSamples.swift in Sources */,
+				602B84BB6FE18033AC801366 /* AgroIndicators.swift in Sources */,
+				EFBD3D376BA2C6155E2B341A /* WeatherCondition.swift in Sources */,
+				6BD2114F82806CCB846FDDA1 /* AgroFormat.swift in Sources */,
+				C6F1C0E338F2738E2E902848 /* Localized.swift in Sources */,
+				8DE99597F966A25339F8E8F1 /* SprayActivityAttributes.swift in Sources */,
+				66C30391B1049D265340CEC8 /* KlimaWidgetsBundle.swift in Sources */,
+				14BB12A5AD82F316E7029E8B /* SprayLiveActivity.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		94A4FAE67BA67F18D5E7594E /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				61C5B7447331C9ABBBFE1CED /* AgroSamples.swift in Sources */,
+				4509EEF2DC8E4C62D9DA8BCB /* AgroIndicators.swift in Sources */,
+				D88BF4697C3B50D53A77A33E /* WeatherCondition.swift in Sources */,
+				3E78F3646BB89AAAC89A32AB /* AgroFormat.swift in Sources */,
+				3F1E657C6B72EB44CCCA881A /* Localized.swift in Sources */,
+				D30A45021398D510D69ABC46 /* AgroWeatherService.swift in Sources */,
+				F01420F28E0C8B2A03D1664C /* LocationService.swift in Sources */,
+				8F35F202B48FCD67F42B95AD /* KlimaWatchApp.swift in Sources */,
+				7EFB2329E3176A037CEFF34F /* WatchDashboardView.swift in Sources */,
+				B076B23897D749FEB0FEF5A6 /* WatchViewModel.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		FCE344431A4896B6088AD9BF /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				7A6AD956B3316B2F2FC4D878 /* AgroIndicatorsTests.swift in Sources */,
+				BB0614F698FDEF8B31CE7353 /* AgroWeatherDecodingTests.swift in Sources */,
+				3EA870888C47D1ABACF99147 /* WeatherConditionTests.swift in Sources */,
+				6E4137A83B7EEE29C714FE18 /* AgroFormatTests.swift in Sources */,
+				1FB389AE880EE714B22698A2 /* LocalizationTests.swift in Sources */,
+				E8ADD8ED06D1079D0959A121 /* SprayActivityTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
-		5A0AB56B64A077C4F9DAD608 /* PBXTargetDependency */ = {
+		9B79C6C49EB89762EDC11A02 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = E3435DDA2687639586BF0B70 /* Klima */;
-			targetProxy = 193D0A8035DE97CF1A3652FD /* PBXContainerItemProxy */;
+			target = CF84E7D1CEC713C260FD9DA1;
+			targetProxy = 7E9D5430C1F53E9E44D0CC96 /* PBXContainerItemProxy */;
+		};
+		66E9B317BEFD0442AB6574F3 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = B11F7CCFABB3F5A4405AE770;
+			targetProxy = 5512985A23C67F721E34796D /* PBXContainerItemProxy */;
+		};
+		9F142A8F658CA0C516AA4072 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 55F3739A6E9AB03B1D740E52;
+			targetProxy = CD2B519EFE7A9C8A41065E10 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
@@ -347,60 +586,42 @@
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ASSETCATALOG_COMPILER_GENERATE_ASSET_SYMBOL_FRAMEWORKS = SwiftUI;
 				CLANG_ANALYZER_NONNULL = YES;
-				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
-				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
 				CLANG_ENABLE_MODULES = YES;
 				CLANG_ENABLE_OBJC_ARC = YES;
-				CLANG_ENABLE_OBJC_WEAK = YES;
-				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
 				CLANG_WARN_BOOL_CONVERSION = YES;
-				CLANG_WARN_COMMA = YES;
 				CLANG_WARN_CONSTANT_CONVERSION = YES;
-				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
-				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
 				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
 				CLANG_WARN_EMPTY_BODY = YES;
-				CLANG_WARN_ENUM_CONVERSION = YES;
 				CLANG_WARN_INFINITE_RECURSION = YES;
 				CLANG_WARN_INT_CONVERSION = YES;
-				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
-				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
-				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
-				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
-				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
-				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
-				CLANG_WARN_STRICT_PROTOTYPES = YES;
 				CLANG_WARN_SUSPICIOUS_MOVE = YES;
 				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
 				CLANG_WARN_UNREACHABLE_CODE = YES;
-				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
 				ENABLE_USER_SCRIPT_SANDBOXING = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu17;
 				GCC_NO_COMMON_BLOCKS = YES;
-				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
-				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
-				GCC_WARN_UNDECLARED_SELECTOR = YES;
-				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
-				GCC_WARN_UNUSED_FUNCTION = YES;
-				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
-				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
-				MTL_FAST_MATH = YES;
-				SDKROOT = iphoneos;
-				DEBUG_INFORMATION_FORMAT = dwarf;
-				ENABLE_TESTABILITY = YES;
-				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"DEBUG=1",
 					"$(inherited)",
 				);
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = iphoneos;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				WATCHOS_DEPLOYMENT_TARGET = 10.0;
 			};
 			name = Debug;
 		};
@@ -410,57 +631,40 @@
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ASSETCATALOG_COMPILER_GENERATE_ASSET_SYMBOL_FRAMEWORKS = SwiftUI;
 				CLANG_ANALYZER_NONNULL = YES;
-				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
-				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
 				CLANG_ENABLE_MODULES = YES;
 				CLANG_ENABLE_OBJC_ARC = YES;
-				CLANG_ENABLE_OBJC_WEAK = YES;
-				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
 				CLANG_WARN_BOOL_CONVERSION = YES;
-				CLANG_WARN_COMMA = YES;
 				CLANG_WARN_CONSTANT_CONVERSION = YES;
-				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
-				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
 				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
 				CLANG_WARN_EMPTY_BODY = YES;
-				CLANG_WARN_ENUM_CONVERSION = YES;
 				CLANG_WARN_INFINITE_RECURSION = YES;
 				CLANG_WARN_INT_CONVERSION = YES;
-				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
-				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
-				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
-				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
-				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
-				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
-				CLANG_WARN_STRICT_PROTOTYPES = YES;
 				CLANG_WARN_SUSPICIOUS_MOVE = YES;
 				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
 				CLANG_WARN_UNREACHABLE_CODE = YES;
-				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_USER_SCRIPT_SANDBOXING = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu17;
 				GCC_NO_COMMON_BLOCKS = YES;
-				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
-				GCC_WARN_UNDECLARED_SELECTOR = YES;
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				SDKROOT = iphoneos;
-				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
-				ENABLE_NS_ASSERTIONS = NO;
-				MTL_ENABLE_DEBUG_INFO = NO;
 				SWIFT_COMPILATION_MODE = wholemodule;
 				VALIDATE_PRODUCT = YES;
+				WATCHOS_DEPLOYMENT_TARGET = 10.0;
 			};
 			name = Release;
 		};
-		0615050D04BD2DC4E6CFFAFF /* Debug */ = {
+		84A87EC0103CE296DE8DA5E7 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
@@ -483,7 +687,7 @@
 			};
 			name = Debug;
 		};
-		2761849A6D0E26CA4E1817A1 /* Release */ = {
+		A302CE9301297FBC3E669870 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
@@ -506,7 +710,103 @@
 			};
 			name = Release;
 		};
-		FC45C70AF9BBBC9692F6FCD0 /* Debug */ = {
+		0EA0B93199915DD876BD7EC6 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = KlimaWidgets/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.klima.app.widgets;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		3078A6DD00BA86B1A1F25E4E /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = KlimaWidgets/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.klima.app.widgets;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		68123E4D17C66F75F20EFB1D /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = KlimaWatch/Resources/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.klima.app.watchkitapp;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = watchos;
+				SUPPORTED_PLATFORMS = "watchos watchsimulator";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 4;
+			};
+			name = Debug;
+		};
+		1D986E422EFEA608CDA3EA95 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = KlimaWatch/Resources/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.klima.app.watchkitapp;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = watchos;
+				SUPPORTED_PLATFORMS = "watchos watchsimulator";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 4;
+			};
+			name = Release;
+		};
+		4611D848092EAF6C69756F7A /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
@@ -523,7 +823,7 @@
 			};
 			name = Debug;
 		};
-		3B9DBBBF25E35C4FAE79C30C /* Release */ = {
+		BAA76C835D25625E20469E64 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
@@ -552,20 +852,38 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		1D97B77EAD2380603A3F2A82 /* Build configuration list for PBXNativeTarget "Klima" */ = {
+		3EC7BAEFA0A10C87A2AF8004 /* Build configuration list for PBXNativeTarget "Klima" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				0615050D04BD2DC4E6CFFAFF /* Debug */,
-				2761849A6D0E26CA4E1817A1 /* Release */,
+				84A87EC0103CE296DE8DA5E7 /* Debug */,
+				A302CE9301297FBC3E669870 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		0F471B4923D46E58DCE40A0E /* Build configuration list for PBXNativeTarget "KlimaTests" */ = {
+		1A119550025DA1718939AE72 /* Build configuration list for PBXNativeTarget "KlimaWidgets" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				FC45C70AF9BBBC9692F6FCD0 /* Debug */,
-				3B9DBBBF25E35C4FAE79C30C /* Release */,
+				0EA0B93199915DD876BD7EC6 /* Debug */,
+				3078A6DD00BA86B1A1F25E4E /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		2419B76D4674E397AF278F0E /* Build configuration list for PBXNativeTarget "KlimaWatch" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				68123E4D17C66F75F20EFB1D /* Debug */,
+				1D986E422EFEA608CDA3EA95 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		90EFBE48AEFC1DC0FA53C3A6 /* Build configuration list for PBXNativeTarget "KlimaTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				4611D848092EAF6C69756F7A /* Debug */,
+				BAA76C835D25625E20469E64 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

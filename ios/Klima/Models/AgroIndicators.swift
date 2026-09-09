@@ -58,7 +58,7 @@ struct WaterBalance: Equatable {
 
 // MARK: - Pulvérisation
 
-enum SprayVerdict: String {
+enum SprayVerdict: String, Codable {
     case favorable, acceptable, defavorable
 
     /// Clé de catalogue, par exemple « spray.favorable ».
@@ -70,7 +70,7 @@ enum SprayVerdict: String {
 
 /// Motif de dégradation d'une heure, sous forme structurée : le domaine dit ce
 /// qui cloche et avec quelles valeurs, l'interface le formule dans sa langue.
-enum SprayBlocker: Equatable, Hashable {
+enum SprayBlocker: Equatable, Hashable, Codable {
     case windTooStrong(wind: Double, limit: Double)
     case windTooWeak
     case gusts(Double)
