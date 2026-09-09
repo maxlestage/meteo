@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { AgroThresholds, weatherCondition, type Parcelle } from '@klima/core'
 import { LanguageSwitcher, useI18n } from '@klima/core/ui'
 import { Features } from './components/Features'
+import { BrandLockup } from './components/Brand'
 import { Footer } from './components/Footer'
 import { SkyScene, SoilProfile, SprayScene } from './components/Illustrations'
 import { Sources } from './components/Sources'
@@ -33,8 +34,8 @@ export default function App() {
   return (
     <>
       <header className="nav">
-        <a className="nav__brand" href="#top">
-          Klima
+        <a className="nav__brand" href="#top" aria-label="Klima">
+          <BrandLockup />
         </a>
         <div className="nav__end">
           <nav>

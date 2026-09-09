@@ -4,14 +4,58 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="color-scheme" content="light" />
+    <meta name="theme-color" content="#3f6b2b" />
+
+    <title>Klima — la météo qui parle agronomie</title>
     <meta
       name="description"
-      content="Klima : la météo qui parle agronomie. Bilan hydrique, humidité du sol, fenêtres de traitement et degrés-jours, sur iPhone et sur le web."
+      content="Klima recoupe plusieurs services météo pour dire l'état du sol, le bilan hydrique et les fenêtres de traitement d'une parcelle. Sur iPhone, sur la montre et sur le web."
     />
-    <title>Klima — la météo qui parle agronomie</title>
+    <meta name="author" content="Maxime Nathan Lestage" />
+
+    <link rel="icon" href="./favicon.svg" type="image/svg+xml" />
+    <link rel="icon" href="./icon-32.png" sizes="32x32" type="image/png" />
+    <link rel="apple-touch-icon" href="./icon-180.png" />
+    <link rel="manifest" href="./site.webmanifest" />
+
+    <!-- L'aperçu des liens partagés. -->
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Klima" />
+    <meta property="og:locale" content="fr_FR" />
+    <meta property="og:locale:alternate" content="en_GB" />
+    <meta property="og:locale:alternate" content="es_ES" />
+    <meta property="og:title" content="Klima — la météo qui parle agronomie" />
+    <meta
+      property="og:description"
+      content="Plusieurs services météo recoupés pour dire l'état du sol, le bilan hydrique et les fenêtres de traitement d'une parcelle."
+    />
+    <meta property="og:url" content="https://maxlestage.github.io/meteo/" />
+    <meta property="og:image" content="https://maxlestage.github.io/meteo/og.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta
+      property="og:image:alt"
+      content="Klima — la météo qui parle agronomie, recoupant Météo-France, ECMWF, DWD, NOAA et MET Norway."
+    />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Klima — la météo qui parle agronomie" />
+    <meta
+      name="twitter:description"
+      content="Plusieurs services météo recoupés pour dire l'état du sol, le bilan hydrique et les fenêtres de traitement d'une parcelle."
+    />
+    <meta name="twitter:image" content="https://maxlestage.github.io/meteo/og.png" />
+
+    <!-- La police d'affichage est servie depuis le site : aucun appel à un tiers. -->
+    <link
+      rel="preload"
+      href="./fonts/fraunces-latin.woff2"
+      as="font"
+      type="font/woff2"
+      crossorigin
+    />
+    <script type="module" src="/src/main.tsx"></script>
   </head>
   <body>
     <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
