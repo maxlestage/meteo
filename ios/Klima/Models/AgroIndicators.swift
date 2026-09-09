@@ -58,7 +58,7 @@ struct WaterBalance: Equatable {
 
 // MARK: - Pulvérisation
 
-enum SprayVerdict: String, Codable {
+enum SprayVerdict: String, Codable, CaseIterable {
     case favorable, acceptable, defavorable
 
     /// Clé de catalogue, par exemple « spray.favorable ».
@@ -168,7 +168,7 @@ struct DiseasePressure: Equatable {
 
 // MARK: - Sol
 
-enum SoilState: String {
+enum SoilState: String, Codable {
     case sature, ressuye, sec
 
     /// Clé de catalogue, par exemple « soil.sature ».
