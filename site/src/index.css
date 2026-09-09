@@ -29,22 +29,25 @@
 }
 
 :root {
-  --paper: #faf8f4;
-  --surface: #ffffff;
-  --ink: #1b2016;
-  --ink-soft: #5f6659;
-  --line: #e3ded2;
-  --accent: #3f6b2b;
-  --good: #4a7c2f;
-  --warn: #a56a12;
-  --bad: #a83232;
+  /* Le site vit sous le même ciel que l'application : un dégradé fixe, une
+     parcelle en bas de fenêtre, et des cartes de verre posées dessus. */
   --sky-1: #3c556e;
   --sky-2: #2b3d52;
   --sky-3: #1d2836;
+  --surface: rgb(255 255 255 / 9%);
+  --surface-strong: rgb(255 255 255 / 14%);
+  --ink: #ffffff;
+  --ink-soft: rgb(255 255 255 / 68%);
+  --line: rgb(255 255 255 / 16%);
+  --accent: #9ed073;
+  --accent-deep: #4a7c2f;
+  --good: #7ed07a;
+  --warn: #f0c14b;
+  --bad: #ef8b7f;
   --radius: 16px;
   --display: 'Fraunces', Georgia, 'Times New Roman', serif;
-  --shadow: 0 1px 2px rgb(27 32 22 / 5%), 0 12px 32px rgb(27 32 22 / 7%);
-  color-scheme: light;
+  --shadow: 0 1px 2px rgb(0 0 0 / 18%), 0 18px 40px rgb(0 0 0 / 24%);
+  color-scheme: dark;
 }
 
 * {
@@ -53,7 +56,8 @@
 
 body {
   margin: 0;
-  background: var(--paper);
+  min-height: 100vh;
+  background: var(--sky-3);
   color: var(--ink);
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
   line-height: 1.55;
@@ -82,6 +86,31 @@ h2 {
 
 a {
   color: inherit;
+}
+
+/* Le ciel et la parcelle : deux couches fixes, derrière toute la page. On
+   dessine sur des pseudo-éléments plutôt qu'en « background-attachment: fixed »,
+   que Safari mobile rend mal. */
+body::before,
+body::after {
+  content: '';
+  position: fixed;
+  z-index: -1;
+  inset: 0;
+  pointer-events: none;
+}
+
+body::before {
+  background: linear-gradient(180deg, var(--sky-1) 0%, var(--sky-2) 42%, var(--sky-3) 100%);
+}
+
+body::after {
+  top: auto;
+  height: 240px;
+  background:
+    linear-gradient(to top, rgb(45 74 24 / 78%), rgb(45 74 24 / 0%)),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1200 240' preserveAspectRatio='none'%3E%3Cpath d='M0 104 Q600 44 1200 104 L1200 240 L0 240 Z' fill='%235d7c3a' opacity='.55'/%3E%3Cpath d='M0 158 Q600 108 1200 158 L1200 240 L0 240 Z' fill='%234d6b2e' opacity='.6'/%3E%3C/svg%3E")
+      bottom / 100% 240px no-repeat;
 }
 
 /* Navigation ------------------------------------------------------------- */
@@ -136,6 +165,7 @@ a {
   border: 1px solid var(--line);
   border-radius: 10px;
   background: var(--surface);
+  backdrop-filter: blur(16px);
 }
 
 .lang button {
@@ -155,7 +185,7 @@ a {
 }
 
 .lang button.is-current {
-  background: var(--accent);
+  background: var(--accent-deep);
   color: #fff;
 }
 
@@ -262,9 +292,9 @@ section {
 .button {
   display: inline-block;
   padding: 11px 20px;
-  border: 1px solid var(--accent);
+  border: 1px solid var(--accent-deep);
   border-radius: 10px;
-  background: var(--accent);
+  background: var(--accent-deep);
   color: #fff;
   font: inherit;
   font-size: 15px;
@@ -274,17 +304,18 @@ section {
 }
 
 .button:hover {
-  background: #35591f;
+  background: #3f6b2b;
 }
 
 .button--ghost {
-  background: transparent;
+  background: var(--surface);
   border-color: var(--line);
   color: var(--ink);
+  backdrop-filter: blur(16px);
 }
 
 .button--ghost:hover {
-  background: #efece4;
+  background: var(--surface-strong);
 }
 
 /* Aperçu iPhone ---------------------------------------------------------- */
@@ -292,9 +323,9 @@ section {
 .phone {
   width: 264px;
   padding: 10px;
-  border: 1px solid #d3cdc0;
+  border: 1px solid rgb(255 255 255 / 22%);
   border-radius: 40px;
-  background: linear-gradient(160deg, #efece4, #ddd7c9);
+  background: linear-gradient(160deg, #55606b, #2c343d);
   box-shadow: var(--shadow);
   justify-self: center;
 }
@@ -404,10 +435,16 @@ section {
   padding: 11px 15px;
   border: 1px solid var(--line);
   border-radius: 11px;
-  background: var(--surface);
+  background: var(--surface-strong);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
   color: var(--ink);
   font: inherit;
   font-size: 16px;
+}
+
+.commune__input::placeholder {
+  color: var(--ink-soft);
 }
 
 .commune__input:focus-visible,
@@ -428,7 +465,8 @@ section {
   list-style: none;
   border: 1px solid var(--line);
   border-radius: 12px;
-  background: var(--surface);
+  background: rgb(34 47 62 / 96%);
+  backdrop-filter: blur(20px);
   box-shadow: var(--shadow);
 }
 
@@ -449,7 +487,7 @@ section {
 }
 
 .commune__results button:hover {
-  background: #f1eee6;
+  background: rgb(255 255 255 / 12%);
 }
 
 .commune__admin {
@@ -459,8 +497,11 @@ section {
 
 .today__card {
   padding: 26px;
+  border: 1px solid rgb(255 255 255 / 14%);
   border-radius: var(--radius);
-  background: linear-gradient(160deg, var(--sky-1), var(--sky-2) 55%, var(--sky-3));
+  /* La carte se détache du ciel de la page : plus dense, et bordée. */
+  background: linear-gradient(160deg, rgb(20 32 45 / 92%), rgb(13 22 32 / 94%));
+  backdrop-filter: blur(10px);
   color: #fff;
   box-shadow: var(--shadow);
 }
@@ -623,6 +664,8 @@ section {
   border: 1px solid var(--line);
   border-radius: var(--radius);
   background: var(--surface);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
 }
 
 .feature h3,
@@ -761,14 +804,14 @@ section {
 }
 
 .scene__sun circle:last-child {
-  transform-origin: 330px 62px;
+  transform-origin: 352px 30px;
   animation: glow 5s ease-in-out infinite alternate;
 }
 
 @keyframes fall {
   from { transform: translateY(-10px); opacity: 0; }
   20% { opacity: 0.9; }
-  to { transform: translateY(64px); opacity: 0; }
+  to { transform: translateY(34px); opacity: 0; }
 }
 
 .scene__rain line {
@@ -801,6 +844,8 @@ section {
   border: 1px solid var(--line);
   border-radius: var(--radius);
   background: var(--surface);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
 }
 
 .figures svg {
@@ -879,6 +924,8 @@ section {
   border: 1px solid var(--line);
   border-radius: var(--radius);
   background: var(--surface);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
   box-shadow: var(--shadow);
 }
 
@@ -957,7 +1004,7 @@ section {
   flex: 0 0 34px;
   padding: 3px 0;
   border-radius: 6px;
-  background: var(--paper);
+  background: var(--surface-strong);
   color: var(--ink-soft);
   font-size: 11px;
   font-weight: 700;
@@ -1121,6 +1168,7 @@ section {
   border: 1px solid var(--line);
   border-radius: 8px;
   background: var(--surface);
+  backdrop-filter: blur(16px);
   color: var(--ink-soft);
   font: inherit;
   font-size: 12px;
