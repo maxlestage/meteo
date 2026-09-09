@@ -40,6 +40,18 @@ enum BackgroundRefresh {
         let summary = AgroIndicators.summarize(hours: forecast.hourly, days: forecast.daily)
         await updateActivities(hours: forecast.hourly, opportunity: summary.nextSpray)
 
+        // Le réveil est aussi le moment d'examiner ce qu'il y a à dire. Le
+        // palier vient du stockage partagé plutôt que de StoreKit : interroger
+        // la boutique depuis une tâche de fond serait lent et inutile, l'écran
+        // d'achat s'en chargeant à chaque ouverture.
+        let state = await AlertScheduler.schedule(
+            summary: summary,
+            hours: forecast.hourly,
+            plan: SharedStore.loadPlan(),
+            state: SharedStore.loadAlertState()
+        )
+        SharedStore.save(state)
+
         #if canImport(WidgetKit)
         WidgetCenter.shared.reloadAllTimelines()
         #endif
