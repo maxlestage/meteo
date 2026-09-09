@@ -52,6 +52,64 @@ body {
   gap: 14px;
 }
 
+/* Bandeau de tête -------------------------------------------------------- */
+
+/* Le signe et la langue, sur une même ligne au-dessus de la recherche. La
+   marque est celle du paquet partagé : le site et l'application montrent le
+   même dessin. Le nom reste en linéale ici — l'application est un outil, pas
+   une vitrine, et ne charge pas de police d'affichage. */
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 0 2px;
+}
+
+.brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.brand-mark {
+  display: block;
+  flex: none;
+}
+
+.brand__name {
+  font-size: 19px;
+  font-weight: 650;
+  letter-spacing: -0.01em;
+}
+
+.lang {
+  display: inline-flex;
+  gap: 2px;
+  padding: 2px;
+  border: 1px solid rgb(255 255 255 / 14%);
+  border-radius: 999px;
+  background: rgb(255 255 255 / 8%);
+}
+
+.lang button {
+  padding: 4px 10px;
+  border: 0;
+  border-radius: 999px;
+  background: none;
+  color: var(--text-muted);
+  font: inherit;
+  font-size: 12px;
+  font-weight: 650;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+}
+
+.lang button.is-current {
+  background: rgb(255 255 255 / 16%);
+  color: #fff;
+}
+
 /* En-tête ---------------------------------------------------------------- */
 
 .hero {
