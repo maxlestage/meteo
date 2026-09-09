@@ -1,5 +1,6 @@
 import { LANGUAGE_NAMES, LANGUAGES } from '@klima/core'
 import { useI18n } from '@klima/core/ui'
+import { BrandMark } from './Brand'
 
 /**
  * Pied de page : ce que le produit couvre, d'où viennent ses chiffres, qui l'a
@@ -13,7 +14,10 @@ export function Footer() {
     <footer className="footer">
       <div className="footer__grid">
         <div className="footer__brand">
-          <p className="footer__wordmark">Klima</p>
+          <span className="brand">
+            <BrandMark size={30} />
+            <span className="footer__wordmark">Klima</span>
+          </span>
           <p className="footer__tagline">{t('footer.tagline')}</p>
           <ul className="footer__languages">
             {LANGUAGES.map((candidate) => (
