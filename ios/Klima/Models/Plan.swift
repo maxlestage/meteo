@@ -33,6 +33,12 @@ enum Feature: String, CaseIterable, Sendable {
     var upgradeReasonKey: String { "plan.reason.\(rawValue)" }
 }
 
+/// Permet de présenter l'écran d'abonnement en nommant la fonction sur
+/// laquelle on a buté.
+extension Feature: Identifiable {
+    var id: String { rawValue }
+}
+
 struct PlanLimits: Equatable, Sendable {
     /// Nombre de parcelles suivies. `nil` quand il n'y a pas de limite.
     let parcelles: Int?

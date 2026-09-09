@@ -10,6 +10,8 @@ export const webMessages: Record<Language, Catalog> = {
     'app.updatedAt': 'mise à jour {time}',
     'app.source':
       'Données Open-Meteo — modèle agricole : humidité et température du sol, ET0 FAO-56, déficit de pression de vapeur',
+    'pro.lead': 'Sur iPhone et Apple Watch, Klima Pro ajoute :',
+    'pro.free': 'Ici et dans l’application, {parcelles} parcelle et {jours} jours de prévision restent gratuits, sans compte ni publicité.',
 
     'search.placeholder': '{parcelle} — changer de parcelle',
     'search.label': 'Rechercher une commune',
@@ -64,6 +66,8 @@ export const webMessages: Record<Language, Catalog> = {
     'app.updatedAt': 'updated {time}',
     'app.source':
       'Open-Meteo data — agricultural model: soil moisture and temperature, FAO-56 ET0, vapour pressure deficit',
+    'pro.lead': 'On iPhone and Apple Watch, Klima Pro adds:',
+    'pro.free': 'Here and in the app, {parcelles} field and {jours} days of forecast stay free, with no account and no adverts.',
 
     'search.placeholder': '{parcelle} — change field',
     'search.label': 'Search for a town',
@@ -119,6 +123,8 @@ export const webMessages: Record<Language, Catalog> = {
     'app.source':
       'Datos de Open-Meteo — modelo agrícola: humedad y temperatura del suelo, ET0 FAO-56, déficit de presión de vapor',
 
+    'pro.lead': 'En iPhone y Apple Watch, Klima Pro añade:',
+    'pro.free': 'Aquí y en la aplicación, {parcelles} parcela y {jours} días de previsión siguen siendo gratis, sin cuenta ni publicidad.',
     'search.placeholder': '{parcelle} — cambiar de parcela',
     'search.label': 'Buscar un municipio',
     'search.locate': 'Ubicarme',
