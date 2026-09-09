@@ -23,14 +23,21 @@ nouvelle pull request.
   et les dates suivent en revanche la langue de l'utilisateur.
 - **Ne pas publier de lien vers le code source** sur le site de présentation.
 - **Respecter les conditions des fournisseurs météo.** MET Norway exige un
-  `User-Agent` identifiant : il n'est appelé que depuis le natif. Les mentions
-  de licence s'affichent dès qu'une source est utilisée.
+  `User-Agent` identifiant. La règle n'est donc pas « natif seulement » mais
+  **« seulement là où l'on peut se nommer »** : en appel direct, le natif ; par
+  le relais, le serveur, qui pose l'en-tête pour tout le monde. Jamais depuis
+  un navigateur en direct. Les mentions de licence s'affichent dès qu'une
+  source est utilisée.
+- **Le plan gratuit d'Open-Meteo est réservé à un usage non commercial.** Le
+  jour où Klima se vend, tout le trafic passe par un plan payant, donc par une
+  clé — qui vit dans `server/` et nulle part ailleurs. Une clé dans un binaire
+  distribué est une clé publiée.
 
 ## Vérifications avant de livrer
 
 ```bash
-bun test                       # cœur partagé, web et site
-cd core && bun run typecheck   # idem dans web/ et site/
+bun test                       # cœur partagé, relais, web et site
+cd core && bun run typecheck   # idem dans server/, web/ et site/
 cd web && bun run build        # idem dans site/
 ```
 
