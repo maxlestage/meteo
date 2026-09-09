@@ -2,6 +2,7 @@ import { afterEach, describe, expect, test } from 'bun:test'
 import { brightSkyProvider } from './brightSky'
 import { metNorwayProvider } from './metNorway'
 import { openMeteoProvider } from './openMeteo'
+import { useDirectProviders, useRelay } from '../endpoints'
 import { fetchAllReadings, providersFor, attributionsFor, PROVIDERS } from './index'
 
 const query = { latitude: 48.4468, longitude: 1.4892 }
@@ -118,10 +119,42 @@ describe('MET Norway', () => {
     expect(readings[0]!.windSpeed).toBeCloseTo(18, 5)
   })
 
-  test('n’est pas appelé depuis le web : ses conditions imposent un User-Agent', () => {
+  test('n’est pas appelé directement depuis le web : ses conditions imposent un User-Agent', () => {
     expect(metNorwayProvider.platforms).toEqual(['native'])
     expect(providersFor('web').map((p) => p.id)).not.toContain('met-norway')
     expect(providersFor('native').map((p) => p.id)).toContain('met-norway')
+  })
+
+  test('le relais le rend accessible au web : c’est lui qui se nomme', () => {
+    useRelay('https://relais.klima')
+    try {
+      expect(providersFor('web').map((p) => p.id)).toContain('met-norway')
+      // Et le client ne pose plus l'en-tête lui-même : le navigateur le
+      // refuserait, et le relais l'a déjà mis.
+      expect(providersFor('web')).toEqual(providersFor('native'))
+    } finally {
+      useDirectProviders()
+    }
+  })
+
+  test('en direct le client se nomme, par le relais il s’en abstient', async () => {
+    const seen: Array<string | null> = []
+    globalThis.fetch = ((_input: string | URL | Request, init?: RequestInit) => {
+      seen.push(new Headers(init?.headers).get('User-Agent'))
+      return Promise.resolve(json({ properties: { timeseries: [] } }))
+    }) as unknown as typeof fetch
+
+    await metNorwayProvider.fetch(query)
+    useRelay('https://relais.klima')
+    try {
+      await metNorwayProvider.fetch(query)
+    } finally {
+      useDirectProviders()
+    }
+
+    expect(seen[0]).toContain('Klima/')
+    // Un navigateur refuserait de poser cet en-tête, et le relais l'a déjà mis.
+    expect(seen[1]).toBeNull()
   })
 })
 

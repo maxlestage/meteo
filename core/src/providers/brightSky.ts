@@ -1,3 +1,4 @@
+import { endpoints } from '../endpoints'
 import type { Provider, ProviderQuery, SourceReading, WeatherSource } from './types'
 
 /**
@@ -23,6 +24,7 @@ export const brightSkyProvider: Provider = {
   id: 'bright-sky',
   institution: 'Bright Sky / DWD',
   platforms: ['web', 'native'],
+  viaRelay: true,
   attribution: SOURCE.attribution,
   fetch: fetchBrightSky,
 }
@@ -38,7 +40,7 @@ interface BrightSkyPayload {
 }
 
 async function fetchBrightSky(query: ProviderQuery, signal?: AbortSignal): Promise<SourceReading[]> {
-  const url = new URL('https://api.brightsky.dev/current_weather')
+  const url = new URL(endpoints().brightSky)
   url.searchParams.set('lat', query.latitude.toFixed(4))
   url.searchParams.set('lon', query.longitude.toFixed(4))
 
