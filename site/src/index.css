@@ -986,6 +986,23 @@ section {
   }
 }
 
+.sources__providers {
+  margin: 4px 0 0;
+  color: var(--ink-soft);
+  font-size: 13px;
+}
+
+.sources__attributions {
+  margin: 12px 0 0;
+  padding-left: 18px;
+  color: var(--ink-soft);
+  font-size: 13px;
+}
+
+.sources__attributions li {
+  margin-bottom: 3px;
+}
+
 /* Pied de page ------------------------------------------------------------ */
 
 .footer {
