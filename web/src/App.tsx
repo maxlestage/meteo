@@ -12,7 +12,7 @@ import { useParcelle } from './hooks/useParcelle'
 export default function App() {
   const { t, f, locale } = useI18n()
   const [parcelle, setParcelle] = useParcelle()
-  const { forecast, summary, loading, error, reload } = useAgroForecast(parcelle)
+  const { forecast, summary, consensus, loading, error, reload } = useAgroForecast(parcelle)
 
   const sky = forecast ? skyFor(forecast.current.isDay, forecast.current.weatherCode) : 'night'
 
@@ -122,6 +122,24 @@ export default function App() {
                   time: time(forecast.daily[0]?.sunset, forecast.timezone, locale),
                 })}
               />
+
+              {consensus && (
+                <DetailTile
+                  label={t('consensus.title')}
+                  value={t(`consensus.${consensus.agreement}`)}
+                  caption={`${t('consensus.detail', {
+                    count: consensus.readings.length,
+                    spread: f.unit(consensus.temperature.spread, '°C'),
+                  })}${consensus.agreeOnRain ? '' : ` · ${t('consensus.rainDisagreement')}`}. ${t(
+                    'consensus.median',
+                    { value: f.unit(consensus.temperature.median, '°C') },
+                  )}.`}
+                  gauge={{
+                    position: 1 - Math.min(consensus.temperature.spread / 5, 1),
+                    gradient: 'linear-gradient(to right, #ef8a5a, #f0c14b, #7ed07a)',
+                  }}
+                />
+              )}
 
               <DetailTile
                 label={t('tile.sowing')}
