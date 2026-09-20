@@ -13,12 +13,19 @@ nouvelle pull request.
 ## Ce qui ne se négocie pas
 
 - **Deux noms, et ce n'est pas une coquille.** Le nouveau nom ne dépasse pas
-  de `ios/`. Le projet Xcode, ses cibles et ses identifiants s'appellent
-  **Kliima** ; tout le reste — le dépôt, le site, l'application web, les
-  catalogues partagés — reste **Klima**. Les libellés partagés
-  (`plan.libre`, `plan.pro`) disent donc Klima ; seul le catalogue iOS dit
-  Kliima. La divergence est voulue : ne pas « corriger » l'un d'après
-  l'autre.
+  de `ios/`. L'application iPhone s'appelle **Kliima ‣** — le triangle
+  (U+2023) fait partie du nom, ce n'est pas de la décoration. Tout le reste —
+  le dépôt, le site, l'application web, les catalogues partagés — reste
+  **Klima**. Les libellés partagés (`plan.libre`, `plan.pro`) disent donc
+  Klima ; seul le catalogue iOS dit Kliima ‣. La divergence est voulue : ne
+  pas « corriger » l'un d'après l'autre.
+- **Le symbole ne vit que dans le nom affiché.** `CFBundleDisplayName` et les
+  textes où l'application se nomme le portent. Il ne peut pas aller ailleurs :
+  un identifiant de paquet n'accepte que lettres, chiffres, tirets et points ;
+  le nom du bundle `.app` vient de `PRODUCT_NAME` ; et un caractère non ASCII
+  dans un nom de cible ou de dossier casserait les chemins de compilation. Les
+  cibles, les dossiers et les identifiants restent donc `Kliima` tout court.
+  Un test vérifie que le nom affiché n'a pas perdu son triangle.
 - **Une seule source pour les règles agronomiques.** Les seuils vivent dans
   `core/src/agro.ts` (`AgroThresholds`) et dans son miroir Swift
   `ios/Kliima/Models/AgroIndicators.swift`. Toute règle ajoutée d'un côté se
