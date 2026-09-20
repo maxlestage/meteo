@@ -1,10 +1,14 @@
 # Klima
 
 Météo agricole : une application iOS en SwiftUI, une application web et un site
-de présentation, tous bâtis sur le même cœur agronomique. Les données viennent
-exclusivement de l'**API agricole Open-Meteo** — humidité et température du sol,
-évapotranspiration de référence FAO-56, déficit de pression de vapeur — sans
-clé d'API.
+de présentation, tous bâtis sur le même cœur agronomique. Les variables sont
+celles de l'**API agricole Open-Meteo** — humidité et température du sol,
+évapotranspiration de référence FAO-56, déficit de pression de vapeur — et trois
+fournisseurs indépendants sont recoupés pour la valeur affichée.
+
+**Deux noms, et c'est voulu.** Le projet, le site et l'application web
+s'appellent **Klima** ; l'application iPhone et sa montre s'appellent
+**Kliima**. Le signe, les couleurs et le cœur agronomique sont les mêmes.
 
 ```
 core/   Cœur partagé TypeScript : règles agronomiques, codes météo, client Open-Meteo
@@ -34,7 +38,7 @@ code de calcul.
 | Commun web et site | `core/src/messages.ts` | — |
 | Application web | `web/src/i18n/messages.ts` | Sélecteur, sinon le navigateur |
 | Site de présentation | `site/src/i18n/messages.ts` | Sélecteur, sinon le navigateur |
-| iOS | `ios/Klima/Resources/Localizable.xcstrings` | Réglages du système |
+| iOS | `ios/Kliima/Resources/Localizable.xcstrings` | Réglages du système |
 
 Les nombres et les dates suivent la langue : virgule décimale en français et en
 espagnol, point en anglais ; horloge sur 24 h en français, sur 12 h en anglais
@@ -100,23 +104,23 @@ thermique de la semaine, lever et coucher du soleil.
 
 Les seuils sont définis une seule fois par plateforme et doivent rester
 synchronisés : `core/src/agro.ts` (`AgroThresholds`), consommé par le web et le
-site, et `ios/Klima/Models/AgroIndicators.swift` (`AgroThresholds`). Les deux
+site, et `ios/Kliima/Models/AgroIndicators.swift` (`AgroThresholds`). Les deux
 suites de tests couvrent les mêmes cas, pour que le conseil rendu soit
 identique au champ.
 
 ## iOS
 
 ```bash
-open ios/Klima.xcodeproj
+open ios/Kliima.xcodeproj
 ```
 
 Le projet est un `project.pbxproj` classique, versionné et modifiable
-directement — pas de générateur ni de Fastlane. Cible iOS 17, deux cibles :
-`Klima` (application) et `KlimaTests` (tests unitaires), avec un
-schéma partagé.
+directement — pas de générateur ni de Fastlane. Cible iOS 17, cinq cibles : `Kliima` (application),
+`KliimaWidgets`, `KliimaWatch`, `KliimaWatchWidgets` et `KliimaTests`, avec
+deux schémas partagés.
 
 ```bash
-xcodebuild -project ios/Klima.xcodeproj -scheme Klima \
+xcodebuild -project ios/Kliima.xcodeproj -scheme Kliima \
   -destination 'platform=iOS Simulator,name=iPhone 15' test
 ```
 
@@ -124,40 +128,40 @@ Avant la première exécution sur appareil, renseignez votre équipe de signatur
 (`DEVELOPMENT_TEAM`) et, si besoin, votre propre `PRODUCT_BUNDLE_IDENTIFIER`
 dans les réglages de la cible.
 
-Trois cibles se partagent le même noyau (`Klima/Models`) :
+Les cinq cibles se partagent le même noyau (`Kliima/Models`) :
 
 ```
-Klima/           Application iPhone
+Kliima/           Application iPhone
   App/           Point d'entrée SwiftUI
   Models/        Types de mesure, cœur agronomique, formats, textes
   Services/      Client Open-Meteo, position, activité en direct
   ViewModels/    État du tableau de bord
   Views/         Tableau de bord, bandeau horaire, liste des jours, tuiles
   Resources/     Info.plist, assets, catalogues de chaînes
-KlimaWidgets/    Extension iOS : activité en direct et widget d'écran d'accueil
-KlimaWatch/      Application watchOS autonome
-KlimaWatchWidgets/ Extension watchOS : complications de cadran
+KliimaWidgets/    Extension iOS : activité en direct et widget d'écran d'accueil
+KliimaWatch/      Application watchOS autonome
+KliimaWatchWidgets/ Extension watchOS : complications de cadran
 ```
 
-Les cinq cibles partagent le noyau `Klima/Models`. L'application, ses widgets et
+L'application, ses widgets et
 la complication lisent la même parcelle via un **groupe d'applications**
-(`group.com.klima.app`) : il doit être déclaré dans le compte développeur avant
+(`group.com.kliima.app`) : il doit être déclaré dans le compte développeur avant
 la première compilation signée.
 
 ### Activité en direct
 
-La fenêtre de traitement est le seul élément vraiment vivant de Klima : elle a
+La fenêtre de traitement est le seul élément vraiment vivant de Kliima : elle a
 un début, une fin, et des conditions qui peuvent se dégrader entre-temps. Un
 bouton sur la carte de traitement ouvre son suivi ; l'écran verrouillé et l'île
 dynamique affichent alors le verdict courant, le vent et le motif de blocage
 s'il y en a un.
 
 Le suivi continue application fermée grâce à une tâche d'arrière-plan
-(`BGAppRefreshTask`) : le système réveille Klima de temps à autre, qui recharge
+(`BGAppRefreshTask`) : le système réveille Kliima de temps à autre, qui recharge
 la prévision, met à jour l'activité et les widgets, puis redemande un réveil. Le
 rythme est décidé par iOS selon l'usage et la batterie — il n'est pas garanti.
-Un suivi à la minute demanderait des notifications poussées, donc un serveur,
-que Klima n'a pas.
+Un suivi à la minute demanderait des notifications poussées, donc un envoi
+depuis le relais (`server/`) — prévu, pas encore fait.
 
 ### Widget d'écran d'accueil
 
@@ -167,18 +171,18 @@ Le widget va chercher sa propre prévision, une fois par heure.
 
 ### Complication de cadran
 
-`KlimaWatchWidgets` fournit les quatre formes de watchOS — circulaire,
+`KliimaWatchWidgets` fournit les quatre formes de watchOS — circulaire,
 rectangulaire, en ligne et d'angle — avec l'heure de la prochaine fenêtre.
 
 ### Application montre
 
-`KlimaWatch` est une application watchOS autonome : elle interroge l'API
+`KliimaWatch` est une application watchOS autonome : elle interroge l'API
 elle-même et se cale sur la position du poignet, sans passer par le téléphone.
 Elle montre la température, la prochaine fenêtre de traitement, le vent, l'état
 du sol, le gel et le bilan — les réponses qu'on vient chercher au champ.
 
 ```bash
-xcodebuild -project ios/Klima.xcodeproj -scheme KlimaWatch \
+xcodebuild -project ios/Kliima.xcodeproj -scheme KliimaWatch \
   -destination 'platform=watchOS Simulator,name=Apple Watch Series 9 (45mm)' build
 ```
 
@@ -216,9 +220,11 @@ peut pas annoncer autre chose que ce que l'application applique.
 
 ### Marque et typographie
 
-Le signe de Klima — un disque de ciel, une goutte, une feuille — tient à seize
-pixels comme sur une icône d'application. Il sert de favicon (SVG et PNG),
-d'icône iOS et watchOS, et de marque dans la barre et le pied de page.
+Le signe de Klima — un K dont la hampe porte une goutte et dont les bras sont
+taillés en lames de feuille — tient à vingt-deux pixels comme sur une icône
+d'application. Il sert de favicon (SVG et PNG), d'icône iOS et watchOS, et de
+marque dans la barre et le pied de page. Un seul dessin, décliné depuis les
+gabarits de `site/public/` et `/tmp/brand`.
 
 L'écriture porte la marque : **Fraunces** pour tout ce qui s'annonce, la linéale
 du système pour tout ce qui se lit. La police est **servie depuis le site**
