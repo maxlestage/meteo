@@ -35,6 +35,11 @@ python3 ios/Tools/gen_xcstrings.py ios/Kliima/Resources
 Les trous des motifs sont **positionnels** (`%1$@`), comme `String(format:)`
 l'attend — pas `{nom}` comme du côté TypeScript. Un test le verrouille.
 
+Le nom affiché est `Kliima ‣` : le triangle (U+2023) fait partie du nom. Il ne
+vit que là et dans les textes où l'application se nomme — jamais dans un
+identifiant de paquet, un nom de cible ou un chemin, qui restent `Kliima` tout
+court. Un test échoue si une régénération le perd.
+
 ## Ce que le validateur vérifie
 
 Il analyse le plist avec son propre parseur OpenStep, puis contrôle que chaque

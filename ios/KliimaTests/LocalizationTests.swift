@@ -94,6 +94,25 @@ final class LocalizationTests: XCTestCase {
         }
     }
 
+    /// Le nom de l'application porte un symbole — « Kliima ‣ » — et ce
+    /// symbole fait partie du nom, pas de la décoration. Une régénération qui
+    /// le perdrait passerait inaperçue sans ce test.
+    ///
+    /// Il ne vit que dans le nom affiché : un identifiant de paquet n'accepte
+    /// que des lettres, des chiffres, des tirets et des points, et le nom du
+    /// bundle `.app` vient de `PRODUCT_NAME`, qui reste ASCII.
+    func testDisplayNameCarriesTheSymbol() throws {
+        let translations = try values(try XCTUnwrap(try catalog("InfoPlist")["CFBundleDisplayName"]))
+        XCTAssertFalse(translations.isEmpty)
+        for (language, value) in translations {
+            XCTAssertTrue(
+                value.contains("\u{2023}"),
+                "le nom affiché en \(language) a perdu son symbole : \(value)"
+            )
+            XCTAssertTrue(value.hasPrefix("Kliima"), "nom inattendu en \(language) : \(value)")
+        }
+    }
+
     /// Un corps d'alerte porte un paramètre : il doit être positionnel, sinon
     /// il s'affiche tel quel au lieu d'être remplacé.
     func testAlertBodiesUsePositionalPlaceholders() throws {
