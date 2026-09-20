@@ -91,8 +91,8 @@ export const sharedMessages: Record<Language, Catalog> = {
     'alert.pluie.body': '{rain} mm attendus : un traitement risque d’être lavé.',
 
     // Ce qu'un palier ferme. Le domaine renvoie la clé, l'interface la montre.
-    'plan.libre': 'Kliima',
-    'plan.pro': 'Kliima Pro',
+    'plan.libre': 'Klima',
+    'plan.pro': 'Klima Pro',
     'plan.reason.recoupement': 'Comparer plusieurs instituts demande l’abonnement.',
     'plan.reason.alertes': 'Être prévenu sans ouvrir l’application demande l’abonnement.',
     'plan.reason.cumuls': 'Les cumuls depuis une date demandent l’abonnement.',
@@ -187,8 +187,8 @@ export const sharedMessages: Record<Language, Catalog> = {
     'alert.pluie.title': 'Rain after the window',
     'alert.pluie.body': '{rain} mm expected: a treatment could be washed off.',
 
-    'plan.libre': 'Kliima',
-    'plan.pro': 'Kliima Pro',
+    'plan.libre': 'Klima',
+    'plan.pro': 'Klima Pro',
     'plan.reason.recoupement': 'Comparing several institutes needs the subscription.',
     'plan.reason.alertes': 'Being warned without opening the app needs the subscription.',
     'plan.reason.cumuls': 'Totals since a chosen date need the subscription.',
@@ -283,8 +283,8 @@ export const sharedMessages: Record<Language, Catalog> = {
     'alert.pluie.title': 'Lluvia tras la ventana',
     'alert.pluie.body': '{rain} mm previstos: un tratamiento podría lavarse.',
 
-    'plan.libre': 'Kliima',
-    'plan.pro': 'Kliima Pro',
+    'plan.libre': 'Klima',
+    'plan.pro': 'Klima Pro',
     'plan.reason.recoupement': 'Comparar varios institutos requiere la suscripción.',
     'plan.reason.alertes': 'Recibir avisos sin abrir la aplicación requiere la suscripción.',
     'plan.reason.cumuls': 'Los acumulados desde una fecha requieren la suscripción.',
