@@ -1,7 +1,7 @@
 /**
  * Les cumuls depuis une date choisie.
  *
- * Miroir Swift : `ios/Klima/Models/Cumuls.swift`.
+ * Miroir Swift : `ios/Kliima/Models/Cumuls.swift`.
  *
  * Un agriculteur ne raisonne pas en « sept derniers jours » mais depuis un
  * événement : le semis, le dernier traitement, la reprise de végétation. Ce

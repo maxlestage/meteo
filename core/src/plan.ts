@@ -1,7 +1,7 @@
 /**
  * Les paliers d'abonnement.
  *
- * Miroir Swift : `ios/Klima/Models/Plan.swift`. Toute règle ajoutée ici se
+ * Miroir Swift : `ios/Kliima/Models/Plan.swift`. Toute règle ajoutée ici se
  * porte là-bas, avec les mêmes cas de test — comme les seuils agronomiques.
  *
  * Un principe gouverne le découpage : **on ne coupe jamais la réponse du

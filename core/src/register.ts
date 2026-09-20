@@ -1,7 +1,7 @@
 /**
  * Le registre : les conditions à l'heure d'un traitement.
  *
- * Miroir Swift : `ios/Klima/Models/Register.swift`.
+ * Miroir Swift : `ios/Kliima/Models/Register.swift`.
  *
  * Tenir un registre des traitements phytosanitaires est une obligation. Klima
  * **n'est pas ce registre** et ne prétend pas l'être : il fournit la partie
