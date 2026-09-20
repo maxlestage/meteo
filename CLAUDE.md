@@ -12,11 +12,13 @@ nouvelle pull request.
 
 ## Ce qui ne se négocie pas
 
-- **Deux noms, et ce n'est pas une coquille.** Le projet, le site de
-  présentation et l'application web s'appellent **Klima** ; l'application
-  iPhone, sa montre et leurs extensions s'appellent **Kliima**. Les libellés
-  qui nomment l'abonnement (`plan.libre`, `plan.pro`) désignent le produit
-  iOS : ils disent Kliima, même affichés sur le web.
+- **Deux noms, et ce n'est pas une coquille.** Le nouveau nom ne dépasse pas
+  de `ios/`. Le projet Xcode, ses cibles et ses identifiants s'appellent
+  **Kliima** ; tout le reste — le dépôt, le site, l'application web, les
+  catalogues partagés — reste **Klima**. Les libellés partagés
+  (`plan.libre`, `plan.pro`) disent donc Klima ; seul le catalogue iOS dit
+  Kliima. La divergence est voulue : ne pas « corriger » l'un d'après
+  l'autre.
 - **Une seule source pour les règles agronomiques.** Les seuils vivent dans
   `core/src/agro.ts` (`AgroThresholds`) et dans son miroir Swift
   `ios/Kliima/Models/AgroIndicators.swift`. Toute règle ajoutée d'un côté se
@@ -46,8 +48,17 @@ cd core && bun run typecheck   # idem dans server/, web/ et site/
 cd web && bun run build        # idem dans site/
 ```
 
-Le projet Xcode est généré : après tout ajout de fichier iOS, régénérer
-`ios/Kliima.xcodeproj/project.pbxproj` et le revalider.
+Le `project.pbxproj` est versionné et ouvrable tel quel par Xcode ; les outils
+de `ios/Tools/` le régénèrent depuis une liste de fichiers lisible, ce qui évite
+d'inventer des identifiants à la main. Après tout ajout de fichier iOS :
+
+```bash
+python3 ios/Tools/gen_pbxproj.py ios/Kliima.xcodeproj/project.pbxproj
+python3 ios/Tools/validate_pbxproj.py ios/Kliima.xcodeproj/project.pbxproj
+```
+
+Même chose pour les textes traduits d'iOS : la table lisible est en tête de
+`ios/Tools/gen_xcstrings.py`, et les trous y sont positionnels (`%1$@`).
 
 ## Marque
 
