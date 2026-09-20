@@ -5,7 +5,7 @@
  * L'application web (`web/`) et le site de présentation (`site/`) consomment ce
  * paquet ; l'application iOS en implémente l'équivalent en Swift. Les seuils
  * n'existent donc qu'à deux endroits : `AgroThresholds` ici et son homologue
- * dans `ios/Klima/Models/AgroIndicators.swift`.
+ * dans `ios/Kliima/Models/AgroIndicators.swift`.
  */
 export * from './agro'
 export * from './weather'
