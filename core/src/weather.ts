@@ -3,7 +3,7 @@
  *
  * Le code renvoie une clé, pas un libellé : le texte affiché dépend de la
  * langue et vit dans les catalogues (`sharedMessages`, et leur équivalent iOS).
- * La même table est implémentée dans `ios/Klima/Models/WeatherCondition.swift`.
+ * La même table est implémentée dans `ios/Kliima/Models/WeatherCondition.swift`.
  */
 
 /** Famille de pictogramme, déclinée jour / nuit à l'affichage. */
