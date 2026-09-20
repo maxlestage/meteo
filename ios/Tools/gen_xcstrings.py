@@ -142,8 +142,8 @@ STRINGS = {
                          "%1$@ mm previstos: un tratamiento podría lavarse."),
 
     # --- Ce qu'un palier ferme ---
-    "plan.libre": ("Kliima", "Kliima", "Kliima"),
-    "plan.pro": ("Kliima Pro", "Kliima Pro", "Kliima Pro"),
+    "plan.libre": ("Kliima ‣", "Kliima ‣", "Kliima ‣"),
+    "plan.pro": ("Kliima ‣ Pro", "Kliima ‣ Pro", "Kliima ‣ Pro"),
     "plan.reason.recoupement": ("Comparer plusieurs instituts demande l'abonnement.",
                                 "Comparing several institutes needs the subscription.",
                                 "Comparar varios institutos requiere la suscripción."),
@@ -158,7 +158,7 @@ STRINGS = {
                              "Exportar las condiciones de tratamiento requiere la suscripción."),
 
     # --- Écran d'abonnement ---
-    "paywall.title": ("Kliima Pro", "Kliima Pro", "Kliima Pro"),
+    "paywall.title": ("Kliima ‣ Pro", "Kliima ‣ Pro", "Kliima ‣ Pro"),
     "plan.feature.recoupement": ("Cinq instituts recoupés, et leur niveau d'accord",
                                     "Five institutes cross-checked, and how far they agree",
                                     "Cinco institutos contrastados y su nivel de acuerdo"),
@@ -182,7 +182,7 @@ STRINGS = {
     "paywall.close": ("Fermer", "Close", "Cerrar"),
     "paywall.unavailable": ("Boutique injoignable pour l'instant.", "Store unreachable for now.",
                             "Tienda no disponible por ahora."),
-    "tile.locked": ("Avec Kliima Pro", "With Kliima Pro", "Con Kliima Pro"),
+    "tile.locked": ("Avec Kliima ‣ Pro", "With Kliima ‣ Pro", "Con Kliima ‣ Pro"),
 
     "widget.description": ("La prochaine fenêtre de traitement sur votre parcelle.",
                            "The next spraying window on your field.",
@@ -222,7 +222,7 @@ STRINGS = {
 }
 
 INFO_PLIST = {
-    "CFBundleDisplayName": ("Kliima", "Kliima", "Kliima"),
+    "CFBundleDisplayName": ("Kliima ‣", "Kliima ‣", "Kliima ‣"),
     "NSLocationWhenInUseUsageDescription": (
         "Votre position sert à caler la prévision agricole sur votre parcelle.",
         "Your location is used to centre the agricultural forecast on your field.",
