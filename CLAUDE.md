@@ -12,9 +12,14 @@ nouvelle pull request.
 
 ## Ce qui ne se négocie pas
 
+- **Deux noms, et ce n'est pas une coquille.** Le projet, le site de
+  présentation et l'application web s'appellent **Klima** ; l'application
+  iPhone, sa montre et leurs extensions s'appellent **Kliima**. Les libellés
+  qui nomment l'abonnement (`plan.libre`, `plan.pro`) désignent le produit
+  iOS : ils disent Kliima, même affichés sur le web.
 - **Une seule source pour les règles agronomiques.** Les seuils vivent dans
   `core/src/agro.ts` (`AgroThresholds`) et dans son miroir Swift
-  `ios/Klima/Models/AgroIndicators.swift`. Toute règle ajoutée d'un côté se
+  `ios/Kliima/Models/AgroIndicators.swift`. Toute règle ajoutée d'un côté se
   porte de l'autre, avec les mêmes cas de test.
 - **Le domaine ne fabrique pas de phrases.** Il renvoie des états et des motifs
   structurés ; l'interface les traduit. Trois langues : français, anglais,
@@ -42,7 +47,7 @@ cd web && bun run build        # idem dans site/
 ```
 
 Le projet Xcode est généré : après tout ajout de fichier iOS, régénérer
-`ios/Klima.xcodeproj/project.pbxproj` et le revalider.
+`ios/Kliima.xcodeproj/project.pbxproj` et le revalider.
 
 ## Marque
 

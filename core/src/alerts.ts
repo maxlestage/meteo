@@ -1,7 +1,7 @@
 /**
  * Les alertes : ce que Klima dit sans qu'on ouvre l'application.
  *
- * Miroir Swift : `ios/Klima/Models/Alerts.swift`. Toute règle ajoutée ici se
+ * Miroir Swift : `ios/Kliima/Models/Alerts.swift`. Toute règle ajoutée ici se
  * porte là-bas, avec les mêmes cas de test.
  *
  * Ce module ne notifie rien. Il répond à une seule question — « qu'y a-t-il à
