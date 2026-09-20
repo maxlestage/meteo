@@ -115,9 +115,21 @@ open ios/Kliima.xcodeproj
 ```
 
 Le projet est un `project.pbxproj` classique, versionné et modifiable
-directement — pas de générateur ni de Fastlane. Cible iOS 17, cinq cibles : `Kliima` (application),
-`KliimaWidgets`, `KliimaWatch`, `KliimaWatchWidgets` et `KliimaTests`, avec
-deux schémas partagés.
+directement — pas de Fastlane, pas de CocoaPods, pas d'étape de résolution.
+Cible iOS 17, cinq cibles : `Kliima` (application), `KliimaWidgets`,
+`KliimaWatch`, `KliimaWatchWidgets` et `KliimaTests`, avec deux schémas
+partagés.
+
+Ajouter un fichier veut dire retoucher une demi-douzaine de sections dans
+soixante kilo-octets de plist, avec des identifiants à inventer : `ios/Tools/`
+s'en charge, et un validateur relit le résultat. Les identifiants étant dérivés
+d'un hachage, régénérer un arbre propre ne produit aucune modification — c'est
+vérifiable en une commande.
+
+```bash
+python3 ios/Tools/gen_pbxproj.py ios/Kliima.xcodeproj/project.pbxproj
+python3 ios/Tools/validate_pbxproj.py ios/Kliima.xcodeproj/project.pbxproj
+```
 
 ```bash
 xcodebuild -project ios/Kliima.xcodeproj -scheme Kliima \
