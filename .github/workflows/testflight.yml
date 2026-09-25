@@ -25,7 +25,11 @@ defaults:
 
 jobs:
   build:
-    runs-on: macos-15
+    # « macos-latest » plutôt qu'une version figée : une étiquette de version
+    # qui n'est pas servie à ce compte fait échouer le job avant toute étape,
+    # sans un seul journal — symptôme peu bavard et facile à confondre avec un
+    # problème de facturation.
+    runs-on: macos-latest
     timeout-minutes: 60
 
     env:
