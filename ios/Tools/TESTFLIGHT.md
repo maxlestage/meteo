@@ -35,26 +35,34 @@ probablement un ou deux ajustements — c'est la nature de la chose.
 7. **Un certificat de distribution Apple**, exporté en `.p12` avec sa clé
    privée et un mot de passe.
 
-## Les six secrets du dépôt
+## Quatre secrets, pas six
 
 Réglages → Secrets and variables → Actions.
 
-| Secret                 | Contenu                                              |
-| ---------------------- | ---------------------------------------------------- |
-| `APPLE_TEAM_ID`        | Le Team ID, dix caractères                           |
-| `APPLE_CERT_P12`       | Le `.p12` encodé en base64                           |
-| `APPLE_CERT_PASSWORD`  | Le mot de passe du `.p12`                            |
-| `ASC_KEY_ID`           | L'identifiant de la clé (dix caractères)             |
-| `ASC_ISSUER_ID`        | L'identifiant d'émetteur (un UUID)                   |
-| `ASC_KEY_P8`           | Le `.p8` encodé en base64                            |
+| Secret            | Contenu                                   |
+| ----------------- | ----------------------------------------- |
+| `APPLE_TEAM_ID`   | Le Team ID, dix caractères                |
+| `ASC_KEY_ID`      | L'identifiant de la clé (dix caractères)  |
+| `ASC_ISSUER_ID`   | L'identifiant d'émetteur (un UUID)        |
+| `ASC_KEY_P8`      | Le fichier `.p8`, tel quel ou en base64   |
 
-```bash
-base64 -i Distribution.p12 | pbcopy
-base64 -i AuthKey_XXXXXXXXXX.p8 | pbcopy
-```
+Le `.p8` s'accepte sous ses deux formes : collez le contenu du fichier
+directement, ou son encodage — `base64 -i AuthKey_XXXXXXXXXX.p8 | pbcopy`. Le
+workflow vérifie qu'il y lit bien une clé PEM et le dit tout de suite si ce
+n'est pas le cas.
 
-Le workflow s'arrête à la première étape si l'un manque, plutôt qu'après vingt
-minutes de compilation.
+**Pas besoin de certificat de distribution.** L'exécution nº 8 l'a établi :
+avec `-allowProvisioningUpdates` et la clé App Store Connect, Xcode obtient de
+quoi signer sans qu'on lui fournisse de `.p12`. Vous pouvez tout de même en
+poser un — `APPLE_CERT_P12` et `APPLE_CERT_PASSWORD` restent reconnus — mais
+ça n'apporte rien et demande un Mac.
+
+**Le Team ID, en revanche, est indispensable.** Sans lui, les quatre cibles
+échouent sur « Signing requires a development team » : la clé authentifie,
+elle ne désigne pas l'équipe.
+
+Le workflow s'arrête à la première étape si l'un des quatre manque, plutôt
+qu'après cinq minutes de compilation.
 
 ## Un préalable : les exécuteurs macOS
 

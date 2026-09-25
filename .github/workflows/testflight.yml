@@ -53,7 +53,7 @@ jobs:
           ASC_KEY_P8: ${{ secrets.ASC_KEY_P8 }}
         run: |
           missing=""
-          for name in ASC_KEY_ID ASC_ISSUER_ID ASC_KEY_P8; do
+          for name in ASC_KEY_ID ASC_ISSUER_ID ASC_KEY_P8 TEAM_ID; do
             [ -z "${!name}" ] && missing="$missing $name"
           done
           if [ -n "$missing" ]; then
@@ -61,12 +61,11 @@ jobs:
             exit 1
           fi
 
-          # Le reste est facultatif. Sans certificat fourni, on s'en remet à la
-          # signature gérée par Apple : « -allowProvisioningUpdates » récupère
-          # un certificat de distribution dont la clé privée reste chez eux,
-          # ce qui convient à un exécuteur qui disparaît après usage.
+          # Le certificat, lui, reste facultatif : l'exécution nº 8 a montré
+          # que « -allowProvisioningUpdates » obtient de quoi signer avec la
+          # seule clé App Store Connect. L'équipe, en revanche, ne se déduit
+          # pas — les quatre cibles réclamaient « a development team ».
           [ -n "$CERT_P12" ] && echo "certificat fourni" || echo "pas de certificat : signature gérée par Apple"
-          [ -n "$TEAM_ID" ] && echo "équipe imposée" || echo "équipe déduite de la clé" 
 
       - uses: oven-sh/setup-bun@v2
         with:
