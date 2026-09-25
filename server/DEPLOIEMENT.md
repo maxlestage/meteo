@@ -4,6 +4,22 @@ Le relais est un seul processus : il écoute, interroge les fournisseurs une
 fois pour tout le monde, et rend la réponse. Il n'a pas de base de données. Ce
 qu'il lui faut, c'est un endroit qui reste allumé.
 
+Il sert aussi le site. Puisqu'il tourne déjà sur une adresse publique, lui
+faire rendre les fichiers construits évite un second hébergement — et met
+l'application sur la même origine que ses appels, donc aucune origine à
+autoriser et aucune adresse de relais à configurer.
+
+| Chemin       | Ce qu'on y trouve                        |
+| ------------ | ---------------------------------------- |
+| `/`          | La vitrine                               |
+| `/app/`      | L'application                            |
+| `/health`    | L'état du relais                         |
+| `/v1/…`      | L'API : les fournisseurs, vus du relais  |
+
+L'API garde la priorité : elle est toute entière sous `/v1/`, et le partage est
+vérifié par des tests. Un chemin qui ne désigne aucun fichier répond 404 — pas
+une erreur de coordonnées.
+
 ## Pourquoi le premier essai sur Heroku a échoué
 
 ```
@@ -37,9 +53,14 @@ Rien à configurer côté Heroku. Le prix de ce choix est un binaire d'une
 trentaine de mégaoctets installé à chaque `install`, y compris en local où Bun
 est déjà là. C'est le coût d'un déploiement qui part d'une simple poussée.
 
-`heroku-postbuild` ne fait rien, volontairement : sans lui, Heroku lancerait le
-`build` de la racine, qui construit aussi la vitrine et l'application web. Le
-relais, lui, s'exécute depuis ses sources.
+`heroku-postbuild` construit la vitrine et l'application, et les pose dans
+`server/public` — la même disposition que sur GitHub Pages. Il refuse
+bruyamment si Vite manque plutôt que de livrer un site vide.
+
+Vite manquerait, d'ailleurs, sans le `.npmrc` de la racine : Heroku construit
+avec `NODE_ENV=production`, et npm saute alors les dépendances de
+développement. `include=dev` les rétablit ; elles sont élaguées après la
+construction, donc ce qui tourne ne grossit pas.
 
 ## Les étapes
 
@@ -49,8 +70,8 @@ relais, lui, s'exécute depuis ses sources.
 
    | Clé               | Valeur                                              |
    | ----------------- | --------------------------------------------------- |
-   | `KLIMA_ORIGINS`   | `https://maxlestage.github.io` — les origines admises |
    | `OPEN_METEO_KEY`  | La clé du plan commercial, quand il y en aura une    |
+   | `KLIMA_ORIGINS`   | Les origines admises — inutile si le site est servi par le relais |
 
    `OPEN_METEO_KEY` peut rester vide pour l'instant : le relais tourne alors
    sur le plan gratuit d'Open-Meteo, réservé à l'usage non commercial. Le jour
@@ -63,11 +84,19 @@ relais, lui, s'exécute depuis ses sources.
    # {"statut":"ok","cellules":0,"interrogations":0,"cleOpenMeteo":"absente"}
    ```
 
-4. **Faire passer le web par le relais.** Le site et l'application lisent
-   `VITE_KLIMA_RELAY` à la construction. Poser l'adresse dans GitHub →
-   *Settings* → *Secrets and variables* → *Actions* → *Variables* → `KLIMA_RELAY`,
-   puis relancer la publication. Sans cette variable, les deux appellent les
-   fournisseurs en direct, comme aujourd'hui.
+4. Ouvrir `https://VOTRE-APP.herokuapp.com/` : la vitrine. Et `/app/` :
+   l'application, qui passe déjà par le relais.
+
+   Rien à configurer pour ça. La construction pose `VITE_KLIMA_RELAY` à
+   `meme-origine`, et l'application demande alors son relais à l'hôte qui la
+   sert — une adresse qui n'est connue qu'à l'affichage, puisqu'elle dépend du
+   nom de domaine.
+
+5. **Seulement si vous publiez aussi sur GitHub Pages** : là, le site et le
+   relais ne sont pas sur la même origine. Il faut alors poser l'adresse du
+   relais dans GitHub → *Settings* → *Secrets and variables* → *Actions* →
+   *Variables* → `KLIMA_RELAY`, et ajouter `https://maxlestage.github.io` aux
+   `KLIMA_ORIGINS` du relais.
 
 ## Ce qu'un dyno change au cache
 
