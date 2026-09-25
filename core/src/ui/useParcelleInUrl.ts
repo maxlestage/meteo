@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { parcelleFromParams, sameParcelle, urlForParcelle } from '../parcelleUrl'
+import type { ParcelleOrigin } from '../position'
 import type { Parcelle } from '../openMeteo'
 
 /**
@@ -22,11 +23,21 @@ export interface UrlParcelleOptions {
 export function useParcelleInUrl(
   fallback: Parcelle,
   options: UrlParcelleOptions = {},
-): [Parcelle, (parcelle: Parcelle) => void] {
+): [Parcelle, (parcelle: Parcelle) => void, ParcelleOrigin] {
   const { storageKey } = options
-  const [parcelle, setParcelle] = useState<Parcelle>(
-    () => readUrl() ?? readStored(storageKey) ?? fallback,
-  )
+
+  // L'origine est calculée en même temps que la parcelle, et une seule fois :
+  // c'est elle qui dit s'il y a un choix derrière ce qui s'affiche, et donc
+  // s'il est permis d'aller chercher la position par-dessus.
+  const [depart] = useState(() => {
+    const adresse = readUrl()
+    if (adresse) return { parcelle: adresse, origin: 'adresse' as const }
+    const memoire = readStored(storageKey)
+    if (memoire) return { parcelle: memoire, origin: 'memoire' as const }
+    return { parcelle: fallback, origin: 'defaut' as const }
+  })
+
+  const [parcelle, setParcelle] = useState<Parcelle>(depart.parcelle)
 
   // La valeur courante, lisible depuis un rappel stable. On ne compare pas
   // dans un `setState` : React rejoue les mises à jour en mode strict, et
@@ -62,7 +73,7 @@ export function useParcelleInUrl(
     setParcelle(next)
   }, [])
 
-  return [parcelle, select]
+  return [parcelle, select, depart.origin]
 }
 
 /** La parcelle que désigne l'adresse, si elle en désigne une de valide. */

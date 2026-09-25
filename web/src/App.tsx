@@ -6,13 +6,18 @@ import { ParcelleSearch } from './components/ParcelleSearch'
 import { ProNote } from './components/ProNote'
 import { SprayCard } from './components/SprayCard'
 import { AgroThresholds } from '@klima/core'
-import { BrandLockup, LanguageSwitcher, useI18n } from '@klima/core/ui'
+import { BrandLockup, LanguageSwitcher, useI18n, useStartPosition } from '@klima/core/ui'
 import { useAgroForecast } from './hooks/useAgroForecast'
 import { useParcelle } from './hooks/useParcelle'
 
 export default function App() {
   const { t, f, locale } = useI18n()
-  const [parcelle, setParcelle] = useParcelle()
+  const [parcelle, setParcelle, origine] = useParcelle()
+
+  // Première visite, rien de choisi ni de partagé : on part de là où est la
+  // personne plutôt que de lui montrer la Beauce.
+  useStartPosition(origine, t('search.myField'), setParcelle)
+
   const { forecast, summary, consensus, loading, error, reload } = useAgroForecast(parcelle)
 
   const sky = forecast ? skyFor(forecast.current.isDay, forecast.current.weatherCode) : 'night'

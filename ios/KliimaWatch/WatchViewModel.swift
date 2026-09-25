@@ -42,8 +42,8 @@ final class WatchViewModel: ObservableObject {
 
         // La position est un confort : sans elle, on garde la parcelle par défaut.
         if let coordinate = try? await location.currentCoordinate() {
-            parcelle = Parcelle(
-                name: Localized.text("search.myField"),
+            parcelle = Position.parcelle(
+                named: Localized.text("search.myField"),
                 latitude: coordinate.latitude,
                 longitude: coordinate.longitude
             )

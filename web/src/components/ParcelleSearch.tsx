@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { searchParcelles, type Parcelle } from '@klima/core'
+import { parcelleFromPosition, searchParcelles, type Parcelle } from '@klima/core'
 import { useI18n } from '@klima/core/ui'
 
 interface Props {
@@ -61,11 +61,7 @@ export function ParcelleSearch({ current, onSelect }: Props) {
     navigator.geolocation.getCurrentPosition(
       (position) => {
         setLocating(false)
-        choose({
-          name: t('search.myField'),
-          latitude: position.coords.latitude,
-          longitude: position.coords.longitude,
-        })
+        choose(parcelleFromPosition(t('search.myField'), position.coords))
       },
       () => {
         setLocating(false)

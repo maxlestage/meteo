@@ -1,5 +1,5 @@
 import { useParcelleInUrl } from '@klima/core/ui'
-import type { Parcelle } from '@klima/core'
+import type { Parcelle, ParcelleOrigin } from '@klima/core'
 
 /** Parcelle par défaut : plaine céréalière de Beauce. */
 const DEFAULT_PARCELLE: Parcelle = {
@@ -16,6 +16,6 @@ const DEFAULT_PARCELLE: Parcelle = {
  * mémorisation lui est propre — c'est un outil qu'on rouvre, pas une page
  * qu'on visite.
  */
-export function useParcelle(): [Parcelle, (parcelle: Parcelle) => void] {
+export function useParcelle(): [Parcelle, (parcelle: Parcelle) => void, ParcelleOrigin] {
   return useParcelleInUrl(DEFAULT_PARCELLE, { storageKey: 'klima.parcelle' })
 }

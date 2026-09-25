@@ -21,7 +21,7 @@ EMBEDS = [
 MODELS = ["AgroSamples.swift", "AgroIndicators.swift", "WeatherCondition.swift",
           "AgroFormat.swift", "Localized.swift", "SharedStore.swift", "Consensus.swift",
           "SprayActivityAttributes.swift", "Plan.swift", "Alerts.swift", "Cumuls.swift",
-          "Register.swift"]
+          "Register.swift", "Position.swift"]
 SERVICES = ["AgroWeatherService.swift", "WeatherProviders.swift", "LocationService.swift",
             "SprayActivityController.swift", "BackgroundRefresh.swift", "Subscription.swift",
             "AlertScheduler.swift"]
@@ -67,7 +67,8 @@ TEST_FILES = [(TESTS, n) for n in ["AgroIndicatorsTests.swift", "AgroWeatherDeco
                                    "LocalizationTests.swift", "SprayActivityTests.swift",
                                    "ConsensusTests.swift", "ProvidersTests.swift",
                                    "PlanTests.swift", "AlertsTests.swift",
-                                   "CumulsTests.swift", "RegisterTests.swift"]]
+                                   "CumulsTests.swift", "RegisterTests.swift",
+                                   "PositionTests.swift"]]
 
 # Sources compilées par chaque cible. Le noyau (Models) est partagé ; la montre
 # ajoute le réseau et la position, le widget se limite à ce qu'il affiche.
