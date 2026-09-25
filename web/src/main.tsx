@@ -1,6 +1,6 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
-import { sharedMessages, useRelay } from '@klima/core'
+import { relayFrom, sharedMessages, useRelay } from '@klima/core'
 import { I18nProvider } from '@klima/core/ui'
 import App from './App'
 import { webMessages } from './i18n/messages'
@@ -17,7 +17,7 @@ const CATALOGS = [sharedMessages, webMessages]
  * passent par lui — clé commerciale, cache mutualisé, et MET Norway devient
  * accessible au web puisque c'est le serveur qui se nomme.
  */
-const RELAY = import.meta.env.VITE_KLIMA_RELAY
+const RELAY = relayFrom(import.meta.env.VITE_KLIMA_RELAY, window.location.origin)
 if (RELAY) useRelay(RELAY)
 
 const container = document.getElementById('root')

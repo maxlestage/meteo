@@ -17,6 +17,6 @@
     "test": "bun test",
     "typecheck": "bun run --filter '*' typecheck",
     "build": "bun run --filter '*' build",
-    "heroku-postbuild": "echo 'Rien a construire : le relais s execute depuis les sources TypeScript.'"
+    "heroku-postbuild": "bash scripts/heroku-postbuild.sh"
   }
 }
