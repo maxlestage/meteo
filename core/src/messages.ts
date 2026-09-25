@@ -36,6 +36,8 @@ export const sharedMessages: Record<Language, Catalog> = {
     'wmo.thunderstormHail': 'Orage et grêle',
     'wmo.thunderstormHeavyHail': 'Orage et forte grêle',
 
+    'search.myField': 'Ma parcelle',
+
     'soil.sature': 'Saturé',
     'soil.ressuye': 'Ressuyé',
     'soil.sec': 'Sec',
@@ -133,6 +135,8 @@ export const sharedMessages: Record<Language, Catalog> = {
     'wmo.thunderstormHail': 'Thunderstorm with hail',
     'wmo.thunderstormHeavyHail': 'Thunderstorm with heavy hail',
 
+    'search.myField': 'My field',
+
     'soil.sature': 'Waterlogged',
     'soil.ressuye': 'Drained',
     'soil.sec': 'Dry',
@@ -228,6 +232,8 @@ export const sharedMessages: Record<Language, Catalog> = {
     'wmo.thunderstorm': 'Tormenta',
     'wmo.thunderstormHail': 'Tormenta con granizo',
     'wmo.thunderstormHeavyHail': 'Tormenta con granizo fuerte',
+
+    'search.myField': 'Mi parcela',
 
     'soil.sature': 'Encharcado',
     'soil.ressuye': 'Oreado',

@@ -23,13 +23,51 @@ final class DashboardViewModel: ObservableObject {
     private var loadTask: Task<Void, Never>?
     private var searchTask: Task<Void, Never>?
 
+    /// D'où vient la parcelle affichée à l'ouverture.
+    private let origin: ParcelleOrigin
+    /// La position n'est demandée qu'une fois par lancement.
+    private var positionDemandee = false
+
     init(
         service: AgroWeatherProviding = AgroWeatherService(),
         location: LocationService = LocationService()
     ) {
         self.service = service
         self.location = location
-        self.parcelle = SharedStore.loadParcelle() ?? .chartres
+        if let memorisee = SharedStore.loadParcelle() {
+            self.parcelle = memorisee
+            self.origin = .memoire
+        } else {
+            self.parcelle = .chartres
+            self.origin = .defaut
+        }
+    }
+
+    /// Cale l'application sur la position de la personne, à la première
+    /// ouverture seulement.
+    ///
+    /// Ne bloque pas l'affichage : la parcelle par défaut se charge pendant que
+    /// le système demande l'autorisation, et la prévision bascule quand la
+    /// position arrive. Attendre la réponse laisserait un écran vide derrière la
+    /// boîte de dialogue, pour un geste que personne n'a demandé.
+    ///
+    /// Silencieux en cas d'échec, pour la même raison : un refus n'est pas une
+    /// erreur à afficher. On garde la parcelle par défaut, et la recherche de
+    /// commune reste là.
+    func locateIfUnchosen() {
+        guard Position.locatesOnStart(origin), !positionDemandee else { return }
+        positionDemandee = true
+
+        Task {
+            guard let coordinate = try? await location.currentCoordinate() else { return }
+            select(
+                Position.parcelle(
+                    named: Localized.text("search.myField"),
+                    latitude: coordinate.latitude,
+                    longitude: coordinate.longitude
+                )
+            )
+        }
     }
 
     /// Fuseau de la parcelle, pour dater correctement les créneaux affichés.
@@ -107,8 +145,8 @@ final class DashboardViewModel: ObservableObject {
             do {
                 let coordinate = try await location.currentCoordinate()
                 select(
-                    Parcelle(
-                        name: Localized.text("search.myField"),
+                    Position.parcelle(
+                        named: Localized.text("search.myField"),
                         latitude: coordinate.latitude,
                         longitude: coordinate.longitude
                     )

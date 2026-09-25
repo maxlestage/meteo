@@ -1,5 +1,5 @@
 import { AgroThresholds, weatherCondition, type Parcelle } from '@klima/core'
-import { BrandLockup, LanguageSwitcher, useI18n, useParcelleInUrl } from '@klima/core/ui'
+import { BrandLockup, LanguageSwitcher, useI18n, useParcelleInUrl, useStartPosition } from '@klima/core/ui'
 import { Features } from './components/Features'
 import { Footer } from './components/Footer'
 import { SkyScene, SoilProfile, SprayScene } from './components/Illustrations'
@@ -22,7 +22,12 @@ export default function App() {
   const { t, f } = useI18n()
   // La commune consultée vit dans l'adresse : le bouton retour la défait, et
   // l'adresse envoyée à quelqu'un lui montre bien la parcelle qu'on a regardée.
-  const [parcelle, setParcelle] = useParcelleInUrl(DEFAULT_PARCELLE)
+  const [parcelle, setParcelle, origine] = useParcelleInUrl(DEFAULT_PARCELLE)
+
+  // La vitrine montre une vraie prévision : autant que ce soit celle du
+  // visiteur. Rien n'est mémorisé ici, donc la demande ne se pose qu'à
+  // l'arrivée, et un refus laisse la parcelle par défaut.
+  useStartPosition(origine, t('search.myField'), setParcelle)
   const { digest, loading, error, reload, forecast, consensus } = useDayDigest(parcelle)
   const featuresReveal = useReveal<HTMLDivElement>()
   const dataReveal = useReveal<HTMLDivElement>()
