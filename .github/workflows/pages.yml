@@ -2,8 +2,6 @@ name: Site de présentation
 
 # Publie la vitrine sur GitHub Pages à chaque poussée sur la branche par défaut,
 # et l'application web à côté d'elle, sous /app/.
-# Le dépôt doit avoir Pages configuré sur « GitHub Actions »
-# (Settings → Pages → Source).
 on:
   push:
     branches: [master]
@@ -23,7 +21,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - uses: oven-sh/setup-bun@v2
         with:
@@ -48,7 +46,12 @@ jobs:
       - name: Assemblage de la publication
         run: cp -r web/dist site/dist/app
 
+      # « enablement » active Pages si le dépôt ne l'a pas encore : sans cela
+      # l'étape échoue sur « Get Pages site failed », et la publication attend
+      # une case à cocher dans les réglages alors que le jeton peut la cocher.
       - uses: actions/configure-pages@v5
+        with:
+          enablement: true
 
       - uses: actions/upload-pages-artifact@v3
         with:
