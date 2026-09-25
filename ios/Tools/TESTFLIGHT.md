@@ -56,9 +56,60 @@ base64 -i AuthKey_XXXXXXXXXX.p8 | pbcopy
 Le workflow s'arrête à la première étape si l'un manque, plutôt qu'après vingt
 minutes de compilation.
 
-## Lancer
+## Un préalable : les exécuteurs macOS
 
-Actions → TestFlight → *Run workflow*. Il enchaîne : tests du cœur partagé,
+Sur ce dépôt, **le workflow ne démarre pas**. Deux déclenchements, l'un sur
+`macos-15`, l'autre sur `macos-latest` : échec en sept secondes, sans un seul
+journal — l'archive que GitHub renvoie est un zip vide. Un job qui meurt ainsi
+n'a exécuté aucune étape ; l'exécuteur n'a jamais été alloué.
+
+Le diagnostic tient par comparaison : sur ce même dépôt, `pages.yml` tourne sur
+`ubuntu-latest` et réussit. Actions fonctionne, Linux fonctionne, macOS non. Or
+le dépôt est **privé**, et les exécuteurs macOS y sont facturés au décuple des
+minutes Linux, sous condition d'une limite de dépense non nulle. Aucun message
+d'erreur ne le dit — c'est une inférence, mais toutes les indications
+convergent.
+
+Deux façons d'en sortir, aucune ne se règle dans le code :
+
+1. **Relever la limite de dépense** du compte (Réglages → Facturation →
+   Spending limit). Le workflow part alors tel quel.
+2. **Compiler depuis un Mac**, ci-dessous. Rien à payer, rien à configurer
+   côté GitHub.
+
+## Compiler depuis un Mac, à la main
+
+Les mêmes étapes que le workflow, sans exécuteur. Depuis la racine du dépôt,
+avec Xcode installé et l'équipe de signature renseignée :
+
+```bash
+# 1. Les tests, comme le ferait l'intégration continue
+bun install && bun test
+python3 ios/Tools/validate_pbxproj.py ios/Kliima.xcodeproj/project.pbxproj
+
+# 2. Les tests iOS — la première fois que SwiftUI, StoreKit et WidgetKit
+#    seront compilés pour de bon
+xcodebuild test -project ios/Kliima.xcodeproj -scheme Kliima \
+  -destination 'platform=iOS Simulator,name=iPhone 16'
+
+# 3. L'archive. Le numéro de build doit croître à chaque envoi.
+xcodebuild archive -project ios/Kliima.xcodeproj -scheme Kliima \
+  -destination 'generic/platform=iOS' \
+  -archivePath build/Kliima.xcarchive \
+  -allowProvisioningUpdates \
+  DEVELOPMENT_TEAM=VOTRE_TEAM_ID \
+  CURRENT_PROJECT_VERSION=1
+```
+
+Puis, dans Xcode : **Window → Organizer**, sélectionner l'archive,
+*Distribute App* → *TestFlight & App Store*. Xcode se charge de la signature,
+de l'export et de l'envoi — c'est le chemin le plus court, et il évite d'avoir
+à fabriquer un `ExportOptions.plist` à la main.
+
+## Lancer le workflow
+
+Une fois les exécuteurs macOS disponibles : Actions → TestFlight →
+*Run workflow*. Il enchaîne : tests du cœur partagé,
 validation du projet, **tests iOS sur simulateur**, archive, export, envoi.
 
 Les tests sur simulateur méritent qu'on s'y arrête : c'est la première fois que
