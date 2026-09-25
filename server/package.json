@@ -10,7 +10,7 @@
     "typecheck": "tsc --noEmit -p tsconfig.json"
   },
   "dependencies": {
-    "@klima/core": "workspace:*"
+    "@klima/core": "*"
   },
   "devDependencies": {
     "@types/bun": "^1.1.14",
