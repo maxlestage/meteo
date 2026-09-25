@@ -1,0 +1,32 @@
+name: État Apple
+
+# Ce que le compte Apple contient déjà, et ce qui manque encore.
+#
+# Les échecs de signature coûtent six minutes de compilation avant de se
+# manifester, et Apple nomme rarement la cause. Cette lecture prend vingt
+# secondes et se lit dans le résumé de l'exécution.
+#
+# Elle ne modifie rien : que des requêtes GET.
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  etat:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: "22"
+
+      - name: Interroger App Store Connect
+        env:
+          ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
+          ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
+          ASC_KEY_P8: ${{ secrets.ASC_KEY_P8 }}
+        run: node ios/Tools/etat-apple.mjs

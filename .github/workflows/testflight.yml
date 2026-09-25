@@ -9,6 +9,11 @@ on:
         description: "Nouveautés pour les testeurs"
         required: false
         default: ""
+      groupe_enregistre:
+        description: "Le groupe group.com.kliima.app est enregistré chez Apple et rattaché aux quatre identifiants"
+        type: boolean
+        required: false
+        default: false
 
 # Un envoi à la fois : deux archives concurrentes se disputeraient le même
 # numéro de build.
@@ -181,12 +186,33 @@ jobs:
 
       # Le numéro de build doit croître à chaque envoi : App Store Connect
       # refuse deux fois le même. Le numéro d'exécution s'en charge.
+      #
+      # Le groupe d'applications, lui, ne se déclare que chez Apple, à la main :
+      # l'API App Store Connect n'a pas de ressource « appGroups », donc
+      # « -allowProvisioningUpdates » sait activer la capacité mais pas
+      # rattacher un groupe. Tant qu'il manque, les quatre cibles échouent sur
+      # « Provisioning profile doesn't match the entitlements file ».
+      #
+      # Plutôt que d'attendre, on archive sans le groupe : « SharedStore »
+      # retombe déjà sur les réglages locaux quand il n'y en a pas. Le widget
+      # affiche alors la parcelle par défaut au lieu de celle de
+      # l'application — dégradé, mais installable. Le jour où le groupe existe,
+      # cocher la case au lancement rend le partage.
       - name: Archiver
         env:
           TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
           ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
           ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
+          GROUPE: ${{ inputs.groupe_enregistre }}
         run: |
+          reglages=(CURRENT_PROJECT_VERSION=${{ github.run_number }})
+          if [ "$GROUPE" = "true" ]; then
+            echo "Groupe d'applications : demandé, les habilitations le déclarent."
+          else
+            echo "::warning::Archive sans groupe d'applications : le widget et la montre ne liront pas la parcelle choisie dans l'application."
+            reglages+=(CODE_SIGN_ENTITLEMENTS=)
+          fi
+
           xcodebuild archive \
             -project "$PROJECT" -scheme "$SCHEME" \
             -destination 'generic/platform=iOS' \
@@ -196,7 +222,7 @@ jobs:
             -authenticationKeyID "$ASC_KEY_ID" \
             -authenticationKeyIssuerID "$ASC_ISSUER_ID" \
             ${TEAM_ID:+DEVELOPMENT_TEAM=$TEAM_ID} \
-            CURRENT_PROJECT_VERSION=${{ github.run_number }} \
+            "${reglages[@]}" \
             | $FORMATTER
 
       - name: Exporter l'ipa
