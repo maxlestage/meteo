@@ -154,3 +154,47 @@ describe('relais', () => {
     expect(seen).toHaveLength(0)
   })
 })
+
+describe('le relais qui sert aussi le site', () => {
+
+  /** Un site qui ne connaît que sa page d'accueil. */
+  const site = async (pathname: string) =>
+    pathname === '/' ? new Response('<!doctype html>', {
+      headers: { 'Content-Type': 'text/html;charset=utf-8' },
+    }) : null
+
+  test('la racine rend la page au lieu d’une erreur de coordonnées', async () => {
+    const handle = createHandler({ site })
+    const response = await handle(get('/'))
+    expect(response.status).toBe(200)
+    expect(await response.text()).toContain('doctype')
+  })
+
+  // Sans ce partage net, un fichier nommé comme une route mangerait l'API —
+  // ou l'inverse, plus silencieusement encore.
+  test('le site ne prend jamais le pas sur l’API', async () => {
+    const { call, seen } = upstream(() => ({ ok: true }))
+    const glouton = async () => new Response('page', {
+      headers: { 'Content-Type': 'text/html;charset=utf-8' },
+    })
+    const handle = createHandler({ fetch: call, site: glouton })
+
+    const meteo = await handle(get('/v1/met-norway/compact?latitude=48.44&longitude=1.49'))
+    expect(meteo.headers.get('Content-Type')).toContain('json')
+    expect(seen).toHaveLength(1)
+
+    const sante = await handle(get('/health'))
+    expect(await sante.json()).toMatchObject({ statut: 'ok' })
+  })
+
+  test('un fichier absent répond 404, pas une erreur de coordonnées', async () => {
+    const response = await createHandler({ site })(get('/inconnu.png'))
+    expect(response.status).toBe(404)
+  })
+
+  test('sans site, la racine répond comme avant', async () => {
+    const response = await createHandler({})(get('/'))
+    expect(response.status).toBe(400)
+    expect(await response.json()).toMatchObject({ erreur: expect.any(String) })
+  })
+})

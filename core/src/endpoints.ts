@@ -49,6 +49,27 @@ export function relayEndpoints(origin: string): Endpoints {
   }
 }
 
+/**
+ * La valeur qui dit « le relais, c'est l'hôte qui sert cette page ».
+ *
+ * Quand le relais sert lui-même l'application, son adresse n'est connue qu'au
+ * moment de l'affichage : elle dépend du nom de domaine, qui change d'un
+ * hébergement à l'autre et n'existe pas à la construction.
+ */
+export const MEME_ORIGINE = 'meme-origine'
+
+/**
+ * L'adresse du relais, d'après le réglage et l'origine de la page.
+ *
+ * Rien de configuré : pas de relais, chaque navigateur pour soi. C'est le
+ * défaut, et il reste sur le plan gratuit d'Open-Meteo.
+ */
+export function relayFrom(configure: string | undefined, origine: string): string | null {
+  const valeur = (configure ?? '').trim()
+  if (!valeur) return null
+  return valeur === MEME_ORIGINE ? origine : valeur
+}
+
 let current: Endpoints = DIRECT_ENDPOINTS
 
 /** L'acheminement en vigueur. */
