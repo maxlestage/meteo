@@ -213,23 +213,27 @@ body {
 
 /* Bandeau horaire -------------------------------------------------------- */
 
+/*
+ * Les vingt-quatre heures tiennent dans la carte, en autant de rangées qu'il
+ * faut.
+ *
+ * C'était un défilement horizontal, sans même une barre pour le dire : on
+ * voyait six heures et il fallait deviner que les autres existaient. Une
+ * grille qui se replie les montre toutes, et ne demande que le geste qu'on
+ * fait déjà pour lire la page.
+ *
+ * « auto-fit » plutôt qu'« auto-fill » : sur un écran assez large pour
+ * vingt-quatre colonnes, les colonnes vides ne prennent pas de place et la
+ * bande garde sa forme de bande.
+ */
 .strip {
-  display: flex;
-  gap: 4px;
-  overflow-x: auto;
-  scrollbar-width: none;
-  margin: 0 -6px;
-  padding: 0 6px;
-}
-
-.strip::-webkit-scrollbar {
-  display: none;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(52px, 1fr));
+  gap: 10px 0;
 }
 
 .strip__item {
   display: flex;
-  flex: 0 0 auto;
-  width: 58px;
   flex-direction: column;
   align-items: center;
   gap: 7px;
