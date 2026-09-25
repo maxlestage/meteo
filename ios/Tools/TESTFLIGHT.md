@@ -86,7 +86,25 @@ pas rattacher *tel* groupe à *tel* identifiant, faute d'une ressource
 `/v1/appGroups` à appeler. Le profil qu'il régénère ne porte donc aucun groupe,
 et l'écart avec le fichier d'habilitations arrête la signature.
 
-Il n'y a pas de contournement par le code. Une seule fois, dans
+### En attendant : archiver sans le groupe
+
+Le workflow n'attend plus. *Run workflow* laisse la case **« Le groupe
+group.com.kliima.app est enregistré »** décochée par défaut, et archive alors
+en passant `CODE_SIGN_ENTITLEMENTS=` : plus d'habilitations, donc plus d'écart
+avec le profil, donc une archive qui part.
+
+Ce que ça coûte, et il faut le savoir avant d'installer la version : le widget
+d'écran d'accueil et la montre ne liront pas la parcelle choisie dans
+l'application. `SharedStore` retombe sur les réglages locaux — c'est prévu, ça
+ne plante pas — et ils affichent donc la parcelle par défaut. Tout le reste de
+l'application fonctionne.
+
+Le jour où le groupe existe, cocher la case au lancement : les habilitations
+reprennent leur place et le partage revient, sans rien changer au dépôt.
+
+### Le rattachement, lui, se fait chez Apple
+
+Une seule fois, dans
 [Certificates, Identifiers & Profiles](https://developer.apple.com/account/resources/identifiers/list/applicationGroup) :
 
 1. **Identifiers → App Groups → +** : enregistrer `group.com.kliima.app`.
@@ -99,8 +117,31 @@ Les identifiants existent déjà : Xcode les a créés à la première archive. 
 modifier invalide les profils en cours, mais c'est sans conséquence ici — le
 workflow en régénère à chaque exécution.
 
-Puis relancer le workflow. C'est la dernière chose que le dépôt ne peut pas
-faire à votre place.
+## Ce que le dépôt ne peut pas faire à votre place
+
+Deux choses, et seulement deux. Ni l'une ni l'autre n'a d'API : l'App Store
+Connect API lit les applications, elle ne les crée pas, et elle ignore les
+groupes d'applications.
+
+1. **La fiche de l'application**, dans App Store Connect → Mes apps → **+**,
+   sur `com.kliima.app`. Sans elle, l'envoi est refusé : TestFlight n'accepte
+   pas un paquet dont la fiche n'existe pas.
+2. **Le groupe d'applications**, ci-dessus — et lui peut attendre, puisque
+   l'archive part sans.
+
+Et une troisième, plus tard : l'abonnement `com.kliima.app.pro.mensuel` au
+palier 0,99 €, sans quoi l'écran d'achat s'affiche sans prix. Une version de
+test s'installe très bien sans lui.
+
+## Savoir où on en est sans rien compiler
+
+Actions → **État Apple** → *Run workflow*. Vingt secondes, sur un exécuteur
+Linux, et le résumé dit ce que le compte contient : la fiche de l'application,
+chacun des cinq identifiants et ses capacités, l'abonnement. Il ne modifie
+rien — que des lectures.
+
+C'est la première chose à lancer quand une signature échoue : le message
+d'Apple nomme rarement la cause, cette page si.
 
 ## Compiler depuis un Mac, à la main
 
