@@ -409,6 +409,9 @@ SHARED = [
     ("CLANG_WARN_UNGUARDED_AVAILABILITY", "YES_AGGRESSIVE"),
     ("CLANG_WARN_UNREACHABLE_CODE", "YES"),
     ("COPY_PHASE_STRIP", "NO"),
+    # Vide à dessein : chacun renseigne la sienne dans Xcode, et
+    # l'intégration continue la passe en ligne de commande.
+    ("DEVELOPMENT_TEAM", '""'),
     ("ENABLE_STRICT_OBJC_MSGSEND", "YES"),
     ("ENABLE_USER_SCRIPT_SANDBOXING", "YES"),
     ("GCC_C_LANGUAGE_STANDARD", "gnu17"),

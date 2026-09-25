@@ -137,8 +137,13 @@ xcodebuild -project ios/Kliima.xcodeproj -scheme Kliima \
 ```
 
 Avant la première exécution sur appareil, renseignez votre équipe de signature
-(`DEVELOPMENT_TEAM`) et, si besoin, votre propre `PRODUCT_BUNDLE_IDENTIFIER`
-dans les réglages de la cible.
+(`DEVELOPMENT_TEAM`, laissée vide dans le projet) et, si besoin, votre propre
+`PRODUCT_BUNDLE_IDENTIFIER` dans les réglages de la cible.
+
+Pour un envoi TestFlight, `.github/workflows/testflight.yml` fait le travail
+sur un exécuteur macOS, sur déclenchement manuel : tests, archive, export,
+envoi. La marche à suivre — identifiants à enregistrer chez Apple, six secrets
+à poser — est dans [`ios/Tools/TESTFLIGHT.md`](ios/Tools/TESTFLIGHT.md).
 
 Les cinq cibles se partagent le même noyau (`Kliima/Models`) :
 
