@@ -2,6 +2,9 @@ name: Site de présentation
 
 # Publie la vitrine sur GitHub Pages à chaque poussée sur la branche par défaut,
 # et l'application web à côté d'elle, sous /app/.
+#
+# Le dépôt doit avoir Pages activé sur « GitHub Actions »
+# (Settings → Pages → Source). Ça ne s'automatise pas : voir plus bas.
 on:
   push:
     branches: [master]
@@ -46,12 +49,13 @@ jobs:
       - name: Assemblage de la publication
         run: cp -r web/dist site/dist/app
 
-      # « enablement » active Pages si le dépôt ne l'a pas encore : sans cela
-      # l'étape échoue sur « Get Pages site failed », et la publication attend
-      # une case à cocher dans les réglages alors que le jeton peut la cocher.
+      # Sans Pages activé dans les réglages, cette étape échoue sur « Get Pages
+      # site failed » et tout ce qui précède est perdu. « enablement: true » a
+      # été essayé : le jeton du workflow a bien « pages: write », mais créer le
+      # site demande les droits d'administration du dépôt, qu'il n'a pas —
+      # « Create Pages site failed: Resource not accessible by integration »
+      # (exécution nº 26). C'est une case à cocher, une fois, à la main.
       - uses: actions/configure-pages@v5
-        with:
-          enablement: true
 
       - uses: actions/upload-pages-artifact@v3
         with:

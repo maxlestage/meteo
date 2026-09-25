@@ -1,12 +1,13 @@
 # Envoyer une version sur TestFlight
 
-Le dépôt ne peut pas compiler l'application : il faut un Mac avec Xcode, un
-certificat de distribution et un compte développeur. `.github/workflows/testflight.yml`
-fait le travail sur un exécuteur macOS de GitHub, sur déclenchement manuel.
+Le dépôt ne peut pas compiler l'application : il faut un Mac avec Xcode et un
+compte développeur. `.github/workflows/testflight.yml` fait le travail sur un
+exécuteur macOS de GitHub, sur déclenchement manuel.
 
-**Ce workflow n'a jamais tourné.** Il a été écrit et relu, sa syntaxe est
-vérifiée, mais aucune exécution ne l'a confirmé. La première demandera
-probablement un ou deux ajustements — c'est la nature de la chose.
+**Où en est-on.** Le workflow tourne. Les exécutions nº 8 et nº 9 ont compilé
+les cinq cibles et passé les 126 tests sur simulateur (Xcode 26.6, environ cinq
+minutes). Il bute maintenant sur l'archive, pour une raison qui n'est pas dans
+le code — voir « Le groupe d'applications », plus bas.
 
 ## À faire une fois, chez Apple
 
@@ -24,7 +25,8 @@ probablement un ou deux ajustements — c'est la nature de la chose.
    Sur `com.kliima.app` : activer **App Groups**, **Push Notifications** et
    **Background Modes**. Sur les autres : **App Groups**.
 3. **Créer le groupe** `group.com.kliima.app` et le rattacher aux quatre
-   premiers identifiants.
+   premiers identifiants. Cette étape ne s'automatise pas ; elle a sa propre
+   section plus bas, parce qu'elle est la seule à arrêter le workflow.
 4. **Créer l'application** dans App Store Connect sur `com.kliima.app`.
    Le nom du magasin s'y règle séparément du nom affiché sous l'icône — si le
    triangle de « Kliima ‣ » y était refusé, seule la fiche changerait.
@@ -32,8 +34,6 @@ probablement un ou deux ajustements — c'est la nature de la chose.
    0,99 €. Sans lui, l'écran d'achat s'affichera sans prix.
 6. **Une clé App Store Connect** (Utilisateurs et accès → Intégrations), rôle
    *App Manager*. Le fichier `.p8` ne se télécharge qu'une fois.
-7. **Un certificat de distribution Apple**, exporté en `.p12` avec sa clé
-   privée et un mot de passe.
 
 ## Quatre secrets, pas six
 
@@ -64,31 +64,48 @@ elle ne désigne pas l'équipe.
 Le workflow s'arrête à la première étape si l'un des quatre manque, plutôt
 qu'après cinq minutes de compilation.
 
-## Un préalable : les exécuteurs macOS
+## Le groupe d'applications, à la main et seulement à la main
 
-Sur ce dépôt, **le workflow ne démarre pas**. Deux déclenchements, l'un sur
-`macos-15`, l'autre sur `macos-latest` : échec en sept secondes, sans un seul
-journal — l'archive que GitHub renvoie est un zip vide. Un job qui meurt ainsi
-n'a exécuté aucune étape ; l'exécuteur n'a jamais été alloué.
+C'est le point de blocage actuel. L'exécution nº 9 échoue à l'archive, sur les
+quatre cibles :
 
-Le diagnostic tient par comparaison : sur ce même dépôt, `pages.yml` tourne sur
-`ubuntu-latest` et réussit. Actions fonctionne, Linux fonctionne, macOS non. Or
-le dépôt est **privé**, et les exécuteurs macOS y sont facturés au décuple des
-minutes Linux, sous condition d'une limite de dépense non nulle. Aucun message
-d'erreur ne le dit — c'est une inférence, mais toutes les indications
-convergent.
+```
+Provisioning profile "iOS Team Provisioning Profile: com.kliima.app" doesn't
+match the entitlements file's value for the com.apple.security.application-groups
+entitlement.
+```
 
-Deux façons d'en sortir, aucune ne se règle dans le code :
+Ce n'est pas un défaut du projet : les quatre fichiers `.entitlements` déclarent
+le même groupe, `group.com.kliima.app`, et rien d'autre. Le manque est chez
+Apple.
 
-1. **Relever la limite de dépense** du compte (Réglages → Facturation →
-   Spending limit). Le workflow part alors tel quel.
-2. **Compiler depuis un Mac**, ci-dessous. Rien à payer, rien à configurer
-   côté GitHub.
+La raison tient en une phrase : **l'API App Store Connect n'expose pas les
+groupes d'applications.** Avec `-allowProvisioningUpdates`, Xcode sait créer les
+identifiants d'application et y activer la capacité *App Groups* ; il ne sait
+pas rattacher *tel* groupe à *tel* identifiant, faute d'une ressource
+`/v1/appGroups` à appeler. Le profil qu'il régénère ne porte donc aucun groupe,
+et l'écart avec le fichier d'habilitations arrête la signature.
+
+Il n'y a pas de contournement par le code. Une seule fois, dans
+[Certificates, Identifiers & Profiles](https://developer.apple.com/account/resources/identifiers/list/applicationGroup) :
+
+1. **Identifiers → App Groups → +** : enregistrer `group.com.kliima.app`.
+2. Pour chacun des quatre identifiants — `com.kliima.app`,
+   `com.kliima.app.widgets`, `com.kliima.app.watchkitapp`,
+   `com.kliima.app.watchkitapp.complications` — ouvrir la fiche, cocher
+   **App Groups**, *Configure*, et sélectionner le groupe.
+
+Les identifiants existent déjà : Xcode les a créés à la première archive. Les
+modifier invalide les profils en cours, mais c'est sans conséquence ici — le
+workflow en régénère à chaque exécution.
+
+Puis relancer le workflow. C'est la dernière chose que le dépôt ne peut pas
+faire à votre place.
 
 ## Compiler depuis un Mac, à la main
 
-Les mêmes étapes que le workflow, sans exécuteur. Depuis la racine du dépôt,
-avec Xcode installé et l'équipe de signature renseignée :
+Les mêmes étapes que le workflow, si vous préférez garder la main. Depuis la
+racine du dépôt, avec Xcode installé et l'équipe de signature renseignée :
 
 ```bash
 # 1. Les tests, comme le ferait l'intégration continue
@@ -116,15 +133,13 @@ de l'export et de l'envoi — c'est le chemin le plus court, et il évite d'avoi
 
 ## Lancer le workflow
 
-Une fois les exécuteurs macOS disponibles : Actions → TestFlight →
-*Run workflow*. Il enchaîne : tests du cœur partagé,
+Actions → TestFlight → *Run workflow*. Il enchaîne : tests du cœur partagé,
 validation du projet, **tests iOS sur simulateur**, archive, export, envoi.
 
-Les tests sur simulateur méritent qu'on s'y arrête : c'est la première fois que
-le code SwiftUI, StoreKit et WidgetKit sera compilé pour de bon. Jusqu'ici il
-n'a été que vérifié syntaxiquement, et seul le domaine pur tourne sur le banc
-d'essai Linux. **C'est là que se révéleront les erreurs qu'aucune vérification
-n'a pu voir.**
+Les tests sur simulateur ont déjà servi : c'est là que le code SwiftUI,
+StoreKit et WidgetKit a été compilé pour de bon, après n'avoir été que vérifié
+syntaxiquement et éprouvé, pour le seul domaine pur, sur un banc d'essai Linux.
+**126 tests, aucun échec** — la traduction depuis le cœur partagé tient.
 
 Le numéro de build vient du numéro d'exécution : il croît tout seul, comme App
 Store Connect l'exige.
