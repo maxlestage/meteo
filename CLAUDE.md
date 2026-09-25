@@ -33,6 +33,10 @@ nouvelle pull request.
 - **Le domaine ne fabrique pas de phrases.** Il renvoie des états et des motifs
   structurés ; l'interface les traduit. Trois langues : français, anglais,
   espagnol, avec des catalogues dont les clés sont vérifiées par les tests.
+- **Rien ne défile de côté.** On lit Klima en faisant glisser vers le bas.
+  Le bandeau des vingt-quatre heures se replie donc en grille — `display: grid`
+  sur le web, `LazyVGrid` sur iOS — et aucune vue n'ouvre de défilement
+  horizontal. Un test à la racine le vérifie des deux côtés.
 - **Les heures sont celles de la parcelle**, pas celles du lecteur. Les nombres
   et les dates suivent en revanche la langue de l'utilisateur.
 - **Ne pas publier de lien vers le code source** sur le site de présentation.
