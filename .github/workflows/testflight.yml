@@ -39,7 +39,7 @@ jobs:
       EXPORT: ${{ github.workspace }}/build/export
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       # On s'arrête tout de suite plutôt qu'après vingt minutes de compilation :
       # une archive signée avec des secrets manquants échouerait à l'envoi.
@@ -57,7 +57,7 @@ jobs:
             [ -z "${!name}" ] && missing="$missing $name"
           done
           if [ -n "$missing" ]; then
-            echo "::error::Secrets absents :$missing — voir ios/Tools/README.md"
+            echo "::error::Secrets absents :$missing — voir ios/Tools/TESTFLIGHT.md"
             exit 1
           fi
 
@@ -208,7 +208,7 @@ jobs:
       # sans lesquels un rapport de plantage reste illisible.
       - name: Conserver l'archive
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: Kliima-${{ github.run_number }}.xcarchive
           path: ${{ env.ARCHIVE }}
@@ -220,5 +220,9 @@ jobs:
       - name: Effacer le trousseau
         if: always()
         run: |
-          security delete-keychain "$KEYCHAIN" || true
+          # Sans ce test, un arrêt survenu avant la création du trousseau
+          # afficherait « SecKeychainDelete: Operation not permitted » — une
+          # erreur sans objet, mais que le lecteur du journal prend pour un
+          # symptôme.
+          [ -n "${KEYCHAIN:-}" ] && security delete-keychain "$KEYCHAIN" || true
           rm -rf ~/private_keys
