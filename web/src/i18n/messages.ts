@@ -20,7 +20,6 @@ export const webMessages: Record<Language, Catalog> = {
     'search.locating': 'Localisation…',
     'search.unsupported': 'Géolocalisation indisponible sur ce navigateur.',
     'search.denied': 'Position refusée. Recherchez la commune à la main.',
-    'search.myField': 'Ma parcelle',
 
     'hourly.title': 'Conditions météo',
     'hourly.now': 'Maint.',
@@ -77,7 +76,6 @@ export const webMessages: Record<Language, Catalog> = {
     'search.locating': 'Locating…',
     'search.unsupported': 'Geolocation is not available in this browser.',
     'search.denied': 'Location denied. Search for the town instead.',
-    'search.myField': 'My field',
 
     'hourly.title': 'Conditions',
     'hourly.now': 'Now',
@@ -134,7 +132,6 @@ export const webMessages: Record<Language, Catalog> = {
     'search.locating': 'Ubicando…',
     'search.unsupported': 'La geolocalización no está disponible en este navegador.',
     'search.denied': 'Ubicación denegada. Busque el municipio a mano.',
-    'search.myField': 'Mi parcela',
 
     'hourly.title': 'Condiciones',
     'hourly.now': 'Ahora',
