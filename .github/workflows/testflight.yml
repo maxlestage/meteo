@@ -136,8 +136,31 @@ jobs:
           ASC_KEY_P8: ${{ secrets.ASC_KEY_P8 }}
         run: |
           mkdir -p ~/private_keys
-          echo "$ASC_KEY_P8" | base64 --decode > ~/private_keys/AuthKey_$ASC_KEY_ID.p8
-          chmod 600 ~/private_keys/AuthKey_$ASC_KEY_ID.p8
+          key=~/private_keys/AuthKey_$ASC_KEY_ID.p8
+
+          # On accepte les deux formes : le contenu du fichier .p8 tel quel —
+          # ce qu'on colle naturellement en l'ouvrant — ou son encodage en
+          # base64. Refuser l'une des deux ne rend service à personne, et le
+          # symptôme est trompeur : « base64 --decode » sur du PEM avale les
+          # lignes « -----BEGIN----- » comme des caractères invalides et ne
+          # rend que le corps binaire, que Xcode ne sait pas lire.
+          case "$ASC_KEY_P8" in
+            -----BEGIN*) printf '%s\n' "$ASC_KEY_P8" > "$key" ;;
+            *)           printf '%s' "$ASC_KEY_P8" | base64 --decode > "$key" ;;
+          esac
+          chmod 600 "$key"
+
+          # Une clé mal collée ne se voit qu'ici. Plus loin, xcodebuild ne dit
+          # que « Invalid authentication key credential » sans indiquer quoi
+          # corriger — après quatre minutes de compilation.
+          if ! head -c 64 "$key" | grep -q "BEGIN PRIVATE KEY"; then
+            echo "::error::ASC_KEY_P8 ne contient pas de clé PEM lisible. Collez le contenu du fichier AuthKey_XXXXXXXXXX.p8 tel quel, ou son encodage base64 — les deux sont acceptés."
+            exit 1
+          fi
+          echo "clé App Store Connect lue"
+
+          # L'export se sert du même chemin : on le calcule une fois.
+          echo "ASC_KEY_PATH=$key" >> "$GITHUB_ENV"
 
       # La première exécution réelle de ces tests : le banc d'essai Linux ne
       # compile que le domaine pur, pas SwiftUI, StoreKit ni WidgetKit.
@@ -170,7 +193,7 @@ jobs:
             -destination 'generic/platform=iOS' \
             -archivePath "$ARCHIVE" \
             -allowProvisioningUpdates \
-            -authenticationKeyPath ~/private_keys/AuthKey_$ASC_KEY_ID.p8 \
+            -authenticationKeyPath "$ASC_KEY_PATH" \
             -authenticationKeyID "$ASC_KEY_ID" \
             -authenticationKeyIssuerID "$ASC_ISSUER_ID" \
             ${TEAM_ID:+DEVELOPMENT_TEAM=$TEAM_ID} \
@@ -201,7 +224,7 @@ jobs:
             -exportPath "$EXPORT" \
             -exportOptionsPlist "$RUNNER_TEMP/ExportOptions.plist" \
             -allowProvisioningUpdates \
-            -authenticationKeyPath ~/private_keys/AuthKey_$ASC_KEY_ID.p8 \
+            -authenticationKeyPath "$ASC_KEY_PATH" \
             -authenticationKeyID "$ASC_KEY_ID" \
             -authenticationKeyIssuerID "$ASC_ISSUER_ID"
 
