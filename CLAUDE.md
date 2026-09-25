@@ -37,6 +37,15 @@ nouvelle pull request.
   Le bandeau des vingt-quatre heures se replie donc en grille — `display: grid`
   sur le web, `LazyVGrid` sur iOS — et aucune vue n'ouvre de défilement
   horizontal. Un test à la racine le vérifie des deux côtés.
+- **On part de là où est la personne.** Une application météo qui s'ouvre sur
+  une ville qu'on n'a pas choisie demande un geste avant d'être utile. La
+  position n'est donc demandée qu'à défaut — jamais par-dessus une parcelle
+  déjà choisie ni par-dessus un lien partagé — elle ne bloque pas l'affichage,
+  et un refus ne dit rien. Les coordonnées sont arrondies à la maille avant de
+  devenir une parcelle : une parcelle finit dans l'adresse et dans le groupe
+  partagé, elle n'a pas à dire à deux mètres près où se tient quelqu'un. La
+  règle vit dans `core/src/position.ts` et dans son miroir
+  `ios/Kliima/Models/Position.swift`.
 - **Les heures sont celles de la parcelle**, pas celles du lecteur. Les nombres
   et les dates suivent en revanche la langue de l'utilisateur.
 - **Ne pas publier de lien vers le code source** sur le site de présentation.

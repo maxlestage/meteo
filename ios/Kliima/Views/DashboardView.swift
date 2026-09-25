@@ -112,6 +112,9 @@ struct DashboardView: View {
             }
             .refreshable { await reload() }
             .task { await reload() }
+            // À part du chargement, et pas avant lui : la prévision par défaut
+            // s'affiche pendant que le système demande l'autorisation.
+            .task { viewModel.locateIfUnchosen() }
             .sheet(item: $paywallFor) { feature in
                 PaywallView(subscription: subscription, reason: feature)
             }
