@@ -253,6 +253,26 @@ jobs:
             -authenticationKeyID "$ASC_KEY_ID" \
             -authenticationKeyIssuerID "$ASC_ISSUER_ID"
 
+      # « exportArchive » échoue en une ligne et garde ses raisons pour lui :
+      # le détail est dans un dossier « .xcdistributionlogs » posé dans le
+      # répertoire temporaire, que l'exécuteur emporte avec lui. Sans ça, un
+      # échec d'export coûte une exécution entière pour être seulement lu.
+      - name: Conserver les journaux de distribution
+        if: failure()
+        run: |
+          mkdir -p build/distribution
+          cp -R "${TMPDIR:-/tmp}"/*.xcdistributionlogs build/distribution/ 2>/dev/null || true
+          ls -R build/distribution || true
+
+      - name: Publier les journaux de distribution
+        if: failure()
+        uses: actions/upload-artifact@v6
+        with:
+          name: distribution-${{ github.run_number }}
+          path: build/distribution
+          retention-days: 7
+          if-no-files-found: ignore
+
       - name: Envoyer sur TestFlight
         env:
           ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}

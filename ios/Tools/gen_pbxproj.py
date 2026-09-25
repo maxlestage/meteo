@@ -489,6 +489,13 @@ TARGET_SETTINGS = {
         RUNPATH_APP,
         ("PRODUCT_BUNDLE_IDENTIFIER", "com.kliima.app.watchkitapp"),
         ("SDKROOT", "watchos"),
+        # L'application de la montre est un produit « application », comme
+        # celle de l'iPhone. Sans ce réglage, l'archive en contient deux au
+        # premier niveau, Xcode ne sait plus laquelle distribuer, et l'archive
+        # devient « générique » : aucune méthode de distribution ne s'applique,
+        # et « exportArchive » refuse avec « expected one {} ». Elle reste
+        # embarquée par la phase « Embed Watch Content ».
+        ("SKIP_INSTALL", "YES"),
         ("SUPPORTED_PLATFORMS", '"watchos watchsimulator"'),
         ("SWIFT_EMIT_LOC_STRINGS", "YES"),
         ("TARGETED_DEVICE_FAMILY", "4"),
