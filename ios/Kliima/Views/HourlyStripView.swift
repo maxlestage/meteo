@@ -7,15 +7,24 @@ struct HourlyStripView: View {
     let current: CurrentSample
     let timeZone: TimeZone
 
+    /// Autant de colonnes que la largeur en accepte, jamais plus étroites que
+    /// ce qu'une température lisible demande.
+    private static let colonnes = [GridItem(.adaptive(minimum: 52), spacing: 4)]
+
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
             CardLabel(text: Localized.text("hourly.title"))
 
-            ScrollView(.horizontal, showsIndicators: false) {
-                HStack(spacing: 4) {
-                    ForEach(Array(hours.prefix(24).enumerated()), id: \.element.id) { index, hour in
-                        column(for: hour, isFirst: index == 0)
-                    }
+            // Les vingt-quatre heures tiennent dans la carte, en autant de
+            // rangées qu'il faut.
+            //
+            // C'était un défilement horizontal sans indicateur : on voyait six
+            // heures et il fallait deviner que les autres existaient. Une
+            // grille qui se replie les montre toutes, et ne demande que le
+            // geste qu'on fait déjà pour lire l'écran.
+            LazyVGrid(columns: Self.colonnes, alignment: .leading, spacing: 14) {
+                ForEach(Array(hours.prefix(24).enumerated()), id: \.element.id) { index, hour in
+                    column(for: hour, isFirst: index == 0)
                 }
             }
         }
@@ -48,7 +57,7 @@ struct HourlyStripView: View {
             Text(AgroFormat.temperature(temperature))
                 .font(.title3)
         }
-        .frame(width: 58)
+        .frame(maxWidth: .infinity)
         .accessibilityElement(children: .combine)
     }
 }

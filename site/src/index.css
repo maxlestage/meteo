@@ -195,6 +195,28 @@ body::after {
   }
 }
 
+/*
+ * Sur les écrans les plus étroits, la marque, l'appel à l'application et le
+ * choix de langue ne tiennent plus côte à côte : l'en-tête dépassait de
+ * vingt-cinq pixels, et toute la page se mettait à défiler de côté. On resserre
+ * plutôt que de laisser déborder.
+ */
+@media (max-width: 380px) {
+  .nav {
+    gap: 12px;
+    padding: 16px 12px;
+  }
+
+  .nav__end {
+    gap: 10px;
+  }
+
+  .lang button {
+    padding: 5px 6px;
+    font-size: 12px;
+  }
+}
+
 .nav nav a {
   color: var(--ink-soft);
   text-decoration: none;
