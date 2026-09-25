@@ -37,11 +37,20 @@ jobs:
         run: bun test
 
       # `build` enchaîne tsc puis vite : une erreur de types arrête la publication.
+      #
+      # `VITE_KLIMA_RELAY` désigne le relais. Variable de dépôt, pas secret :
+      # c'est une adresse publique, elle finit dans le paquet servi. Tant
+      # qu'elle est vide, le site et l'application appellent les fournisseurs
+      # en direct.
       - name: Construction de la vitrine
         run: bun run --cwd site build
+        env:
+          VITE_KLIMA_RELAY: ${{ vars.KLIMA_RELAY }}
 
       - name: Construction de l'application web
         run: bun run --cwd web build
+        env:
+          VITE_KLIMA_RELAY: ${{ vars.KLIMA_RELAY }}
 
       # L'application est servie depuis un sous-chemin de la vitrine. Les deux
       # projets construisent en chemins relatifs (`base: './'`), il n'y a donc
