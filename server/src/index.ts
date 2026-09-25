@@ -20,8 +20,10 @@
  * d'appeler seuls (MET Norway en natif, Bright Sky partout). On perd des
  * sources, pas la météo.
  */
+import { existsSync } from 'node:fs'
 import { ForecastCache } from './cache'
 import { cellFor, cellKey } from './grid'
+import { staticSite } from './static'
 import {
   brightSkyCurrent,
   metNorwayCompact,
@@ -48,6 +50,14 @@ export interface ServerOptions extends UpstreamConfig {
   /** Origines autorisées à appeler le relais depuis un navigateur. */
   allowedOrigins?: readonly string[]
   now?: () => number
+  /**
+   * Servir la vitrine et l'application depuis ce dossier, en plus de l'API.
+   *
+   * Absent, le relais ne fait que relayer. Présent, il devient aussi
+   * l'hébergement du site — et l'application se retrouve sur la même origine
+   * que ses appels.
+   */
+  site?: (pathname: string) => Promise<Response | null>
 }
 
 const JSON_HEADERS = { 'Content-Type': 'application/json; charset=utf-8' }
@@ -109,6 +119,17 @@ export function createHandler(options: ServerOptions = {}) {
         },
         { headers: cors },
       )
+    }
+
+    // Les fichiers du site, s'il y en a. L'API garde la priorité : elle est
+    // toute entière sous « /v1/ », et « /health » vient d'être traité.
+    if (options.site && !url.pathname.startsWith('/v1/')) {
+      const fichier = await options.site(url.pathname)
+      if (fichier) return fichier
+      // Un fichier absent est absent. Sans ce retour, la requête tomberait sur
+      // la lecture des coordonnées et une image manquante répondrait
+      // « coordonnées manquantes » — vrai, et incompréhensible.
+      return new Response('introuvable', { status: 404, headers: cors })
     }
 
     // Le géocodage n'a pas de point : il se met en cache sur le texte cherché.
@@ -190,12 +211,19 @@ async function respond(
 }
 
 if (import.meta.main) {
+  // Le dossier est construit au déploiement. S'il n'est pas là — en
+  // développement, par exemple — le relais ne fait que relayer.
+  const racine = process.env.KLIMA_PUBLIC ?? 'server/public'
+  const sert = existsSync(racine)
+
   const options: ServerOptions = {
     openMeteoKey: process.env.OPEN_METEO_KEY,
     allowedOrigins: process.env.KLIMA_ORIGINS?.split(',').map((o) => o.trim()),
+    site: sert ? staticSite(racine, (chemin) => Bun.file(chemin)) : undefined,
   }
   const port = Number(process.env.PORT ?? 8787)
   Bun.serve({ port, fetch: createHandler(options) })
   console.log(`relais Klima sur :${port} — clé Open-Meteo ${
-    options.openMeteoKey ? 'configurée' : 'absente (plan gratuit, usage non commercial)'}`)
+    options.openMeteoKey ? 'configurée' : 'absente (plan gratuit, usage non commercial)'}`
+    + (sert ? `, site servi depuis ${racine}` : ', sans site'))
 }
