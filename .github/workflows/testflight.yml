@@ -53,13 +53,20 @@ jobs:
           ASC_KEY_P8: ${{ secrets.ASC_KEY_P8 }}
         run: |
           missing=""
-          for name in TEAM_ID CERT_P12 CERT_PASSWORD ASC_KEY_ID ASC_ISSUER_ID ASC_KEY_P8; do
+          for name in ASC_KEY_ID ASC_ISSUER_ID ASC_KEY_P8; do
             [ -z "${!name}" ] && missing="$missing $name"
           done
           if [ -n "$missing" ]; then
             echo "::error::Secrets absents :$missing — voir ios/Tools/TESTFLIGHT.md"
             exit 1
           fi
+
+          # Le reste est facultatif. Sans certificat fourni, on s'en remet à la
+          # signature gérée par Apple : « -allowProvisioningUpdates » récupère
+          # un certificat de distribution dont la clé privée reste chez eux,
+          # ce qui convient à un exécuteur qui disparaît après usage.
+          [ -n "$CERT_P12" ] && echo "certificat fourni" || echo "pas de certificat : signature gérée par Apple"
+          [ -n "$TEAM_ID" ] && echo "équipe imposée" || echo "équipe déduite de la clé" 
 
       - uses: oven-sh/setup-bun@v2
         with:
@@ -98,6 +105,11 @@ jobs:
           CERT_P12: ${{ secrets.APPLE_CERT_P12 }}
           CERT_PASSWORD: ${{ secrets.APPLE_CERT_PASSWORD }}
         run: |
+          if [ -z "$CERT_P12" ]; then
+            echo "aucun certificat à installer — Xcode ira le chercher lui-même"
+            exit 0
+          fi
+
           keychain="$RUNNER_TEMP/kliima.keychain-db"
           password="$(uuidgen)"
           echo "KEYCHAIN=$keychain" >> "$GITHUB_ENV"
@@ -161,7 +173,7 @@ jobs:
             -authenticationKeyPath ~/private_keys/AuthKey_$ASC_KEY_ID.p8 \
             -authenticationKeyID "$ASC_KEY_ID" \
             -authenticationKeyIssuerID "$ASC_ISSUER_ID" \
-            DEVELOPMENT_TEAM="$TEAM_ID" \
+            ${TEAM_ID:+DEVELOPMENT_TEAM=$TEAM_ID} \
             CURRENT_PROJECT_VERSION=${{ github.run_number }} \
             | $FORMATTER
 
@@ -177,7 +189,7 @@ jobs:
           <plist version="1.0">
           <dict>
             <key>method</key><string>app-store-connect</string>
-            <key>teamID</key><string>$TEAM_ID</string>
+            ${TEAM_ID:+<key>teamID</key><string>$TEAM_ID</string>}
             <key>uploadSymbols</key><true/>
             <key>destination</key><string>export</string>
           </dict>
