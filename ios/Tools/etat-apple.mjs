@@ -156,7 +156,77 @@ async function main() {
   dire('publique. C\'est ce rattachement qui manque à la signature.')
   dire()
 
-  // 4. L'abonnement.
+  // 4. Les versions envoyées, et ce que TestFlight en fait.
+  if (appId) {
+    dire("## Les versions envoyées")
+    dire()
+    const builds = await demander(
+      `/v1/builds?filter[app]=${appId}&limit=10&sort=-uploadedDate`
+      + `&include=buildBetaDetail,preReleaseVersion`
+      + `&fields[builds]=version,processingState,uploadedDate,expired`
+      + `&fields[buildBetaDetails]=internalBuildState,externalBuildState`
+      + `&fields[preReleaseVersions]=version`,
+      jwt,
+    )
+    const liste = builds.corps?.data ?? []
+    const inclus = builds.corps?.included ?? []
+    const detail = (id) => inclus.find((i) => i.type === 'buildBetaDetails' && i.id === id)
+    const version = (id) => inclus.find((i) => i.type === 'preReleaseVersions' && i.id === id)
+
+    if (liste.length === 0) {
+      dire('**Aucune.** Rien n\'est arrivé jusqu\'à App Store Connect.')
+      dire(erreurs(builds.corps))
+    } else {
+      dire('| Build | Version | Traitement | État TestFlight interne | Envoyé le |')
+      dire('| --- | --- | --- | --- | --- |')
+      for (const b of liste) {
+        const d = detail(b.relationships?.buildBetaDetail?.data?.id)
+        const v = version(b.relationships?.preReleaseVersion?.data?.id)
+        dire(
+          `| ${b.attributes?.version} | ${v?.attributes?.version ?? '?'} `
+          + `| ${b.attributes?.processingState} `
+          + `| ${d?.attributes?.internalBuildState ?? '—'} `
+          + `| ${(b.attributes?.uploadedDate ?? '').replace('T', ' ').slice(0, 16)} |`,
+        )
+      }
+      dire()
+      dire("« VALID » et « READY_FOR_BETA_TESTING » veulent dire que le build est")
+      dire("installable. « PROCESSING » : Apple n'a pas fini.")
+      dire("« MISSING_EXPORT_COMPLIANCE » : il attend une réponse sur le chiffrement.")
+    }
+    dire()
+
+    // 5. À qui TestFlight écrirait-il ?
+    dire('## Les testeurs')
+    dire()
+    const groupes = await demander(
+      `/v1/apps/${appId}/betaGroups?limit=20&fields[betaGroups]=name,isInternalGroup,hasAccessToAllBuilds`,
+      jwt,
+    )
+    const bandes = groupes.corps?.data ?? []
+    if (bandes.length === 0) {
+      dire("**Aucun groupe.** C'est l'explication la plus probable d'un silence :")
+      dire("TestFlight n'envoie de courriel qu'aux testeurs d'un groupe, et il n'y")
+      dire('en a aucun. Un build peut être parfaitement valide et ne prévenir')
+      dire('personne.')
+    } else {
+      for (const g of bandes) {
+        const testeurs = await demander(
+          `/v1/betaGroups/${g.id}/betaTesters?limit=50&fields[betaTesters]=email,firstName,inviteType,state`,
+          jwt,
+        )
+        const gens = testeurs.corps?.data ?? []
+        const genre = g.attributes?.isInternalGroup ? 'interne' : 'externe'
+        dire(`- **${g.attributes?.name}** (${genre}) — ${gens.length} testeur(s)`)
+        for (const t of gens) {
+          dire(`  - ${t.attributes?.email ?? '?'} — ${t.attributes?.state ?? '?'}`)
+        }
+      }
+    }
+    dire()
+  }
+
+  // 6. L'abonnement.
   if (appId) {
     dire('## L\'abonnement')
     dire()
