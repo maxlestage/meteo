@@ -21,6 +21,7 @@ struct SprayLiveActivity: Widget {
                         Text(context.attributes.parcelleName)
                             .font(.caption)
                             .foregroundStyle(.secondary)
+                            .lineLimit(1)
                     }
                 }
 
@@ -32,6 +33,8 @@ struct SprayLiveActivity: Widget {
                         Text(AgroFormat.unit(context.state.windSpeed, "km/h", decimals: 0))
                             .font(.caption)
                             .foregroundStyle(.secondary)
+                            .lineLimit(1)
+                            .fixedSize(horizontal: true, vertical: false)
                     }
                 }
 
@@ -76,45 +79,63 @@ private struct LockScreenView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
-            HStack {
+            HStack(alignment: .top, spacing: 12) {
                 VStack(alignment: .leading, spacing: 1) {
-                    Text(Localized.text("spray.title"))
+                    // « Fenêtre » et non « Fenêtre de traitement » : sur une
+                    // demi-largeur d'écran verrouillé, le libellé long se
+                    // faisait couper en « FENÊTRE DE TRAI… ». Le nom de la
+                    // parcelle, juste dessous, lève l'ambiguïté.
+                    Text(Localized.text("activity.window"))
                         .font(.caption2.weight(.semibold))
                         .textCase(.uppercase)
                         .foregroundStyle(.secondary)
                     Text(context.attributes.parcelleName)
                         .font(.headline)
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.8)
                 }
+                .layoutPriority(1)
 
-                Spacer()
+                Spacer(minLength: 0)
 
                 VStack(alignment: .trailing, spacing: 1) {
                     Text(window)
                         .font(.headline)
                         .monospacedDigit()
+                        .lineLimit(1)
                     Text(context.attributes.windowEnd, style: .relative)
                         .font(.caption2)
                         .foregroundStyle(.secondary)
+                        .lineLimit(1)
                 }
+                .fixedSize(horizontal: true, vertical: false)
             }
 
-            HStack(alignment: .firstTextBaseline, spacing: 10) {
+            HStack(alignment: .firstTextBaseline, spacing: 8) {
                 Text(context.state.verdict.label)
                     .font(.title2.weight(.semibold))
                     .foregroundStyle(SprayPalette.color(for: context.state.verdict))
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.8)
 
                 Text(Localized.text("activity.score", String(context.state.score)))
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
+                    .lineLimit(1)
 
-                Spacer()
+                Spacer(minLength: 4)
 
+                // Sans cette taille figée, « 4 km/h » se coupait en « 4 km/ »
+                // et « h » sur la ligne suivante : une unité cassée en deux se
+                // lit mal et fait paraître l'ensemble bâclé.
                 Label(
                     AgroFormat.unit(context.state.windSpeed, "km/h", decimals: 0),
                     systemImage: "wind"
                 )
                 .font(.subheadline)
                 .monospacedDigit()
+                .lineLimit(1)
+                .fixedSize(horizontal: true, vertical: false)
             }
 
             if let blocker = context.state.blocker {
