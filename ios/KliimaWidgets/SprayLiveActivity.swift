@@ -56,9 +56,16 @@ struct SprayLiveActivity: Widget {
                 Image(systemName: "wind")
                     .foregroundStyle(SprayPalette.color(for: context.state.verdict))
             } compactTrailing: {
-                Text(context.attributes.windowEnd, style: .timer)
-                    .monospacedDigit()
-                    .frame(maxWidth: 44)
+                // « style: .timer » sur une date passée compte le temps écoulé
+                // depuis elle : l'île affichait « 28:34 », puis « 28:53 », pour
+                // une fenêtre close depuis le matin. Un intervalle borné, lui,
+                // descend jusqu'à zéro et s'y arrête.
+                Text(
+                    timerInterval: context.attributes.windowStart...context.attributes.windowEnd,
+                    countsDown: true
+                )
+                .monospacedDigit()
+                .frame(maxWidth: 52)
             } minimal: {
                 Image(systemName: context.state.isBlocked ? "xmark.circle.fill" : "checkmark.circle.fill")
                     .foregroundStyle(SprayPalette.color(for: context.state.verdict))
