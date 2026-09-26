@@ -113,6 +113,7 @@ STRINGS = {
     "spray.plus24": ("+24 h", "+24 h", "+24 h"),
 
     # --- Activité en direct ---
+    "activity.window": ("Fenêtre", "Window", "Ventana"),
     "activity.allClear": ("Conditions réunies", "Conditions are right", "Condiciones favorables"),
     "activity.score": ("%1$@/100", "%1$@/100", "%1$@/100"),
     # --- Recoupement des modèles ---
