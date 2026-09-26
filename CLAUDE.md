@@ -33,15 +33,18 @@ nouvelle pull request.
 - **Le domaine ne fabrique pas de phrases.** Il renvoie des états et des motifs
   structurés ; l'interface les traduit. Trois langues : français, anglais,
   espagnol, avec des catalogues dont les clés sont vérifiées par les tests.
-- **Rien ne défile de côté.** On lit Klima en faisant glisser vers le bas.
-  Le bandeau des vingt-quatre heures se replie donc en grille — `display: grid`
-  sur le web, `LazyVGrid` sur iOS — et aucune vue n'ouvre de défilement
-  horizontal. Un test à la racine le vérifie des deux côtés.
-- **Une carte ne prend pas tout l'écran.** Les vingt-quatre heures en grille
-  tenaient dans leur carte, et la carte tenait l'écran entier : la recherche de
-  commune et la prévision à sept jours passaient sous la ligne de flottaison.
-  Le bandeau montre donc douze heures — une demi-journée, deux rangées sur un
-  téléphone — et les autres se déplient d'un bouton. Même règle des deux côtés.
+- **Un défilement horizontal ne se cache pas.** Le bandeau horaire d'iOS
+  glisse de côté — la grille repliable essayée entre-temps montrait tout d'un
+  coup, mais prenait la moitié de l'écran et finissait sur une rangée
+  ébréchée ; Maxime Nathan Lestage a tranché pour le bandeau. Ce qui ne revient
+  pas, c'est `showsIndicators: false` : la première version défilait sans rien
+  dire, on voyait six heures et il fallait deviner que les autres existaient.
+  L'indicateur reste visible, et lui seul défile de côté. Un test à la racine
+  le vérifie.
+- **Le web, lui, ne défile pas de côté.** Aucune règle CSS ne rend un bloc
+  défilable à l'horizontale ; le bandeau y est une grille qui se replie, et
+  montre douze heures — une demi-journée — les autres se dépliant d'un bouton.
+  Une carte ne prend pas tout l'écran.
 - **On part de là où est la personne.** Une application météo qui s'ouvre sur
   une ville qu'on n'a pas choisie demande un geste avant d'être utile. La
   position n'est donc demandée qu'à défaut — jamais par-dessus une parcelle
