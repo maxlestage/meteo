@@ -11,6 +11,17 @@ struct HourlyStripView: View {
     /// ce qu'une température lisible demande.
     private static let colonnes = [GridItem(.adaptive(minimum: 52), spacing: 4)]
 
+    /// Ce qu'on montre sans rien demander : deux rangées sur un iPhone.
+    ///
+    /// Les vingt-quatre heures repliées en grille tenaient dans la carte, mais
+    /// la carte tenait tout l'écran — la recherche de commune et la prévision à
+    /// sept jours passaient sous la ligne de flottaison. Une demi-journée
+    /// répond à la question qu'on se pose en ouvrant l'application ; le reste
+    /// se déplie.
+    private static let apercu = 12
+
+    @State private var deplie = false
+
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
             CardLabel(text: Localized.text("hourly.title"))
@@ -23,12 +34,33 @@ struct HourlyStripView: View {
             // grille qui se replie les montre toutes, et ne demande que le
             // geste qu'on fait déjà pour lire l'écran.
             LazyVGrid(columns: Self.colonnes, alignment: .leading, spacing: 14) {
-                ForEach(Array(hours.prefix(24).enumerated()), id: \.element.id) { index, hour in
+                ForEach(Array(visibles.enumerated()), id: \.element.id) { index, hour in
                     column(for: hour, isFirst: index == 0)
                 }
             }
+
+            if hours.count > Self.apercu {
+                Button {
+                    withAnimation(.snappy) { deplie.toggle() }
+                } label: {
+                    Label(
+                        Localized.text(deplie ? "hourly.fold" : "hourly.unfold"),
+                        systemImage: deplie ? "chevron.up" : "chevron.down"
+                    )
+                    .font(.footnote.weight(.semibold))
+                }
+                .buttonStyle(.plain)
+                .foregroundStyle(.secondary)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding(.top, 2)
+            }
         }
         .cardBackground()
+    }
+
+    /// Les heures affichées : un aperçu, ou les vingt-quatre.
+    private var visibles: [HourlySample] {
+        Array(hours.prefix(deplie ? 24 : Self.apercu))
     }
 
     private func column(for hour: HourlySample, isFirst: Bool) -> some View {
