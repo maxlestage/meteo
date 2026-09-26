@@ -79,7 +79,17 @@ private struct LockScreenView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
-            HStack(alignment: .top, spacing: 12) {
+            // Disposition d'origine, volontairement : elle s'affichait. Ce qui
+            // réglait la troncature, c'est le libellé court — pas les
+            // contraintes de largeur que j'y avais ajoutées.
+            //
+            // « fixedSize » demandait ici sa largeur idéale à une colonne qui
+            // contient une date relative. Une date relative se réécrit toute
+            // seule au fil du temps : sa largeur idéale n'est pas connue à
+            // l'avance, et une activité en direct est rendue hors du processus,
+            // à l'avance justement. C'est mon premier suspect pour le cadre
+            // resté vide.
+            HStack {
                 VStack(alignment: .leading, spacing: 1) {
                     // « Fenêtre » et non « Fenêtre de traitement » : sur une
                     // demi-largeur d'écran verrouillé, le libellé long se
@@ -92,23 +102,18 @@ private struct LockScreenView: View {
                     Text(context.attributes.parcelleName)
                         .font(.headline)
                         .lineLimit(1)
-                        .minimumScaleFactor(0.8)
                 }
-                .layoutPriority(1)
 
-                Spacer(minLength: 0)
+                Spacer()
 
                 VStack(alignment: .trailing, spacing: 1) {
                     Text(window)
                         .font(.headline)
                         .monospacedDigit()
-                        .lineLimit(1)
                     Text(context.attributes.windowEnd, style: .relative)
                         .font(.caption2)
                         .foregroundStyle(.secondary)
-                        .lineLimit(1)
                 }
-                .fixedSize(horizontal: true, vertical: false)
             }
 
             HStack(alignment: .firstTextBaseline, spacing: 8) {
@@ -116,14 +121,13 @@ private struct LockScreenView: View {
                     .font(.title2.weight(.semibold))
                     .foregroundStyle(SprayPalette.color(for: context.state.verdict))
                     .lineLimit(1)
-                    .minimumScaleFactor(0.8)
 
                 Text(Localized.text("activity.score", String(context.state.score)))
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
                     .lineLimit(1)
 
-                Spacer(minLength: 4)
+                Spacer()
 
                 // Sans cette taille figée, « 4 km/h » se coupait en « 4 km/ »
                 // et « h » sur la ligne suivante : une unité cassée en deux se
