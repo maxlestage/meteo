@@ -875,6 +875,29 @@
         }
       }
     },
+    "hourly.fold": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Show less"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Plegar"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Replier"
+          }
+        }
+      }
+    },
     "hourly.now": {
       "extractionState": "manual",
       "localizations": {
@@ -917,6 +940,29 @@
           "stringUnit": {
             "state": "translated",
             "value": "Conditions météo"
+          }
+        }
+      }
+    },
+    "hourly.unfold": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Show all 24 hours"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ver las 24 horas"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Voir les 24 heures"
           }
         }
       }
