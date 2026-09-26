@@ -161,31 +161,41 @@ async function main() {
     dire("## Les versions envoyées")
     dire()
     const builds = await demander(
+      // Les relations doivent figurer dans « fields[builds] », sinon elles ne
+      // sont pas renvoyées et « include » n'a rien à quoi se rattacher — la
+      // colonne reste vide sans que rien ne signale l'erreur.
       `/v1/builds?filter[app]=${appId}&limit=10&sort=-uploadedDate`
-      + `&include=buildBetaDetail,preReleaseVersion`
+      + `&include=buildBetaDetail,preReleaseVersion,betaGroups`
       + `&fields[builds]=version,processingState,uploadedDate,expired`
+      + `,buildBetaDetail,preReleaseVersion,betaGroups`
       + `&fields[buildBetaDetails]=internalBuildState,externalBuildState`
-      + `&fields[preReleaseVersions]=version`,
+      + `&fields[preReleaseVersions]=version`
+      + `&fields[betaGroups]=name,isInternalGroup`,
       jwt,
     )
     const liste = builds.corps?.data ?? []
     const inclus = builds.corps?.included ?? []
     const detail = (id) => inclus.find((i) => i.type === 'buildBetaDetails' && i.id === id)
     const version = (id) => inclus.find((i) => i.type === 'preReleaseVersions' && i.id === id)
+    const bande = (id) => inclus.find((i) => i.type === 'betaGroups' && i.id === id)
 
     if (liste.length === 0) {
       dire('**Aucune.** Rien n\'est arrivé jusqu\'à App Store Connect.')
       dire(erreurs(builds.corps))
     } else {
-      dire('| Build | Version | Traitement | État TestFlight interne | Envoyé le |')
-      dire('| --- | --- | --- | --- | --- |')
+      dire('| Build | Version | Traitement | État TestFlight | Distribué à | Envoyé le |')
+      dire('| --- | --- | --- | --- | --- | --- |')
       for (const b of liste) {
         const d = detail(b.relationships?.buildBetaDetail?.data?.id)
         const v = version(b.relationships?.preReleaseVersion?.data?.id)
+        const groupes = (b.relationships?.betaGroups?.data ?? [])
+          .map((g) => bande(g.id)?.attributes?.name)
+          .filter(Boolean)
         dire(
           `| ${b.attributes?.version} | ${v?.attributes?.version ?? '?'} `
           + `| ${b.attributes?.processingState} `
           + `| ${d?.attributes?.internalBuildState ?? '—'} `
+          + `| ${groupes.length ? groupes.join(', ') : '**personne**'} `
           + `| ${(b.attributes?.uploadedDate ?? '').replace('T', ' ').slice(0, 16)} |`,
         )
       }
@@ -193,6 +203,9 @@ async function main() {
       dire("« VALID » et « READY_FOR_BETA_TESTING » veulent dire que le build est")
       dire("installable. « PROCESSING » : Apple n'a pas fini.")
       dire("« MISSING_EXPORT_COMPLIANCE » : il attend une réponse sur le chiffrement.")
+      dire()
+      dire('La colonne « distribué à » est celle qui décide du courriel : un build')
+      dire("valide mais rattaché à aucun groupe ne prévient personne.")
     }
     dire()
 
