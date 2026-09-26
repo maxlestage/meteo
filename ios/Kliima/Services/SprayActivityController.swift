@@ -41,6 +41,11 @@ final class SprayActivityController: ObservableObject {
         #if canImport(ActivityKit)
         guard #available(iOS 16.2, *), isAvailable, activity == nil else { return }
 
+        // L'application a pu être tuée en laissant une activité derrière elle :
+        // `activity` est alors nul ici alors que le système en affiche encore
+        // une. Sans ce ménage, on en ouvre une seconde par-dessus.
+        Task { await Self.endPastActivities() }
+
         let attributes = SprayActivityAttributes(
             parcelleName: parcelle.name,
             windowStart: opportunity.start,
@@ -70,6 +75,13 @@ final class SprayActivityController: ObservableObject {
         #if canImport(ActivityKit)
         guard #available(iOS 16.2, *), let activity else { return }
 
+        // Sa propre fenêtre d'abord : une activité qui a passé son heure se
+        // ferme, même si une autre occasion se présente plus tard.
+        guard activity.attributes.windowEnd > Date() else {
+            await stop()
+            return
+        }
+
         guard let opportunity, opportunity.end > Date() else {
             await stop()
             return
@@ -92,6 +104,20 @@ final class SprayActivityController: ObservableObject {
         self.activity = nil
         #endif
         isRunning = false
+    }
+
+    /// Ferme les activités dont la fenêtre est passée, où qu'elles viennent.
+    ///
+    /// Statique : elles survivent au processus qui les a ouvertes, et personne
+    /// d'autre ne les fermera.
+    static func endPastActivities() async {
+        #if canImport(ActivityKit)
+        guard #available(iOS 16.2, *) else { return }
+        for activity in Activity<SprayActivityAttributes>.activities
+        where activity.attributes.windowEnd <= Date() {
+            await activity.end(nil, dismissalPolicy: .default)
+        }
+        #endif
     }
 
     /// Conditions de l'heure la plus proche de `date`.

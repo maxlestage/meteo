@@ -64,6 +64,17 @@ enum BackgroundRefresh {
         guard #available(iOS 16.2, *) else { return }
 
         for activity in Activity<SprayActivityAttributes>.activities {
+            // Sa propre fenêtre d'abord, et c'était le défaut : on regardait la
+            // prochaine occasion. Quand la fenêtre de ce matin était passée
+            // mais qu'une autre se présentait pour demain, l'activité de ce
+            // matin était mise à jour au lieu d'être fermée — et l'île
+            // dynamique se mettait à compter le temps écoulé depuis une heure
+            // révolue.
+            if activity.attributes.windowEnd <= Date() {
+                await activity.end(nil, dismissalPolicy: .default)
+                continue
+            }
+
             guard let opportunity, opportunity.end > Date() else {
                 await activity.end(nil, dismissalPolicy: .default)
                 continue
