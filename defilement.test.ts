@@ -40,7 +40,7 @@ describe('le web ne défile pas de côté', () => {
   })
 })
 
-describe('iOS non plus', () => {
+describe('iOS glisse à l’horizontale, mais le dit', () => {
 
   const VUES = 'ios/Kliima/Views'
   const fichiers = readdirSync(join(RACINE, VUES)).filter((f) => f.endsWith('.swift'))
@@ -49,14 +49,26 @@ describe('iOS non plus', () => {
     expect(fichiers.length).toBeGreaterThan(0)
   })
 
-  test('aucune vue ne défile horizontalement', () => {
+  // Le bandeau horaire est revenu au défilement horizontal après un détour par
+  // la grille : elle montrait tout d'un coup, mais prenait la moitié de l'écran
+  // et finissait sur une rangée ébréchée.
+  test('seul le bandeau horaire défile de côté', () => {
     const coupables = fichiers.filter((f) => lire(join(VUES, f)).includes('ScrollView(.horizontal'))
-    expect(coupables).toEqual([])
+    expect(coupables).toEqual(['HourlyStripView.swift'])
   })
 
-  test('le bandeau horaire y est une grille qui se replie', () => {
+  /*
+   * La règle qui reste, et c'est elle qui compte.
+   *
+   * La première version défilait avec « showsIndicators: false » : on voyait
+   * six heures et rien ne disait que les autres existaient. Un défilement
+   * horizontal est acceptable ; un défilement horizontal muet, non.
+   */
+  test('l’indicateur est visible, et personne ne le cache', () => {
     const source = lire(join(VUES, 'HourlyStripView.swift'))
-    expect(source).toContain('LazyVGrid')
-    expect(source).toContain('GridItem(.adaptive(')
+    expect(source).toContain('.scrollIndicators(.visible)')
+
+    const muettes = fichiers.filter((f) => lire(join(VUES, f)).includes('showsIndicators: false'))
+    expect(muettes).toEqual([])
   })
 })

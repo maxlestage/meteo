@@ -97,8 +97,6 @@ STRINGS = {
 
     "hourly.title": ("Conditions météo", "Conditions", "Condiciones"),
     "hourly.now": ("Maint.", "Now", "Ahora"),
-    "hourly.unfold": ("Voir les 24 heures", "Show all 24 hours", "Ver las 24 horas"),
-    "hourly.fold": ("Replier", "Show less", "Plegar"),
     "daily.title": ("Prévision sur 7 jours", "7-day forecast", "Previsión a 7 días"),
     "daily.today": ("Auj.", "Today", "Hoy"),
 
