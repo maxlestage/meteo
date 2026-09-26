@@ -23,6 +23,8 @@ export const webMessages: Record<Language, Catalog> = {
 
     'hourly.title': 'Conditions météo',
     'hourly.now': 'Maint.',
+    'hourly.unfold': 'Voir les 24 heures',
+    'hourly.fold': 'Replier',
     'daily.title': 'Prévision sur 7 jours',
     'daily.today': 'Auj.',
 
@@ -79,6 +81,8 @@ export const webMessages: Record<Language, Catalog> = {
 
     'hourly.title': 'Conditions',
     'hourly.now': 'Now',
+    'hourly.unfold': 'Show all 24 hours',
+    'hourly.fold': 'Show less',
     'daily.title': '7-day forecast',
     'daily.today': 'Today',
 
@@ -135,6 +139,8 @@ export const webMessages: Record<Language, Catalog> = {
 
     'hourly.title': 'Condiciones',
     'hourly.now': 'Ahora',
+    'hourly.unfold': 'Ver las 24 horas',
+    'hourly.fold': 'Plegar',
     'daily.title': 'Previsión a 7 días',
     'daily.today': 'Hoy',
 

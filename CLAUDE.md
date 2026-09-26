@@ -37,6 +37,11 @@ nouvelle pull request.
   Le bandeau des vingt-quatre heures se replie donc en grille — `display: grid`
   sur le web, `LazyVGrid` sur iOS — et aucune vue n'ouvre de défilement
   horizontal. Un test à la racine le vérifie des deux côtés.
+- **Une carte ne prend pas tout l'écran.** Les vingt-quatre heures en grille
+  tenaient dans leur carte, et la carte tenait l'écran entier : la recherche de
+  commune et la prévision à sept jours passaient sous la ligne de flottaison.
+  Le bandeau montre donc douze heures — une demi-journée, deux rangées sur un
+  téléphone — et les autres se déplient d'un bouton. Même règle des deux côtés.
 - **On part de là où est la personne.** Une application météo qui s'ouvre sur
   une ville qu'on n'a pas choisie demande un geste avant d'être utile. La
   position n'est donc demandée qu'à défaut — jamais par-dessus une parcelle
