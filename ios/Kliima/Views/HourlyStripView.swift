@@ -7,60 +7,39 @@ struct HourlyStripView: View {
     let current: CurrentSample
     let timeZone: TimeZone
 
-    /// Autant de colonnes que la largeur en accepte, jamais plus étroites que
-    /// ce qu'une température lisible demande.
-    private static let colonnes = [GridItem(.adaptive(minimum: 52), spacing: 4)]
-
-    /// Ce qu'on montre sans rien demander : deux rangées sur un iPhone.
-    ///
-    /// Les vingt-quatre heures repliées en grille tenaient dans la carte, mais
-    /// la carte tenait tout l'écran — la recherche de commune et la prévision à
-    /// sept jours passaient sous la ligne de flottaison. Une demi-journée
-    /// répond à la question qu'on se pose en ouvrant l'application ; le reste
-    /// se déplie.
-    private static let apercu = 12
-
-    @State private var deplie = false
+    /// Largeur d'une colonne. Vingt-quatre d'entre elles font environ quinze
+    /// cents points : c'est ce qu'on fait glisser.
+    private static let largeurColonne: CGFloat = 58
 
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
             CardLabel(text: Localized.text("hourly.title"))
 
-            // Les vingt-quatre heures tiennent dans la carte, en autant de
-            // rangées qu'il faut.
+            // Un bandeau qui glisse, et qui le montre.
             //
-            // C'était un défilement horizontal sans indicateur : on voyait six
-            // heures et il fallait deviner que les autres existaient. Une
-            // grille qui se replie les montre toutes, et ne demande que le
-            // geste qu'on fait déjà pour lire l'écran.
-            LazyVGrid(columns: Self.colonnes, alignment: .leading, spacing: 14) {
-                ForEach(Array(visibles.enumerated()), id: \.element.id) { index, hour in
-                    column(for: hour, isFirst: index == 0)
+            // Il a été une grille repliable entre-temps : tout voir d'un coup
+            // évitait de faire glisser, mais la carte prenait la moitié de
+            // l'écran et la dernière rangée finissait ébréchée, deux colonnes
+            // seules sous cinq. Maxime Nathan Lestage a tranché pour le
+            // bandeau.
+            //
+            // Une chose ne revient pas : l'indicateur caché. La première
+            // version défilait sans rien dire, on voyait six heures et il
+            // fallait deviner que les autres existaient. Il est visible
+            // désormais, et le rembourrage latéral laisse une colonne entamée
+            // au bord — deux façons de dire « ça continue ».
+            ScrollView(.horizontal) {
+                HStack(spacing: 4) {
+                    ForEach(Array(hours.prefix(24).enumerated()), id: \.element.id) { index, hour in
+                        column(for: hour, isFirst: index == 0)
+                    }
                 }
+                .padding(.horizontal, 2)
             }
-
-            if hours.count > Self.apercu {
-                Button {
-                    withAnimation(.snappy) { deplie.toggle() }
-                } label: {
-                    Label(
-                        Localized.text(deplie ? "hourly.fold" : "hourly.unfold"),
-                        systemImage: deplie ? "chevron.up" : "chevron.down"
-                    )
-                    .font(.footnote.weight(.semibold))
-                }
-                .buttonStyle(.plain)
-                .foregroundStyle(.secondary)
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .padding(.top, 2)
-            }
+            .scrollIndicators(.visible)
+            .scrollBounceBehavior(.basedOnSize)
         }
         .cardBackground()
-    }
-
-    /// Les heures affichées : un aperçu, ou les vingt-quatre.
-    private var visibles: [HourlySample] {
-        Array(hours.prefix(deplie ? 24 : Self.apercu))
     }
 
     private func column(for hour: HourlySample, isFirst: Bool) -> some View {
@@ -89,7 +68,7 @@ struct HourlyStripView: View {
             Text(AgroFormat.temperature(temperature))
                 .font(.title3)
         }
-        .frame(maxWidth: .infinity)
+        .frame(width: Self.largeurColonne)
         .accessibilityElement(children: .combine)
     }
 }
