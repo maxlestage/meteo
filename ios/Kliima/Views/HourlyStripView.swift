@@ -7,9 +7,16 @@ struct HourlyStripView: View {
     let current: CurrentSample
     let timeZone: TimeZone
 
-    /// Largeur d'une colonne. Vingt-quatre d'entre elles font environ quinze
-    /// cents points : c'est ce qu'on fait glisser.
-    private static let largeurColonne: CGFloat = 58
+    /// Largeur d'une colonne, qui suit la taille de texte choisie par la
+    /// personne.
+    ///
+    /// Figée à 58 points, elle allait pour le réglage par défaut et pour lui
+    /// seul : un cran au-dessus, « Maint. » ne tenait plus sur une ligne,
+    /// passait à la ligne, et poussait toute sa colonne d'un cran vers le bas
+    /// pendant que les autres restaient en place. `ScaledMetric` fait grandir
+    /// la colonne avec le texte, ce qui traite la cause plutôt que le
+    /// symptôme.
+    @ScaledMetric private var largeurColonne: CGFloat = 58
 
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
@@ -29,7 +36,10 @@ struct HourlyStripView: View {
             // désormais, et le rembourrage latéral laisse une colonne entamée
             // au bord — deux façons de dire « ça continue ».
             ScrollView(.horizontal) {
-                HStack(spacing: 4) {
+                // Aligné en haut : si une colonne devient malgré tout plus
+                // haute que ses voisines, elles gardent la même ligne de
+                // départ au lieu de se recentrer contre elle.
+                HStack(alignment: .top, spacing: 4) {
                     ForEach(Array(hours.prefix(24).enumerated()), id: \.element.id) { index, hour in
                         column(for: hour, isFirst: index == 0)
                     }
@@ -53,6 +63,8 @@ struct HourlyStripView: View {
         return VStack(spacing: 7) {
             Text(isFirst ? Localized.text("hourly.now") : AgroFormat.hour(hour.time, in: timeZone))
                 .font(.subheadline.weight(.semibold))
+                .lineLimit(1)
+                .minimumScaleFactor(0.7)
 
             Image(systemName: condition.icon.symbolName(isDay: isDay))
                 .symbolRenderingMode(.multicolor)
@@ -64,11 +76,14 @@ struct HourlyStripView: View {
                  : " ")
                 .font(.caption2.weight(.semibold))
                 .foregroundStyle(Color(red: 0.498, green: 0.816, blue: 0.961))
+                .lineLimit(1)
 
             Text(AgroFormat.temperature(temperature))
                 .font(.title3)
+                .lineLimit(1)
+                .minimumScaleFactor(0.7)
         }
-        .frame(width: Self.largeurColonne)
+        .frame(width: largeurColonne)
         .accessibilityElement(children: .combine)
     }
 }
