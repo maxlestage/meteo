@@ -47,7 +47,8 @@ APP_PLIST = (f"{APP}/Resources", "Info.plist")
 
 WIDGET_FILES = [(WIDGETS, "KliimaWidgetsBundle.swift"), (WIDGETS, "SprayLiveActivity.swift"),
                 (WIDGETS, "SprayWidget.swift"), (WIDGETS, "WeatherLiveActivity.swift"),
-                (WIDGETS, "WeatherWidget.swift")]
+                (WIDGETS, "WeatherWidget.swift"),
+                (WIDGETS, "WeatherLockScreenWidget.swift")]
 WIDGET_PLIST = (WIDGETS, "Info.plist")
 WIDGET_ENTITLEMENTS = (WIDGETS, "KliimaWidgets.entitlements")
 APP_ENTITLEMENTS = (APP, "Kliima.entitlements")
