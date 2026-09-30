@@ -39,6 +39,7 @@ enum BackgroundRefresh {
 
         let summary = AgroIndicators.summarize(hours: forecast.hourly, days: forecast.daily)
         await updateActivities(hours: forecast.hourly, opportunity: summary.nextSpray)
+        await updateWeatherActivities(forecast: forecast)
 
         // Le réveil est aussi le moment d'examiner ce qu'il y a à dire. Le
         // palier vient du stockage partagé plutôt que de StoreKit : interroger
@@ -54,6 +55,25 @@ enum BackgroundRefresh {
 
         #if canImport(WidgetKit)
         WidgetCenter.shared.reloadAllTimelines()
+        #endif
+    }
+
+    /// Met à jour l'activité météo, s'il y en a une.
+    ///
+    /// Elle n'a pas d'heure de fin à surveiller : c'est l'utilisateur qui la
+    /// ferme, et iOS qui la termine au bout de huit heures environ.
+    private static func updateWeatherActivities(forecast: AgroForecast) async {
+        #if canImport(ActivityKit)
+        guard #available(iOS 16.2, *) else { return }
+
+        for activity in Activity<WeatherActivityAttributes>.activities {
+            await activity.update(
+                ActivityContent(
+                    state: WeatherActivityController.state(from: forecast),
+                    staleDate: Date(timeIntervalSinceNow: 3600)
+                )
+            )
+        }
         #endif
     }
 

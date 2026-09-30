@@ -21,10 +21,10 @@ EMBEDS = [
 MODELS = ["AgroSamples.swift", "AgroIndicators.swift", "WeatherCondition.swift",
           "AgroFormat.swift", "Localized.swift", "SharedStore.swift", "Consensus.swift",
           "SprayActivityAttributes.swift", "Plan.swift", "Alerts.swift", "Cumuls.swift",
-          "Register.swift", "Position.swift"]
+          "Register.swift", "Position.swift", "WeatherActivityAttributes.swift"]
 SERVICES = ["AgroWeatherService.swift", "WeatherProviders.swift", "LocationService.swift",
             "SprayActivityController.swift", "BackgroundRefresh.swift", "Subscription.swift",
-            "AlertScheduler.swift"]
+            "AlertScheduler.swift", "WeatherActivityController.swift"]
 VIEWMODELS = ["DashboardViewModel.swift"]
 VIEWS = ["DashboardView.swift", "DailyListView.swift", "DetailTile.swift", "HeroView.swift",
          "HourlyStripView.swift", "SkyBackground.swift", "SprayCardView.swift",
@@ -46,13 +46,15 @@ INFO_STRINGS = (f"{APP}/Resources", "InfoPlist.xcstrings")
 APP_PLIST = (f"{APP}/Resources", "Info.plist")
 
 WIDGET_FILES = [(WIDGETS, "KliimaWidgetsBundle.swift"), (WIDGETS, "SprayLiveActivity.swift"),
-                (WIDGETS, "SprayWidget.swift")]
+                (WIDGETS, "SprayWidget.swift"), (WIDGETS, "WeatherLiveActivity.swift"),
+                (WIDGETS, "WeatherWidget.swift")]
 WIDGET_PLIST = (WIDGETS, "Info.plist")
 WIDGET_ENTITLEMENTS = (WIDGETS, "KliimaWidgets.entitlements")
 APP_ENTITLEMENTS = (APP, "Kliima.entitlements")
 
 WATCH_WIDGET_FILES = [(WATCH_WIDGETS, "KliimaWatchWidgetsBundle.swift"),
-                      (WATCH_WIDGETS, "SprayComplication.swift")]
+                      (WATCH_WIDGETS, "SprayComplication.swift"),
+                      (WATCH_WIDGETS, "WeatherComplication.swift")]
 WATCH_WIDGET_PLIST = (WATCH_WIDGETS, "Info.plist")
 WATCH_WIDGET_ENTITLEMENTS = (WATCH_WIDGETS, "KliimaWatchWidgets.entitlements")
 WATCH_ENTITLEMENTS = (WATCH, "KliimaWatch.entitlements")
@@ -75,7 +77,8 @@ TEST_FILES = [(TESTS, n) for n in ["AgroIndicatorsTests.swift", "AgroWeatherDeco
 def models(*names): return [(f"{APP}/Models", n) for n in names]
 def services(*names): return [(f"{APP}/Services", n) for n in names]
 
-WATCH_MODELS = [n for n in MODELS if n != "SprayActivityAttributes.swift"]
+WATCH_MODELS = [n for n in MODELS
+                if n not in ("SprayActivityAttributes.swift", "WeatherActivityAttributes.swift")]
 
 TARGET_SOURCES = {
     APP: sum(APP_FILES.values(), []),
