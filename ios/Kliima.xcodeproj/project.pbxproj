@@ -104,6 +104,7 @@
 		D461CDD744E459C7FF88E76F /* WeatherProviders.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B02EF58B1456D6BD190EA69 /* WeatherProviders.swift */; };
 		D4E428A194F9BBE7D25648FD /* WatchDashboardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A5124FDFE368E7208E1385D /* WatchDashboardView.swift */; };
 		DAE9DB161E7BBD9D633D5D63 /* Position.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB8F1DD4A8E34FF10F2CCB10 /* Position.swift */; };
+		DB6E4FF76A92046B4033B5A3 /* WeatherLockScreenWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA60311A4E5C2F3FC49CD1A2 /* WeatherLockScreenWidget.swift */; };
 		DC984FA742F7D37DDC81E8C6 /* PositionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 56740BAA255A8BCAFBF38DA5 /* PositionTests.swift */; };
 		DEA0EE17388FB7558136498A /* InfoPlist.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = 0D5EBEB31B8DF6AAD5C55101 /* InfoPlist.xcstrings */; };
 		E016E78093754332382D4C89 /* AlertScheduler.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC9C8B864A04819924BE30DA /* AlertScheduler.swift */; };
@@ -225,6 +226,7 @@
 		F20A680382FE74EE4D9DD82E /* SprayActivityController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SprayActivityController.swift; sourceTree = "<group>"; };
 		F265DD9AEA66CC782EE18E84 /* WeatherLiveActivity.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeatherLiveActivity.swift; sourceTree = "<group>"; };
 		F5DE221E004C2ABBAC38370E /* Register.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Register.swift; sourceTree = "<group>"; };
+		FA60311A4E5C2F3FC49CD1A2 /* WeatherLockScreenWidget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeatherLockScreenWidget.swift; sourceTree = "<group>"; };
 		FC9C8B864A04819924BE30DA /* AlertScheduler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlertScheduler.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -427,6 +429,7 @@
 				E11C6E9B05EF6074F1829033 /* SprayWidget.swift */,
 				F265DD9AEA66CC782EE18E84 /* WeatherLiveActivity.swift */,
 				9AF7C0B1999B4323F84609D4 /* WeatherWidget.swift */,
+				FA60311A4E5C2F3FC49CD1A2 /* WeatherLockScreenWidget.swift */,
 				77B55B9E0D7865BFA00A4D86 /* Info.plist */,
 				05D1254950D21B8B472EE75B /* KliimaWidgets.entitlements */,
 			);
@@ -744,6 +747,7 @@
 				A175AFBC7198678FA723B024 /* SprayWidget.swift in Sources */,
 				EAF7B34C9BF2E809C7CD00F3 /* WeatherLiveActivity.swift in Sources */,
 				BC0C44A99F6940D479EAED5A /* WeatherWidget.swift in Sources */,
+				DB6E4FF76A92046B4033B5A3 /* WeatherLockScreenWidget.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
