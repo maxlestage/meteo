@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		0051B64F20CAC75CDEA80E41 /* WeatherActivityAttributes.swift in Sources */ = {isa = PBXBuildFile; fileRef = D5D96242648F683B45087C7B /* WeatherActivityAttributes.swift */; };
 		02B2BECE670FA06BEF82490D /* Consensus.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4720B7B1832151B0FB656485 /* Consensus.swift */; };
 		030C9CE889BD9AD635C33428 /* AgroFormat.swift in Sources */ = {isa = PBXBuildFile; fileRef = B457BBEBEAB42296C88BBA73 /* AgroFormat.swift */; };
 		0359376CE5438049AEDA2652 /* HourlyStripView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D70921AA7E1E94DD9264ACE0 /* HourlyStripView.swift */; };
@@ -43,6 +44,7 @@
 		49FD2887070E46F84706F388 /* AgroIndicators.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9535087DBAA65F2039A9CA7B /* AgroIndicators.swift */; };
 		4FEE791FA44A990E010B9616 /* AgroFormat.swift in Sources */ = {isa = PBXBuildFile; fileRef = B457BBEBEAB42296C88BBA73 /* AgroFormat.swift */; };
 		51EABAB1CB6EC84EC5CDA384 /* PaywallView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 72250014395A5607AA9841A4 /* PaywallView.swift */; };
+		52107F0CE5EB66152149F039 /* WeatherActivityAttributes.swift in Sources */ = {isa = PBXBuildFile; fileRef = D5D96242648F683B45087C7B /* WeatherActivityAttributes.swift */; };
 		531D9C2CEFE1FBC7E4E32098 /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = BDAA24888AF82B3F0F77BEAC /* Localizable.xcstrings */; };
 		5B206D3E23E0CB6F2B797D0D /* ProvidersTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7DCA75C69B7079D7387BB77 /* ProvidersTests.swift */; };
 		5C2F375DC4671BD9665C2407 /* ConsensusTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58093B38B279A9D62D8B393B /* ConsensusTests.swift */; };
@@ -60,6 +62,7 @@
 		77407BAE424DC91B26C7EF09 /* DetailTile.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5AD6285EE75DA0AD1F4E4FE1 /* DetailTile.swift */; };
 		78DE2827430FE8E03E520FB2 /* AgroIndicators.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9535087DBAA65F2039A9CA7B /* AgroIndicators.swift */; };
 		79320F1D2A6C540B619E896D /* WeatherProviders.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B02EF58B1456D6BD190EA69 /* WeatherProviders.swift */; };
+		7B33428B409A6713D35368BD /* WeatherComplication.swift in Sources */ = {isa = PBXBuildFile; fileRef = EB259B7BB39EEC60E87ECD28 /* WeatherComplication.swift */; };
 		7F8BC1BFEB1A56B35A0BD54E /* Localized.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5450F8A4FCE049DD06100EC9 /* Localized.swift */; };
 		82DE81496D9B0819DD2B7C0E /* KliimaApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2046E03783B437CAFA8D461 /* KliimaApp.swift */; };
 		837F0C53FB92BB10E5D4757D /* BackgroundRefresh.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5EC9D5F7632B1EF2E5B81F82 /* BackgroundRefresh.swift */; };
@@ -87,6 +90,7 @@
 		B6BE20AE614CC1FA23FF70B3 /* LocationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8FCC89F11BCF6BA08E68ADF1 /* LocationService.swift */; };
 		B7BA648ECB503BA675BBDE07 /* PlanTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6C5717DB9A72E3BC677A00B3 /* PlanTests.swift */; };
 		B881BEE60D7B2CB8EEE12BC1 /* RegisterTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BD096399F9FBD57D28CC36F4 /* RegisterTests.swift */; };
+		BC0C44A99F6940D479EAED5A /* WeatherWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9AF7C0B1999B4323F84609D4 /* WeatherWidget.swift */; };
 		BCA77F887960BBB8B6530C3D /* SharedStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 817D0E86880F9A5C255CC9CA /* SharedStore.swift */; };
 		BFECAE5FE146209EE48874C0 /* HeroView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 07648D3F3C3D6F0CFF6F562F /* HeroView.swift */; };
 		C188257FC6E79EA1D45FD4E5 /* SprayActivityAttributes.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3CC70E8067AA900DADB695A0 /* SprayActivityAttributes.swift */; };
@@ -106,11 +110,13 @@
 		E18C0B6A8CC01EF34FC82DFF /* KliimaWatch.app in Embed Watch Content */ = {isa = PBXBuildFile; fileRef = 8F45A5AFFADBE3D7107AC5A3 /* KliimaWatch.app */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		E21922A5084B826F1CD1A303 /* SprayActivityAttributes.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3CC70E8067AA900DADB695A0 /* SprayActivityAttributes.swift */; };
 		E258B27EF0A807071E4EF580 /* SharedStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 817D0E86880F9A5C255CC9CA /* SharedStore.swift */; };
+		EAF7B34C9BF2E809C7CD00F3 /* WeatherLiveActivity.swift in Sources */ = {isa = PBXBuildFile; fileRef = F265DD9AEA66CC782EE18E84 /* WeatherLiveActivity.swift */; };
 		EB82014EA888475DF997E70F /* SharedStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 817D0E86880F9A5C255CC9CA /* SharedStore.swift */; };
 		F1BB1FE2BA5912881D1C4E38 /* DashboardViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = D271A216C9DBED75A8724752 /* DashboardViewModel.swift */; };
 		F2BEC19CCE1C05DF23208DEB /* WeatherCondition.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6580A8FAA2962596D57856A9 /* WeatherCondition.swift */; };
 		F495D15D8E0787A30075CF21 /* SprayCardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 759A50D03E2923056A2614D4 /* SprayCardView.swift */; };
 		F77107620B89E9EF18B91720 /* AgroFormat.swift in Sources */ = {isa = PBXBuildFile; fileRef = B457BBEBEAB42296C88BBA73 /* AgroFormat.swift */; };
+		FBFE7ECDAA7CBD948D6E7572 /* WeatherActivityController.swift in Sources */ = {isa = PBXBuildFile; fileRef = EC2943147A1F876131069F7E /* WeatherActivityController.swift */; };
 		FE92CF4B1435C809E175394E /* Register.swift in Sources */ = {isa = PBXBuildFile; fileRef = F5DE221E004C2ABBAC38370E /* Register.swift */; };
 		FE92D85149BF14BF38E701F8 /* Consensus.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4720B7B1832151B0FB656485 /* Consensus.swift */; };
 /* End PBXBuildFile section */
@@ -188,6 +194,7 @@
 		9707DFF5CA818F05AB43EBA1 /* Alerts.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Alerts.swift; sourceTree = "<group>"; };
 		97EF0E5CB49DC180AB4601DB /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		9806D2D88C6DC00561E1AA4F /* KliimaWidgets.appex */ = {isa = PBXFileReference; explicitFileType = wrapper.app-extension; includeInIndex = 0; path = KliimaWidgets.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		9AF7C0B1999B4323F84609D4 /* WeatherWidget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeatherWidget.swift; sourceTree = "<group>"; };
 		9DFCEE1BB00EFE0321D4C01A /* WatchViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WatchViewModel.swift; sourceTree = "<group>"; };
 		A005ABFA015948456057712C /* Kliima.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Kliima.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		A37F792453EED1853EB12C4B /* SkyBackground.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SkyBackground.swift; sourceTree = "<group>"; };
@@ -204,15 +211,19 @@
 		C97139E68009C8F299BB5EF6 /* CumulsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CumulsTests.swift; sourceTree = "<group>"; };
 		D1CBB225EB1F79C894350D65 /* DailyListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DailyListView.swift; sourceTree = "<group>"; };
 		D271A216C9DBED75A8724752 /* DashboardViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DashboardViewModel.swift; sourceTree = "<group>"; };
+		D5D96242648F683B45087C7B /* WeatherActivityAttributes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeatherActivityAttributes.swift; sourceTree = "<group>"; };
 		D70921AA7E1E94DD9264ACE0 /* HourlyStripView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HourlyStripView.swift; sourceTree = "<group>"; };
 		DB8F1DD4A8E34FF10F2CCB10 /* Position.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Position.swift; sourceTree = "<group>"; };
 		E11C6E9B05EF6074F1829033 /* SprayWidget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SprayWidget.swift; sourceTree = "<group>"; };
 		E2F29AC239FEE014AA2A291D /* KliimaWatchWidgetsBundle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KliimaWatchWidgetsBundle.swift; sourceTree = "<group>"; };
 		E4146898ED70D1C4345707CD /* KliimaWatchWidgets.appex */ = {isa = PBXFileReference; explicitFileType = wrapper.app-extension; includeInIndex = 0; path = KliimaWatchWidgets.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		E950878EBB34FE4C01AA2C13 /* SprayLiveActivity.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SprayLiveActivity.swift; sourceTree = "<group>"; };
+		EB259B7BB39EEC60E87ECD28 /* WeatherComplication.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeatherComplication.swift; sourceTree = "<group>"; };
 		EB3BB0251C5B6D7194C4AEE4 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		EBE1FBED16537140FD9D2E11 /* KliimaWatchWidgets.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = KliimaWatchWidgets.entitlements; sourceTree = "<group>"; };
+		EC2943147A1F876131069F7E /* WeatherActivityController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeatherActivityController.swift; sourceTree = "<group>"; };
 		F20A680382FE74EE4D9DD82E /* SprayActivityController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SprayActivityController.swift; sourceTree = "<group>"; };
+		F265DD9AEA66CC782EE18E84 /* WeatherLiveActivity.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeatherLiveActivity.swift; sourceTree = "<group>"; };
 		F5DE221E004C2ABBAC38370E /* Register.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Register.swift; sourceTree = "<group>"; };
 		FC9C8B864A04819924BE30DA /* AlertScheduler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlertScheduler.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -354,6 +365,7 @@
 				701558C0E92F12ECB916E1C6 /* Cumuls.swift */,
 				F5DE221E004C2ABBAC38370E /* Register.swift */,
 				DB8F1DD4A8E34FF10F2CCB10 /* Position.swift */,
+				D5D96242648F683B45087C7B /* WeatherActivityAttributes.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -368,6 +380,7 @@
 				5EC9D5F7632B1EF2E5B81F82 /* BackgroundRefresh.swift */,
 				3A92F285D90BF784E3CE2062 /* Subscription.swift */,
 				FC9C8B864A04819924BE30DA /* AlertScheduler.swift */,
+				EC2943147A1F876131069F7E /* WeatherActivityController.swift */,
 			);
 			path = Services;
 			sourceTree = "<group>";
@@ -412,6 +425,8 @@
 				8B148DA87ACC29FF2D439C47 /* KliimaWidgetsBundle.swift */,
 				E950878EBB34FE4C01AA2C13 /* SprayLiveActivity.swift */,
 				E11C6E9B05EF6074F1829033 /* SprayWidget.swift */,
+				F265DD9AEA66CC782EE18E84 /* WeatherLiveActivity.swift */,
+				9AF7C0B1999B4323F84609D4 /* WeatherWidget.swift */,
 				77B55B9E0D7865BFA00A4D86 /* Info.plist */,
 				05D1254950D21B8B472EE75B /* KliimaWidgets.entitlements */,
 			);
@@ -435,6 +450,7 @@
 			children = (
 				E2F29AC239FEE014AA2A291D /* KliimaWatchWidgetsBundle.swift */,
 				6CF1D4F0A0F98BB261827EF5 /* SprayComplication.swift */,
+				EB259B7BB39EEC60E87ECD28 /* WeatherComplication.swift */,
 				AD6AE031CC45EBED74B7A798 /* Info.plist */,
 				EBE1FBED16537140FD9D2E11 /* KliimaWatchWidgets.entitlements */,
 			);
@@ -682,6 +698,7 @@
 				CE6773B648CF3706170D8392 /* Cumuls.swift in Sources */,
 				FE92CF4B1435C809E175394E /* Register.swift in Sources */,
 				420C76EE3B79A358C8B791FE /* Position.swift in Sources */,
+				0051B64F20CAC75CDEA80E41 /* WeatherActivityAttributes.swift in Sources */,
 				96A4E1A6DD8A75B811BE93A9 /* AgroWeatherService.swift in Sources */,
 				2AEC62A5036EAA7E15DEBBBF /* WeatherProviders.swift in Sources */,
 				B6BE20AE614CC1FA23FF70B3 /* LocationService.swift in Sources */,
@@ -689,6 +706,7 @@
 				837F0C53FB92BB10E5D4757D /* BackgroundRefresh.swift in Sources */,
 				06FD740CB03C528DA7CAD222 /* Subscription.swift in Sources */,
 				E016E78093754332382D4C89 /* AlertScheduler.swift in Sources */,
+				FBFE7ECDAA7CBD948D6E7572 /* WeatherActivityController.swift in Sources */,
 				F1BB1FE2BA5912881D1C4E38 /* DashboardViewModel.swift in Sources */,
 				A5096683B0D64D48DE29C934 /* DashboardView.swift in Sources */,
 				0361672A474EBC61E33E5BDF /* DailyListView.swift in Sources */,
@@ -718,11 +736,14 @@
 				1EE8D32E4688E1C5E7963471 /* Cumuls.swift in Sources */,
 				ADD71A52B7936C88EF9722CF /* Register.swift in Sources */,
 				C9C810C3BF18F031960B0D73 /* Position.swift in Sources */,
+				52107F0CE5EB66152149F039 /* WeatherActivityAttributes.swift in Sources */,
 				3C2CE8F8F6017276AD70D067 /* AgroWeatherService.swift in Sources */,
 				CD50AC741D60BCE2B9A76E96 /* WeatherProviders.swift in Sources */,
 				076631A9A497778C8DACA248 /* KliimaWidgetsBundle.swift in Sources */,
 				2C7E17E75DF8AE00EEC0C792 /* SprayLiveActivity.swift in Sources */,
 				A175AFBC7198678FA723B024 /* SprayWidget.swift in Sources */,
+				EAF7B34C9BF2E809C7CD00F3 /* WeatherLiveActivity.swift in Sources */,
+				BC0C44A99F6940D479EAED5A /* WeatherWidget.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -771,6 +792,7 @@
 				D461CDD744E459C7FF88E76F /* WeatherProviders.swift in Sources */,
 				294494102F3820F390FEB5FA /* KliimaWatchWidgetsBundle.swift in Sources */,
 				99FE4D659051ED8746BC56E8 /* SprayComplication.swift in Sources */,
+				7B33428B409A6713D35368BD /* WeatherComplication.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -5,6 +5,7 @@ import SwiftUI
 struct DashboardView: View {
     @StateObject private var viewModel = DashboardViewModel()
     @StateObject private var activity = SprayActivityController()
+    @StateObject private var weather = WeatherActivityController()
     @StateObject private var subscription = Subscription()
     @State private var query = ""
     /// Renseigné quand on ouvre l'écran d'abonnement : on sait alors sur quelle
@@ -35,6 +36,25 @@ struct DashboardView: View {
 
                         if let forecast = viewModel.forecast, let summary = viewModel.summary {
                             HeroView(forecast: forecast)
+
+                            // L'activité en direct de la météo s'ouvre et se
+                            // ferme à la main : elle ne suit aucun événement
+                            // borné, et iOS la termine de lui-même au bout de
+                            // huit heures environ.
+                            if weather.isAvailable {
+                                Button {
+                                    toggleWeather(forecast)
+                                } label: {
+                                    Label(
+                                        Localized.text(weather.isRunning ? "weather.stop" : "weather.follow"),
+                                        systemImage: weather.isRunning ? "livephoto.slash" : "livephoto"
+                                    )
+                                    .font(.footnote.weight(.semibold))
+                                }
+                                .buttonStyle(.plain)
+                                .foregroundStyle(.white.opacity(0.85))
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                            }
 
                             HourlyStripView(
                                 hours: forecast.hourly,
@@ -135,6 +155,15 @@ struct DashboardView: View {
         await viewModel.load()
         guard let forecast = viewModel.forecast, let summary = viewModel.summary else { return }
         await activity.refresh(hours: forecast.hourly, opportunity: summary.nextSpray)
+        await weather.refresh(forecast: forecast)
+    }
+
+    private func toggleWeather(_ forecast: AgroForecast) {
+        if weather.isRunning {
+            Task { await weather.stop() }
+        } else {
+            weather.start(parcelle: viewModel.parcelle, forecast: forecast)
+        }
     }
 
     private func toggleFollow(_ forecast: AgroForecast, _ summary: AgroSummary) {
