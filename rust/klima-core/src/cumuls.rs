@@ -19,6 +19,7 @@
 //! division. Deux serveurs dans deux fuseaux ne rendront plus deux cumuls.
 
 use crate::agro::{DailySample, growing_degree_days, thresholds::GDD_CEILING};
+use crate::calendar::at_midnight;
 
 const DAY_MS: i64 = 86_400_000;
 
@@ -47,14 +48,6 @@ impl Cumul {
     pub fn is_complete(&self) -> bool {
         self.missing_days == 0
     }
-}
-
-/// Le minuit de la journée qui contient cet instant.
-///
-/// `div_euclid` et non une division entière : pour un horodatage antérieur à
-/// 1970, la seconde tronquerait vers zéro et placerait minuit après l'instant.
-fn at_midnight(ms: i64) -> i64 {
-    ms.div_euclid(DAY_MS) * DAY_MS
 }
 
 /// Additionne les journées depuis `from` incluse.

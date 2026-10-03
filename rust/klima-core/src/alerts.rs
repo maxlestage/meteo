@@ -27,6 +27,7 @@
 use std::collections::BTreeMap;
 
 use crate::agro::{AgroSummary, HourlySample, SoilState, thresholds::SPRAY_RAIN_MAX};
+use crate::calendar::{at_midnight, hour_of};
 use crate::i18n::{Params, params};
 
 const HOUR_MS: i64 = 3_600_000;
@@ -109,11 +110,6 @@ impl AlertOptions {
     }
 }
 
-/// L'heure locale d'un horodatage de parcelle.
-fn hour_of(ms: i64) -> i64 {
-    ms.rem_euclid(DAY_MS) / HOUR_MS
-}
-
 /// Vrai si l'heure locale tombe dans la plage de silence.
 pub fn is_quiet(hour: i64, from: i64, to: i64) -> bool {
     if from <= to { hour >= from && hour < to } else { hour >= from || hour < to }
@@ -127,7 +123,7 @@ pub fn defer_past_quiet_hours(send: i64, event: i64, from: i64, to: i64) -> Opti
         return Some(send);
     }
 
-    let midnight = send.div_euclid(DAY_MS) * DAY_MS;
+    let midnight = at_midnight(send);
     let day = if hour_of(send) >= to { midnight + DAY_MS } else { midnight };
     let resume = day + to * HOUR_MS;
 
