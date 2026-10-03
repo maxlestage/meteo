@@ -1,76 +1,83 @@
 //! Le relais de Klima, en Axum.
 //!
 //! Il interroge les fournisseurs une fois pour tout le monde, pose l'en-tête
-//! que MET Norway exige, et détient la clé du plan commercial d'Open-Meteo.
+//! que MET Norway exige, détient la clé du plan commercial d'Open-Meteo et
+//! sert la vitrine et l'application depuis la même origine que leurs appels.
 //!
-//! Le relais Bun (`server/`) sert toujours la production : celui-ci se
-//! construit à côté, route par route, et on ne débranche qu'une fois le
-//! remplaçant complet. Pour l'instant il sait dire comment il va — ce qui
-//! suffit à prouver la chaîne : Axum répond, et le cache qu'il porte est le
-//! même que celui du relais TypeScript.
+//! Ce fichier ne fait que le câblage : ce qui vient de l'environnement, et ce
+//! qu'on en déduit. Les routes sont dans `routes`, les interrogations dans
+//! `upstream`, les fichiers dans `site`, le cache dans `cache`.
 
 mod cache;
+mod routes;
+mod site;
+mod upstream;
 
+use std::path::PathBuf;
 use std::sync::Arc;
 use std::time::{SystemTime, UNIX_EPOCH};
-
-use axum::extract::State;
-use axum::response::IntoResponse;
-use cache::{CacheOptions, ForecastCache};
-
-/// Une entrée vit une heure, et dépanne encore deux heures si le fournisseur
-/// se tait. Les mêmes durées que dans `server/src/index.ts`.
-const TTL_MS: i64 = 3_600_000;
-const STALE_MS: i64 = 7_200_000;
-
-#[derive(Clone)]
-struct Etat {
-    forecasts: Arc<ForecastCache<String>>,
-    open_meteo_key: Option<String>,
-}
 
 #[tokio::main]
 async fn main() {
     let port: u16 = std::env::var("PORT").ok().and_then(|p| p.parse().ok()).unwrap_or(8787);
 
-    let etat = Etat {
-        forecasts: Arc::new(ForecastCache::new(CacheOptions {
-            ttl_ms: TTL_MS,
-            stale_ms: STALE_MS,
-            now: Arc::new(maintenant),
-        })),
-        open_meteo_key: std::env::var("OPEN_METEO_KEY").ok().filter(|k| !k.is_empty()),
-    };
+    let client = reqwest::Client::builder()
+        .timeout(std::time::Duration::from_secs(15))
+        .build()
+        .expect("client HTTP");
 
-    let app = axum::Router::new()
-        .route("/health", axum::routing::get(sante))
-        .with_state(etat.clone());
+    let mut etat = routes::etat(upstream::http_fetch(client), Arc::new(maintenant));
+    etat.open_meteo_key = std::env::var("OPEN_METEO_KEY").ok().filter(|k| !k.is_empty());
 
-    let listener = tokio::net::TcpListener::bind(("0.0.0.0", port)).await.expect("écoute");
+    if let Some(origines) = std::env::var("KLIMA_ORIGINS").ok().filter(|o| !o.is_empty()) {
+        etat.allowed_origins =
+            origines.split(',').map(|o| o.trim().to_owned()).filter(|o| !o.is_empty()).collect();
+    }
+
+    // Le dossier est construit au déploiement. S'il n'est pas là — en
+    // développement, par exemple — le relais ne fait que relayer.
+    let racine = PathBuf::from(
+        std::env::var("KLIMA_PUBLIC").unwrap_or_else(|_| "server/public".to_owned()),
+    );
+    etat.site = racine.is_dir().then_some(racine.clone());
+
     println!(
-        "relais Klima (Rust) sur :{port} — clé Open-Meteo {}",
+        "relais Klima (Rust) sur :{port} — clé Open-Meteo {}{}",
         if etat.open_meteo_key.is_some() {
             "configurée"
         } else {
             "absente (plan gratuit, usage non commercial)"
+        },
+        match &etat.site {
+            Some(racine) => format!(", site servi depuis {}", racine.display()),
+            None => ", sans site".to_owned(),
         }
     );
-    axum::serve(listener, app).await.expect("service");
+
+    balayer_regulierement(etat.clone());
+
+    let listener = tokio::net::TcpListener::bind(("0.0.0.0", port)).await.expect("écoute");
+    axum::serve(listener, routes::router(etat)).await.expect("service");
+}
+
+/// Oublie les entrées que même le mode dépannage ne servirait plus.
+///
+/// Le relais TypeScript a la même méthode et ne l'appelle jamais : sa mémoire
+/// ne redescend donc qu'au redémarrage. Une parcelle consultée une fois y
+/// reste pour toujours — quelques kilo-octets, mais pour toujours.
+fn balayer_regulierement(etat: routes::Etat) {
+    tokio::spawn(async move {
+        let mut horloge = tokio::time::interval(std::time::Duration::from_secs(3600));
+        horloge.tick().await; // le premier top est immédiat
+        loop {
+            horloge.tick().await;
+            etat.forecasts.sweep();
+            etat.searches.sweep();
+        }
+    });
 }
 
 /// Millisecondes depuis l'époque.
 fn maintenant() -> i64 {
     SystemTime::now().duration_since(UNIX_EPOCH).map_or(0, |d| d.as_millis() as i64)
-}
-
-/// L'état de santé, dans la même forme que celui du relais TypeScript — la
-/// clé n'y apparaît jamais, seulement le fait qu'elle soit là.
-async fn sante(State(etat): State<Etat>) -> impl IntoResponse {
-    let corps = format!(
-        r#"{{"statut":"ok","cellules":{},"interrogations":{},"cleOpenMeteo":"{}"}}"#,
-        etat.forecasts.size(),
-        etat.forecasts.calls(),
-        if etat.open_meteo_key.is_some() { "configurée" } else { "absente" }
-    );
-    ([(axum::http::header::CONTENT_TYPE, "application/json; charset=utf-8")], corps)
 }
