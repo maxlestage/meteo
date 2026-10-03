@@ -47,6 +47,11 @@ pub async fn search(endpoints: &Endpoints, requete: &str) -> Result<Vec<Parcelle
 
 /// Interroge tous les fournisseurs permis et rend ce que chacun a dit.
 ///
+/// Les trois appels partent **ensemble**, comme le `Promise.allSettled` du
+/// TypeScript : à la file, le recoupement attendrait trois allers-retours au
+/// lieu d'un, et l'accord des modèles apparaîtrait trois fois plus tard que la
+/// météo qu'il commente.
+///
 /// Chaque fournisseur est isolé : une panne, un refus ou une absence de
 /// couverture en écarte un seul. Le recoupement se fait sur ce qui a répondu.
 pub async fn readings(
@@ -54,7 +59,7 @@ pub async fn readings(
     parcelle: &Parcelle,
     maintenant: i64,
 ) -> Vec<ProviderOutcome> {
-    let mut outcomes = Vec::new();
+    let mut appels = Vec::new();
 
     for provider in providers_for(Platform::Web, endpoints.transport) {
         let (appel, lire): (_, fn(&str, i64) -> _) = match provider.id {
@@ -73,15 +78,16 @@ pub async fn readings(
             _ => continue,
         };
 
-        let readings = match texte(&appel.url).await {
-            Ok(corps) => lire(&corps, maintenant),
-            // Une absence n'est pas une panne : le fournisseur sort du
-            // recoupement, et l'interface dit combien de sources ont parlé.
-            Err(_) => Vec::new(),
-        };
-
-        outcomes.push(ProviderOutcome { provider_id: provider.id.to_owned(), readings });
+        appels.push(async move {
+            let readings = match texte(&appel.url).await {
+                Ok(corps) => lire(&corps, maintenant),
+                // Une absence n'est pas une panne : le fournisseur sort du
+                // recoupement, et l'interface dit combien de sources ont parlé.
+                Err(_) => Vec::new(),
+            };
+            ProviderOutcome { provider_id: provider.id.to_owned(), readings }
+        });
     }
 
-    outcomes
+    futures::future::join_all(appels).await
 }
