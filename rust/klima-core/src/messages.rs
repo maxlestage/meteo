@@ -1,0 +1,379 @@
+//! Catalogue des libellés partagés.
+//!
+//! Miroir de `core/src/messages.ts`.
+//!
+//! Ce que le domaine décrit par des clés — temps qu'il fait, états du sol,
+//! verdicts, motifs de blocage, alertes, paliers — dans les trois langues de
+//! Klima. Les textes propres à chaque interface vivent chez elle.
+//!
+//! Les tables sont écrites à plat et montées une seule fois : un catalogue ne
+//! change pas en cours d'exécution, et les trois langues portent exactement
+//! les mêmes clés — un test le vérifie, parce qu'une clé oubliée dans une
+//! langue ne se voit qu'une fois le texte affiché à quelqu'un.
+
+use std::sync::LazyLock;
+
+use crate::i18n::{Catalog, MessageSet};
+
+/// Les libellés partagés, dans les trois langues.
+pub static SHARED_MESSAGES: LazyLock<MessageSet> = LazyLock::new(|| MessageSet {
+    fr: catalog(&FR),
+    en: catalog(&EN),
+    es: catalog(&ES),
+});
+
+fn catalog(entries: &[(&'static str, &'static str)]) -> Catalog {
+    entries.iter().copied().collect()
+}
+
+const FR: [(&str, &str); 85] = [
+    ("wmo.clearSky", "Ciel dégagé"),
+    ("wmo.mainlyClear", "Peu nuageux"),
+    ("wmo.partlyCloudy", "Partiellement nuageux"),
+    ("wmo.overcast", "Couvert"),
+    ("wmo.fog", "Brouillard"),
+    ("wmo.rimeFog", "Brouillard givrant"),
+    ("wmo.lightDrizzle", "Bruine légère"),
+    ("wmo.drizzle", "Bruine"),
+    ("wmo.denseDrizzle", "Bruine dense"),
+    ("wmo.freezingDrizzle", "Bruine verglaçante"),
+    ("wmo.denseFreezingDrizzle", "Bruine verglaçante dense"),
+    ("wmo.slightRain", "Pluie faible"),
+    ("wmo.rain", "Pluie"),
+    ("wmo.heavyRain", "Pluie forte"),
+    ("wmo.freezingRain", "Pluie verglaçante"),
+    ("wmo.heavyFreezingRain", "Pluie verglaçante forte"),
+    ("wmo.slightSnow", "Neige faible"),
+    ("wmo.snow", "Neige"),
+    ("wmo.heavySnow", "Neige forte"),
+    ("wmo.snowGrains", "Grains de neige"),
+    ("wmo.showers", "Averses"),
+    ("wmo.moderateShowers", "Averses modérées"),
+    ("wmo.violentShowers", "Averses violentes"),
+    ("wmo.snowShowers", "Averses de neige"),
+    ("wmo.heavySnowShowers", "Averses de neige fortes"),
+    ("wmo.thunderstorm", "Orage"),
+    ("wmo.thunderstormHail", "Orage et grêle"),
+    ("wmo.thunderstormHeavyHail", "Orage et forte grêle"),
+    ("search.myField", "Ma parcelle"),
+    ("soil.sature", "Saturé"),
+    ("soil.ressuye", "Ressuyé"),
+    ("soil.sec", "Sec"),
+    ("soil.trafficable", "Portance correcte"),
+    ("soil.compaction", "Risque de tassement"),
+    ("water.deficit", "Déficit"),
+    ("water.equilibre", "Équilibre"),
+    ("water.excedent", "Excédent"),
+    ("frost.aucun", "Aucun"),
+    ("frost.faible", "Faible"),
+    ("frost.modere", "Modéré"),
+    ("frost.severe", "Sévère"),
+    ("frost.hoarFrost", "gelée blanche probable"),
+    ("disease.faible", "Faible"),
+    ("disease.moyenne", "Moyenne"),
+    ("disease.elevee", "Élevée"),
+    ("spray.favorable", "Favorable"),
+    ("spray.acceptable", "Acceptable"),
+    ("spray.defavorable", "Défavorable"),
+    ("spray.windTooStrong", "Vent {wind} (max {limit})"),
+    ("spray.windTooWeak", "Vent trop faible, risque d’inversion thermique"),
+    ("spray.gusts", "Rafales {gusts}"),
+    ("spray.rain", "Pluie {amount} dans les 2 h"),
+    ("spray.tooHot", "Température {temperature}, trop chaud"),
+    ("spray.tooCold", "Température {temperature}, trop froid"),
+    ("spray.dryAir", "Hygrométrie {humidity}, air trop sec"),
+    ("spray.vapourPressureDeficit", "VPD {vpd}, évaporation des gouttelettes"),
+    ("api.unreachable", "Service météo injoignable. Vérifiez votre connexion."),
+    ("api.status", "Le service météo a répondu {status}."),
+    ("api.malformed", "Réponse illisible du service météo."),
+    ("consensus.title", "Accord des modèles"),
+    ("consensus.forte", "Fort"),
+    ("consensus.moyenne", "Moyen"),
+    ("consensus.faible", "Faible"),
+    ("consensus.detail", "{count} modèles · écart {spread}"),
+    ("consensus.rainDisagreement", "désaccord sur la pluie"),
+    ("consensus.unavailable", "Comparaison indisponible"),
+    ("consensus.median", "Valeur retenue : {value}"),
+    ("alert.fenetre.title", "Fenêtre de traitement"),
+    ("alert.fenetre.body", "Conditions réunies, score {score}/100 sur la plage."),
+    ("alert.gel.title", "Gel cette nuit"),
+    ("alert.gel.body", "Jusqu’à {temperature} °C attendus."),
+    ("alert.sol.title", "Sol ressuyé"),
+    ("alert.sol.body", "Humidité retombée à {moisture} : la parcelle porte."),
+    ("alert.pluie.title", "Pluie après la fenêtre"),
+    ("alert.pluie.body", "{rain} mm attendus : un traitement risque d’être lavé."),
+    ("plan.libre", "Klima"),
+    ("plan.pro", "Klima Pro"),
+    ("plan.reason.recoupement", "Comparer plusieurs instituts demande l’abonnement."),
+    ("plan.reason.alertes", "Être prévenu sans ouvrir l’application demande l’abonnement."),
+    ("plan.reason.cumuls", "Les cumuls depuis une date demandent l’abonnement."),
+    ("plan.reason.registre", "L’export des conditions de traitement demande l’abonnement."),
+    ("plan.feature.recoupement", "Cinq instituts recoupés, et leur niveau d’accord"),
+    ("plan.feature.alertes", "Prévenu sans ouvrir l’application"),
+    ("plan.feature.cumuls", "Cumuls depuis le semis ou le dernier traitement"),
+    ("plan.feature.registre", "Export des conditions à l’heure du traitement"),
+];
+
+const EN: [(&str, &str); 85] = [
+    ("wmo.clearSky", "Clear sky"),
+    ("wmo.mainlyClear", "Mainly clear"),
+    ("wmo.partlyCloudy", "Partly cloudy"),
+    ("wmo.overcast", "Overcast"),
+    ("wmo.fog", "Fog"),
+    ("wmo.rimeFog", "Freezing fog"),
+    ("wmo.lightDrizzle", "Light drizzle"),
+    ("wmo.drizzle", "Drizzle"),
+    ("wmo.denseDrizzle", "Heavy drizzle"),
+    ("wmo.freezingDrizzle", "Freezing drizzle"),
+    ("wmo.denseFreezingDrizzle", "Heavy freezing drizzle"),
+    ("wmo.slightRain", "Light rain"),
+    ("wmo.rain", "Rain"),
+    ("wmo.heavyRain", "Heavy rain"),
+    ("wmo.freezingRain", "Freezing rain"),
+    ("wmo.heavyFreezingRain", "Heavy freezing rain"),
+    ("wmo.slightSnow", "Light snow"),
+    ("wmo.snow", "Snow"),
+    ("wmo.heavySnow", "Heavy snow"),
+    ("wmo.snowGrains", "Snow grains"),
+    ("wmo.showers", "Showers"),
+    ("wmo.moderateShowers", "Moderate showers"),
+    ("wmo.violentShowers", "Violent showers"),
+    ("wmo.snowShowers", "Snow showers"),
+    ("wmo.heavySnowShowers", "Heavy snow showers"),
+    ("wmo.thunderstorm", "Thunderstorm"),
+    ("wmo.thunderstormHail", "Thunderstorm with hail"),
+    ("wmo.thunderstormHeavyHail", "Thunderstorm with heavy hail"),
+    ("search.myField", "My field"),
+    ("soil.sature", "Waterlogged"),
+    ("soil.ressuye", "Drained"),
+    ("soil.sec", "Dry"),
+    ("soil.trafficable", "Bears machinery"),
+    ("soil.compaction", "Compaction risk"),
+    ("water.deficit", "Deficit"),
+    ("water.equilibre", "Balanced"),
+    ("water.excedent", "Surplus"),
+    ("frost.aucun", "None"),
+    ("frost.faible", "Slight"),
+    ("frost.modere", "Moderate"),
+    ("frost.severe", "Severe"),
+    ("frost.hoarFrost", "hoar frost likely"),
+    ("disease.faible", "Low"),
+    ("disease.moyenne", "Moderate"),
+    ("disease.elevee", "High"),
+    ("spray.favorable", "Favourable"),
+    ("spray.acceptable", "Acceptable"),
+    ("spray.defavorable", "Unsuitable"),
+    ("spray.windTooStrong", "Wind {wind} (limit {limit})"),
+    ("spray.windTooWeak", "Wind too light, risk of thermal inversion"),
+    ("spray.gusts", "Gusts {gusts}"),
+    ("spray.rain", "Rain {amount} within 2 h"),
+    ("spray.tooHot", "Temperature {temperature}, too warm"),
+    ("spray.tooCold", "Temperature {temperature}, too cold"),
+    ("spray.dryAir", "Humidity {humidity}, air too dry"),
+    ("spray.vapourPressureDeficit", "VPD {vpd}, droplets evaporate"),
+    ("api.unreachable", "Weather service unreachable. Check your connection."),
+    ("api.status", "The weather service replied {status}."),
+    ("api.malformed", "Unreadable response from the weather service."),
+    ("consensus.title", "Model agreement"),
+    ("consensus.forte", "Strong"),
+    ("consensus.moyenne", "Moderate"),
+    ("consensus.faible", "Weak"),
+    ("consensus.detail", "{count} models · {spread} apart"),
+    ("consensus.rainDisagreement", "they disagree on rain"),
+    ("consensus.unavailable", "Comparison unavailable"),
+    ("consensus.median", "Value used: {value}"),
+    ("alert.fenetre.title", "Spraying window"),
+    ("alert.fenetre.body", "Conditions are right, {score}/100 over the window."),
+    ("alert.gel.title", "Frost tonight"),
+    ("alert.gel.body", "Down to {temperature} °C expected."),
+    ("alert.sol.title", "Soil drained"),
+    ("alert.sol.body", "Moisture back to {moisture}: the field bears machinery."),
+    ("alert.pluie.title", "Rain after the window"),
+    ("alert.pluie.body", "{rain} mm expected: a treatment could be washed off."),
+    ("plan.libre", "Klima"),
+    ("plan.pro", "Klima Pro"),
+    ("plan.reason.recoupement", "Comparing several institutes needs the subscription."),
+    ("plan.reason.alertes", "Being warned without opening the app needs the subscription."),
+    ("plan.reason.cumuls", "Totals since a chosen date need the subscription."),
+    ("plan.reason.registre", "Exporting treatment conditions needs the subscription."),
+    ("plan.feature.recoupement", "Five institutes cross-checked, and how far they agree"),
+    ("plan.feature.alertes", "Warned without opening the app"),
+    ("plan.feature.cumuls", "Totals since sowing or the last treatment"),
+    ("plan.feature.registre", "Export of the conditions at the hour of treatment"),
+];
+
+const ES: [(&str, &str); 85] = [
+    ("wmo.clearSky", "Cielo despejado"),
+    ("wmo.mainlyClear", "Poco nuboso"),
+    ("wmo.partlyCloudy", "Parcialmente nuboso"),
+    ("wmo.overcast", "Cubierto"),
+    ("wmo.fog", "Niebla"),
+    ("wmo.rimeFog", "Niebla helada"),
+    ("wmo.lightDrizzle", "Llovizna débil"),
+    ("wmo.drizzle", "Llovizna"),
+    ("wmo.denseDrizzle", "Llovizna intensa"),
+    ("wmo.freezingDrizzle", "Llovizna engelante"),
+    ("wmo.denseFreezingDrizzle", "Llovizna engelante intensa"),
+    ("wmo.slightRain", "Lluvia débil"),
+    ("wmo.rain", "Lluvia"),
+    ("wmo.heavyRain", "Lluvia fuerte"),
+    ("wmo.freezingRain", "Lluvia engelante"),
+    ("wmo.heavyFreezingRain", "Lluvia engelante fuerte"),
+    ("wmo.slightSnow", "Nieve débil"),
+    ("wmo.snow", "Nieve"),
+    ("wmo.heavySnow", "Nieve fuerte"),
+    ("wmo.snowGrains", "Cinarra"),
+    ("wmo.showers", "Chubascos"),
+    ("wmo.moderateShowers", "Chubascos moderados"),
+    ("wmo.violentShowers", "Chubascos violentos"),
+    ("wmo.snowShowers", "Chubascos de nieve"),
+    ("wmo.heavySnowShowers", "Chubascos de nieve fuertes"),
+    ("wmo.thunderstorm", "Tormenta"),
+    ("wmo.thunderstormHail", "Tormenta con granizo"),
+    ("wmo.thunderstormHeavyHail", "Tormenta con granizo fuerte"),
+    ("search.myField", "Mi parcela"),
+    ("soil.sature", "Encharcado"),
+    ("soil.ressuye", "Oreado"),
+    ("soil.sec", "Seco"),
+    ("soil.trafficable", "Soporta la maquinaria"),
+    ("soil.compaction", "Riesgo de compactación"),
+    ("water.deficit", "Déficit"),
+    ("water.equilibre", "Equilibrio"),
+    ("water.excedent", "Excedente"),
+    ("frost.aucun", "Ninguna"),
+    ("frost.faible", "Leve"),
+    ("frost.modere", "Moderada"),
+    ("frost.severe", "Severa"),
+    ("frost.hoarFrost", "escarcha probable"),
+    ("disease.faible", "Baja"),
+    ("disease.moyenne", "Media"),
+    ("disease.elevee", "Alta"),
+    ("spray.favorable", "Favorable"),
+    ("spray.acceptable", "Aceptable"),
+    ("spray.defavorable", "Desfavorable"),
+    ("spray.windTooStrong", "Viento {wind} (máx. {limit})"),
+    ("spray.windTooWeak", "Viento demasiado flojo, riesgo de inversión térmica"),
+    ("spray.gusts", "Rachas {gusts}"),
+    ("spray.rain", "Lluvia {amount} en 2 h"),
+    ("spray.tooHot", "Temperatura {temperature}, demasiado calor"),
+    ("spray.tooCold", "Temperatura {temperature}, demasiado frío"),
+    ("spray.dryAir", "Humedad {humidity}, aire demasiado seco"),
+    ("spray.vapourPressureDeficit", "DPV {vpd}, las gotas se evaporan"),
+    ("api.unreachable", "Servicio meteorológico inaccesible. Compruebe su conexión."),
+    ("api.status", "El servicio meteorológico ha respondido {status}."),
+    ("api.malformed", "Respuesta ilegible del servicio meteorológico."),
+    ("consensus.title", "Acuerdo de los modelos"),
+    ("consensus.forte", "Fuerte"),
+    ("consensus.moyenne", "Medio"),
+    ("consensus.faible", "Débil"),
+    ("consensus.detail", "{count} modelos · diferencia de {spread}"),
+    ("consensus.rainDisagreement", "discrepan sobre la lluvia"),
+    ("consensus.unavailable", "Comparación no disponible"),
+    ("consensus.median", "Valor retenido: {value}"),
+    ("alert.fenetre.title", "Ventana de tratamiento"),
+    ("alert.fenetre.body", "Condiciones reunidas, {score}/100 en la franja."),
+    ("alert.gel.title", "Helada esta noche"),
+    ("alert.gel.body", "Hasta {temperature} °C previstos."),
+    ("alert.sol.title", "Suelo oreado"),
+    ("alert.sol.body", "Humedad de nuevo en {moisture}: la parcela soporta la maquinaria."),
+    ("alert.pluie.title", "Lluvia tras la ventana"),
+    ("alert.pluie.body", "{rain} mm previstos: un tratamiento podría lavarse."),
+    ("plan.libre", "Klima"),
+    ("plan.pro", "Klima Pro"),
+    ("plan.reason.recoupement", "Comparar varios institutos requiere la suscripción."),
+    ("plan.reason.alertes", "Recibir avisos sin abrir la aplicación requiere la suscripción."),
+    ("plan.reason.cumuls", "Los acumulados desde una fecha requieren la suscripción."),
+    ("plan.reason.registre", "Exportar las condiciones de tratamiento requiere la suscripción."),
+    ("plan.feature.recoupement", "Cinco institutos contrastados y su nivel de acuerdo"),
+    ("plan.feature.alertes", "Avisado sin abrir la aplicación"),
+    ("plan.feature.cumuls", "Acumulados desde la siembra o el último tratamiento"),
+    ("plan.feature.registre", "Exportación de las condiciones a la hora del tratamiento"),
+];
+
+/* ---------------------------------------------------------------- */
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::i18n::{LANGUAGES, Language, REFERENCE_LANGUAGE};
+    use crate::weather::weather_condition;
+
+    #[test]
+    fn les_trois_langues_portent_exactement_les_memes_cles() {
+        let reference: Vec<&str> =
+            SHARED_MESSAGES.catalog(REFERENCE_LANGUAGE).keys().copied().collect();
+        for language in LANGUAGES {
+            let keys: Vec<&str> = SHARED_MESSAGES.catalog(language).keys().copied().collect();
+            assert_eq!(keys, reference, "{language}");
+        }
+    }
+
+    #[test]
+    fn aucun_texte_vide() {
+        for language in LANGUAGES {
+            for (key, value) in SHARED_MESSAGES.catalog(language) {
+                assert!(!value.trim().is_empty(), "{language} · {key}");
+            }
+        }
+    }
+
+    #[test]
+    fn un_motif_a_trous_a_les_memes_trous_partout() {
+        for (key, modele) in SHARED_MESSAGES.catalog(REFERENCE_LANGUAGE) {
+            let reference = jetons(modele);
+            for language in LANGUAGES {
+                let value = SHARED_MESSAGES.get(language, key).unwrap();
+                assert_eq!(jetons(value), reference, "{language} · {key}");
+            }
+        }
+    }
+
+    #[test]
+    fn tout_code_wmo_documente_est_traduit_dans_les_trois_langues() {
+        let codes = [
+            0, 1, 2, 3, 45, 48, 51, 53, 55, 56, 57, 61, 63, 65, 66, 67, 71, 73, 75, 77, 80, 81,
+            82, 85, 86, 95, 96, 99,
+        ];
+        for code in codes {
+            let key = weather_condition(code).label_key;
+            for language in LANGUAGES {
+                assert!(SHARED_MESSAGES.get(language, key).is_some(), "{language} · {key}");
+            }
+        }
+    }
+
+    #[test]
+    fn les_libelles_partages_disent_klima_jamais_kliima() {
+        // Deux noms, et ce n'est pas une coquille : le triangle et le second
+        // « i » ne vivent que dans le catalogue iOS.
+        for language in LANGUAGES {
+            for (key, value) in SHARED_MESSAGES.catalog(language) {
+                assert!(!value.contains("Kliima"), "{language} · {key}");
+                assert!(!value.contains('\u{2023}'), "{language} · {key}");
+            }
+        }
+        assert_eq!(SHARED_MESSAGES.get(Language::Fr, "plan.libre"), Some("Klima"));
+        assert_eq!(SHARED_MESSAGES.get(Language::Fr, "plan.pro"), Some("Klima Pro"));
+    }
+
+    /// Les noms des trous d'un motif, triés.
+    fn jetons(modele: &str) -> Vec<String> {
+        let mut noms = Vec::new();
+        let mut rest = modele;
+        while let Some(start) = rest.find('{') {
+            let after = &rest[start + 1..];
+            let len = after
+                .char_indices()
+                .find(|(_, c)| !(c.is_ascii_alphanumeric() || *c == '_'))
+                .map_or(after.len(), |(index, _)| index);
+            if len > 0 && after[len..].starts_with('}') {
+                noms.push(after[..len].to_owned());
+                rest = &after[len + 1..];
+            } else {
+                rest = after;
+            }
+        }
+        noms.sort();
+        noms
+    }
+}
