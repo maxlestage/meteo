@@ -38,17 +38,7 @@ precipitation_sum,precipitation_probability_max,et0_fao_evapotranspiration,wind_
 
 const HOUR_MS: i64 = 3_600_000;
 
-/// Une parcelle : un nom, un point, et de quoi lever l'ambiguïté entre
-/// homonymes.
-#[derive(Debug, Clone, PartialEq)]
-pub struct Parcelle {
-    pub name: String,
-    pub latitude: f64,
-    pub longitude: f64,
-    /// Région / département.
-    pub admin: Option<String>,
-    pub country: Option<String>,
-}
+pub use klima_core::position::Parcelle;
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct AgroForecast {
