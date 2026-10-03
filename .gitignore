@@ -5,3 +5,6 @@ dist
 
 # Le site construit pour le relais
 server/public
+
+# Compilation Rust
+rust/target
