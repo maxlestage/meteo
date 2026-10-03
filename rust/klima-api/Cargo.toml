@@ -7,3 +7,4 @@ rust-version.workspace = true
 [dependencies]
 klima-core = { path = "../klima-core" }
 serde_json.workspace = true
+url.workspace = true
