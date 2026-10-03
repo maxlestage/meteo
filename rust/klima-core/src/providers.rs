@@ -51,6 +51,14 @@ pub struct ProviderOutcome {
 const OPEN_METEO_ATTRIBUTION: &str = "Open-Meteo — modèles Météo-France, ECMWF, DWD et NOAA";
 
 /// Les quatre modèles nationaux qu'Open-Meteo redistribue.
+/// Ce que Klima dit de lui-même aux fournisseurs.
+///
+/// MET Norway l'exige : une requête anonyme est refusée. Un navigateur n'a pas
+/// le droit de poser cet en-tête, d'où la règle du dépôt — « seulement là où
+/// l'on peut se nommer » : en direct le natif, sinon le relais, qui le pose
+/// pour tout le monde.
+pub const USER_AGENT: &str = "Klima/1.0 (météo agricole; https://maxlestage.github.io/meteo/)";
+
 pub const OPEN_METEO_SOURCES: [WeatherSource; 4] = [
     WeatherSource {
         id: "meteofrance_seamless",
