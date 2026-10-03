@@ -2,7 +2,7 @@
 //!
 //! Miroir de `web/src/App.tsx`.
 
-use klima_api::open_meteo::AgroApiError;
+use klima_core::agro::summarize;
 use klima_core::agro::thresholds::{GDD_BASE, SPRAY_WIND_MAX};
 use klima_core::endpoints::Endpoints;
 use klima_core::i18n::params;
@@ -12,17 +12,17 @@ use yew::prelude::*;
 use crate::composants::bandeau::Bandeau;
 use crate::composants::entete::Entete;
 use crate::composants::jours::Jours;
-use crate::composants::langue::SelecteurDeLangue;
-use crate::composants::marque::MarqueEtNom;
+use klima_ui::composants::langue::SelecteurDeLangue;
+use klima_ui::composants::marque::MarqueEtNom;
 use crate::composants::pro::NotePro;
 use crate::composants::recherche::Recherche;
 use crate::composants::traitement::Traitement;
 use crate::composants::tuile::{Jauge, Tuile};
-use crate::crochets::parcelle::use_parcelle;
-use crate::crochets::position::use_start_position;
-use crate::crochets::prevision::use_agro_forecast;
-use crate::dates;
-use crate::i18n::use_i18n;
+use klima_ui::crochets::parcelle::use_parcelle;
+use klima_ui::crochets::position::use_start_position;
+use klima_ui::crochets::prevision::use_forecast;
+use klima_ui::dates;
+use klima_ui::i18n::use_i18n;
 
 /// Parcelle par défaut : plaine céréalière de Beauce.
 fn defaut() -> Parcelle {
@@ -52,14 +52,16 @@ pub fn App(props: &Props) -> Html {
 
     let prevision = {
         let i18n = i18n.clone();
-        use_agro_forecast(lieu.parcelle.clone(), props.endpoints.clone(), move |erreur| {
-            match erreur {
-                AgroApiError::Status(_) => i18n.with(erreur.message_key(), &erreur.params()),
-                _ => i18n.t(erreur.message_key()),
-            }
+        use_forecast(lieu.parcelle.clone(), props.endpoints.clone(), 7, move |erreur| {
+            i18n.with(erreur.message_key(), &erreur.params())
         })
     };
     let etat = &prevision.etat;
+
+    // Les indicateurs se recalculent avec la prévision, pas à chaque rendu.
+    let summary = use_memo(etat.forecast.clone(), |forecast| {
+        forecast.as_ref().map(|f| summarize(&f.hourly, &f.daily))
+    });
 
     let recharger = {
         let reload = prevision.reload.clone();
@@ -104,7 +106,7 @@ pub fn App(props: &Props) -> Html {
                     </div>
                 }
 
-                if let (Some(forecast), Some(summary)) = (&etat.forecast, &etat.summary) {
+                if let (Some(forecast), Some(summary)) = (&etat.forecast, &*summary) {
                     <>
                         <Entete forecast={forecast.clone()} />
                         <Bandeau

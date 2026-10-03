@@ -6,5 +6,7 @@ dist
 # Le site construit pour le relais
 server/public
 
-# Compilation Rust
+# Compilation Rust. Les interfaces ont leur propre espace de travail, donc
+# leur propre dossier de compilation.
 rust/target
+rust/*/target

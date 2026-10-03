@@ -1,0 +1,188 @@
+//! La vitrine de Klima.
+//!
+//! Miroir de `site/src/App.tsx`.
+
+use klima_api::today::day_digest;
+use klima_core::agro::thresholds::{SPRAY_GUST_MAX, SPRAY_WIND_MAX, SPRAY_WIND_MIN};
+use klima_core::endpoints::Endpoints;
+use klima_core::i18n::params;
+use klima_core::position::Parcelle;
+use klima_core::weather::{ConditionIcon, weather_condition};
+use klima_ui::composants::langue::SelecteurDeLangue;
+use klima_ui::composants::marque::MarqueEtNom;
+use klima_ui::crochets::parcelle::use_parcelle;
+use klima_ui::crochets::position::use_start_position;
+use klima_ui::crochets::prevision::use_forecast;
+use klima_ui::i18n::use_i18n;
+use yew::prelude::*;
+
+use crate::composants::aujourdhui::SectionDuJour;
+use crate::composants::fonctions::Fonctions;
+use crate::composants::illustrations::{CoupeDeSol, SceneDeCiel, SceneDeTraitement};
+use crate::composants::pied::Pied;
+use crate::composants::sources::Sources;
+use crate::composants::telephone::Telephone;
+use crate::crochets::apparition::use_apparition;
+
+/// Plaine céréalière de Beauce, au premier chargement.
+fn defaut() -> Parcelle {
+    Parcelle {
+        name: "Chartres".to_owned(),
+        latitude: 48.4468,
+        longitude: 1.4892,
+        admin: Some("Eure-et-Loir".to_owned()),
+        country: Some("France".to_owned()),
+    }
+}
+
+#[derive(Properties, PartialEq)]
+pub struct Props {
+    pub endpoints: Endpoints,
+}
+
+#[function_component]
+pub fn App(props: &Props) -> Html {
+    let i18n = use_i18n();
+    let f = i18n.f();
+
+    // La commune consultée vit dans l'adresse : le bouton retour la défait, et
+    // l'adresse envoyée à quelqu'un lui montre bien la parcelle qu'on a
+    // regardée.
+    let lieu = use_parcelle(defaut());
+
+    // La vitrine montre une vraie prévision : autant que ce soit celle du
+    // visiteur. Un refus laisse la parcelle par défaut.
+    use_start_position(lieu.origine, i18n.t("search.myField"), lieu.select.clone());
+
+    // Deux jours suffisent : aujourd'hui, et la nuit qui déborde sur demain.
+    let prevision = {
+        let i18n = i18n.clone();
+        use_forecast(lieu.parcelle.clone(), props.endpoints.clone(), 2, move |erreur| {
+            i18n.with(erreur.message_key(), &erreur.params())
+        })
+    };
+    let etat = &prevision.etat;
+
+    let digest = use_memo(etat.forecast.clone(), |forecast| {
+        forecast.as_ref().and_then(day_digest)
+    });
+
+    let courant = etat.forecast.as_ref().map(|f| f.current.clone());
+    let pluie = courant.as_ref().is_some_and(|c| {
+        matches!(
+            weather_condition(c.weather_code).icon,
+            ConditionIcon::Drizzle | ConditionIcon::Rain | ConditionIcon::Showers
+                | ConditionIcon::Thunder
+        )
+    });
+
+    let fonctions = use_apparition();
+    let donnees = use_apparition();
+
+    html! {
+        <>
+            <header class="nav">
+                <a class="nav__brand" href="#top" aria-label="Klima">
+                    <MarqueEtNom />
+                </a>
+                <div class="nav__end">
+                    <nav>
+                        <a href="#aujourdhui">{ i18n.t("nav.today") }</a>
+                        <a href="#indicateurs">{ i18n.t("nav.indicators") }</a>
+                        <a href="#sources">{ i18n.t("nav.sources") }</a>
+                        <a href="#donnees">{ i18n.t("nav.data") }</a>
+                    </nav>
+                    <a class="button button--compact" href="./app/">{ i18n.t("app.open") }</a>
+                    <SelecteurDeLangue class="lang" label={i18n.t("language.label")} />
+                </div>
+            </header>
+
+            <main id="top">
+                <section class="hero">
+                    <div class="hero__text">
+                        <p class="hero__eyebrow">{ i18n.t("hero.eyebrow") }</p>
+                        <h1>{ i18n.t("hero.title") }</h1>
+                        <p class="hero__lead">{ i18n.t("hero.lead") }</p>
+                        <div class="hero__actions">
+                            <a class="button" href="#aujourdhui">{ i18n.t("hero.cta.today") }</a>
+                            <a class="button button--ghost" href="#indicateurs">
+                                { i18n.t("hero.cta.indicators") }
+                            </a>
+                        </div>
+                        <p class="hero__note">{ i18n.t("hero.note") }</p>
+                    </div>
+
+                    <Telephone
+                        parcelle={lieu.parcelle.clone()}
+                        digest={(*digest).clone()}
+                        current={courant.clone()}
+                    />
+                </section>
+
+                <div class="banner">
+                    <SceneDeCiel
+                        is_day={courant.as_ref().map(|c| c.is_day).unwrap_or(true)}
+                        raining={pluie}
+                    />
+                </div>
+
+                <SectionDuJour
+                    parcelle={lieu.parcelle.clone()}
+                    digest={(*digest).clone()}
+                    current={courant}
+                    loading={etat.loading}
+                    error={etat.error.clone()}
+                    endpoints={props.endpoints.clone()}
+                    on_select={lieu.select.clone()}
+                    on_retry={prevision.reload.clone()}
+                />
+
+                <Sources consensus={etat.consensus.clone()} loading={etat.loading} />
+
+                <div ref={fonctions.node} class={fonctions.class}>
+                    <Fonctions />
+                    <div class="figures">
+                        <figure>
+                            <CoupeDeSol />
+                            <figcaption>{ i18n.t("feature.soil.rule") }</figcaption>
+                        </figure>
+                        <figure>
+                            <SceneDeTraitement />
+                            <figcaption>
+                                { i18n.with("feature.spray.rule", &params([
+                                    ("min", f.unit(SPRAY_WIND_MIN, "km/h", 0).as_str().into()),
+                                    ("max", f.unit(SPRAY_WIND_MAX, "km/h", 0).as_str().into()),
+                                    ("gusts", f.unit(SPRAY_GUST_MAX, "km/h", 0).as_str().into()),
+                                ])) }
+                            </figcaption>
+                        </figure>
+                    </div>
+                </div>
+
+                <section class="data" id="donnees" ref={donnees.node}>
+                    <div class="section-head">
+                        <h2>{ i18n.t("data.title") }</h2>
+                    </div>
+                    <div class={classes!("data__grid", donnees.class)}>
+                        <article>
+                            <h3>{ i18n.t("data.model.title") }</h3>
+                            <p>{ i18n.t("data.model.body") }</p>
+                        </article>
+                        <article>
+                            <h3>{ i18n.t("data.rules.title") }</h3>
+                            <p>{ i18n.t("data.rules.body") }</p>
+                        </article>
+                        <article>
+                            <h3>{ i18n.t("data.wind.title") }</h3>
+                            <p>{ i18n.with("data.wind.body", &params([
+                                ("limit", f.unit(SPRAY_WIND_MAX, "km/h", 0).as_str().into()),
+                            ])) }</p>
+                        </article>
+                    </div>
+                </section>
+            </main>
+
+            <Pied />
+        </>
+    }
+}

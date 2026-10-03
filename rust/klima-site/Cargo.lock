@@ -174,7 +174,7 @@ dependencies = [
  "gloo-net 0.5.0",
  "gloo-render",
  "gloo-storage",
- "gloo-timers 0.3.0",
+ "gloo-timers",
  "gloo-utils 0.2.0",
  "gloo-worker",
 ]
@@ -314,18 +314,6 @@ version = "0.3.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "bbb143cf96099802033e0d4f4963b19fd2e0b728bcf076cd9cf7f6634f092994"
 dependencies = [
- "js-sys",
- "wasm-bindgen",
-]
-
-[[package]]
-name = "gloo-timers"
-version = "0.4.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "482ce8a491a501da4cd806bd190275363d674f2845005c6ddbd5d3e1dd54495d"
-dependencies = [
- "futures-channel",
- "futures-core",
  "js-sys",
  "wasm-bindgen",
 ]
@@ -583,13 +571,13 @@ name = "klima-core"
 version = "1.0.0"
 
 [[package]]
-name = "klima-ui"
+name = "klima-site"
 version = "1.0.0"
 dependencies = [
- "gloo-net 0.7.0",
  "js-sys",
  "klima-api",
  "klima-core",
+ "klima-ui",
  "wasm-bindgen",
  "wasm-bindgen-futures",
  "web-sys",
@@ -597,15 +585,13 @@ dependencies = [
 ]
 
 [[package]]
-name = "klima-web"
+name = "klima-ui"
 version = "1.0.0"
 dependencies = [
  "gloo-net 0.7.0",
- "gloo-timers 0.4.0",
  "js-sys",
  "klima-api",
  "klima-core",
- "klima-ui",
  "wasm-bindgen",
  "wasm-bindgen-futures",
  "web-sys",
@@ -951,9 +937,9 @@ dependencies = [
 
 [[package]]
 name = "tokio"
-version = "1.53.1"
+version = "1.53.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "202caea871b69668250d242070849eb495be178ed697a3e98aebce5bc81a0bed"
+checksum = "e95f91fcc7a621e8b030f6aa23c71fe9838ae2fb4d8118b75602a328f5144044"
 dependencies = [
  "pin-project-lite",
  "tokio-macros",
