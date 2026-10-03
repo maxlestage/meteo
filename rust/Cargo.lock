@@ -654,6 +654,7 @@ version = "1.0.0"
 dependencies = [
  "klima-core",
  "serde_json",
+ "url",
 ]
 
 [[package]]

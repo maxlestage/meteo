@@ -12,3 +12,6 @@
 //! pur, donc testable sur une réponse enregistrée, sans réseau ni horloge.
 
 pub mod open_meteo;
+pub mod parcelle_url;
+pub mod readings;
+pub mod today;
