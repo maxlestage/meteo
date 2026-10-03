@@ -9,6 +9,8 @@
 //! l'autre. C'est ce qui garantit qu'une position tombe dans la même cellule
 //! quelle que soit la langue qui la calcule.
 
+pub mod cumuls;
 pub mod grid;
 pub mod agro;
 pub mod position;
+pub mod weather;
