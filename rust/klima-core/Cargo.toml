@@ -1,0 +1,9 @@
+[package]
+name = "klima-core"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+
+# Le cœur n'a aucune dépendance, et c'est volontaire : ce sont des règles
+# agronomiques et des arrondis, pas de l'infrastructure.
+[dependencies]
