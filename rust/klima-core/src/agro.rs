@@ -158,6 +158,17 @@ pub enum SprayVerdict {
     Defavorable,
 }
 
+impl SprayVerdict {
+    /// Nom stable, pour les journaux et les documents exportés.
+    pub fn code(self) -> &'static str {
+        match self {
+            SprayVerdict::Favorable => "favorable",
+            SprayVerdict::Acceptable => "acceptable",
+            SprayVerdict::Defavorable => "defavorable",
+        }
+    }
+}
+
 /// Motif de dégradation d'une heure, sous forme structurée : le domaine dit ce
 /// qui cloche et avec quelles valeurs, l'interface le formule dans sa langue.
 #[derive(Debug, Clone, PartialEq)]
