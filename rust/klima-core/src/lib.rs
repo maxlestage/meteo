@@ -12,6 +12,7 @@
 pub mod alerts;
 pub mod calendar;
 pub mod cumuls;
+pub mod endpoints;
 pub mod grid;
 pub mod i18n;
 pub mod agro;
