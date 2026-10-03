@@ -65,6 +65,21 @@ pub struct HourlySample {
     pub vapour_pressure_deficit: f64,
 }
 
+/// Les conditions de l'instant.
+#[derive(Debug, Clone, PartialEq)]
+pub struct CurrentSample {
+    /// Millisecondes depuis l'époque.
+    pub time: i64,
+    pub temperature: f64,
+    /// Température ressentie (°C).
+    pub apparent_temperature: f64,
+    pub weather_code: u16,
+    pub is_day: bool,
+    pub relative_humidity: f64,
+    pub wind_speed: f64,
+    pub wind_gusts: f64,
+}
+
 /// Une journée de prévision.
 #[derive(Debug, Clone, PartialEq)]
 pub struct DailySample {
