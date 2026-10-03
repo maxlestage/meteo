@@ -31,6 +31,14 @@ jobs:
       - name: Chaîne Rust
         run: rustup show
 
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: |
+            rust
+            rust/klima-ui
+            rust/klima-web
+            rust/klima-site
+
       # Le cœur partage ses règles avec les deux interfaces : une règle fausse
       # publierait une page qui annonce autre chose que ce qu'elle applique.
       - name: Tests du cœur et du relais

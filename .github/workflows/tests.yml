@@ -27,9 +27,17 @@ jobs:
       # `rust-toolchain.toml` : rustup les pose tout seul.
       - run: rustup show
 
+      # Les interfaces ont chacune leur espace de travail, donc leur propre
+      # dossier de compilation : sans les nommer ici, chaque exécution
+      # recompilerait Yew quatre fois, et la vérification deviendrait quelque
+      # chose qu'on apprend à ne plus attendre.
       - uses: Swatinem/rust-cache@v2
         with:
-          workspaces: rust
+          workspaces: |
+            rust
+            rust/klima-ui
+            rust/klima-web
+            rust/klima-site
 
       - name: Cœur, formats de fil, relais
         run: cargo test

@@ -11,16 +11,28 @@ s'appellent **Klima** ; l'application iPhone et sa montre s'appellent
 **Kliima**. Le signe, les couleurs et le cœur agronomique sont les mêmes.
 
 ```
-core/   Cœur partagé TypeScript : règles agronomiques, codes météo, client Open-Meteo
+rust/   Tout ce qui tourne hors iOS, en Rust
+  klima-core/   Cœur : règles agronomiques, codes météo, langues, paliers
+  klima-api/    Formats de fil : adresses des fournisseurs, lecture des réponses
+  klima-relay/  Le relais (Axum) : cache mutualisé, clé commerciale, site servi
+  klima-ui/     Ce que les deux interfaces web partagent (Yew)
+  klima-web/    Application web complète (Yew + WebAssembly)
+  klima-site/   Site de présentation, avec la météo du jour (Yew + WebAssembly)
 ios/    Application iOS (SwiftUI, projet Xcode avec project.pbxproj versionné)
-web/    Application web complète (Bun + TypeScript + Vite + React)
-site/   Site de présentation, avec la météo du jour
+core/   Cœur partagé TypeScript — la version sortante
+server/ Relais Bun — la version sortante, qui sert encore la production
+web/    Application web React — la version sortante
+site/   Site de présentation React — la version sortante
 ```
 
 Le tout est traduit en **français, anglais et espagnol**.
 
-Les trois paquets JavaScript forment un espace de travail Bun : `bun install` à la
-racine les installe ensemble, et `bun test` y exécute la suite du cœur partagé.
+**Le portage en Rust est fait ; la bascule ne l'est pas.** Les six crates
+reproduisent le TypeScript, cas de test pour cas de test, et ont été essayées
+contre les vrais fournisseurs. Le relais Bun sert encore la production : il
+s'arrêtera le jour où Heroku construira le binaire Rust, et le TypeScript
+partira avec lui. La marche à suivre est dans
+[`rust/DEPLOIEMENT.md`](rust/DEPLOIEMENT.md).
 
 L'application reprend la présentation de l'application Météo du système —
 commune, température, bandeau horaire, liste des sept jours — et range les
@@ -35,9 +47,9 @@ code de calcul.
 
 | Surface | Catalogue | Choix de la langue |
 | --- | --- | --- |
-| Commun web et site | `core/src/messages.ts` | — |
-| Application web | `web/src/i18n/messages.ts` | Sélecteur, sinon le navigateur |
-| Site de présentation | `site/src/i18n/messages.ts` | Sélecteur, sinon le navigateur |
+| Commun web et site | `rust/klima-core/src/messages.rs` | — |
+| Application web | `rust/klima-web/src/messages.rs` | Sélecteur, sinon le navigateur |
+| Site de présentation | `rust/klima-site/src/messages.rs` | Sélecteur, sinon le navigateur |
 | iOS | `ios/Kliima/Resources/Localizable.xcstrings` | Réglages du système |
 
 Les nombres et les dates suivent la langue : virgule décimale en français et en
@@ -57,13 +69,15 @@ de sa fiabilité.
 | Fournisseur | Sources | Nature | Plateformes |
 | --- | --- | --- | --- |
 | Open-Meteo | Météo-France (AROME/ARPEGE), ECMWF (IFS), DWD (ICON), NOAA (GFS) | Sorties de modèles | Web et natif |
-| MET Norway | Locationforecast 2.0 | Sortie de modèle | **Natif seulement** |
+| MET Norway | Locationforecast 2.0 | Sortie de modèle | Natif, ou web **par le relais** |
 | Bright Sky | Observation DWD | Mesure de station | Web et natif |
 
 MET Norway impose un en-tête `User-Agent` identifiant l'application ; un
-navigateur interdit de le fixer. On l'appelle donc depuis iOS et watchOS, où
-`URLSession` le permet, plutôt que d'envoyer des requêtes anonymes contre leur
-volonté. Bright Sky apporte un point de comparaison d'une autre nature : une
+navigateur interdit de le fixer. La règle n'est donc pas « natif seulement »
+mais **« seulement là où l'on peut se nommer »** : en appel direct, iOS et
+watchOS, où `URLSession` le permet ; par le relais, le serveur, qui pose
+l'en-tête pour tout le monde — et le web gagne alors la même source que le
+natif. Jamais de requête anonyme contre leur volonté. Bright Sky apporte un point de comparaison d'une autre nature : une
 observation de station, qui dit ce qu'il fait et non ce qui est prévu ; sa
 couverture suit le réseau du DWD.
 
@@ -103,8 +117,8 @@ temps WMO traduits en pictogrammes, probabilité de pluie horaire, amplitude
 thermique de la semaine, lever et coucher du soleil.
 
 Les seuils sont définis une seule fois par plateforme et doivent rester
-synchronisés : `core/src/agro.ts` (`AgroThresholds`), consommé par le web et le
-site, et `ios/Kliima/Models/AgroIndicators.swift` (`AgroThresholds`). Les deux
+synchronisés : `rust/klima-core/src/agro.rs` (`thresholds`), consommé par le web
+et le site, et `ios/Kliima/Models/AgroIndicators.swift` (`AgroThresholds`). Les deux
 suites de tests couvrent les mêmes cas, pour que le conseil rendu soit
 identique au champ.
 
@@ -208,12 +222,17 @@ xcodebuild -project ios/Kliima.xcodeproj -scheme KliimaWatch \
 L'application complète : bandeau horaire, semaine et tuiles agronomiques.
 
 ```bash
-bun install        # à la racine, installe core, web et site
-cd web
-bun run dev        # http://localhost:5173
-bun run typecheck
-bun run build      # dist/
+cd rust/klima-web
+trunk serve        # http://localhost:8081
+trunk build --release
 ```
+
+Rien ne défile de côté : le bandeau horaire est une grille qui se replie et
+montre douze heures — une demi-journée —, les autres se dépliant d'un bouton.
+Une carte ne prend pas tout l'écran.
+
+L'ancienne version React vit encore dans `web/` (`bun run dev`, port 5173) le
+temps de la bascule.
 
 La parcelle est mémorisée dans le navigateur ; la recherche de commune passe par
 le géocodage Open-Meteo et le bouton « Me localiser » par la géolocalisation du
@@ -226,11 +245,13 @@ qui la fait essayer sur sa propre commune — la journée en cours uniquement, l
 semaine et le détail horaire restant l'affaire de l'application.
 
 ```bash
-cd site
-bun run dev        # http://localhost:5174
-bun run typecheck
-bun run build      # dist/
+cd rust/klima-site
+trunk serve        # http://localhost:8082
+trunk build --release
 ```
+
+L'ancienne version React vit encore dans `site/` (`bun run dev`, port 5174) le
+temps de la bascule.
 
 Les seuils affichés dans la page sont lus dans `AgroThresholds` : la vitrine ne
 peut pas annoncer autre chose que ce que l'application applique.
@@ -260,10 +281,10 @@ JavaScript ou sans `IntersectionObserver`, la page reste lisible.
 
 ### Publication sur GitHub Pages
 
-`.github/workflows/pages.yml` construit `site/` et le publie à chaque poussée
-sur la branche par défaut (et à la demande, via *Run workflow*). Le déploiement
-échoue si les tests du cœur partagé ou la vérification de types échouent : rien
-d'incohérent n'est mis en ligne.
+`.github/workflows/pages.yml` construit les deux interfaces Yew et les publie à
+chaque poussée sur la branche par défaut (et à la demande, via *Run workflow*) :
+la vitrine à la racine, l'application sous `/app/`. Le déploiement échoue si les
+tests du cœur échouent : rien d'incohérent n'est mis en ligne.
 
 Une seule chose à faire côté dépôt, une fois : **Settings → Pages → Source →
 GitHub Actions**. Sans cela le job `deploy` s'arrête faute d'environnement
@@ -276,13 +297,25 @@ d'un domaine personnalisé, sans rien reconfigurer.
 ## Cœur partagé
 
 ```bash
-cd core
-bun test           # règles agronomiques, codes météo, journée en cours, formats
-bun run typecheck
+cd rust
+cargo test                 # cœur, formats de fil, relais
+cargo clippy --all-targets
 ```
 
-`core` n'a pas d'étape de compilation : le web et le site l'importent en
-TypeScript via l'alias `@klima/core`, et `@klima/core/ui` pour les pictogrammes.
+`klima-core` n'a **aucune dépendance** — pas même une bibliothèque de dates. Ce
+n'est pas de l'ascétisme : c'est ce qui lui permet de compiler pour un serveur
+comme pour un navigateur, et de ne jamais dépendre d'une mise à jour qui change
+un arrondi. Les horodatages y sont des millisecondes depuis l'époque, et ce sont
+celles **de la parcelle** : une journée se découpe par division, pas en
+demandant à un fuseau.
+
+Lire du JSON demande une dépendance : c'est pourquoi `klima-api` existe à côté,
+avec `serde_json`. Les règles restent pures d'un côté, le décodage du fil vit de
+l'autre.
+
+Le relais tourne sur Axum, les interfaces sur Yew et WebAssembly. Elles ne sont
+pas dans l'espace de travail : elles se construisent pour le navigateur, et les
+y laisser ferait compiler Yew à chaque `cargo test`.
 
 ## Données
 
@@ -293,6 +326,11 @@ l'hygrométrie, la pluie et le vent nécessaires aux fenêtres de traitement, et
 `weather_code`, `is_day`, `sunrise`, `sunset` pour la présentation.
 
 L'API renvoie les horodatages en heure locale de la parcelle et les séries
-horaires depuis minuit : les deux clients les ramènent en instants absolus et
-recoupent la série à l'heure en cours, pour que « maintenant » soit bien le
-premier élément affiché.
+horaires depuis minuit. Les clients recoupent la série à l'heure en cours, pour
+que « maintenant » soit bien le premier élément affiché.
+
+Côté Rust, l'heure locale est **conservée telle quelle** plutôt que ramenée en
+instant absolu : « 21 h » veut alors dire 21 h au champ, quel que soit le fuseau
+du serveur qui calcule. Le décalage n'est pas perdu pour autant — la prévision
+le porte, et `instant()` rend l'instant absolu pour qui en a besoin, un minuteur
+d'écran verrouillé par exemple.

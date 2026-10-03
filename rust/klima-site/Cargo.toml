@@ -19,3 +19,14 @@ web-sys = { version = "0.3", features = [
   "MediaQueryList", "EventTarget", "Node",
 ] }
 wasm-bindgen-futures = "0.4.79"
+
+# Ce qui part sur le réseau compte plus que ce qui compile vite : une parcelle
+# se consulte au champ, souvent sur un réseau qui traîne. On optimise donc pour
+# la taille, en une seule unité de compilation, et sans le code de déroulement
+# des paniques — en WebAssembly, une panique arrête de toute façon la page.
+[profile.release]
+opt-level = "z"
+lto = true
+codegen-units = 1
+panic = "abort"
+strip = true
