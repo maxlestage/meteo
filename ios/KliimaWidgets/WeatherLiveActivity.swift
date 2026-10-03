@@ -11,7 +11,7 @@ import WidgetKit
 struct WeatherLiveActivity: Widget {
     var body: some WidgetConfiguration {
         ActivityConfiguration(for: WeatherActivityAttributes.self) { context in
-            WeatherLockScreenView(context: context)
+            WeatherActivityView(context: context)
                 .activityBackgroundTint(Color.black.opacity(0.55))
                 .activitySystemActionForegroundColor(.white)
         } dynamicIsland: { context in
@@ -66,7 +66,12 @@ struct WeatherLiveActivity: Widget {
 }
 
 /// Écran verrouillé : la parcelle, la température, le ciel et les bornes du jour.
-private struct WeatherLockScreenView: View {
+///
+/// Nommée « activité » et non « écran verrouillé » : le widget d'écran
+/// verrouillé, lui, a une vue qui porte déjà ce nom. Deux types de même nom
+/// dans une même cible ne compilent pas, même quand l'un est privé — Swift
+/// refuse la redéclaration au niveau du module.
+private struct WeatherActivityView: View {
     let context: ActivityViewContext<WeatherActivityAttributes>
 
     var body: some View {
