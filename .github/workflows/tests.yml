@@ -1,0 +1,81 @@
+name: Tests
+
+# Ce que le dépôt vérifie avant de livrer, vérifié aussi à chaque poussée.
+#
+# Il n'y avait rien ici : les tests tournaient en local, et une branche
+# pouvait arriver rouge sans que ça se voie. Les deux travaux sont séparés
+# parce qu'ils n'ont rien en commun — l'un compile du Rust, l'autre lit du
+# TypeScript — et qu'un échec doit dire lequel des deux a lâché.
+on:
+  push:
+    branches: [master]
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: tests-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  rust:
+    name: Rust
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      # La chaîne et la cible du navigateur sont épinglées par
+      # `rust-toolchain.toml` : rustup les pose tout seul.
+      - run: rustup show
+
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: rust
+
+      - name: Cœur, formats de fil, relais
+        run: cargo test
+        working-directory: rust
+
+      - name: Clippy
+        run: cargo clippy --all-targets -- -D warnings
+        working-directory: rust
+
+      # Les interfaces ont leur propre espace de travail : leurs tests de
+      # catalogue ne tournent pas avec les autres.
+      - name: Catalogues des interfaces
+        run: |
+          cargo test --manifest-path klima-site/Cargo.toml
+          cargo test --manifest-path klima-web/Cargo.toml
+        working-directory: rust
+
+      - name: Trunk
+        run: |
+          mkdir -p "$HOME/.local/bin"
+          curl --fail --location --silent \
+            https://github.com/trunk-rs/trunk/releases/download/v0.21.14/trunk-x86_64-unknown-linux-gnu.tar.gz \
+            | tar -xz -C "$HOME/.local/bin"
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+
+      # Une interface qui ne compile pas pour le navigateur est une interface
+      # cassée, même si tous les tests passent sur la machine.
+      - name: Construction des deux interfaces
+        run: |
+          trunk build --config klima-site/Trunk.toml
+          trunk build --config klima-web/Trunk.toml
+        working-directory: rust
+
+  typescript:
+    name: TypeScript
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - run: bun install --frozen-lockfile
+
+      - run: bun test
+
+      - name: Types
+        run: bun run typecheck
