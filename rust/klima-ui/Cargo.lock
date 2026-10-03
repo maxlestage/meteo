@@ -574,6 +574,7 @@ version = "1.0.0"
 name = "klima-ui"
 version = "1.0.0"
 dependencies = [
+ "futures",
  "gloo-net 0.7.0",
  "js-sys",
  "klima-api",
