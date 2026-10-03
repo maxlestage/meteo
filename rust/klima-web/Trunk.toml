@@ -1,0 +1,9 @@
+# L'application est publiée sous /app/ de la vitrine : les chemins produits
+# doivent être relatifs, sinon un déploiement à la racine d'un autre domaine
+# chercherait ses fichiers au mauvais endroit.
+[build]
+public_url = "./"
+dist = "dist"
+
+[serve]
+port = 8081

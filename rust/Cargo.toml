@@ -5,6 +5,10 @@
 # le remplaçant prouvé.
 [workspace]
 members = ["klima-api", "klima-core", "klima-relay"]
+# Les interfaces se construisent pour le navigateur, pas pour la machine :
+# les laisser dans l'espace de travail ferait compiler Yew à chaque `cargo
+# test`, pour un binaire que personne n'exécuterait.
+exclude = ["klima-web"]
 resolver = "3"
 
 [workspace.package]
