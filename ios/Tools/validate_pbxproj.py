@@ -1,5 +1,6 @@
 """Parseur OpenStep minimal + vérifications d'intégrité du project.pbxproj."""
-import os, re, sys
+import os
+import re, sys
 
 class Parser:
     def __init__(self, text):
@@ -135,9 +136,12 @@ def resolve(group_id, prefix):
             full = os.path.join(root_dir, here, obj["path"])
             if not os.path.exists(full):
                 errors.append(f"fichier absent du disque : {os.path.relpath(full, root_dir)}")
-            seen_files.add(os.path.relpath(full, root_dir))
+            relative = os.path.relpath(full, root_dir)
+            seen_files.add(relative)
+            path_by_ref[child] = relative
 
 seen_files = set()
+path_by_ref = {}
 resolve(project["mainGroup"], "")
 
 # 4. Tout fichier source du disque est bien référencé par le projet.
@@ -225,6 +229,35 @@ for host, needed in (("Kliima", ("KliimaWidgets", "KliimaWatch")),
         if name not in deps:
             errors.append(f"{host} ne dépend pas de {name}")
     print(f"dépendances de {host} :", ", ".join(sorted(deps)))
+
+# 9. Deux types de même nom dans une même cible ne compilent pas.
+#
+# Swift refuse la redéclaration au niveau du module, même quand l'une des deux
+# est privée : « private » au premier niveau d'un fichier limite la visibilité,
+# pas le nom. L'erreur ne sort qu'à la compilation, c'est-à-dire après six
+# minutes d'exécution — alors qu'elle se lit ici en une seconde.
+DECLARATION = re.compile(r"^(?:public |internal |private |fileprivate |final )*"
+                         r"(?:struct|enum|class|actor|protocol) ([A-Za-z_][A-Za-z0-9_]*)",
+                         re.MULTILINE)
+
+for target_id in project["targets"]:
+    target = objects[target_id]
+    name = objects[target_id]["name"]
+    vus = {}
+    for phase in (objects[p] for p in target["buildPhases"]):
+        if phase["isa"] != "PBXSourcesBuildPhase":
+            continue
+        for bf in phase["files"]:
+            relative = path_by_ref.get(objects[bf]["fileRef"])
+            if not relative or not relative.endswith(".swift"):
+                continue
+            source = open(os.path.join(root_dir, relative), encoding="utf-8").read()
+            for declare in DECLARATION.findall(source):
+                if declare in vus and vus[declare] != relative:
+                    errors.append(
+                        f"{name} : « {declare} » déclaré deux fois — "
+                        f"{vus[declare]} et {relative}")
+                vus.setdefault(declare, relative)
 
 if errors:
     print("\nERREURS :")
