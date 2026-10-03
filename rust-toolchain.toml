@@ -1,0 +1,11 @@
+# La version de Rust, et la cible des deux interfaces.
+#
+# Épinglée plutôt que « stable » : une construction qui se déploie toute seule
+# ne doit pas changer de compilateur sans qu'on l'ait décidé.
+[toolchain]
+channel = "1.94.1"
+targets = ["wasm32-unknown-unknown"]
+profile = "minimal"
+# Clippy avec : la vérification d'avant-livraison l'appelle, et une version
+# épinglée sans lui ferait échouer la commande que le dépôt documente.
+components = ["clippy"]

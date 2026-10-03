@@ -14,7 +14,7 @@ use klima_core::i18n::params;
 use klima_core::plan::{FEATURES, Feature, Plan, limits_for};
 use yew::prelude::*;
 
-use crate::i18n::use_i18n;
+use klima_ui::i18n::use_i18n;
 
 /// Ce que le web donne malgré tout.
 ///

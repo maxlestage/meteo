@@ -1,0 +1,21 @@
+[workspace]
+
+[package]
+name = "klima-site"
+version = "1.0.0"
+edition = "2024"
+rust-version = "1.85"
+
+[dependencies]
+klima-core = { path = "../klima-core" }
+klima-api = { path = "../klima-api" }
+klima-ui = { path = "../klima-ui" }
+yew = { version = "0.23", features = ["csr"] }
+js-sys = "0.3"
+wasm-bindgen = "0.2"
+web-sys = { version = "0.3", features = [
+  "Window", "Document", "Element", "HtmlElement", "HtmlInputElement",
+  "IntersectionObserver", "IntersectionObserverInit", "IntersectionObserverEntry",
+  "MediaQueryList", "EventTarget", "Node",
+] }
+wasm-bindgen-futures = "0.4.79"

@@ -9,6 +9,7 @@ rust-version = "1.85"
 [dependencies]
 klima-core = { path = "../klima-core" }
 klima-api = { path = "../klima-api" }
+klima-ui = { path = "../klima-ui" }
 yew = { version = "0.23", features = ["csr"] }
 gloo-net = "0.7"
 gloo-timers = { version = "0.4", features = ["futures"] }

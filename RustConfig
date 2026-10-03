@@ -1,0 +1,8 @@
+# Réglages du buildpack Rust d'Heroku.
+#
+# L'espace de travail est dans `rust/` ; les interfaces se construisent avant
+# le relais, parce que c'est lui qui les sert.
+RUST_SKIP_BUILD=no
+RUST_TOOLCHAIN_FILE=rust-toolchain.toml
+BUILD_PATH=rust/klima-relay
+BUILD_HOOK=rust/scripts/construire.sh

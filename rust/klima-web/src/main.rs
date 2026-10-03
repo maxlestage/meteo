@@ -16,25 +16,29 @@
 
 mod app;
 mod composants;
-mod crochets;
-mod dates;
-mod horloge;
-mod i18n;
 mod messages;
-mod reseau;
-mod storage;
 
 use klima_core::endpoints::{Endpoints, relay_from};
+use klima_core::i18n::MessageSet;
+use klima_ui::i18n::{Catalogues, I18nProvider};
 use yew::prelude::*;
+
+/// Les catalogues de l'application, dans l'ordre : le sien, puis le partagé,
+/// que le fournisseur ajoute derrière.
+fn catalogues() -> Catalogues {
+    static CATALOGUES: std::sync::LazyLock<[&'static MessageSet; 1]> =
+        std::sync::LazyLock::new(|| [&messages::WEB_MESSAGES]);
+    Catalogues(&*CATALOGUES)
+}
 
 #[function_component]
 fn Racine() -> Html {
     let endpoints = acheminement();
 
     html! {
-        <i18n::I18nProvider>
+        <I18nProvider catalogues={catalogues()}>
             <app::App {endpoints} />
-        </i18n::I18nProvider>
+        </I18nProvider>
     }
 }
 

@@ -53,6 +53,31 @@ describe('relais', () => {
     expect(seen[0]!.searchParams.get('longitude')).toBe('1.480')
   })
 
+  test('deux demandes de portée différente ne partagent pas leur entrée', async () => {
+    // La vitrine demande deux jours, l'application sept. Avec une seule entrée
+    // pour les deux, la première arrivée servirait l'autre.
+    const { call, seen } = upstream(() => ({ ok: true }))
+    const handle = createHandler({ fetch: call })
+
+    await handle(get('/v1/open-meteo/forecast?latitude=48.44&longitude=1.48&forecast_days=2'))
+    await handle(get('/v1/open-meteo/forecast?latitude=48.44&longitude=1.48&forecast_days=7'))
+
+    expect(seen).toHaveLength(2)
+  })
+
+  test('deux demandes identiques à la maille près partagent la leur', async () => {
+    const { call, seen } = upstream(() => ({ ok: true }))
+    const handle = createHandler({ fetch: call })
+    const demande = (lat: string) =>
+      `/v1/open-meteo/forecast?latitude=${lat}&longitude=1.48&forecast_days=7&hourly=temperature_2m`
+
+    await handle(get(demande('48.441')))
+    const second = await handle(get(demande('48.444')))
+
+    expect(seen).toHaveLength(1)
+    expect(second.headers.get('X-Klima-Cache')).toBe('cache')
+  })
+
   test('la comparaison des modèles est un cache distinct de la prévision seule', async () => {
     const { call, seen } = upstream(() => ({ ok: true }))
     const handle = createHandler({ fetch: call })

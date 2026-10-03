@@ -17,8 +17,8 @@ use wasm_bindgen::{JsCast, JsValue};
 use web_sys::HtmlInputElement;
 use yew::prelude::*;
 
-use crate::i18n::use_i18n;
-use crate::reseau;
+use klima_ui::i18n::use_i18n;
+use klima_ui::reseau;
 
 /// Le temps qu'on laisse à la frappe avant d'interroger.
 const ATTENTE_MS: u32 = 250;
