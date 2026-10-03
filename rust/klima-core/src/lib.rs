@@ -19,6 +19,7 @@ pub mod i18n;
 pub mod agro;
 pub mod consensus;
 pub mod messages;
+pub mod plan;
 pub mod position;
 pub mod providers;
 pub mod register;
