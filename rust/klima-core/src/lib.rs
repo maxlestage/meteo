@@ -12,5 +12,7 @@
 pub mod cumuls;
 pub mod grid;
 pub mod agro;
+pub mod consensus;
 pub mod position;
+pub mod providers;
 pub mod weather;
