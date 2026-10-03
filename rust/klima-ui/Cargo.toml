@@ -19,3 +19,4 @@ web-sys = { version = "0.3", features = [
   "Location", "History", "Navigator", "Geolocation", "Position", "Coordinates",
   "PositionOptions", "PositionError", "EventTarget", "Node",
 ] }
+futures = { version = "0.3.34", default-features = false, features = ["std", "async-await"] }
