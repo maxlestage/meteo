@@ -8,8 +8,8 @@ use klima_core::format::describe_blocker;
 use klima_core::i18n::params;
 use yew::prelude::*;
 
-use crate::dates;
-use crate::i18n::use_i18n;
+use klima_ui::dates;
+use klima_ui::i18n::use_i18n;
 
 #[derive(Properties, PartialEq)]
 pub struct Props {
@@ -21,7 +21,7 @@ pub struct Props {
 pub fn Traitement(props: &Props) -> Html {
     let i18n = use_i18n();
     let f = i18n.f();
-    let traducteur = traducteur(&i18n);
+    let traducteur = i18n.translator();
 
     let fenetres: Vec<_> = spray_windows(&props.hours).into_iter().take(24).collect();
 
@@ -97,12 +97,4 @@ pub fn Traitement(props: &Props) -> Html {
             </div>
         </section>
     }
-}
-
-/// Le traducteur du cœur, pour `describe_blocker` qui formule les motifs.
-fn traducteur(i18n: &crate::i18n::I18n) -> klima_core::i18n::Translator<'static> {
-    klima_core::i18n::Translator::new(
-        i18n.language,
-        &[&crate::messages::WEB_MESSAGES, &klima_core::messages::SHARED_MESSAGES],
-    )
 }

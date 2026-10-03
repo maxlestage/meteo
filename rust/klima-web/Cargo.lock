@@ -583,6 +583,20 @@ name = "klima-core"
 version = "1.0.0"
 
 [[package]]
+name = "klima-ui"
+version = "1.0.0"
+dependencies = [
+ "gloo-net 0.7.0",
+ "js-sys",
+ "klima-api",
+ "klima-core",
+ "wasm-bindgen",
+ "wasm-bindgen-futures",
+ "web-sys",
+ "yew",
+]
+
+[[package]]
 name = "klima-web"
 version = "1.0.0"
 dependencies = [
@@ -591,6 +605,7 @@ dependencies = [
  "js-sys",
  "klima-api",
  "klima-core",
+ "klima-ui",
  "wasm-bindgen",
  "wasm-bindgen-futures",
  "web-sys",

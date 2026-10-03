@@ -74,6 +74,26 @@ function corsHeaders(origin: string | null, allowed: readonly string[]): Record<
   }
 }
 
+/**
+ * L'empreinte de ce qui change la réponse.
+ *
+ * Seul `models` entrait dans la clé : la vitrine, qui demande deux jours, et
+ * l'application, qui en demande sept, partageaient donc une entrée. Celle des
+ * deux qui arrivait la première servait l'autre — une liste de sept jours qui
+ * n'en montrait que deux, ou l'inverse.
+ *
+ * Tout ce qui n'est pas le point entre donc dans la clé, trié pour que l'ordre
+ * des paramètres ne compte pas.
+ */
+function empreinte(params: URLSearchParams): string {
+  const parts: string[] = []
+  for (const [key, value] of params) {
+    if (['latitude', 'longitude', 'lat', 'lon'].includes(key)) continue
+    parts.push(`${key}=${value}`)
+  }
+  return parts.sort().join('&')
+}
+
 /** Lit et valide un point de la requête. */
 function pointFrom(params: URLSearchParams): { latitude: number; longitude: number } | null {
   const rawLatitude = params.get('latitude') ?? params.get('lat')
@@ -156,7 +176,7 @@ export function createHandler(options: ServerOptions = {}) {
       case '/v1/open-meteo/forecast':
         return respond(
           () =>
-            forecasts.serve(cellKey(`om:${url.searchParams.get('models') ?? 'seul'}`, cell), () =>
+            forecasts.serve(cellKey(`om:${empreinte(url.searchParams)}`, cell), () =>
               openMeteoForecast(options, url.searchParams, cell.latitude, cell.longitude),
             ),
           cors,

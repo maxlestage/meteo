@@ -1,0 +1,8 @@
+# La vitrine est publiée à la racine, l'application sous /app/ : les chemins
+# relatifs marchent dans les deux cas, y compris sous un sous-chemin.
+[build]
+public_url = "./"
+dist = "dist"
+
+[serve]
+port = 8082
