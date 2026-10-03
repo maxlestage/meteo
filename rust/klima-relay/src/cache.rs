@@ -16,6 +16,13 @@
 //! erreur : la météo d'il y a deux heures reste utilisable, l'absence de météo
 //! ne l'est pas. `stale` dit jusqu'où on accepte de servir du périmé.
 //!
+//! Le cache est complet et éprouvé, mais aucune route ne l'appelle encore :
+//! `serve` attend les routes `/v1/…`, qui attendent elles-mêmes le client
+//! HTTP. D'où l'autorisation ci-dessous, qui part avec elles — mieux vaut un
+//! `allow` commenté qu'une douzaine d'avertissements qu'on apprend à ne plus
+//! lire.
+#![allow(dead_code)]
+
 //! La coalescence s'écrit ici autrement qu'en TypeScript, et c'est une
 //! différence de langue, pas de règle. Là-bas on partage une promesse ; ici un
 //! verrou par clé, et celui qui l'obtient vérifie d'abord si un autre n'a pas
