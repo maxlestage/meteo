@@ -8,6 +8,8 @@ rust-version.workspace = true
 klima-core = { path = "../klima-core" }
 axum.workspace = true
 tokio.workspace = true
+reqwest.workspace = true
 
 [dev-dependencies]
-tokio = { version = "1", features = ["rt-multi-thread", "macros", "sync", "time", "test-util"] }
+tokio = { version = "1", features = ["rt-multi-thread", "macros", "sync", "time", "fs", "test-util"] }
+tower = { version = "0.5.3", features = ["util"] }
