@@ -143,9 +143,8 @@ async fn handle(State(etat): State<Etat>, request: Request) -> Response {
 
     let (cle, appel) = match chemin.as_str() {
         "/v1/open-meteo/forecast" => {
-            let modeles = params.get("models").map(String::as_str).unwrap_or("seul");
             (
-                cell_key(&format!("om:{modeles}"), &cell),
+                cell_key(&format!("om:{}", empreinte(&params)), &cell),
                 upstream::open_meteo_forecast(
                     etat.open_meteo_key.as_deref(),
                     &params,
@@ -198,6 +197,31 @@ fn cors_headers(origin: Option<&str>, allowed: &[String]) -> HeaderMap {
     inserer(&mut entetes, header::ACCESS_CONTROL_ALLOW_ORIGIN, valeur);
     inserer(&mut entetes, header::VARY, "Origin");
     entetes
+}
+
+/// L'empreinte de ce qui change la réponse.
+///
+/// Le relais TypeScript ne mettait que `models` dans la clé : la vitrine, qui
+/// demande deux jours, et l'application, qui en demande sept, partageaient
+/// donc une entrée. Celle des deux qui arrivait la première servait l'autre —
+/// une liste de sept jours qui n'en montre que deux, ou l'inverse.
+///
+/// Tout ce qui n'est pas le point entre donc dans la clé. On la condense
+/// (FNV-1a, 64 bits) parce que les listes de variables font quatre cents
+/// caractères, et qu'une clé de cache n'a pas à être lisible.
+fn empreinte(params: &Params) -> String {
+    let mut hachage: u64 = 0xcbf2_9ce4_8422_2325;
+    for (nom, valeur) in params {
+        if nom == "latitude" || nom == "longitude" || nom == "lat" || nom == "lon" {
+            continue;
+        }
+        for octet in nom.bytes().chain(b"=".iter().copied()).chain(valeur.bytes()).chain(b"&".iter().copied())
+        {
+            hachage ^= u64::from(octet);
+            hachage = hachage.wrapping_mul(0x1000_0000_01b3);
+        }
+    }
+    format!("{hachage:016x}")
 }
 
 /// Lit et valide un point de la requête.
@@ -402,6 +426,42 @@ mod tests {
         let url = faux.premiere_url();
         assert!(url.contains("latitude=48.440"), "{url}");
         assert!(url.contains("longitude=1.480"), "{url}");
+    }
+
+    #[tokio::test]
+    async fn deux_demandes_de_portee_differente_ne_partagent_pas_leur_entree() {
+        // La vitrine demande deux jours, l'application sept. Avec une seule
+        // entrée pour les deux, la première arrivée servirait l'autre.
+        let faux = Faux::new();
+        let etat = relais(&faux);
+
+        let _ = get(
+            etat.clone(),
+            "/v1/open-meteo/forecast?latitude=48.44&longitude=1.48&forecast_days=2",
+        )
+        .await;
+        let _ = get(
+            etat,
+            "/v1/open-meteo/forecast?latitude=48.44&longitude=1.48&forecast_days=7",
+        )
+        .await;
+
+        assert_eq!(faux.appels(), 2);
+    }
+
+    #[tokio::test]
+    async fn deux_demandes_identiques_a_la_maille_pres_partagent_la_leur() {
+        let faux = Faux::new();
+        let etat = relais(&faux);
+        let demande = |lat: &str| {
+            format!("/v1/open-meteo/forecast?latitude={lat}&longitude=1.48&forecast_days=7&hourly=temperature_2m")
+        };
+
+        let _ = get(etat.clone(), &demande("48.441")).await;
+        let (_, entetes, _) = get(etat, &demande("48.444")).await;
+
+        assert_eq!(faux.appels(), 1);
+        assert_eq!(entetes["x-klima-cache"], "cache");
     }
 
     #[tokio::test]

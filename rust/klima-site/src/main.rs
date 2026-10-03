@@ -1,21 +1,16 @@
-//! Le montage de l'application web, en Yew et WebAssembly.
+//! Le montage de la vitrine, en Yew et WebAssembly.
 //!
-//! Miroir de `web/src/main.tsx`.
+//! Miroir de `site/src/main.tsx`.
 //!
-//! ## L'acheminement des appels météo
-//!
-//! Sans relais configuré, chaque navigateur interroge les fournisseurs
-//! lui-même : c'est le mode de développement, et il reste sur le plan gratuit
-//! d'Open-Meteo, réservé à un usage non commercial. Avec un relais, les appels
-//! passent par lui — clé commerciale, cache mutualisé, et MET Norway devient
-//! accessible au web puisque c'est le serveur qui se nomme.
-//!
-//! Le réglage est lu à la compilation (`KLIMA_RELAY`), comme la variable
-//! `VITE_KLIMA_RELAY` du côté TypeScript : un binaire WebAssembly n'a pas
-//! d'environnement à l'exécution.
+//! L'acheminement des appels météo suit la même règle que l'application :
+//! sans relais configuré, le navigateur interroge les fournisseurs lui-même ;
+//! avec un relais, tout passe par lui. Le réglage est lu à la compilation
+//! (`KLIMA_RELAY`) : un binaire WebAssembly n'a pas d'environnement à
+//! l'exécution.
 
 mod app;
 mod composants;
+mod crochets;
 mod messages;
 
 use klima_core::endpoints::{Endpoints, relay_from};
@@ -23,11 +18,9 @@ use klima_core::i18n::MessageSet;
 use klima_ui::i18n::{Catalogues, I18nProvider};
 use yew::prelude::*;
 
-/// Les catalogues de l'application, dans l'ordre : le sien, puis le partagé,
-/// que le fournisseur ajoute derrière.
 fn catalogues() -> Catalogues {
     static CATALOGUES: std::sync::LazyLock<[&'static MessageSet; 1]> =
-        std::sync::LazyLock::new(|| [&messages::WEB_MESSAGES]);
+        std::sync::LazyLock::new(|| [&messages::SITE_MESSAGES]);
     Catalogues(&*CATALOGUES)
 }
 

@@ -71,10 +71,16 @@ nouvelle pull request.
 ## Vérifications avant de livrer
 
 ```bash
-bun test                       # cœur partagé, relais, web et site
-cd core && bun run typecheck   # idem dans server/, web/ et site/
-cd web && bun run build        # idem dans site/
+cd rust && cargo test          # cœur, formats de fil, relais
+cd rust && cargo clippy --all-targets
+cd rust && trunk build --config klima-web/Trunk.toml    # idem klima-site/
+bun test                       # ce qui reste en TypeScript
 ```
+
+Les interfaces en Yew ne sont pas dans l'espace de travail : elles se
+construisent pour le navigateur, et les laisser dedans ferait compiler Yew à
+chaque `cargo test`. `cargo test` passe quand même dans `klima-web`,
+`klima-site` et `klima-ui` — il n'y tourne que les tests de catalogue.
 
 Le `project.pbxproj` est versionné et ouvrable tel quel par Xcode ; les outils
 de `ios/Tools/` le régénèrent depuis une liste de fichiers lisible, ce qui évite

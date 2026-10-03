@@ -12,9 +12,9 @@ use klima_core::agro::{CurrentSample, HourlySample};
 use klima_core::weather::weather_condition;
 use yew::prelude::*;
 
-use crate::composants::pictogramme::Pictogramme;
-use crate::dates;
-use crate::i18n::use_i18n;
+use klima_ui::composants::pictogramme::Pictogramme;
+use klima_ui::dates;
+use klima_ui::i18n::use_i18n;
 
 /// Une demi-journée répond à la question qu'on se pose en ouvrant
 /// l'application.

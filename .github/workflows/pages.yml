@@ -26,37 +26,49 @@ jobs:
     steps:
       - uses: actions/checkout@v5
 
-      - uses: oven-sh/setup-bun@v2
-        with:
-          bun-version: latest
+      # La chaîne Rust est épinglée par `rust-toolchain.toml` ; la cible du
+      # navigateur y figure aussi, rustup la pose donc tout seul.
+      - name: Chaîne Rust
+        run: rustup show
 
-      - run: bun install --frozen-lockfile
+      # Le cœur partage ses règles avec les deux interfaces : une règle fausse
+      # publierait une page qui annonce autre chose que ce qu'elle applique.
+      - name: Tests du cœur et du relais
+        run: cargo test
+        working-directory: rust
 
-      # Le cœur partagé porte les règles agronomiques citées par la page.
-      - name: Tests du cœur partagé
-        run: bun test
+      # Trunk est téléchargé déjà compilé : le compiler prendrait plus de temps
+      # que tout le reste de la publication.
+      - name: Trunk
+        run: |
+          mkdir -p "$HOME/.local/bin"
+          curl --fail --location --silent \
+            https://github.com/trunk-rs/trunk/releases/download/v0.21.14/trunk-x86_64-unknown-linux-gnu.tar.gz \
+            | tar -xz -C "$HOME/.local/bin"
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
 
-      # `build` enchaîne tsc puis vite : une erreur de types arrête la publication.
-      #
-      # `VITE_KLIMA_RELAY` désigne le relais. Variable de dépôt, pas secret :
-      # c'est une adresse publique, elle finit dans le paquet servi. Tant
-      # qu'elle est vide, le site et l'application appellent les fournisseurs
-      # en direct.
+      # `KLIMA_RELAY` désigne le relais. Variable de dépôt, pas secret : c'est
+      # une adresse publique, elle finit dans le paquet servi. Tant qu'elle est
+      # vide, le site et l'application appellent les fournisseurs en direct.
       - name: Construction de la vitrine
-        run: bun run --cwd site build
+        run: trunk build --release --config klima-site/Trunk.toml
+        working-directory: rust
         env:
-          VITE_KLIMA_RELAY: ${{ vars.KLIMA_RELAY }}
+          KLIMA_RELAY: ${{ vars.KLIMA_RELAY }}
 
       - name: Construction de l'application web
-        run: bun run --cwd web build
+        run: trunk build --release --config klima-web/Trunk.toml
+        working-directory: rust
         env:
-          VITE_KLIMA_RELAY: ${{ vars.KLIMA_RELAY }}
+          KLIMA_RELAY: ${{ vars.KLIMA_RELAY }}
 
       # L'application est servie depuis un sous-chemin de la vitrine. Les deux
-      # projets construisent en chemins relatifs (`base: './'`), il n'y a donc
-      # rien à reconfigurer pour qu'elle vive sous /app/.
+      # projets construisent en chemins relatifs (`public_url = "./"`), il n'y
+      # a donc rien à reconfigurer pour qu'elle vive sous /app/.
       - name: Assemblage de la publication
-        run: cp -r web/dist site/dist/app
+        run: |
+          mkdir -p rust/klima-site/dist/app
+          cp -r rust/klima-web/dist/. rust/klima-site/dist/app/
 
       # Sans Pages activé dans les réglages, cette étape échoue sur « Get Pages
       # site failed » et tout ce qui précède est perdu. « enablement: true » a
@@ -68,7 +80,7 @@ jobs:
 
       - uses: actions/upload-pages-artifact@v3
         with:
-          path: site/dist
+          path: rust/klima-site/dist
 
   deploy:
     needs: build

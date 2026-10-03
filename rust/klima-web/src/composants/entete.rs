@@ -6,7 +6,7 @@ use klima_api::open_meteo::AgroForecast;
 use klima_core::weather::weather_condition;
 use yew::prelude::*;
 
-use crate::i18n::use_i18n;
+use klima_ui::i18n::use_i18n;
 
 #[derive(Properties, PartialEq)]
 pub struct Props {
