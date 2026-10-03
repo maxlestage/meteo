@@ -10,6 +10,7 @@
 //! quelle que soit la langue qui la calcule.
 
 pub mod alerts;
+pub mod calendar;
 pub mod cumuls;
 pub mod grid;
 pub mod i18n;
@@ -17,4 +18,5 @@ pub mod agro;
 pub mod consensus;
 pub mod position;
 pub mod providers;
+pub mod register;
 pub mod weather;
