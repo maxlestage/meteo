@@ -23,12 +23,34 @@ pub enum ParcelleOrigin {
     Defaut,
 }
 
-/// Une parcelle : un nom et un point.
-#[derive(Debug, Clone, PartialEq)]
+/// Une parcelle : un nom, un point, et de quoi lever l'ambiguïté entre
+/// homonymes.
+///
+/// Le type vit ici et non dans `klima-api` parce que deux `Parcelle`
+/// différentes finiraient par se contredire : la règle de position en
+/// fabrique une, l'adresse de la page en relit une, le géocodage en rend une
+/// liste — ce sont les mêmes.
+#[derive(Debug, Clone, PartialEq, Default)]
 pub struct Parcelle {
     pub name: String,
     pub latitude: f64,
     pub longitude: f64,
+    /// Région ou département, quand la source le donne.
+    pub admin: Option<String>,
+    pub country: Option<String>,
+}
+
+impl Parcelle {
+    /// Une parcelle réduite à ce qui la désigne.
+    pub fn new(name: &str, latitude: f64, longitude: f64) -> Self {
+        Parcelle {
+            name: name.to_owned(),
+            latitude,
+            longitude,
+            admin: None,
+            country: None,
+        }
+    }
 }
 
 /// Faut-il aller chercher la position au démarrage ?
@@ -40,11 +62,7 @@ pub fn locates_on_start(origin: ParcelleOrigin) -> bool {
 ///
 /// Le nom vient de l'interface : le domaine ne fabrique pas de phrases.
 pub fn parcelle_from_position(name: &str, latitude: f64, longitude: f64) -> Parcelle {
-    Parcelle {
-        name: name.to_string(),
-        latitude: snap(latitude),
-        longitude: snap(longitude),
-    }
+    Parcelle::new(name, snap(latitude), snap(longitude))
 }
 
 #[cfg(test)]

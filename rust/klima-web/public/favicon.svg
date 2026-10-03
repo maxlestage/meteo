@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="64" height="64"><defs><linearGradient id="klimaTile" x1="0" y1="0" x2="0.4" y2="1">
+    <stop offset="0%" stop-color="#4e7d33"/><stop offset="100%" stop-color="#22401a"/>
+  </linearGradient></defs>
+  <rect width="1024" height="1024" rx="229" fill="url(#klimaTile)"/>
+  <rect x="322" y="276" width="96" height="560" rx="48" fill="#f2f6ec"/>
+  <path d="M418 556c118-36 214-124 286-244 22 148-70 268-206 316Z" fill="#f2f6ec"/>
+  <path d="M418 556c118 36 214 124 286 244 22-148-70-268-206-316Z" fill="#b9d98f"/>
+  <circle cx="370" cy="240" r="52" fill="#7fd0f5"/>
+</svg>
