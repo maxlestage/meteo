@@ -35,31 +35,42 @@ struct ComplicationProvider: TimelineProvider {
     }
 
     func getSnapshot(in context: Context, completion: @escaping (ComplicationEntry) -> Void) {
-        Task { completion(await entry()) }
+        Task { completion(await entries().first ?? placeholder(in: context)) }
     }
 
+    /// Une entrée par heure à venir, la fenêtre recalculée pour chacune : une
+    /// fenêtre refermée cède la place à la suivante à l'heure où elle se ferme,
+    /// pas au prochain rechargement.
     func getTimeline(in context: Context, completion: @escaping (Timeline<ComplicationEntry>) -> Void) {
         Task {
-            let entry = await entry()
-            let next = Calendar.current.date(byAdding: .hour, value: 1, to: Date()) ?? Date()
-            completion(Timeline(entries: [entry], policy: .after(next)))
+            let entries = await entries()
+            completion(Timeline(entries: entries.isEmpty ? [placeholder(in: context)] : entries,
+                                policy: .after(Date().addingTimeInterval(3 * 3600))))
         }
     }
 
-    private func entry() async -> ComplicationEntry {
+    private func entries() async -> [ComplicationEntry] {
         let parcelle = SharedStore.loadParcelle() ?? .chartres
+        let maintenant = Date()
 
         guard let forecast = try? await AgroWeatherService().forecast(for: parcelle, days: 2) else {
-            return ComplicationEntry(date: Date(), spray: nil, loaded: false, timeZone: .current)
+            return [ComplicationEntry(date: maintenant, spray: nil, loaded: false, timeZone: .current)]
         }
 
-        let summary = AgroIndicators.summarize(hours: forecast.hourly, days: forecast.daily)
-        return ComplicationEntry(
-            date: Date(),
-            spray: summary.nextSpray,
-            loaded: true,
-            timeZone: TimeZone(identifier: forecast.timezone) ?? .current
-        )
+        let zone = TimeZone(identifier: forecast.timezone) ?? .current
+        return Horizon.chronologie(
+            courant: forecast.current,
+            heures: forecast.hourly,
+            jours: forecast.daily,
+            depuis: maintenant
+        ).map { moment in
+            ComplicationEntry(
+                date: moment.date,
+                spray: AgroIndicators.summarize(hours: moment.heures, days: forecast.daily).nextSpray,
+                loaded: true,
+                timeZone: zone
+            )
+        }
     }
 }
 

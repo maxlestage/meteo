@@ -14,7 +14,7 @@ struct DailyListView: View {
             VStack(spacing: 0) {
                 ForEach(Array(days.enumerated()), id: \.element.id) { index, day in
                     if index > 0 {
-                        Divider().overlay(Color.white.opacity(0.14))
+                        Divider().overlay(Color.filet)
                     }
                     row(for: day, isToday: index == 0)
                 }
@@ -49,7 +49,7 @@ struct DailyListView: View {
             .frame(width: 46)
 
             Text(AgroFormat.temperature(day.temperatureMin))
-                .foregroundStyle(.white.opacity(0.62))
+                .foregroundStyle(Color.encreDouce)
                 .frame(width: 34, alignment: .trailing)
 
             temperatureBar(for: day, isToday: isToday)
@@ -71,7 +71,7 @@ struct DailyListView: View {
 
             ZStack(alignment: .leading) {
                 Capsule()
-                    .fill(Color.white.opacity(0.2))
+                    .fill(Color.encre.opacity(0.2))
                 Capsule()
                     .fill(LinearGradient(
                         colors: [
@@ -88,7 +88,7 @@ struct DailyListView: View {
                 if isToday {
                     let position = min(max((currentTemperature - weekLow) / span, 0), 1)
                     Circle()
-                        .fill(.white)
+                        .fill(Color.encre)
                         .frame(width: 7, height: 7)
                         .offset(x: width * position - 3.5)
                 }

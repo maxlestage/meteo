@@ -81,6 +81,9 @@ web: rust/target/release/klima-relay
 | `KLIMA_PUBLIC`   | Où sont les fichiers du site. `public` par défaut — rien à régler |
 | `KLIMA_PRO`      | Le palier accordé pendant l'essai — voir plus bas                 |
 | `KLIMA_SESSION_SECRET` | Le secret qui signe les sessions des comptes — voir plus bas |
+| `KLIMA_APNS_KEY` | Le contenu du fichier `.p8` d'Apple — voir « L'île dynamique en temps réel » |
+| `KLIMA_APNS_KEY_ID` | L'identifiant de cette clé, dix caractères |
+| `KLIMA_APNS_TEAM_ID` | L'identifiant de l'équipe Apple, dix caractères |
 
 `OPEN_METEO_KEY` peut rester vide : le relais tourne alors sur le plan gratuit
 d'Open-Meteo, réservé à l'usage non commercial. Le jour où Klima se vend,
@@ -240,6 +243,45 @@ Il ne donne rien sur iPhone, qui ne présente plus que sa session.
 `KliimaProCode` reste vide dans le dépôt et le restera, et un test le vérifie.
 Un code écrit ici serait lisible par quiconque lit le dépôt, bien avant d'être
 extrait du binaire. Les comptes rendent la question sans objet.
+
+## L'île dynamique en temps réel
+
+Sans le relais, l'île dynamique de Kliima ‣ bascule seule à l'heure pile —
+l'iPhone lui a donné l'heure suivante d'avance — mais ne reçoit rien de neuf
+tant qu'iOS ne réveille pas l'application. Avec une clé APNs, le relais
+regarde chaque minute ce que chaque île devrait montrer et pousse ce qui
+change : l'heure qui commence en priorité haute, une prévision renouvelée en
+priorité basse.
+
+La clé se crée une fois, dans le compte développeur d'Apple :
+**Certificates, Identifiers & Profiles › Keys › +**, cocher **Apple Push
+Notifications service (APNs)**, environnement **Production** (ou « Sandbox &
+Production »). Apple ne laisse télécharger le fichier `AuthKey_XXXXXXXXXX.p8`
+qu'une seule fois : le garder. L'identifiant de la clé est sur sa page,
+celui de l'équipe en haut à droite du compte.
+
+```bash
+heroku config:set KLIMA_APNS_KEY="$(cat AuthKey_XXXXXXXXXX.p8)" \
+                  KLIMA_APNS_KEY_ID=XXXXXXXXXX \
+                  KLIMA_APNS_TEAM_ID=YYYYYYYYYY
+```
+
+Dans le tableau de bord d'Heroku, le champ avale les retours à la ligne :
+coller la clé sur une ligne, avec ou sans ses lignes `BEGIN`/`END`, marche
+aussi. Les trois valeurs vont ensemble ; une seule bancale désactive la
+poussée, et le journal dit laquelle — jamais ce qu'elle contient. La clé
+signe des envois vers tous les appareils de l'équipe : elle vit ici et nulle
+part ailleurs, comme les autres.
+
+Ce que le relais garde de chaque île : le jeton qu'Apple lui a remis, la
+maille de la parcelle, et ce qu'il a poussé en dernier. En mémoire, douze
+heures au plus — un redémarrage oublie tout, et l'iPhone réinscrit son île à
+la prochaine ouverture.
+
+```bash
+curl https://VOTRE-APP.herokuapp.com/health
+# … "poussee":"activée","iles":1
+```
 
 ## Vérifier
 

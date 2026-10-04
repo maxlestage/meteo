@@ -1,9 +1,29 @@
 import SwiftUI
 
-/// Le fond suit le ciel : nuit, journée couverte ou journée dégagée.
+/// L'encre de l'interface : blanche sur un ciel sombre, bleu nuit sur un ciel clair.
+///
+/// Tout était écrit en blanc, et l'écran forcé en sombre pour que ça reste
+/// lisible — de jour comme de nuit, quel que soit le réglage du téléphone. Ces
+/// couleurs suivent maintenant le thème du système, comme le reste d'iOS.
+extension Color {
+    static let encre = Color(uiColor: UIColor { trait in
+        trait.userInterfaceStyle == .dark
+            ? .white
+            : UIColor(red: 0.071, green: 0.129, blue: 0.220, alpha: 1)
+    })
+    /// Pour ce qui accompagne : intitulés, unités, compléments.
+    static let encreDouce = Color.encre.opacity(0.62)
+    /// Pour les filets et les séparations.
+    static let filet = Color.encre.opacity(0.14)
+}
+
+/// Le fond suit le ciel : nuit, journée couverte ou journée dégagée — et le
+/// thème du système, clair ou sombre.
 struct SkyBackground: View {
     let isDay: Bool
     let weatherCode: Int
+
+    @Environment(\.colorScheme) private var scheme
 
     var body: some View {
         LinearGradient(colors: colors, startPoint: .top, endPoint: .bottom)
@@ -11,6 +31,33 @@ struct SkyBackground: View {
     }
 
     private var colors: [Color] {
+        scheme == .dark ? sombre : clair
+    }
+
+    /// Les mêmes trois ciels, en clair : l'encre bleu nuit y garde son contraste.
+    private var clair: [Color] {
+        guard isDay else {
+            return [
+                Color(red: 0.800, green: 0.808, blue: 0.918),
+                Color(red: 0.871, green: 0.875, blue: 0.949),
+                Color(red: 0.941, green: 0.941, blue: 0.980),
+            ]
+        }
+        if weatherCode >= 45 {
+            return [
+                Color(red: 0.820, green: 0.851, blue: 0.890),
+                Color(red: 0.882, green: 0.902, blue: 0.929),
+                Color(red: 0.949, green: 0.957, blue: 0.969),
+            ]
+        }
+        return [
+            Color(red: 0.761, green: 0.871, blue: 0.973),
+            Color(red: 0.859, green: 0.929, blue: 0.992),
+            Color(red: 0.953, green: 0.973, blue: 1.000),
+        ]
+    }
+
+    private var sombre: [Color] {
         guard isDay else {
             return [
                 Color(red: 0.235, green: 0.333, blue: 0.431),
@@ -41,7 +88,7 @@ struct CardBackground: ViewModifier {
             .background(.ultraThinMaterial.opacity(0.6), in: RoundedRectangle(cornerRadius: 18))
             .overlay(
                 RoundedRectangle(cornerRadius: 18)
-                    .strokeBorder(Color.white.opacity(0.14), lineWidth: 1)
+                    .strokeBorder(Color.filet, lineWidth: 1)
             )
     }
 }
@@ -58,7 +105,7 @@ struct CardLabel: View {
         Text(text.uppercased())
             .font(.caption2.weight(.semibold))
             .kerning(0.6)
-            .foregroundStyle(.white.opacity(0.62))
+            .foregroundStyle(Color.encreDouce)
             .frame(maxWidth: .infinity, alignment: .leading)
     }
 }
