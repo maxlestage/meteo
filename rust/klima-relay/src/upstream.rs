@@ -1,7 +1,5 @@
 //! Les interrogations qui partent vraiment.
 //!
-//! Miroir de `server/src/upstream.ts`.
-//!
 //! Le relais **ne décode rien** : il transmet la réponse du fournisseur telle
 //! quelle. Les clients gardent donc leur code de décodage, et le jour où un
 //! fournisseur ajoute un champ, il n'y a rien à changer ici.

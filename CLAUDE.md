@@ -27,7 +27,7 @@ nouvelle pull request.
   cibles, les dossiers et les identifiants restent donc `Kliima` tout court.
   Un test vérifie que le nom affiché n'a pas perdu son triangle.
 - **Une seule source pour les règles agronomiques.** Les seuils vivent dans
-  `core/src/agro.ts` (`AgroThresholds`) et dans son miroir Swift
+  `rust/klima-core/src/agro.rs` (`thresholds`) et dans son miroir Swift
   `ios/Kliima/Models/AgroIndicators.swift`. Toute règle ajoutée d'un côté se
   porte de l'autre, avec les mêmes cas de test.
 - **Le domaine ne fabrique pas de phrases.** Il renvoie des états et des motifs
@@ -39,8 +39,9 @@ nouvelle pull request.
   ébréchée ; Maxime Nathan Lestage a tranché pour le bandeau. Ce qui ne revient
   pas, c'est `showsIndicators: false` : la première version défilait sans rien
   dire, on voyait six heures et il fallait deviner que les autres existaient.
-  L'indicateur reste visible, et lui seul défile de côté. Un test à la racine
-  le vérifie.
+  L'indicateur reste visible, et lui seul défile de côté.
+  `rust/klima-web/tests/defilement.rs` le vérifie : il porte sur les deux
+  plateformes à la fois, et lit les vues SwiftUI.
 - **Le web, lui, ne défile pas de côté.** Aucune règle CSS ne rend un bloc
   défilable à l'horizontale ; le bandeau y est une grille qui se replie, et
   montre douze heures — une demi-journée — les autres se dépliant d'un bouton.
@@ -52,7 +53,7 @@ nouvelle pull request.
   et un refus ne dit rien. Les coordonnées sont arrondies à la maille avant de
   devenir une parcelle : une parcelle finit dans l'adresse et dans le groupe
   partagé, elle n'a pas à dire à deux mètres près où se tient quelqu'un. La
-  règle vit dans `core/src/position.ts` et dans son miroir
+  règle vit dans `rust/klima-core/src/position.rs` et dans son miroir
   `ios/Kliima/Models/Position.swift`.
 - **Les heures sont celles de la parcelle**, pas celles du lecteur. Les nombres
   et les dates suivent en revanche la langue de l'utilisateur.
@@ -72,7 +73,7 @@ nouvelle pull request.
   réponse ni dans `/health`.
 - **Le plan gratuit d'Open-Meteo est réservé à un usage non commercial.** Le
   jour où Klima se vend, tout le trafic passe par un plan payant, donc par une
-  clé — qui vit dans `server/` et nulle part ailleurs. Une clé dans un binaire
+  clé — qui vit dans le relais et nulle part ailleurs. Une clé dans un binaire
   distribué est une clé publiée.
 
 ## Vérifications avant de livrer
@@ -80,14 +81,15 @@ nouvelle pull request.
 ```bash
 cd rust && cargo test          # cœur, formats de fil, relais
 cd rust && cargo clippy --all-targets
-cd rust && trunk build --config klima-web/Trunk.toml    # idem klima-site/
-bun test                       # ce qui reste en TypeScript
+cd rust && cargo test --manifest-path klima-web/Cargo.toml   # idem klima-site/
+cd rust && trunk build --config klima-web/Trunk.toml         # idem klima-site/
 ```
 
 Les interfaces en Yew ne sont pas dans l'espace de travail : elles se
 construisent pour le navigateur, et les laisser dedans ferait compiler Yew à
-chaque `cargo test`. `cargo test` passe quand même dans `klima-web`,
-`klima-site` et `klima-ui` — il n'y tourne que les tests de catalogue.
+chaque `cargo test`. Leurs propres tests tiennent les catalogues — et, pour
+`klima-web`, le garde-fou du défilement horizontal, qui lit aussi les vues
+SwiftUI.
 
 Le `project.pbxproj` est versionné et ouvrable tel quel par Xcode ; les outils
 de `ios/Tools/` le régénèrent depuis une liste de fichiers lisible, ce qui évite

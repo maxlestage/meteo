@@ -1,7 +1,5 @@
 //! Le montage de l'application web, en Yew et WebAssembly.
 //!
-//! Miroir de `web/src/main.tsx`.
-//!
 //! ## L'acheminement des appels météo
 //!
 //! Sans relais configuré, chaque navigateur interroge les fournisseurs

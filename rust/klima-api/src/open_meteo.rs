@@ -1,8 +1,6 @@
 //! Client de l'API agricole Open-Meteo : les adresses, et la lecture des
 //! réponses.
 //!
-//! Miroir de `core/src/openMeteo.ts`.
-//!
 //! On n'interroge que les variables agronomiques : température et humidité du
 //! sol, évapotranspiration de référence FAO-56, déficit de pression de vapeur,
 //! en plus des paramètres nécessaires au calcul des fenêtres de traitement.
@@ -10,11 +8,10 @@
 //! ## Les horodatages sont ceux de la parcelle
 //!
 //! Open-Meteo renvoie des heures locales sans décalage (« 2026-05-12T21:00 »).
-//! Le TypeScript les lit en UTC puis retranche le décalage du fuseau, ce qui
-//! donne un instant absolu que l'affichage rhabille ensuite en heure locale.
-//! Ici on garde l'heure de la parcelle telle quelle : c'est la convention du
-//! cœur en Rust, celle qui fait que « 21 h » veut dire 21 h au champ dans
-//! `alerts` comme dans `cumuls`, quel que soit le fuseau du serveur.
+//! On garde l'heure de la parcelle telle quelle plutôt que d'en faire un
+//! instant absolu : c'est la convention du cœur, celle qui fait que « 21 h »
+//! veut dire 21 h au champ dans `alerts` comme dans `cumuls`, quel que soit le
+//! fuseau du serveur.
 //!
 //! Le décalage n'est pas perdu pour autant : `AgroForecast` le porte, et
 //! `instant()` rend l'instant absolu pour qui en a besoin — un minuteur

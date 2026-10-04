@@ -1,9 +1,8 @@
 //! Charger la prévision d'une parcelle.
 //!
-//! Miroirs : `web/src/hooks/useAgroForecast.ts` et
-//! `site/src/hooks/useDayDigest.ts`. Les deux faisaient le même appel pour en
-//! tirer deux choses différentes — l'un la semaine, l'autre la journée. Ce qui
-//! est commun est ici ; ce qu'on en tire reste chez chaque interface.
+//! L'application et la vitrine faisaient le même appel pour en tirer deux
+//! choses différentes — l'une la semaine, l'autre la journée. Ce qui est
+//! commun est ici ; ce qu'on en tire reste chez chaque interface.
 //!
 //! Deux appels, et le second ne peut pas faire échouer le premier : le
 //! recoupement des modèles est un plus, son absence ne prive de rien. C'est

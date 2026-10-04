@@ -1,7 +1,5 @@
 //! La parcelle consultée, dans l'adresse.
 //!
-//! Miroir de `core/src/parcelleUrl.ts`.
-//!
 //! Sans cela, choisir une commune ne laisse aucune trace : le bouton retour du
 //! navigateur ne défait rien, recharger la page perd le choix, et envoyer
 //! l'adresse à quelqu'un lui montre une autre parcelle que la sienne. Trois

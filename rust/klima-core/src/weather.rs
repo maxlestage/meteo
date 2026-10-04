@@ -2,7 +2,7 @@
 //!
 //! Le code renvoie une clé, pas un libellé : le texte affiché dépend de la
 //! langue et vit dans les catalogues. La même table existe en TypeScript
-//! (`core/src/weather.ts`) et en Swift (`ios/Kliima/Models/WeatherCondition.swift`).
+//! en Swift (`ios/Kliima/Models/WeatherCondition.swift`).
 
 /// Famille de pictogramme, déclinée jour / nuit à l'affichage.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
