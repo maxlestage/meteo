@@ -63,6 +63,13 @@ nouvelle pull request.
   le relais, le serveur, qui pose l'en-tête pour tout le monde. Jamais depuis
   un navigateur en direct. Les mentions de licence s'affichent dès qu'une
   source est utilisée.
+- **Ce que le déploiement accorde vit sur le serveur.** Le palier payant
+  s'ouvre pendant l'essai par la variable `KLIMA_PRO` du relais, jamais par une
+  valeur glissée dans l'application : une valeur distribuée est une valeur
+  publiée, qu'on ne retire qu'en publiant une version. L'accord **s'ajoute** à
+  ce que dit StoreKit, il ne le remplace pas — un relais muet ne fait pas
+  perdre un abonnement réel. Le relais ne répète jamais le code, ni dans sa
+  réponse ni dans `/health`.
 - **Le plan gratuit d'Open-Meteo est réservé à un usage non commercial.** Le
   jour où Klima se vend, tout le trafic passe par un plan payant, donc par une
   clé — qui vit dans `server/` et nulle part ailleurs. Une clé dans un binaire
