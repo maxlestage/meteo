@@ -95,9 +95,9 @@ struct DashboardView: View {
                     .padding(.bottom, 32)
                 }
                 .scrollIndicators(.hidden)
+                .bordsNets()
             }
             .foregroundStyle(Color.encre)
-            .toolbarBackground(.hidden, for: .navigationBar)
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
                     Button {
@@ -406,4 +406,28 @@ struct DashboardView: View {
 
 #Preview {
     DashboardView()
+}
+
+private extension View {
+    /// Ce qui défile ne se lit plus sous les boutons du haut ni sous la
+    /// recherche.
+    ///
+    /// La barre était déclarée transparente pour laisser voir le ciel : le
+    /// texte glissait alors sous ✦ et ➤ sans rien entre eux, et « Conditions
+    /// météo » se lisait à travers les boutons. La barre reprend son
+    /// comportement par défaut — transparente en haut de page, voilée dès
+    /// qu'un contenu passe dessous —, et depuis iOS 26, le bord franc remplace
+    /// le fondu, qui laissait le texte mi-lisible sous les boutons.
+    @ViewBuilder
+    func bordsNets() -> some View {
+        #if compiler(>=6.2)
+        if #available(iOS 26.0, *) {
+            self.scrollEdgeEffectStyle(.hard, for: [.top, .bottom])
+        } else {
+            self
+        }
+        #else
+        self
+        #endif
+    }
 }
