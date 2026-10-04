@@ -147,7 +147,7 @@ final class WeatherActivityController: ObservableObject {
         guard PlanGrant.relayURL != nil,
               let latitude = activity.attributes.latitude,
               let longitude = activity.attributes.longitude,
-              suivies.insert(activity.id).inserted
+              Self.suivies.insert(activity.id).inserted
         else { return }
 
         Task {
@@ -155,7 +155,7 @@ final class WeatherActivityController: ObservableObject {
                 await IlesRelais.inscrire(jeton: jeton, latitude: latitude, longitude: longitude)
             }
             // La file se tarit quand l'activité se termine.
-            suivies.remove(activity.id)
+            Self.suivies.remove(activity.id)
         }
     }
     #endif
