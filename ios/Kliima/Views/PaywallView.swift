@@ -1,3 +1,4 @@
+import AuthenticationServices
 import StoreKit
 import SwiftUI
 
@@ -22,11 +23,7 @@ struct PaywallView: View {
     var reason: Feature?
 
     @State private var busy = false
-
-    /// L'adresse d'essai, relue à l'ouverture pour ne pas la redemander.
-    @State private var courriel = SharedStore.loadCourriel() ?? ""
-    @State private var verification = false
-    @State private var refuse = false
+    @State private var connexion = false
 
     var body: some View {
         NavigationStack {
@@ -69,7 +66,7 @@ struct PaywallView: View {
                         .font(.caption2)
                         .foregroundStyle(.secondary)
 
-                    accesDEssai
+                    compte
                 }
                 .padding(24)
             }
@@ -91,77 +88,80 @@ struct PaywallView: View {
         }
     }
 
-    /// L'accès de test, et seulement quand il y a un relais pour l'accorder.
+    /// Le compte, et seulement quand il y a un relais pour le reconnaître.
     ///
-    /// Sans `KliimaRelay`, ce bloc n'existe pas : un champ qui ne peut rien
+    /// Sans `KliimaRelay`, ce bloc n'existe pas : un bouton qui ne peut rien
     /// ouvrir serait une promesse en l'air, et la version de l'App Store n'a
     /// pas à exposer la mécanique de l'essai. Vider la clé le fait disparaître.
     ///
-    /// Ce n'est pas une identification : le relais ne vérifie pas que l'adresse
-    /// est relevée par celui qui la présente. Il compare à une liste d'invités,
-    /// et c'est tout ce qu'on lui demande pendant un essai fermé.
+    /// Une tape sur le bouton d'Apple, et c'est tout : rien à taper. Apple
+    /// prouve l'adresse, le relais dit si elle est invitée.
     @ViewBuilder
-    private var accesDEssai: some View {
+    private var compte: some View {
         if PlanGrant.relayURL != nil {
             Divider()
 
-            VStack(alignment: .leading, spacing: 8) {
-                Text(Localized.text("paywall.grant.title"))
+            VStack(alignment: .leading, spacing: 10) {
+                Text(Localized.text("account.title"))
                     .font(.subheadline.weight(.semibold))
 
-                Text(Localized.text("paywall.grant.hint"))
+                if let ouvert = subscription.compte {
+                    Text(Localized.text("account.signedIn", ouvert.courriel))
+                        .font(.footnote)
+
+                    if subscription.plan != .pro {
+                        // Le compte est ouvert mais pas invité. On montre
+                        // l'adresse qu'Apple a prouvée — c'est la sienne, il
+                        // n'y a rien là à énumérer — parce que c'est elle qu'il
+                        // faut ajouter à la liste. Y compris quand Apple a
+                        // donné une adresse relais : celle-là, personne ne la
+                        // devinerait.
+                        Text(Localized.text("account.notInvited"))
+                            .font(.footnote)
+                            .foregroundStyle(.secondary)
+                    }
+
+                    Button(Localized.text("account.signOut"), role: .destructive) {
+                        subscription.deconnecter()
+                    }
                     .font(.footnote)
-                    .foregroundStyle(.secondary)
+                } else {
+                    Text(Localized.text("account.hint"))
+                        .font(.footnote)
+                        .foregroundStyle(.secondary)
 
-                HStack(spacing: 8) {
-                    TextField(Localized.text("paywall.grant.field"), text: $courriel)
-                        .textFieldStyle(.roundedBorder)
-                        .textContentType(.emailAddress)
-                        .keyboardType(.emailAddress)
-                        .textInputAutocapitalization(.never)
-                        .autocorrectionDisabled()
-                        .submitLabel(.go)
-                        .onSubmit { verifier() }
-
-                    Button(Localized.text("paywall.grant.check")) { verifier() }
-                        .disabled(verification || saisieVide)
+                    SignInWithAppleButton(.signIn) { demande in
+                        // L'adresse, et rien d'autre : le nom ne sert à rien
+                        // ici, et ce qu'on ne demande pas n'a pas à être gardé.
+                        demande.requestedScopes = [.email]
+                    } onCompletion: { resultat in
+                        connexion = true
+                        Task {
+                            await subscription.connecter(resultat)
+                            connexion = false
+                        }
+                    }
+                    .signInWithAppleButtonStyle(.white)
+                    .frame(height: 44)
+                    .disabled(connexion)
                 }
 
-                if refuse {
-                    // On ne dit pas « adresse inconnue » : le relais ne le dit
-                    // pas non plus, et pour la même raison — ce serait donner
-                    // de quoi énumérer la liste une adresse à la fois.
-                    Text(Localized.text("paywall.grant.refused"))
+                if let echec = subscription.echecConnexion {
+                    Text(Localized.text(cle(echec)))
                         .font(.footnote)
                         .foregroundStyle(.secondary)
                 }
             }
-            .onChange(of: courriel) { _, _ in refuse = false }
         }
     }
 
-    private var saisieVide: Bool {
-        courriel.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
-    }
-
-    /// Enregistre l'adresse et redemande le palier.
-    ///
-    /// L'adresse est gardée même si elle est refusée : une invitation qui
-    /// arrive plus tard trouvera la saisie en place au lancement suivant, et
-    /// retaper son adresse à chaque essai serait une punition pour rien.
-    @MainActor
-    private func verifier() {
-        guard !saisieVide, !verification else { return }
-        verification = true
-        refuse = false
-        SharedStore.saveCourriel(courriel)
-
-        Task {
-            await subscription.refresh()
-            // Le succès referme l'écran tout seul — l'`onChange` du palier s'en
-            // charge. Il n'y a donc que l'échec à dire.
-            refuse = subscription.plan != .pro
-            verification = false
+    /// La phrase d'un échec de connexion. Le domaine rend un motif, l'écran le
+    /// traduit — comme partout ailleurs.
+    private func cle(_ echec: Session.Echec) -> String {
+        switch echec {
+        case .sansRelais, .injoignable: return "account.error.unreachable"
+        case .comptesFermes: return "account.error.closed"
+        case .refuse: return "account.error.refused"
         }
     }
 

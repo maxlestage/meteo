@@ -6,15 +6,11 @@ import XCTest
 /// L'appel réseau n'est pas testable ici — il n'y a pas de relais sous la
 /// main. Ce qui l'est, et qui compte autant : la lecture de la réponse, qui
 /// doit refuser tout ce qui n'est pas un « oui » franc, et la fabrication de
-/// l'adresse interrogée, où un échappement manquant suffit à tout casser.
+/// la demande, où un échappement manquant ou un en-tête oublié suffit à tout
+/// casser.
 final class PlanGrantTests: XCTestCase {
 
     private func data(_ texte: String) -> Data { Data(texte.utf8) }
-
-    override func tearDown() {
-        SharedStore.saveCourriel("")
-        super.tearDown()
-    }
 
     func testUnOuiFrancAccordeLePalier() {
         XCTAssertEqual(PlanGrant.lire(data(#"{"plan":"pro"}"#)), .accorde)
@@ -63,68 +59,40 @@ final class PlanGrantTests: XCTestCase {
     func testAucunCodeNEstLivreDansLeDepot() {
         // La règle, et pas une préférence : un code écrit dans `Info.plist` est
         // lisible par quiconque lit le dépôt, bien avant d'être extrait du
-        // binaire. L'essai nominatif passe par l'adresse, qui n'a pas ce
+        // binaire. L'essai nominatif passe par les comptes, qui n'ont pas ce
         // défaut. Si ce test tombe, c'est qu'un secret a été commité.
         XCTAssertNil(PlanGrant.code)
     }
 
-    // MARK: L'adresse d'essai
-
-    func testUneAdresseSeGardeEtSeRetire() {
-        SharedStore.saveCourriel("max@ferme.fr")
-        XCTAssertEqual(SharedStore.loadCourriel(), "max@ferme.fr")
-        XCTAssertEqual(PlanGrant.courriel, "max@ferme.fr")
-
-        // Une saisie vide efface : c'est ainsi qu'on se retire de l'essai sans
-        // réinstaller.
-        SharedStore.saveCourriel("   ")
-        XCTAssertNil(SharedStore.loadCourriel())
-        XCTAssertNil(PlanGrant.courriel)
-    }
-
-    func testLesBlancsAutourNeComptentPas() {
-        SharedStore.saveCourriel("  max@ferme.fr\n")
-        XCTAssertEqual(SharedStore.loadCourriel(), "max@ferme.fr")
-    }
-
-    // MARK: L'adresse interrogée
+    // MARK: La demande
 
     private let base = URL(string: "https://exemple.test")!
 
-    func testSansRienAPresenterLAdresseNaPasDeQuery() {
-        let url = PlanGrant.requete(base: base)
-        XCTAssertEqual(url?.absoluteString, "https://exemple.test/v1/plan")
+    func testSansRienAPresenterLaDemandeEstNue() {
+        let requete = PlanGrant.demande(base: base)
+        XCTAssertEqual(requete?.url?.absoluteString, "https://exemple.test/v1/plan")
+        XCTAssertNil(requete?.value(forHTTPHeaderField: "Authorization"))
     }
 
-    func testLAdresseVoyageSousCourriel() {
-        let url = PlanGrant.requete(base: base, courriel: "max@ferme.fr")
-        XCTAssertEqual(url?.absoluteString, "https://exemple.test/v1/plan?courriel=max@ferme.fr")
+    func testLaSessionVoyageDansLEnTeteEtPasDansLAdresse() {
+        // Une adresse finit dans les journaux d'un proxy ; un en-tête beaucoup
+        // moins. La session ne doit jamais apparaître dans l'URL.
+        let requete = PlanGrant.demande(base: base, session: "abc.def.ghi")
+        XCTAssertEqual(requete?.value(forHTTPHeaderField: "Authorization"), "Bearer abc.def.ghi")
+        XCTAssertEqual(requete?.url?.absoluteString, "https://exemple.test/v1/plan")
+        XCTAssertFalse(requete?.url?.absoluteString.contains("abc") ?? true)
     }
 
-    func testUneAdresseAEtiquetteEstEncodee() {
-        // Le piège : une query se lit en form-urlencoded, où « + » vaut une
-        // espace. Sans encodage, `max+ferme@ferme.fr` arrive au relais avec un
-        // trou au milieu et ne correspond à aucune invitation.
-        let url = PlanGrant.requete(base: base, courriel: "max+ferme@ferme.fr")
-        XCTAssertEqual(
-            url?.absoluteString,
-            "https://exemple.test/v1/plan?courriel=max%2Bferme@ferme.fr"
-        )
+    func testUneSessionVideNePoseAucunEnTete() {
+        let requete = PlanGrant.demande(base: base, session: "")
+        XCTAssertNil(requete?.value(forHTTPHeaderField: "Authorization"))
     }
 
-    func testLesSeparateursDeQuerySontEncodes() {
-        // Une saisie ne doit pas pouvoir ajouter un paramètre.
-        let url = PlanGrant.requete(base: base, courriel: "a&code=x@ferme.fr")
-        let query = url?.query ?? ""
-        XCTAssertFalse(query.contains("&code="), query)
-        XCTAssertTrue(query.contains("%26"), query)
-    }
-
-    func testLesDeuxPreuvesPeuventVoyagerEnsemble() {
-        let url = PlanGrant.requete(base: base, code: "sillon", courriel: "max@ferme.fr")
-        XCTAssertEqual(
-            url?.absoluteString,
-            "https://exemple.test/v1/plan?code=sillon&courriel=max@ferme.fr"
-        )
+    func testUnCodeEstEncodePlusCompris() {
+        // Le piège : « + » vaut une espace dans une query.
+        let requete = PlanGrant.demande(base: base, code: "a+b&c=d")
+        let query = requete?.url?.query ?? ""
+        XCTAssertTrue(query.contains("%2B"), query)
+        XCTAssertFalse(query.contains("&c="), query)
     }
 }

@@ -69,6 +69,7 @@ web: rust/target/release/klima-relay
 | `KLIMA_ORIGINS`  | Les origines admises — inutile si le site est servi par le relais |
 | `KLIMA_PUBLIC`   | Où sont les fichiers du site. `public` par défaut, absent sur Heroku |
 | `KLIMA_PRO`      | Le palier accordé pendant l'essai — voir plus bas                 |
+| `KLIMA_SESSION_SECRET` | Le secret qui signe les sessions des comptes — voir plus bas |
 
 `OPEN_METEO_KEY` peut rester vide : le relais tourne alors sur le plan gratuit
 d'Open-Meteo, réservé à l'usage non commercial. Le jour où Klima se vend,
@@ -91,7 +92,66 @@ C'est là que ça doit vivre, et pas ailleurs : une valeur glissée dans une
 application distribuée est une valeur publiée, qu'on ne retire qu'en publiant
 une nouvelle version. Celle-là s'enlève en une commande.
 
-### Par liste d'adresses — la forme à préférer
+### Par comptes — la forme du système
+
+Chaque testeur a son compte, et rien à taper : sur iPhone, l'écran
+d'abonnement propose **Se connecter avec Apple**. Apple prouve l'adresse, le
+relais la compare à `KLIMA_PRO`. Deux variables, une fois pour toutes :
+
+```bash
+heroku config:set KLIMA_SESSION_SECRET="$(openssl rand -hex 32)" -a VOTRE-APP
+heroku config:set KLIMA_PRO='max@ferme.fr, ana@vina.es' -a VOTRE-APP
+curl https://VOTRE-APP.herokuapp.com/health
+# … "pro":"sur liste (2)","comptes":"activés"
+```
+
+Ce qui se passe, dans l'ordre :
+
+1. Le testeur touche le bouton d'Apple. Apple remet à l'application un jeton
+   signé qui dit : cette personne contrôle cette adresse.
+2. L'application l'envoie à `POST /v1/session`. Le relais vérifie la signature
+   avec les clés publiques d'Apple, l'émetteur, le destinataire
+   (`com.kliima.app`) et l'échéance, puis rend une **session** qu'il signe
+   lui-même avec `KLIMA_SESSION_SECRET`. Elle vaut six mois.
+3. L'application la garde dans le trousseau et la présente à chaque
+   `GET /v1/plan`, dans l'en-tête `Authorization`. Le relais en relit
+   l'adresse et la compare à la liste **du moment**.
+
+La session prouve une identité ; elle n'accorde rien. D'où les deux gestes :
+
+| Pour…                              | Faire                                                     |
+| ---------------------------------- | --------------------------------------------------------- |
+| inviter quelqu'un                  | ajouter son adresse à `KLIMA_PRO`                         |
+| retirer quelqu'un                  | l'enlever de `KLIMA_PRO` — effet à la question suivante   |
+| déconnecter tout le monde          | changer `KLIMA_SESSION_SECRET` — chacun se reconnecte d'une tape |
+
+**L'adresse relais d'Apple.** Qui choisit « Masquer mon adresse » reçoit une
+adresse en `@privaterelay.appleid.com`, que personne ne devinerait. L'écran
+d'abonnement l'affiche telle qu'Apple l'a prouvée, avec « ce compte n'est pas
+encore invité » : c'est celle-là qu'il faut ajouter à la liste. Montrer sa
+propre adresse à quelqu'un qui vient de la prouver ne révèle rien de la liste.
+
+**Sans secret, pas de comptes.** Le relais le dit — `"comptes":"désactivés"`
+dans `/health`, 503 sur `/v1/session` — plutôt que de tirer un secret au hasard
+à chaque démarrage : Heroku recycle ses dynos chaque jour, et tout le monde
+serait déconnecté chaque matin. Le secret doit faire 32 octets au moins ;
+`openssl rand -hex 32` en donne 64 caractères. Il vit ici et nulle part
+ailleurs, comme la clé d'Open-Meteo.
+
+**Côté Apple**, la capacité « Sign in with Apple » doit être active sur
+l'identifiant `com.kliima.app`. L'archivage de la CI l'active seul
+(`-allowProvisioningUpdates`) ; si Xcode réclame tout de même un profil qui la
+porte, la case est dans Certificates, Identifiers & Profiles › Identifiers ›
+`com.kliima.app`.
+
+**Ce que le relais vérifie, et que les tests fixent** : un jeton expiré, émis
+pour une autre application, par un autre émetteur, à clé inconnue, retouché, ou
+annonçant HS256 pour se faire vérifier avec la clé publique — tous refusés, sans
+que la réponse dise lequel. Le motif va au journal. Les clés d'Apple sont lues
+une fois par heure ; une clé inconnue relance la lecture au plus une fois toutes
+les cinq minutes, pour que personne ne fasse marteler Apple par le relais.
+
+### Par liste d'adresses, sans compte — ce que fait encore le site
 
 ```bash
 heroku config:set KLIMA_PRO='max@ferme.fr, ana@vina.es' -a VOTRE-APP
@@ -154,25 +214,21 @@ d'adresses n'a pas ce défaut : préférez-la.
 
 Côté application, deux clés d'`Info.plist` : `KliimaRelay` (l'adresse du relais
 — sans elle, aucun appel n'est fait, et l'écran d'abonnement n'affiche même pas
-le champ d'accès de test) et `KliimaProCode`, qui ne sert que si le relais exige
-un code. L'adresse, elle, n'est pas dans `Info.plist` : elle est saisie par le
-testeur et rangée avec les réglages. L'accord **s'ajoute**
-à ce que dit StoreKit : un relais muet ne fait pas perdre un abonnement réel, et
-une boutique vide n'annule pas l'accord du relais.
+le bloc du compte) et `KliimaProCode`, qui ne sert que si le relais exige un
+code. L'accord **s'ajoute** à ce que dit StoreKit : un relais muet ne fait pas
+perdre un abonnement réel, et une boutique vide n'annule pas l'accord du relais.
 
-Le palier payant n'existe que sur iPhone : l'application web est au palier libre
-en dur et n'interroge pas `/v1/plan`. Une invitation ne concerne donc que le
-téléphone, et `tous` n'ouvre rien de payant sur le site — il n'y a rien à y
-ouvrir.
+**Le site n'a pas de comptes.** « Se connecter avec Apple » sur le web demande
+un identifiant de services et un domaine déclarés chez Apple ; en attendant, le
+site garde le champ d'adresse, et `?courriel=` reste accepté par le relais. Ce
+chemin-là n'est pas une preuve : quiconque connaît une adresse invitée obtient
+le palier *sur le site* — c'est-à-dire le registre, un CSV de météo publique.
+Il ne donne rien sur iPhone, qui ne présente plus que sa session.
 
 `KliimaRelay` est renseigné : c'est une adresse publique, elle n'a rien à cacher.
-`KliimaProCode` reste vide dans le dépôt et le restera. Un code écrit ici serait
-lisible par quiconque lit le dépôt, bien avant d'être extrait du binaire — ce qui
-ne laisserait plus qu'à le changer des deux côtés. Si une version d'essai doit
-présenter un code, il se pose dans Xcode au moment de l'archivage, sur une copie
-locale du fichier, et il ne revient pas dans un commit. Tant que `KLIMA_PRO` vaut
-`tous`, la question ne se pose pas : le relais accorde le palier sans qu'on lui
-présente quoi que ce soit, et l'application n'a aucun code à porter.
+`KliimaProCode` reste vide dans le dépôt et le restera, et un test le vérifie.
+Un code écrit ici serait lisible par quiconque lit le dépôt, bien avant d'être
+extrait du binaire. Les comptes rendent la question sans objet.
 
 ## Vérifier
 
