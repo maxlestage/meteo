@@ -58,23 +58,10 @@ enum BackgroundRefresh {
         #endif
     }
 
-    /// Met à jour l'activité météo, s'il y en a une.
-    ///
-    /// Elle n'a pas d'heure de fin à surveiller : c'est l'utilisateur qui la
-    /// ferme, et iOS qui la termine au bout de huit heures environ.
+    /// Met à jour l'activité météo, s'il y en a une — avec l'heure suivante
+    /// calculée d'avance, pour qu'elle bascule seule à l'heure pile.
     private static func updateWeatherActivities(forecast: AgroForecast) async {
-        #if canImport(ActivityKit)
-        guard #available(iOS 16.2, *) else { return }
-
-        for activity in Activity<WeatherActivityAttributes>.activities {
-            await activity.update(
-                ActivityContent(
-                    state: WeatherActivityController.state(from: forecast),
-                    staleDate: Date(timeIntervalSinceNow: 3600)
-                )
-            )
-        }
-        #endif
+        await WeatherActivityController.update(forecast: forecast)
     }
 
     /// Met à jour les activités en cours, sans passer par le contrôleur :
@@ -101,7 +88,7 @@ enum BackgroundRefresh {
             }
             await activity.update(
                 ActivityContent(
-                    state: SprayActivityController.state(from: hours, at: max(opportunity.start, Date())),
+                    state: await SprayActivityController.state(from: hours, at: max(opportunity.start, Date())),
                     staleDate: opportunity.end
                 )
             )

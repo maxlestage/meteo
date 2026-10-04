@@ -6,6 +6,9 @@ rust-version.workspace = true
 
 [dependencies]
 klima-core = { path = "../klima-core" }
+# Lire la prévision qu'on pousse aux îles dynamiques : le même décodage que
+# les clients, pas un second.
+klima-api = { path = "../klima-api" }
 axum.workspace = true
 tokio.workspace = true
 reqwest.workspace = true
@@ -15,6 +18,9 @@ serde = { version = "1", features = ["derive"] }
 # Le moteur cryptographique en Rust pur : pas de bibliothèque système à lier,
 # donc rien qui casse sur la pile du buildpack.
 jsonwebtoken = { version = "11.1.0", default-features = false, features = ["rust_crypto"] }
+# Le corps de la clé APNs (.p8). Déjà tiré par jsonwebtoken : rien de plus à
+# compiler.
+base64 = "0.22"
 
 [dev-dependencies]
 tokio = { version = "1", features = ["rt-multi-thread", "macros", "sync", "time", "fs", "test-util"] }
@@ -23,4 +29,5 @@ tower = { version = "0.5.3", features = ["util"] }
 # jetons « à la manière d'Apple » : aucune clé privée n'est commitée.
 rsa = "0.9"
 rand = "0.8"
-base64 = "0.22"
+# Une clé APNs d'essai, au format d'Apple, fabriquée à l'exécution.
+p256 = { version = "0.13", features = ["pkcs8", "pem"] }

@@ -39,34 +39,54 @@ struct WeatherTimelineProvider: TimelineProvider {
     }
 
     func getSnapshot(in context: Context, completion: @escaping (WeatherEntry) -> Void) {
-        Task { completion(await entry()) }
+        Task { completion(await entries().first ?? placeholder(in: context)) }
     }
 
+    /// Une entrée par heure à venir, calculée d'avance.
+    ///
+    /// C'était une seule entrée, figée au chargement : le widget montrait la
+    /// mesure de 14 h 05 jusqu'à ce que WidgetKit veuille bien le recharger —
+    /// parfois bien après 15 h. Les entrées suivantes commencent chacune au
+    /// début d'une heure de la série, avec sa prévision : le widget bascule tout
+    /// seul à l'heure pile, sans réseau.
+    ///
+    /// On redemande malgré tout la prévision au bout de trois heures : les
+    /// modèles tournent, et douze heures calculées d'avance restent un filet,
+    /// pas une raison de ne plus rien demander.
     func getTimeline(in context: Context, completion: @escaping (Timeline<WeatherEntry>) -> Void) {
         Task {
-            let entry = await entry()
-            // Une prévision horaire ne bouge pas plus vite qu'une heure.
-            let next = Calendar.current.date(byAdding: .hour, value: 1, to: Date()) ?? Date()
-            completion(Timeline(entries: [entry], policy: .after(next)))
+            let entries = await entries()
+            let relecture = Date().addingTimeInterval(3 * 3600)
+            completion(Timeline(entries: entries.isEmpty ? [placeholder(in: context)] : entries,
+                                policy: .after(relecture)))
         }
     }
 
-    private func entry() async -> WeatherEntry {
+    private func entries() async -> [WeatherEntry] {
         let parcelle = SharedStore.loadParcelle() ?? .chartres
+        let maintenant = Date()
 
         guard let forecast = try? await AgroWeatherService().forecast(for: parcelle, days: 2) else {
-            return WeatherEntry(date: Date(), parcelleName: parcelle.name,
-                                current: nil, today: nil, hours: [], timeZone: .current)
+            return [WeatherEntry(date: maintenant, parcelleName: parcelle.name,
+                                 current: nil, today: nil, hours: [], timeZone: .current)]
         }
 
-        return WeatherEntry(
-            date: Date(),
-            parcelleName: parcelle.name,
-            current: forecast.current,
-            today: forecast.daily.first,
-            hours: Array(forecast.hourly.prefix(6)),
-            timeZone: TimeZone(identifier: forecast.timezone) ?? .current
-        )
+        let zone = TimeZone(identifier: forecast.timezone) ?? .current
+        return Horizon.chronologie(
+            courant: forecast.current,
+            heures: forecast.hourly,
+            jours: forecast.daily,
+            depuis: maintenant
+        ).map { moment in
+            WeatherEntry(
+                date: moment.date,
+                parcelleName: parcelle.name,
+                current: moment.courant,
+                today: moment.jour,
+                hours: Array(moment.heures.prefix(6)),
+                timeZone: zone
+            )
+        }
     }
 }
 

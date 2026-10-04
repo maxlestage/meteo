@@ -40,32 +40,43 @@ struct WeatherComplicationProvider: TimelineProvider {
     }
 
     func getSnapshot(in context: Context, completion: @escaping (WeatherComplicationEntry) -> Void) {
-        Task { completion(await entry()) }
+        Task { completion(await entries().first ?? placeholder(in: context)) }
     }
 
+    /// Une entrée par heure à venir, calculée d'avance — comme les widgets du
+    /// téléphone : le cadran bascule seul à l'heure pile, sans réseau, et la
+    /// prévision est redemandée au bout de trois heures.
     func getTimeline(in context: Context, completion: @escaping (Timeline<WeatherComplicationEntry>) -> Void) {
         Task {
-            let entry = await entry()
-            let next = Calendar.current.date(byAdding: .hour, value: 1, to: Date()) ?? Date()
-            completion(Timeline(entries: [entry], policy: .after(next)))
+            let entries = await entries()
+            completion(Timeline(entries: entries.isEmpty ? [placeholder(in: context)] : entries,
+                                policy: .after(Date().addingTimeInterval(3 * 3600))))
         }
     }
 
-    private func entry() async -> WeatherComplicationEntry {
+    private func entries() async -> [WeatherComplicationEntry] {
         let parcelle = SharedStore.loadParcelle() ?? .chartres
+        let maintenant = Date()
 
         guard let forecast = try? await AgroWeatherService().forecast(for: parcelle, days: 2) else {
-            return WeatherComplicationEntry(date: Date(), parcelleName: parcelle.name,
-                                            current: nil, today: nil, loaded: false)
+            return [WeatherComplicationEntry(date: maintenant, parcelleName: parcelle.name,
+                                             current: nil, today: nil, loaded: false)]
         }
 
-        return WeatherComplicationEntry(
-            date: Date(),
-            parcelleName: parcelle.name,
-            current: forecast.current,
-            today: forecast.daily.first,
-            loaded: true
-        )
+        return Horizon.chronologie(
+            courant: forecast.current,
+            heures: forecast.hourly,
+            jours: forecast.daily,
+            depuis: maintenant
+        ).map { moment in
+            WeatherComplicationEntry(
+                date: moment.date,
+                parcelleName: parcelle.name,
+                current: moment.courant,
+                today: moment.jour,
+                loaded: true
+            )
+        }
     }
 }
 

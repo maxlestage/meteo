@@ -19,7 +19,7 @@ struct HeroView: View {
 
             Text(condition.label)
                 .font(.title3)
-                .foregroundStyle(.white.opacity(0.62))
+                .foregroundStyle(Color.encreDouce)
 
             if let today = forecast.daily.first {
                 Text("↑ \(AgroFormat.temperature(today.temperatureMax))   ↓ \(AgroFormat.temperature(today.temperatureMin))")

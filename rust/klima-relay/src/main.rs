@@ -8,8 +8,11 @@
 //! qu'on en déduit. Les routes sont dans `routes`, les interrogations dans
 //! `upstream`, les fichiers dans `site`, le cache dans `cache`.
 
+mod apns;
 mod cache;
 mod identite;
+mod iles;
+mod poussee;
 mod pro;
 mod routes;
 mod site;
@@ -42,6 +45,10 @@ async fn main() {
     // tout le monde au premier recyclage du dyno — chaque jour sur Heroku.
     etat.comptes = comptes_depuis_l_environnement();
 
+    // La poussée vers les îles dynamiques. Sans clé, elles basculent quand même
+    // seules à l'heure pile — elles ne reçoivent simplement rien de neuf.
+    etat.apns = apns_depuis_l_environnement();
+
     if let Some(origines) = std::env::var("KLIMA_ORIGINS").ok().filter(|o| !o.is_empty()) {
         etat.allowed_origins =
             origines.split(',').map(|o| o.trim().to_owned()).filter(|o| !o.is_empty()).collect();
@@ -55,7 +62,7 @@ async fn main() {
     etat.site = racine.is_dir().then_some(racine.clone());
 
     println!(
-        "relais Klima (Rust) sur :{port} — clé Open-Meteo {}, palier accordé : {}, comptes {}{}",
+        "relais Klima (Rust) sur :{port} — clé Open-Meteo {}, palier accordé : {}, comptes {}, poussée {}{}",
         if etat.open_meteo_key.is_some() {
             "configurée"
         } else {
@@ -63,6 +70,7 @@ async fn main() {
         },
         etat.accord_pro.etiquette(),
         if etat.comptes.is_some() { "activés" } else { "désactivés" },
+        if etat.apns.is_some() { "activée" } else { "désactivée" },
         match &etat.site {
             Some(racine) => format!(", site servi depuis {}", racine.display()),
             None => ", sans site".to_owned(),
@@ -70,6 +78,7 @@ async fn main() {
     );
 
     balayer_regulierement(etat.clone());
+    poussee::tourner(etat.clone());
 
     let listener = tokio::net::TcpListener::bind(("0.0.0.0", port)).await.expect("écoute");
     axum::serve(listener, routes::router(etat)).await.expect("service");
@@ -119,6 +128,46 @@ fn comptes_depuis_l_environnement() -> Option<routes::Comptes> {
         comptes.adresse_cles = adresse;
     }
     Some(comptes)
+}
+
+/// La clé APNs, d'après l'environnement : les trois valeurs ou rien.
+///
+/// `KLIMA_APNS_KEY` est le contenu du fichier `.p8` qu'Apple délivre une
+/// fois, `KLIMA_APNS_KEY_ID` son identifiant à dix caractères,
+/// `KLIMA_APNS_TEAM_ID` celui de l'équipe. Une valeur bancale désactive la
+/// poussée et le journal dit laquelle — jamais ce qu'elle contient.
+fn apns_depuis_l_environnement() -> Option<apns::Apns> {
+    let lire = |nom: &str| std::env::var(nom).ok().filter(|v| !v.trim().is_empty());
+    let (cle, id_cle, equipe) = match (
+        lire("KLIMA_APNS_KEY"),
+        lire("KLIMA_APNS_KEY_ID"),
+        lire("KLIMA_APNS_TEAM_ID"),
+    ) {
+        (None, None, None) => return None,
+        (Some(cle), Some(id), Some(equipe)) => (cle, id, equipe),
+        _ => {
+            eprintln!("poussée désactivée : il faut KLIMA_APNS_KEY, KLIMA_APNS_KEY_ID et KLIMA_APNS_TEAM_ID ensemble");
+            return None;
+        }
+    };
+
+    let client = reqwest::Client::builder()
+        .timeout(std::time::Duration::from_secs(15))
+        .build()
+        .expect("client HTTP");
+    match apns::Apns::new(&cle, &id_cle, &equipe, apns::http_envoyer(client)) {
+        Ok(mut apns) => {
+            // Le bac à sable, pour une compilation de développement.
+            if let Some(hote) = lire("KLIMA_APNS_HOST") {
+                apns.hote = hote;
+            }
+            Some(apns)
+        }
+        Err(motif) => {
+            eprintln!("poussée désactivée : {motif:?} illisible");
+            None
+        }
+    }
 }
 
 /// Millisecondes depuis l'époque.

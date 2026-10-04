@@ -25,7 +25,7 @@ struct DetailTile: View {
                 Spacer(minLength: 6)
                 Text(caption)
                     .font(.footnote)
-                    .foregroundStyle(.white.opacity(0.62))
+                    .foregroundStyle(Color.encreDouce)
                     .fixedSize(horizontal: false, vertical: true)
             }
         }
@@ -45,7 +45,7 @@ struct DetailTile: View {
                     .fill(LinearGradient(colors: gauge.colors, startPoint: .leading, endPoint: .trailing))
                     .frame(height: 5)
                 Circle()
-                    .fill(.white)
+                    .fill(Color.encre)
                     .frame(width: 9, height: 9)
                     .offset(x: width * position - 4.5)
             }

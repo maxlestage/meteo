@@ -34,33 +34,49 @@ struct SprayTimelineProvider: TimelineProvider {
     }
 
     func getSnapshot(in context: Context, completion: @escaping (SprayEntry) -> Void) {
-        Task { completion(await entry()) }
+        Task { completion(await entries().first ?? placeholder(in: context)) }
     }
 
+    /// Une entrée par heure à venir, la fenêtre recalculée pour chacune.
+    ///
+    /// Le verdict d'une fenêtre dépend de l'heure d'où on la regarde : à 9 h,
+    /// « dans deux heures » ; à 11 h, « maintenant » ; à 13 h, elle est passée et
+    /// c'est la suivante qui compte. Une seule entrée figée au chargement
+    /// continuait d'annoncer une fenêtre déjà refermée. Chaque entrée refait
+    /// donc le calcul sur les heures qui restent à partir de la sienne.
     func getTimeline(in context: Context, completion: @escaping (Timeline<SprayEntry>) -> Void) {
         Task {
-            let entry = await entry()
-            // Une prévision horaire ne bouge pas plus vite qu'une heure.
-            let next = Calendar.current.date(byAdding: .hour, value: 1, to: Date()) ?? Date()
-            completion(Timeline(entries: [entry], policy: .after(next)))
+            let entries = await entries()
+            let relecture = Date().addingTimeInterval(3 * 3600)
+            completion(Timeline(entries: entries.isEmpty ? [placeholder(in: context)] : entries,
+                                policy: .after(relecture)))
         }
     }
 
-    private func entry() async -> SprayEntry {
+    private func entries() async -> [SprayEntry] {
         let parcelle = SharedStore.loadParcelle() ?? .chartres
+        let maintenant = Date()
 
         guard let forecast = try? await AgroWeatherService().forecast(for: parcelle, days: 2) else {
-            return SprayEntry(date: Date(), parcelleName: parcelle.name,
-                              summary: nil, current: nil, timeZone: .current)
+            return [SprayEntry(date: maintenant, parcelleName: parcelle.name,
+                               summary: nil, current: nil, timeZone: .current)]
         }
 
-        return SprayEntry(
-            date: Date(),
-            parcelleName: parcelle.name,
-            summary: AgroIndicators.summarize(hours: forecast.hourly, days: forecast.daily),
-            current: forecast.current,
-            timeZone: TimeZone(identifier: forecast.timezone) ?? .current
-        )
+        let zone = TimeZone(identifier: forecast.timezone) ?? .current
+        return Horizon.chronologie(
+            courant: forecast.current,
+            heures: forecast.hourly,
+            jours: forecast.daily,
+            depuis: maintenant
+        ).map { moment in
+            SprayEntry(
+                date: moment.date,
+                parcelleName: parcelle.name,
+                summary: AgroIndicators.summarize(hours: moment.heures, days: forecast.daily),
+                current: moment.courant,
+                timeZone: zone
+            )
+        }
     }
 }
 
