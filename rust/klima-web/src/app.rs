@@ -17,6 +17,7 @@ use crate::composants::pro::NotePro;
 use crate::composants::recherche::Recherche;
 use crate::composants::traitement::Traitement;
 use crate::composants::tuile::{Jauge, Tuile};
+use klima_ui::crochets::palier::use_palier;
 use klima_ui::crochets::parcelle::use_parcelle;
 use klima_ui::crochets::position::use_start_position;
 use klima_ui::crochets::prevision::use_forecast;
@@ -37,6 +38,10 @@ fn defaut() -> Parcelle {
 #[derive(Properties, PartialEq)]
 pub struct Props {
     pub endpoints: Endpoints,
+    /// L'adresse du relais, quand il y en a un. Elle sert à lui demander le
+    /// palier accordé — une question qui ne passe pas par les fournisseurs,
+    /// et qui n'a donc pas sa place dans `Endpoints`.
+    pub relais: Option<String>,
 }
 
 #[function_component]
@@ -44,6 +49,7 @@ pub fn App(props: &Props) -> Html {
     let i18n = use_i18n();
     let f = i18n.f();
     let lieu = use_parcelle(defaut());
+    let palier = use_palier(props.relais.clone());
 
     // Première visite, rien de choisi ni de partagé : on part de là où est la
     // personne plutôt que de lui montrer la Beauce.
@@ -245,7 +251,7 @@ pub fn App(props: &Props) -> Html {
                             />
                         </div>
 
-                        <NotePro />
+                        <NotePro palier={palier.clone()} />
 
                         <footer class="footer">
                             <p>{ format!("{}.", i18n.t("app.source")) }</p>

@@ -18,7 +18,7 @@ fn catalog(entries: &[(&'static str, &'static str)]) -> Catalog {
     entries.iter().copied().collect()
 }
 
-const FR: [(&str, &str); 49] = [
+const FR: [(&str, &str); 58] = [
     ("app.loading", "Chargement des données agronomiques…"),
     ("app.retry", "Réessayer"),
     ("app.refresh", "Actualiser"),
@@ -28,6 +28,15 @@ const FR: [(&str, &str); 49] = [
     ("app.home", "Retour à la présentation de Klima"),
     ("pro.lead", "Sur iPhone et Apple Watch, Klima Pro ajoute :"),
     ("pro.free", "Ici et dans l’application, {parcelles} parcelle et {jours} jours de prévision restent gratuits, sans compte ni publicité."),
+    ("pro.grant.title", "Accès de test"),
+    ("pro.grant.hint", "Si votre adresse fait partie des invitées, saisissez-la : le relais la reconnaîtra."),
+    ("pro.grant.field", "Adresse électronique"),
+    ("pro.grant.check", "Vérifier"),
+    ("pro.grant.checking", "Vérification…"),
+    ("pro.grant.refused", "Cette adresse n’ouvre rien pour le moment. Elle est gardée : si l’invitation arrive, le palier suivra."),
+    ("pro.grant.active", "Accès de test reconnu par le relais."),
+    ("pro.grant.web", "Ici, cela ne change rien de plus : le recoupement est déjà à l’œuvre, et les trois autres fonctions vivent dans l’application iPhone."),
+    ("pro.grant.forget", "Retirer mon adresse"),
     ("search.placeholder", "{parcelle} — changer de parcelle"),
     ("search.label", "Rechercher une commune"),
     ("search.locate", "Me localiser"),
@@ -70,7 +79,7 @@ const FR: [(&str, &str); 49] = [
     ("language.label", "Langue"),
 ];
 
-const EN: [(&str, &str); 49] = [
+const EN: [(&str, &str); 58] = [
     ("app.loading", "Loading agronomic data…"),
     ("app.retry", "Try again"),
     ("app.refresh", "Refresh"),
@@ -80,6 +89,15 @@ const EN: [(&str, &str); 49] = [
     ("app.home", "Back to the Klima showcase"),
     ("pro.lead", "On iPhone and Apple Watch, Klima Pro adds:"),
     ("pro.free", "Here and in the app, {parcelles} field and {jours} days of forecast stay free, with no account and no adverts."),
+    ("pro.grant.title", "Test access"),
+    ("pro.grant.hint", "If your address is on the invite list, enter it: the relay will recognise it."),
+    ("pro.grant.field", "Email address"),
+    ("pro.grant.check", "Check"),
+    ("pro.grant.checking", "Checking…"),
+    ("pro.grant.refused", "This address opens nothing for now. It is kept: if the invitation arrives, the tier will follow."),
+    ("pro.grant.active", "Test access recognised by the relay."),
+    ("pro.grant.web", "It changes nothing further here: cross-checking is already at work, and the other three features live in the iPhone app."),
+    ("pro.grant.forget", "Remove my address"),
     ("search.placeholder", "{parcelle} — change field"),
     ("search.label", "Search for a town"),
     ("search.locate", "Locate me"),
@@ -122,7 +140,7 @@ const EN: [(&str, &str); 49] = [
     ("language.label", "Language"),
 ];
 
-const ES: [(&str, &str); 49] = [
+const ES: [(&str, &str); 58] = [
     ("app.loading", "Cargando los datos agronómicos…"),
     ("app.retry", "Reintentar"),
     ("app.refresh", "Actualizar"),
@@ -132,6 +150,15 @@ const ES: [(&str, &str); 49] = [
     ("app.home", "Volver a la presentación de Klima"),
     ("pro.lead", "En iPhone y Apple Watch, Klima Pro añade:"),
     ("pro.free", "Aquí y en la aplicación, {parcelles} parcela y {jours} días de previsión siguen siendo gratis, sin cuenta ni publicidad."),
+    ("pro.grant.title", "Acceso de prueba"),
+    ("pro.grant.hint", "Si su dirección está entre las invitadas, introdúzcala: el relé la reconocerá."),
+    ("pro.grant.field", "Dirección de correo"),
+    ("pro.grant.check", "Comprobar"),
+    ("pro.grant.checking", "Comprobando…"),
+    ("pro.grant.refused", "Esta dirección no abre nada por ahora. Queda guardada: si llega la invitación, el plan la seguirá."),
+    ("pro.grant.active", "Acceso de prueba reconocido por el relé."),
+    ("pro.grant.web", "Aquí no cambia nada más: el contraste ya está en marcha, y las otras tres funciones viven en la aplicación de iPhone."),
+    ("pro.grant.forget", "Quitar mi dirección"),
     ("search.placeholder", "{parcelle} — cambiar de parcela"),
     ("search.label", "Buscar un municipio"),
     ("search.locate", "Ubicarme"),

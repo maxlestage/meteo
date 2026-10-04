@@ -12,5 +12,6 @@
 
 pub mod open_meteo;
 pub mod parcelle_url;
+pub mod plan;
 pub mod readings;
 pub mod today;
