@@ -31,24 +31,30 @@ fn catalogues() -> Catalogues {
 
 #[function_component]
 fn Racine() -> Html {
-    let endpoints = acheminement();
+    let relais = relais();
+    let endpoints = match &relais {
+        Some(relais) => Endpoints::relais(relais),
+        None => Endpoints::direct(),
+    };
 
     html! {
         <I18nProvider catalogues={catalogues()}>
-            <app::App {endpoints} />
+            <app::App {endpoints} {relais} />
         </I18nProvider>
     }
 }
 
-fn acheminement() -> Endpoints {
+/// L'adresse du relais, s'il y en a un.
+///
+/// Elle sert deux fois : à fabriquer les quatre adresses des fournisseurs, et
+/// à demander le palier accordé — une question qui ne passe par aucun
+/// fournisseur, et qui n'a donc pas sa place dans `Endpoints`.
+fn relais() -> Option<String> {
     let origine = web_sys::window()
         .and_then(|w| w.location().origin().ok())
         .unwrap_or_default();
 
-    match relay_from(option_env!("KLIMA_RELAY"), &origine) {
-        Some(relais) => Endpoints::relais(&relais),
-        None => Endpoints::direct(),
-    }
+    relay_from(option_env!("KLIMA_RELAY"), &origine)
 }
 
 fn main() {
