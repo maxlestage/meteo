@@ -1,6 +1,6 @@
 //! Prendre la position de la personne, plutôt que lui montrer Chartres.
 //!
-//! Miroir Rust de `core/src/position.ts` et de `ios/Kliima/Models/Position.swift`,
+//! Miroir Swift : `ios/Kliima/Models/Position.swift`,
 //! avec les mêmes cas de test. Deux règles, et elles tiennent ensemble :
 //!
 //! - **On ne demande qu'à défaut.** Une adresse partagée désigne une parcelle,

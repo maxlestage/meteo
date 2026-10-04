@@ -1,7 +1,5 @@
 //! Catalogue des libellés partagés.
 //!
-//! Miroir de `core/src/messages.ts`.
-//!
 //! Ce que le domaine décrit par des clés — temps qu'il fait, états du sol,
 //! verdicts, motifs de blocage, alertes, paliers — dans les trois langues de
 //! Klima. Les textes propres à chaque interface vivent chez elle.

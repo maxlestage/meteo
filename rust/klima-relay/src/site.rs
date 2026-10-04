@@ -1,7 +1,5 @@
 //! Servir la vitrine et l'application depuis le relais.
 //!
-//! Miroir de `server/src/static.ts`.
-//!
 //! Le relais tourne déjà quelque part de public : lui faire servir les
 //! fichiers construits évite un second hébergement, et l'application se
 //! retrouve sur la même origine que ses appels — donc plus de CORS à accorder,

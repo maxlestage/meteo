@@ -1,7 +1,5 @@
 //! Faire apparaître un élément quand il entre dans la fenêtre.
 //!
-//! Miroir de `site/src/hooks/useReveal.ts`.
-//!
 //! Le contenu part **visible** : il n'est masqué que dans l'instant qui
 //! précède le premier affichage, et seulement si l'on sait pouvoir le ramener.
 //! Sans `IntersectionObserver`, ou lorsque le système demande moins de

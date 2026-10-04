@@ -1,7 +1,5 @@
 //! Caler la page sur la position de la personne, à la première visite.
 //!
-//! Miroir de `core/src/ui/useStartPosition.ts`.
-//!
 //! Ne bloque rien : la parcelle par défaut se charge pendant que le navigateur
 //! demande l'autorisation, et bascule quand la position arrive. Attendre la
 //! réponse laisserait une page vide derrière la boîte de dialogue, pour un

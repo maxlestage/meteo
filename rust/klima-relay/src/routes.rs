@@ -1,7 +1,5 @@
 //! Les routes du relais.
 //!
-//! Miroir de `server/src/index.ts`.
-//!
 //! Un seul rôle : interroger les fournisseurs météo une fois pour tout le
 //! monde. Ce que ça change, dans l'ordre d'importance :
 //!

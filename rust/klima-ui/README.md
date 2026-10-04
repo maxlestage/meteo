@@ -1,7 +1,5 @@
 # Ce que les deux interfaces partagent
 
-Miroir de `core/src/ui/`.
-
 La vitrine et l'application affichent le même signe, parlent les mêmes langues,
 tiennent leur parcelle dans l'adresse de la même façon et appellent les
 fournisseurs par le même chemin. Deux copies de tout cela divergeraient : la

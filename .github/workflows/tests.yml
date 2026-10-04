@@ -3,9 +3,7 @@ name: Tests
 # Ce que le dépôt vérifie avant de livrer, vérifié aussi à chaque poussée.
 #
 # Il n'y avait rien ici : les tests tournaient en local, et une branche
-# pouvait arriver rouge sans que ça se voie. Les deux travaux sont séparés
-# parce qu'ils n'ont rien en commun — l'un compile du Rust, l'autre lit du
-# TypeScript — et qu'un échec doit dire lequel des deux a lâché.
+# pouvait arriver rouge sans que ça se voie.
 on:
   push:
     branches: [master]
@@ -70,20 +68,3 @@ jobs:
           trunk build --config klima-site/Trunk.toml
           trunk build --config klima-web/Trunk.toml
         working-directory: rust
-
-  typescript:
-    name: TypeScript
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v5
-
-      - uses: oven-sh/setup-bun@v2
-        with:
-          bun-version: latest
-
-      - run: bun install --frozen-lockfile
-
-      - run: bun test
-
-      - name: Types
-        run: bun run typecheck
