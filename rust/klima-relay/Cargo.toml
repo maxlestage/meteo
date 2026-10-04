@@ -9,7 +9,18 @@ klima-core = { path = "../klima-core" }
 axum.workspace = true
 tokio.workspace = true
 reqwest.workspace = true
+serde_json.workspace = true
+serde = { version = "1", features = ["derive"] }
+# Vérifier les jetons d'Apple (RS256) et signer les sessions du relais (HS256).
+# Le moteur cryptographique en Rust pur : pas de bibliothèque système à lier,
+# donc rien qui casse sur la pile du buildpack.
+jsonwebtoken = { version = "11.1.0", default-features = false, features = ["rust_crypto"] }
 
 [dev-dependencies]
 tokio = { version = "1", features = ["rt-multi-thread", "macros", "sync", "time", "fs", "test-util"] }
 tower = { version = "0.5.3", features = ["util"] }
+# Les tests fabriquent leur propre paire de clés à l'exécution, pour signer des
+# jetons « à la manière d'Apple » : aucune clé privée n'est commitée.
+rsa = "0.9"
+rand = "0.8"
+base64 = "0.22"

@@ -17,7 +17,7 @@
 //! d'appeler seuls. On perd des sources, pas la météo.
 
 use std::path::PathBuf;
-use std::sync::Arc;
+use std::sync::{Arc, RwLock};
 
 use axum::Router;
 use axum::body::Body;
@@ -28,10 +28,11 @@ use klima_core::grid::{cell_for, cell_key};
 use klima_core::plan::Plan;
 use reqwest::Url;
 
-use crate::cache::{ForecastCache, Served};
+use crate::cache::{Clock, ForecastCache, Served};
+use crate::identite::{self, Cles, Identite, Refus};
 use crate::pro::Accord;
 use crate::site;
-use crate::upstream::{self, Fetch, Params, UpstreamError};
+use crate::upstream::{self, Call, Fetch, Params, UpstreamError};
 
 /// Une heure de fraîcheur. Les modèles ne tournent que quelques fois par
 /// jour ; rafraîchir plus souvent ne change pas la réponse et multiplie la
@@ -63,7 +64,46 @@ pub struct Etat {
     /// l'hébergement du site — et l'application se retrouve sur la même
     /// origine que ses appels.
     pub site: Option<PathBuf>,
+    /// L'horloge, en millisecondes : pour les échéances des jetons.
+    pub now: Clock,
+    /// Ce qu'il faut pour reconnaître un compte. Absent, les comptes sont
+    /// désactivés — et `/v1/session` le dit plutôt que de faire semblant.
+    pub comptes: Option<Comptes>,
 }
+
+/// Les comptes : de quoi vérifier ce qu'Apple prouve, et signer ce qu'on en tire.
+#[derive(Clone)]
+pub struct Comptes {
+    /// Le secret des sessions. Il vit dans l'environnement du relais et nulle
+    /// part ailleurs ; le changer déconnecte tout le monde, d'un coup.
+    pub secret: Arc<Vec<u8>>,
+    /// L'identifiant de l'application, que les jetons d'Apple doivent viser.
+    pub audience: String,
+    /// Où lire les clés publiques d'Apple.
+    pub adresse_cles: String,
+    /// Les clés lues, et quand. Apple les fait tourner rarement : une heure de
+    /// mémoire suffit, et une clé inconnue déclenche une relecture.
+    pub cles: Arc<RwLock<Option<(i64, Cles)>>>,
+}
+
+impl Comptes {
+    pub fn new(secret: Vec<u8>) -> Self {
+        Comptes {
+            secret: Arc::new(secret),
+            audience: identite::AUDIENCE_PAR_DEFAUT.to_owned(),
+            adresse_cles: identite::APPLE_CLES.to_owned(),
+            cles: Arc::new(RwLock::new(None)),
+        }
+    }
+}
+
+/// Garder les clés d'Apple une heure.
+const CLES_TTL_MS: i64 = 3_600_000;
+
+/// Une clé inconnue ne relance la lecture qu'une fois toutes les cinq minutes :
+/// sans ce frein, n'importe qui pourrait faire marteler Apple par le relais en
+/// lui présentant des jetons à clé fantaisiste.
+const CLES_RELECTURE_MIN_MS: i64 = 300_000;
 
 /// Tout passe par un seul gestionnaire, comme dans le relais TypeScript : les
 /// routes se lisent alors dans l'ordre où elles comptent, et la priorité de
@@ -86,6 +126,16 @@ async fn handle(State(etat): State<Etat>, request: Request) -> Response {
     let chemin = url.path().to_owned();
     let params: Params = url.query_pairs().map(|(k, v)| (k.into_owned(), v.into_owned())).collect();
 
+    // Le porteur d'une session, s'il y en a un. Lu ici parce que la requête
+    // peut être consommée plus bas, pour son corps.
+    let porteur: Option<String> = request
+        .headers()
+        .get(header::AUTHORIZATION)
+        .and_then(|v| v.to_str().ok())
+        .and_then(|v| v.strip_prefix("Bearer "))
+        .map(|v| v.trim().to_owned())
+        .filter(|v| !v.is_empty());
+
     if request.method() == Method::OPTIONS {
         let mut entetes = cors.clone();
         entetes.insert(
@@ -93,6 +143,15 @@ async fn handle(State(etat): State<Etat>, request: Request) -> Response {
             HeaderValue::from_static("GET, OPTIONS"),
         );
         return (StatusCode::NO_CONTENT, entetes).into_response();
+    }
+
+    // La seule route qui reçoit un corps : l'échange d'un jeton d'Apple contre
+    // une session. Tout le reste est en lecture.
+    if chemin == "/v1/session" {
+        if request.method() != Method::POST {
+            return texte(StatusCode::METHOD_NOT_ALLOWED, "méthode non permise", &cors);
+        }
+        return ouvrir_session(&etat, request.into_body(), &cors).await;
     }
 
     if request.method() != Method::GET {
@@ -111,7 +170,28 @@ async fn handle(State(etat): State<Etat>, request: Request) -> Response {
         // « courriel » d'abord, « email » ensuite : le second n'est là que pour
         // qu'un essai à la main ne réponde pas « libre » sur un nom de
         // paramètre, ce qui se cherche longtemps.
-        let courriel = params.get("courriel").or_else(|| params.get("email"));
+        //
+        // Une session, quand il y en a une, passe avant tout : son adresse est
+        // celle qu'Apple a prouvée, et une adresse en paramètre ne la remplace
+        // pas. Une session illisible ou échue répond 401 — une réponse franche,
+        // que l'application lit comme « reconnectez-vous », et non comme un
+        // silence à ignorer.
+        let verifiee: Option<String> = match (&porteur, &etat.comptes) {
+            (None, _) => None,
+            (Some(jeton), Some(comptes)) => {
+                match identite::lire_session(jeton, &comptes.secret, (etat.now)() / 1000) {
+                    Ok(identite) => Some(identite.courriel),
+                    Err(_) => return json(StatusCode::UNAUTHORIZED, r#"{"erreur":"session"}"#.to_owned(), &cors),
+                }
+            }
+            (Some(_), None) => {
+                return json(StatusCode::UNAUTHORIZED, r#"{"erreur":"session"}"#.to_owned(), &cors);
+            }
+        };
+        let courriel = verifiee
+            .as_ref()
+            .or_else(|| params.get("courriel"))
+            .or_else(|| params.get("email"));
         let accorde = etat
             .accord_pro
             .accorde(params.get("code").map(String::as_str), courriel.map(String::as_str));
@@ -194,11 +274,13 @@ async fn handle(State(etat): State<Etat>, request: Request) -> Response {
 /// qu'ils soient là.
 fn sante(etat: &Etat) -> String {
     format!(
-        r#"{{"statut":"ok","cellules":{},"interrogations":{},"cleOpenMeteo":"{}","pro":"{}"}}"#,
+        r#"{{"statut":"ok","cellules":{},"interrogations":{},"cleOpenMeteo":"{}","pro":"{}","comptes":"{}"}}"#,
         etat.forecasts.size(),
         etat.forecasts.calls() + etat.searches.calls(),
         if etat.open_meteo_key.is_some() { "configurée" } else { "absente" },
-        etat.accord_pro.etiquette()
+        etat.accord_pro.etiquette(),
+        // L'état, jamais le secret.
+        if etat.comptes.is_some() { "activés" } else { "désactivés" }
     )
 }
 
@@ -296,6 +378,90 @@ fn servir(lu: Result<Served<String>, UpstreamError>, cors: &HeaderMap) -> Respon
     }
 }
 
+/// Échange un jeton d'Apple contre une session du relais.
+///
+/// La réponse rend l'adresse prouvée : c'est celle de la personne qui vient de
+/// se connecter, l'application la lui montre — y compris quand Apple a donné
+/// une adresse relais à sa demande, qu'il faudra alors inviter telle quelle.
+async fn ouvrir_session(etat: &Etat, corps: Body, cors: &HeaderMap) -> Response {
+    let Some(comptes) = &etat.comptes else {
+        return json(
+            StatusCode::SERVICE_UNAVAILABLE,
+            r#"{"erreur":"comptes désactivés"}"#.to_owned(),
+            cors,
+        );
+    };
+
+    let Ok(octets) = axum::body::to_bytes(corps, 16 * 1024).await else {
+        return json(StatusCode::BAD_REQUEST, r#"{"erreur":"corps illisible"}"#.to_owned(), cors);
+    };
+    let jeton = serde_json::from_slice::<serde_json::Value>(&octets)
+        .ok()
+        .and_then(|v| v.get("jetonApple")?.as_str().map(str::to_owned));
+    let Some(jeton) = jeton else {
+        return json(StatusCode::BAD_REQUEST, r#"{"erreur":"corps illisible"}"#.to_owned(), cors);
+    };
+
+    let maintenant = (etat.now)() / 1000;
+    match verifier_avec_cles(etat, comptes, &jeton, maintenant).await {
+        Ok(identite) => {
+            let session = identite::emettre_session(&identite, &comptes.secret, maintenant);
+            let corps = serde_json::json!({ "session": session, "courriel": identite.courriel });
+            json(StatusCode::OK, corps.to_string(), cors)
+        }
+        Err(motif) => {
+            // Le motif va au journal, pas au client : détailler un refus
+            // aiderait surtout qui fabrique des jetons.
+            eprintln!("session refusée ({motif:?})");
+            json(StatusCode::UNAUTHORIZED, r#"{"erreur":"refusé"}"#.to_owned(), cors)
+        }
+    }
+}
+
+async fn verifier_avec_cles(
+    etat: &Etat,
+    comptes: &Comptes,
+    jeton: &str,
+    maintenant: i64,
+) -> Result<Identite, Refus> {
+    let (cles, relues) = cles_apple(etat, comptes, false).await.ok_or(Refus::CleInconnue)?;
+    match identite::verifier_apple(jeton, &cles, &comptes.audience, maintenant) {
+        // Apple fait tourner ses clés : une clé inconnue peut être une neuve.
+        Err(Refus::CleInconnue) if !relues => {
+            let (cles, _) = cles_apple(etat, comptes, true).await.ok_or(Refus::CleInconnue)?;
+            identite::verifier_apple(jeton, &cles, &comptes.audience, maintenant)
+        }
+        autre => autre,
+    }
+}
+
+/// Les clés d'Apple, de mémoire si elles sont fraîches. Le booléen dit si
+/// elles viennent d'être relues — auquel cas une seconde lecture est inutile.
+async fn cles_apple(etat: &Etat, comptes: &Comptes, forcer: bool) -> Option<(Cles, bool)> {
+    let maintenant = (etat.now)();
+    let memoire = comptes.cles.read().ok().and_then(|g| g.clone());
+    if let Some((quand, cles)) = &memoire {
+        let age = maintenant - quand;
+        let fraiches = age < CLES_TTL_MS;
+        let relecture_permise = age >= CLES_RELECTURE_MIN_MS;
+        if fraiches && !(forcer && relecture_permise) {
+            return Some((cles.clone(), false));
+        }
+    }
+
+    let appel = Call { url: comptes.adresse_cles.clone(), user_agent: None };
+    let Some(cles) = (etat.fetch)(appel).await.ok().and_then(|corps| Cles::lire(&corps)) else {
+        // Apple injoignable : on se rabat sur ce qu'on avait, même vieux. Une
+        // clé ne devient pas fausse en vieillissant ; elle peut seulement
+        // manquer, et c'est ce que dira la vérification.
+        return memoire.map(|(_, cles)| (cles, true));
+    };
+    if let Ok(mut garde) = comptes.cles.write() {
+        *garde = Some((maintenant, cles.clone()));
+    }
+    Some((cles, true))
+}
+
 fn json(status: StatusCode, corps: String, cors: &HeaderMap) -> Response {
     let mut entetes = cors.clone();
     inserer(&mut entetes, header::CONTENT_TYPE, "application/json; charset=utf-8");
@@ -325,8 +491,10 @@ pub fn etat(fetch: Fetch, now: crate::cache::Clock) -> Etat {
         searches: Arc::new(ForecastCache::new(CacheOptions {
             ttl_ms: SEARCH_TTL_MS,
             stale_ms: SEARCH_TTL_MS,
-            now,
+            now: now.clone(),
         })),
+        now,
+        comptes: None,
         open_meteo_key: None,
         accord_pro: Accord::Aucun,
         allowed_origins: vec![DEFAULT_ORIGIN.to_owned()],
@@ -367,6 +535,11 @@ mod tests {
 
         fn echoue(mut self, status: u16) -> Self {
             self.reponse = Arc::new(move || Err(UpstreamError { status: Some(status) }));
+            self
+        }
+
+        fn repond_texte(mut self, corps: String) -> Self {
+            self.reponse = Arc::new(move || Ok(corps.clone()));
             self
         }
 
@@ -747,6 +920,233 @@ mod tests {
 
         assert_eq!(status, StatusCode::NOT_FOUND);
         assert_eq!(faux.appels(), 0);
+    }
+
+    /* ---- les comptes ---- */
+
+    use crate::identite::essai;
+
+    /// L'instant des tests, en secondes — celui de `relais()`.
+    const T: i64 = 1_700_000_000;
+    const SECRET: &[u8] = b"un secret d'essai suffisamment long pour HS256";
+
+    /// Un relais dont les comptes sont activés, et dont « Apple » répond avec
+    /// les clés d'essai.
+    fn avec_comptes(faux: &Faux, accord: &str) -> Etat {
+        let mut etat = relais(faux);
+        etat.accord_pro = Accord::depuis(Some(accord));
+        etat.comptes = Some(Comptes::new(SECRET.to_vec()));
+        etat
+    }
+
+    fn faux_apple() -> Faux {
+        Faux::new().repond_texte(serde_json::to_string(&essai::cles()).unwrap())
+    }
+
+    async fn poste(etat: Etat, chemin: &str, corps: &str) -> (StatusCode, String) {
+        let requete = Request::builder()
+            .method(Method::POST)
+            .uri(chemin)
+            .header("Content-Type", "application/json")
+            .body(Body::from(corps.to_owned()))
+            .unwrap();
+        let reponse = router(etat).oneshot(requete).await.expect("réponse");
+        let status = reponse.status();
+        let corps = to_bytes(reponse.into_body(), 1 << 20).await.unwrap();
+        (status, String::from_utf8_lossy(&corps).into_owned())
+    }
+
+    async fn plan_avec_session(etat: Etat, session: &str, query: &str) -> (StatusCode, String) {
+        let requete = Request::builder()
+            .uri(format!("/v1/plan{query}"))
+            .header("Authorization", format!("Bearer {session}"))
+            .body(Body::empty())
+            .unwrap();
+        let reponse = router(etat).oneshot(requete).await.expect("réponse");
+        let status = reponse.status();
+        let corps = to_bytes(reponse.into_body(), 1 << 20).await.unwrap();
+        (status, String::from_utf8_lossy(&corps).into_owned())
+    }
+
+    fn corps_session(jeton: &str) -> String {
+        serde_json::json!({ "jetonApple": jeton }).to_string()
+    }
+
+    async fn ouvrir(etat: Etat, courriel: &str) -> (StatusCode, serde_json::Value) {
+        let jeton = essai::jeton(essai::apple(courriel, T));
+        let (status, corps) = poste(etat, "/v1/session", &corps_session(&jeton)).await;
+        (status, serde_json::from_str(&corps).unwrap_or(serde_json::Value::Null))
+    }
+
+    #[tokio::test]
+    async fn un_compte_invite_obtient_le_palier_sans_rien_saisir() {
+        // Le trajet complet : Apple prouve l'adresse, le relais en tire une
+        // session, la session suffit à obtenir le palier.
+        let faux = faux_apple();
+        let etat = avec_comptes(&faux, "max@ferme.fr");
+
+        let (status, reponse) = ouvrir(etat.clone(), "Max@Ferme.FR").await;
+        assert_eq!(status, StatusCode::OK);
+        assert_eq!(reponse["courriel"], "max@ferme.fr");
+        let session = reponse["session"].as_str().expect("une session").to_owned();
+
+        let (status, plan) = plan_avec_session(etat, &session, "").await;
+        assert_eq!(status, StatusCode::OK);
+        assert_eq!(plan, r#"{"plan":"pro"}"#);
+    }
+
+    #[tokio::test]
+    async fn un_compte_non_invite_reste_au_palier_libre() {
+        let faux = faux_apple();
+        let etat = avec_comptes(&faux, "max@ferme.fr");
+
+        let (_, reponse) = ouvrir(etat.clone(), "jo@farm.uk").await;
+        let session = reponse["session"].as_str().unwrap().to_owned();
+        let (status, plan) = plan_avec_session(etat, &session, "").await;
+        assert_eq!(status, StatusCode::OK);
+        assert_eq!(plan, r#"{"plan":"libre"}"#);
+    }
+
+    #[tokio::test]
+    async fn la_session_passe_avant_ladresse_en_parametre() {
+        // Un compte non invité ne se fait pas passer pour un autre en
+        // ajoutant `?courriel=` : l'adresse prouvée l'emporte.
+        let faux = faux_apple();
+        let etat = avec_comptes(&faux, "max@ferme.fr");
+
+        let (_, reponse) = ouvrir(etat.clone(), "jo@farm.uk").await;
+        let session = reponse["session"].as_str().unwrap().to_owned();
+        let (_, plan) = plan_avec_session(etat, &session, "?courriel=max@ferme.fr").await;
+        assert_eq!(plan, r#"{"plan":"libre"}"#);
+    }
+
+    #[tokio::test]
+    async fn retirer_quelquun_de_la_liste_lui_retire_le_palier_session_ou_pas() {
+        // La session prouve une identité, elle n'accorde rien : c'est la liste
+        // du moment qui décide, à chaque question.
+        let faux = faux_apple();
+        let etat = avec_comptes(&faux, "max@ferme.fr");
+        let (_, reponse) = ouvrir(etat.clone(), "max@ferme.fr").await;
+        let session = reponse["session"].as_str().unwrap().to_owned();
+
+        let mut sans_max = etat.clone();
+        sans_max.accord_pro = Accord::depuis(Some("ana@vina.es"));
+        let (status, plan) = plan_avec_session(sans_max, &session, "").await;
+        assert_eq!(status, StatusCode::OK);
+        assert_eq!(plan, r#"{"plan":"libre"}"#);
+    }
+
+    #[tokio::test]
+    async fn un_jeton_dapple_invalide_nouvre_pas_de_session() {
+        let faux = faux_apple();
+        let etat = avec_comptes(&faux, "max@ferme.fr");
+
+        let mut revendications = essai::apple("max@ferme.fr", T);
+        revendications["aud"] = serde_json::json!("com.autre.app");
+        let jeton = essai::jeton(revendications);
+        let (status, corps) = poste(etat, "/v1/session", &corps_session(&jeton)).await;
+        assert_eq!(status, StatusCode::UNAUTHORIZED);
+        // Le refus ne dit pas pourquoi.
+        assert_eq!(corps, r#"{"erreur":"refusé"}"#);
+    }
+
+    #[tokio::test]
+    async fn une_session_illisible_ou_retouchee_repond_401() {
+        let faux = faux_apple();
+        let etat = avec_comptes(&faux, "max@ferme.fr");
+
+        let (status, _) = plan_avec_session(etat.clone(), "nimporte.quoi.la", "").await;
+        assert_eq!(status, StatusCode::UNAUTHORIZED);
+
+        // Une session signée avec un autre secret : celle d'un autre relais,
+        // ou d'avant un changement de secret.
+        let autre = crate::identite::emettre_session(
+            &Identite { sujet: "x".into(), courriel: "max@ferme.fr".into() },
+            b"un autre secret, tout aussi long que le premier",
+            T,
+        );
+        let (status, _) = plan_avec_session(etat, &autre, "").await;
+        assert_eq!(status, StatusCode::UNAUTHORIZED);
+    }
+
+    #[tokio::test]
+    async fn sans_secret_les_comptes_sont_desactives_et_le_disent() {
+        let faux = faux_apple();
+        let mut etat = relais(&faux);
+        etat.accord_pro = Accord::depuis(Some("max@ferme.fr"));
+
+        let jeton = essai::jeton(essai::apple("max@ferme.fr", T));
+        let (status, corps) = poste(etat.clone(), "/v1/session", &corps_session(&jeton)).await;
+        assert_eq!(status, StatusCode::SERVICE_UNAVAILABLE);
+        assert!(corps.contains("comptes désactivés"), "{corps}");
+        // Et rien n'a été demandé à Apple.
+        assert_eq!(faux.appels(), 0);
+
+        let (_, _, sante) = get(etat, "/health").await;
+        assert!(sante.contains(r#""comptes":"désactivés""#), "{sante}");
+    }
+
+    #[tokio::test]
+    async fn la_sante_dit_que_les_comptes_sont_actives_sans_rien_reveler() {
+        let faux = faux_apple();
+        let etat = avec_comptes(&faux, "max@ferme.fr");
+        let (_, _, sante) = get(etat, "/health").await;
+        assert!(sante.contains(r#""comptes":"activés""#), "{sante}");
+        assert!(!sante.contains("secret"), "{sante}");
+    }
+
+    #[tokio::test]
+    async fn la_session_ne_se_demande_quen_post() {
+        let faux = faux_apple();
+        let etat = avec_comptes(&faux, "max@ferme.fr");
+        let (status, _, _) = get(etat, "/v1/session").await;
+        assert_eq!(status, StatusCode::METHOD_NOT_ALLOWED);
+    }
+
+    #[tokio::test]
+    async fn un_corps_illisible_est_refuse_sans_interroger_apple() {
+        let faux = faux_apple();
+        let etat = avec_comptes(&faux, "max@ferme.fr");
+        for corps in ["", "{}", r#"{"jeton":"x"}"#, "pas du json"] {
+            let (status, _) = poste(etat.clone(), "/v1/session", corps).await;
+            assert_eq!(status, StatusCode::BAD_REQUEST, "{corps}");
+        }
+        assert_eq!(faux.appels(), 0);
+    }
+
+    #[tokio::test]
+    async fn les_cles_dapple_se_lisent_une_fois_pour_plusieurs_connexions() {
+        let faux = faux_apple();
+        let etat = avec_comptes(&faux, "max@ferme.fr");
+        for _ in 0..3 {
+            let (status, _) = ouvrir(etat.clone(), "max@ferme.fr").await;
+            assert_eq!(status, StatusCode::OK);
+        }
+        assert_eq!(faux.appels(), 1, "une seule lecture des clés pour trois connexions");
+        assert_eq!(faux.premiere_url(), crate::identite::APPLE_CLES);
+    }
+
+    #[tokio::test]
+    async fn une_cle_fantaisiste_ne_fait_pas_marteler_apple() {
+        // Chaque jeton à clé inconnue pourrait relancer une lecture. Le frein :
+        // pas plus d'une relecture toutes les cinq minutes.
+        let faux = faux_apple();
+        let etat = avec_comptes(&faux, "max@ferme.fr");
+        ouvrir(etat.clone(), "max@ferme.fr").await; // première lecture
+        for _ in 0..5 {
+            let jeton = essai::jeton_avec_kid(essai::apple("max@ferme.fr", T), "fantaisie");
+            let (status, _) = poste(etat.clone(), "/v1/session", &corps_session(&jeton)).await;
+            assert_eq!(status, StatusCode::UNAUTHORIZED);
+        }
+        assert_eq!(faux.appels(), 1, "l'horloge n'a pas bougé : aucune relecture");
+    }
+
+    #[tokio::test]
+    async fn apple_injoignable_au_premier_appel_refuse_proprement() {
+        let faux = Faux::new().echoue(503);
+        let etat = avec_comptes(&faux, "max@ferme.fr");
+        let (status, _) = ouvrir(etat, "max@ferme.fr").await;
+        assert_eq!(status, StatusCode::UNAUTHORIZED);
     }
 
     /* ---- le relais qui sert aussi le site ---- */

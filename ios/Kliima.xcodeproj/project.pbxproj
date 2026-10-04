@@ -21,6 +21,7 @@
 		1EE8D32E4688E1C5E7963471 /* Cumuls.swift in Sources */ = {isa = PBXBuildFile; fileRef = 701558C0E92F12ECB916E1C6 /* Cumuls.swift */; };
 		214352D01F675595A3F3654A /* AlertsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 70A323DF1CDDEA680AC90086 /* AlertsTests.swift */; };
 		21C1E31CFC40D9A436686E87 /* Alerts.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9707DFF5CA818F05AB43EBA1 /* Alerts.swift */; };
+		23D4D55E45A75CD9C2731FCE /* Session.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6202144CAAD11B150D2A067A /* Session.swift */; };
 		24141C10E98B7C3F39FDEA2F /* WatchViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9DFCEE1BB00EFE0321D4C01A /* WatchViewModel.swift */; };
 		257D3B727C84AFDA7BB58E05 /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = BDAA24888AF82B3F0F77BEAC /* Localizable.xcstrings */; };
 		294494102F3820F390FEB5FA /* KliimaWatchWidgetsBundle.swift in Sources */ = {isa = PBXBuildFile; fileRef = E2F29AC239FEE014AA2A291D /* KliimaWatchWidgetsBundle.swift */; };
@@ -110,6 +111,7 @@
 		DC984FA742F7D37DDC81E8C6 /* PositionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 56740BAA255A8BCAFBF38DA5 /* PositionTests.swift */; };
 		DEA0EE17388FB7558136498A /* InfoPlist.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = 0D5EBEB31B8DF6AAD5C55101 /* InfoPlist.xcstrings */; };
 		E016E78093754332382D4C89 /* AlertScheduler.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC9C8B864A04819924BE30DA /* AlertScheduler.swift */; };
+		E06580C77FB4AC245ED5437E /* SessionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C4CC9F49C325FC15E741F577 /* SessionTests.swift */; };
 		E18C0B6A8CC01EF34FC82DFF /* KliimaWatch.app in Embed Watch Content */ = {isa = PBXBuildFile; fileRef = 8F45A5AFFADBE3D7107AC5A3 /* KliimaWatch.app */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		E21922A5084B826F1CD1A303 /* SprayActivityAttributes.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3CC70E8067AA900DADB695A0 /* SprayActivityAttributes.swift */; };
 		E258B27EF0A807071E4EF580 /* SharedStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 817D0E86880F9A5C255CC9CA /* SharedStore.swift */; };
@@ -179,6 +181,7 @@
 		5957CAFC6F87D0B5FCCC85D5 /* WeatherConditionTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeatherConditionTests.swift; sourceTree = "<group>"; };
 		5AD6285EE75DA0AD1F4E4FE1 /* DetailTile.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DetailTile.swift; sourceTree = "<group>"; };
 		5EC9D5F7632B1EF2E5B81F82 /* BackgroundRefresh.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackgroundRefresh.swift; sourceTree = "<group>"; };
+		6202144CAAD11B150D2A067A /* Session.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Session.swift; sourceTree = "<group>"; };
 		6580A8FAA2962596D57856A9 /* WeatherCondition.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeatherCondition.swift; sourceTree = "<group>"; };
 		6C5717DB9A72E3BC677A00B3 /* PlanTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlanTests.swift; sourceTree = "<group>"; };
 		6CF1D4F0A0F98BB261827EF5 /* SprayComplication.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SprayComplication.swift; sourceTree = "<group>"; };
@@ -210,6 +213,7 @@
 		BD096399F9FBD57D28CC36F4 /* RegisterTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RegisterTests.swift; sourceTree = "<group>"; };
 		BDAA24888AF82B3F0F77BEAC /* Localizable.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = Localizable.xcstrings; sourceTree = "<group>"; };
 		C2046E03783B437CAFA8D461 /* KliimaApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KliimaApp.swift; sourceTree = "<group>"; };
+		C4CC9F49C325FC15E741F577 /* SessionTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionTests.swift; sourceTree = "<group>"; };
 		C634F133C7CC1216F9C71EE8 /* SprayActivityTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SprayActivityTests.swift; sourceTree = "<group>"; };
 		C97139E68009C8F299BB5EF6 /* CumulsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CumulsTests.swift; sourceTree = "<group>"; };
 		CFD368A2A4B59C7B26F9AB9F /* PlanGrant.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlanGrant.swift; sourceTree = "<group>"; };
@@ -388,6 +392,7 @@
 				FC9C8B864A04819924BE30DA /* AlertScheduler.swift */,
 				EC2943147A1F876131069F7E /* WeatherActivityController.swift */,
 				CFD368A2A4B59C7B26F9AB9F /* PlanGrant.swift */,
+				6202144CAAD11B150D2A067A /* Session.swift */,
 			);
 			path = Services;
 			sourceTree = "<group>";
@@ -491,6 +496,7 @@
 				BD096399F9FBD57D28CC36F4 /* RegisterTests.swift */,
 				56740BAA255A8BCAFBF38DA5 /* PositionTests.swift */,
 				F88A878C2B02CB2543E34A76 /* PlanGrantTests.swift */,
+				C4CC9F49C325FC15E741F577 /* SessionTests.swift */,
 			);
 			path = KliimaTests;
 			sourceTree = "<group>";
@@ -717,6 +723,7 @@
 				E016E78093754332382D4C89 /* AlertScheduler.swift in Sources */,
 				FBFE7ECDAA7CBD948D6E7572 /* WeatherActivityController.swift in Sources */,
 				42043A473875D12D735301EF /* PlanGrant.swift in Sources */,
+				23D4D55E45A75CD9C2731FCE /* Session.swift in Sources */,
 				F1BB1FE2BA5912881D1C4E38 /* DashboardViewModel.swift in Sources */,
 				A5096683B0D64D48DE29C934 /* DashboardView.swift in Sources */,
 				0361672A474EBC61E33E5BDF /* DailyListView.swift in Sources */,
@@ -825,6 +832,7 @@
 				B881BEE60D7B2CB8EEE12BC1 /* RegisterTests.swift in Sources */,
 				DC984FA742F7D37DDC81E8C6 /* PositionTests.swift in Sources */,
 				BB1832BB7F0104122B0D0B7E /* PlanGrantTests.swift in Sources */,
+				E06580C77FB4AC245ED5437E /* SessionTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
