@@ -88,6 +88,68 @@ body {
   font-size: 13px;
 }
 
+/* Accès de test ---------------------------------------------------------- */
+
+/* La rangée se replie sous 380 px plutôt que de serrer le champ : un champ
+   d'adresse trop étroit se remplit à l'aveugle. Pas de défilement latéral —
+   c'est une grille, comme partout ailleurs dans cette interface. */
+
+.pro__grant {
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px solid rgb(255 255 255 / 10%);
+  display: grid;
+  gap: 8px;
+}
+
+.pro__grant-title {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.pro__grant-hint,
+.pro__grant-refused,
+.pro__granted-note {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 13px;
+}
+
+.pro__granted {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.pro__grant-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 8px;
+  align-items: center;
+}
+
+@media (width <= 380px) {
+  .pro__grant-row {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+.pro__grant-field {
+  min-width: 0;
+  padding: 9px 12px;
+  border: 1px solid rgb(255 255 255 / 16%);
+  border-radius: 10px;
+  background: rgb(0 0 0 / 20%);
+  color: inherit;
+  font: inherit;
+  font-size: 14px;
+}
+
+.pro__grant-field::placeholder {
+  color: var(--text-muted);
+}
+
 /* Bandeau de tête -------------------------------------------------------- */
 
 /* Le signe et la langue, sur une même ligne au-dessus de la recherche. La
