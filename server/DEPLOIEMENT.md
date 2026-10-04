@@ -110,3 +110,39 @@ jour et par cellule — mais elle suppose un processus qui reste debout.
 
 Pour un relais qui sert vraiment, un dyno **Basic** qui ne dort pas vaut mieux
 que la mise en cache la plus fine.
+
+## Débloquer le palier payant pendant l'essai
+
+Pendant l'essai, personne n'achète : les testeurs doivent voir le palier payant
+sans passer par la boutique. `KLIMA_PRO` le décide, **côté serveur** :
+
+| Valeur                    | Ce que le relais répond                  |
+| ------------------------- | ---------------------------------------- |
+| absente, vide, `0`, `non` | rien : StoreKit décide seul              |
+| `tous`, `1`, `oui`        | le palier payant, à qui demande          |
+| n'importe quoi d'autre    | le palier payant, à qui présente ce code |
+
+```bash
+heroku config:set KLIMA_PRO=tous --app VOTRE-APP
+curl https://VOTRE-APP.herokuapp.com/v1/plan
+# {"plan":"pro"}
+
+heroku config:unset KLIMA_PRO --app VOTRE-APP   # et le palier redescend
+```
+
+C'est là qu'elle doit vivre, et pas ailleurs : une valeur glissée dans une
+application distribuée est une valeur publiée, qu'on ne retire qu'en publiant
+une nouvelle version. Celle-là s'enlève en une commande.
+
+**Soyez franc sur ce que fait `tous`** : un relais public qui accorde le palier
+à qui demande l'accorde à tout le monde. C'est exactement ce qu'on veut tant
+que les seuls clients sont les testeurs qu'on a invités. Passé là, mettez un
+code long et aléatoire à la place — le relais ne le répète jamais, ni dans sa
+réponse ni dans `/health`, et la comparaison est à durée constante pour qu'on
+ne le devine pas lettre par lettre en chronométrant.
+
+Côté application, deux clés d'`Info.plist`, vides par défaut : `KliimaRelay`
+(l'adresse du relais — sans elle, aucun appel n'est fait et rien ne change) et
+`KliimaProCode`, qui ne sert que si le relais exige un code. L'accord **s'ajoute**
+à ce que dit StoreKit : un relais muet ne fait pas perdre un abonnement réel, et
+une boutique vide n'annule pas l'accord du relais.

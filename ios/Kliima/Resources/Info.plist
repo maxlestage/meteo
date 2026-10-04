@@ -2,6 +2,16 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+	<!--
+	  Le relais, quand il y en a un. Vide, l'application interroge les
+	  fournisseurs elle-même et la boutique décide seule du palier ; renseigné,
+	  elle lui demande aussi ce que le déploiement accorde (variable KLIMA_PRO
+	  du relais). Le code, lui, ne sert que si le relais en exige un.
+	-->
+	<key>KliimaRelay</key>
+	<string></string>
+	<key>KliimaProCode</key>
+	<string></string>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>fr</string>
 	<key>CFBundleDisplayName</key>

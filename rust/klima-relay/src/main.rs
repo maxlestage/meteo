@@ -9,6 +9,7 @@
 //! `upstream`, les fichiers dans `site`, le cache dans `cache`.
 
 mod cache;
+mod pro;
 mod routes;
 mod site;
 mod upstream;
@@ -29,6 +30,12 @@ async fn main() {
     let mut etat = routes::etat(upstream::http_fetch(client), Arc::new(maintenant));
     etat.open_meteo_key = std::env::var("OPEN_METEO_KEY").ok().filter(|k| !k.is_empty());
 
+    // Ce que ce déploiement accorde comme palier, en plus de la boutique. La
+    // valeur vit ici et nulle part ailleurs : elle s'enlève en une commande,
+    // là où une valeur glissée dans l'application demanderait une nouvelle
+    // version pour être retirée.
+    etat.accord_pro = pro::Accord::depuis(std::env::var("KLIMA_PRO").ok().as_deref());
+
     if let Some(origines) = std::env::var("KLIMA_ORIGINS").ok().filter(|o| !o.is_empty()) {
         etat.allowed_origins =
             origines.split(',').map(|o| o.trim().to_owned()).filter(|o| !o.is_empty()).collect();
@@ -42,12 +49,13 @@ async fn main() {
     etat.site = racine.is_dir().then_some(racine.clone());
 
     println!(
-        "relais Klima (Rust) sur :{port} — clé Open-Meteo {}{}",
+        "relais Klima (Rust) sur :{port} — clé Open-Meteo {}, palier accordé : {}{}",
         if etat.open_meteo_key.is_some() {
             "configurée"
         } else {
             "absente (plan gratuit, usage non commercial)"
         },
+        etat.accord_pro.etiquette(),
         match &etat.site {
             Some(racine) => format!(", site servi depuis {}", racine.display()),
             None => ", sans site".to_owned(),
