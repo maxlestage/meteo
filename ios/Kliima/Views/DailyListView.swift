@@ -7,6 +7,18 @@ struct DailyListView: View {
     let currentTemperature: Double
     let timeZone: TimeZone
 
+    /// Les colonnes grandissent avec la taille de texte choisie.
+    ///
+    /// Figées en points, elles allaient pour le réglage par défaut et lui
+    /// seul : un cran au-dessus, « 18° » ne tenait plus dans ses 34 points et
+    /// le degré passait seul à la ligne, comme le point de « Sam. ». Même
+    /// remède que le bandeau horaire : `ScaledMetric` fait grandir la colonne
+    /// avec le texte, et une seule ligne reste une seule ligne.
+    @ScaledMetric(relativeTo: .body) private var largeurJour: CGFloat = 50
+    @ScaledMetric(relativeTo: .body) private var largeurCiel: CGFloat = 46
+    @ScaledMetric(relativeTo: .body) private var largeurTemperature: CGFloat = 38
+    @ScaledMetric(relativeTo: .body) private var tailleIcone: CGFloat = 18
+
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
             CardLabel(text: Localized.text("daily.title"))
@@ -34,28 +46,36 @@ struct DailyListView: View {
         return HStack(spacing: 10) {
             Text(isToday ? Localized.text("daily.today") : AgroFormat.weekday(day.date, in: timeZone))
                 .font(.body.weight(.medium))
-                .frame(width: 48, alignment: .leading)
+                .lineLimit(1)
+                .minimumScaleFactor(0.75)
+                .frame(width: largeurJour, alignment: .leading)
 
             VStack(spacing: 0) {
                 Image(systemName: condition.icon.symbolName(isDay: true))
                     .symbolRenderingMode(.multicolor)
-                    .font(.system(size: 18))
+                    .font(.system(size: tailleIcone))
                 Text(day.precipitationProbabilityMax >= 10
                      ? AgroFormat.percent(day.precipitationProbabilityMax)
                      : " ")
-                    .font(.system(size: 11, weight: .semibold))
+                    .font(.caption2.weight(.semibold))
                     .foregroundStyle(Color(red: 0.498, green: 0.816, blue: 0.961))
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.75)
             }
-            .frame(width: 46)
+            .frame(width: largeurCiel)
 
             Text(AgroFormat.temperature(day.temperatureMin))
                 .foregroundStyle(Color.encreDouce)
-                .frame(width: 34, alignment: .trailing)
+                .lineLimit(1)
+                .minimumScaleFactor(0.75)
+                .frame(width: largeurTemperature, alignment: .trailing)
 
             temperatureBar(for: day, isToday: isToday)
 
             Text(AgroFormat.temperature(day.temperatureMax))
-                .frame(width: 34, alignment: .trailing)
+                .lineLimit(1)
+                .minimumScaleFactor(0.75)
+                .frame(width: largeurTemperature, alignment: .trailing)
         }
         .font(.body)
         .monospacedDigit()

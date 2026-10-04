@@ -20,8 +20,12 @@ struct SprayCardView: View {
         VStack(alignment: .leading, spacing: 4) {
             CardLabel(text: Localized.text("spray.title"))
 
+            // Une ligne : « Dim. 18 h → 21 h » coupé après la flèche ne se
+            // lit plus comme une fenêtre.
             Text(headline)
                 .font(.system(size: 26, weight: .regular))
+                .lineLimit(1)
+                .minimumScaleFactor(0.6)
 
             Text(caption)
                 .font(.subheadline)
@@ -46,7 +50,8 @@ struct SprayCardView: View {
                 Spacer()
                 Text(Localized.text("spray.plus24"))
             }
-            .font(.system(size: 11))
+            .font(.caption2)
+            .lineLimit(1)
             .foregroundStyle(Color.encreDouce)
             .padding(.top, 5)
 
