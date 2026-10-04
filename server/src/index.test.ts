@@ -180,6 +180,43 @@ describe('relais', () => {
   })
 })
 
+describe('le palier accordé par le déploiement', () => {
+
+  test('sans rien de configuré, le relais n’accorde aucun palier', async () => {
+    // StoreKit décide seul, comme en production.
+    const response = await createHandler({})(get('/v1/plan'))
+    expect(await response.json()).toEqual({ plan: 'libre' })
+  })
+
+  test('le mode « tous » accorde à qui demande', async () => {
+    const handle = createHandler({ accordPro: { type: 'tous' } })
+    const response = await handle(get('/v1/plan'))
+
+    expect(response.status).toBe(200)
+    expect(await response.json()).toEqual({ plan: 'pro' })
+  })
+
+  test('un code n’accorde qu’au code, et le relais ne le répète jamais', async () => {
+    const handle = createHandler({ accordPro: { type: 'code', code: 'sillon-2026-dUx7' } })
+
+    expect(await (await handle(get('/v1/plan?code=sillon-2026-dUx7'))).json())
+      .toEqual({ plan: 'pro' })
+    expect(await (await handle(get('/v1/plan?code=sillon'))).json()).toEqual({ plan: 'libre' })
+    expect(await (await handle(get('/v1/plan'))).json()).toEqual({ plan: 'libre' })
+
+    // Ni la réponse ni l'état de santé ne redisent le code.
+    const sante = await (await handle(get('/health'))).text()
+    expect(sante).not.toContain('sillon')
+    expect(sante).toContain('"pro":"sur code"')
+  })
+
+  test('le palier accordé ne dépend pas des coordonnées', async () => {
+    // La route répond avant la lecture du point : un palier n'a pas de lieu.
+    const handle = createHandler({ accordPro: { type: 'tous' } })
+    expect((await handle(get('/v1/plan'))).status).toBe(200)
+  })
+})
+
 describe('le relais qui sert aussi le site', () => {
 
   /** Un site qui ne connaît que sa page d'accueil. */

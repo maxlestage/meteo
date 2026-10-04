@@ -45,6 +45,11 @@ final class Subscription: ObservableObject {
     deinit { updates?.cancel() }
 
     /// Relit le palier auprès de StoreKit et le recopie pour les extensions.
+    ///
+    /// Deux sources, et l'une n'efface jamais l'autre : ce que la boutique
+    /// atteste, et ce que le déploiement accorde (`KLIMA_PRO`, côté relais)
+    /// pendant l'essai. Un relais muet ne fait donc pas perdre un abonnement
+    /// réel, et une boutique vide n'annule pas l'accord du relais.
     func refresh() async {
         var entitled = false
         for await result in Transaction.currentEntitlements {
@@ -56,7 +61,8 @@ final class Subscription: ObservableObject {
             }
         }
 
-        let next: Plan = entitled ? .pro : .libre
+        let accorde = await PlanGrant.accorde()
+        let next: Plan = (entitled || accorde) ? .pro : .libre
         plan = next
         SharedStore.save(next)
     }

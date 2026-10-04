@@ -38,6 +38,7 @@
 		39174010BBCB45A96CCCC41F /* AgroSamples.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2D56D2AFEB6AE6DB08B2F311 /* AgroSamples.swift */; };
 		3C2CE8F8F6017276AD70D067 /* AgroWeatherService.swift in Sources */ = {isa = PBXBuildFile; fileRef = B4F0E666C771746CB3FD57AF /* AgroWeatherService.swift */; };
 		3D992A5AAC326C078E61CB00 /* Cumuls.swift in Sources */ = {isa = PBXBuildFile; fileRef = 701558C0E92F12ECB916E1C6 /* Cumuls.swift */; };
+		42043A473875D12D735301EF /* PlanGrant.swift in Sources */ = {isa = PBXBuildFile; fileRef = CFD368A2A4B59C7B26F9AB9F /* PlanGrant.swift */; };
 		420C76EE3B79A358C8B791FE /* Position.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB8F1DD4A8E34FF10F2CCB10 /* Position.swift */; };
 		421B6FEE5575083F54E009D5 /* WeatherCondition.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6580A8FAA2962596D57856A9 /* WeatherCondition.swift */; };
 		43C88D74E43EBFC3FF3A51F8 /* Alerts.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9707DFF5CA818F05AB43EBA1 /* Alerts.swift */; };
@@ -90,6 +91,7 @@
 		B6BE20AE614CC1FA23FF70B3 /* LocationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8FCC89F11BCF6BA08E68ADF1 /* LocationService.swift */; };
 		B7BA648ECB503BA675BBDE07 /* PlanTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6C5717DB9A72E3BC677A00B3 /* PlanTests.swift */; };
 		B881BEE60D7B2CB8EEE12BC1 /* RegisterTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BD096399F9FBD57D28CC36F4 /* RegisterTests.swift */; };
+		BB1832BB7F0104122B0D0B7E /* PlanGrantTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F88A878C2B02CB2543E34A76 /* PlanGrantTests.swift */; };
 		BC0C44A99F6940D479EAED5A /* WeatherWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9AF7C0B1999B4323F84609D4 /* WeatherWidget.swift */; };
 		BCA77F887960BBB8B6530C3D /* SharedStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 817D0E86880F9A5C255CC9CA /* SharedStore.swift */; };
 		BFECAE5FE146209EE48874C0 /* HeroView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 07648D3F3C3D6F0CFF6F562F /* HeroView.swift */; };
@@ -210,6 +212,7 @@
 		C2046E03783B437CAFA8D461 /* KliimaApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KliimaApp.swift; sourceTree = "<group>"; };
 		C634F133C7CC1216F9C71EE8 /* SprayActivityTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SprayActivityTests.swift; sourceTree = "<group>"; };
 		C97139E68009C8F299BB5EF6 /* CumulsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CumulsTests.swift; sourceTree = "<group>"; };
+		CFD368A2A4B59C7B26F9AB9F /* PlanGrant.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlanGrant.swift; sourceTree = "<group>"; };
 		D1CBB225EB1F79C894350D65 /* DailyListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DailyListView.swift; sourceTree = "<group>"; };
 		D271A216C9DBED75A8724752 /* DashboardViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DashboardViewModel.swift; sourceTree = "<group>"; };
 		D5D96242648F683B45087C7B /* WeatherActivityAttributes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeatherActivityAttributes.swift; sourceTree = "<group>"; };
@@ -226,6 +229,7 @@
 		F20A680382FE74EE4D9DD82E /* SprayActivityController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SprayActivityController.swift; sourceTree = "<group>"; };
 		F265DD9AEA66CC782EE18E84 /* WeatherLiveActivity.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeatherLiveActivity.swift; sourceTree = "<group>"; };
 		F5DE221E004C2ABBAC38370E /* Register.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Register.swift; sourceTree = "<group>"; };
+		F88A878C2B02CB2543E34A76 /* PlanGrantTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlanGrantTests.swift; sourceTree = "<group>"; };
 		FA60311A4E5C2F3FC49CD1A2 /* WeatherLockScreenWidget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeatherLockScreenWidget.swift; sourceTree = "<group>"; };
 		FC9C8B864A04819924BE30DA /* AlertScheduler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlertScheduler.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -383,6 +387,7 @@
 				3A92F285D90BF784E3CE2062 /* Subscription.swift */,
 				FC9C8B864A04819924BE30DA /* AlertScheduler.swift */,
 				EC2943147A1F876131069F7E /* WeatherActivityController.swift */,
+				CFD368A2A4B59C7B26F9AB9F /* PlanGrant.swift */,
 			);
 			path = Services;
 			sourceTree = "<group>";
@@ -485,6 +490,7 @@
 				C97139E68009C8F299BB5EF6 /* CumulsTests.swift */,
 				BD096399F9FBD57D28CC36F4 /* RegisterTests.swift */,
 				56740BAA255A8BCAFBF38DA5 /* PositionTests.swift */,
+				F88A878C2B02CB2543E34A76 /* PlanGrantTests.swift */,
 			);
 			path = KliimaTests;
 			sourceTree = "<group>";
@@ -710,6 +716,7 @@
 				06FD740CB03C528DA7CAD222 /* Subscription.swift in Sources */,
 				E016E78093754332382D4C89 /* AlertScheduler.swift in Sources */,
 				FBFE7ECDAA7CBD948D6E7572 /* WeatherActivityController.swift in Sources */,
+				42043A473875D12D735301EF /* PlanGrant.swift in Sources */,
 				F1BB1FE2BA5912881D1C4E38 /* DashboardViewModel.swift in Sources */,
 				A5096683B0D64D48DE29C934 /* DashboardView.swift in Sources */,
 				0361672A474EBC61E33E5BDF /* DailyListView.swift in Sources */,
@@ -817,6 +824,7 @@
 				094ACA9848B6A74ED1846458 /* CumulsTests.swift in Sources */,
 				B881BEE60D7B2CB8EEE12BC1 /* RegisterTests.swift in Sources */,
 				DC984FA742F7D37DDC81E8C6 /* PositionTests.swift in Sources */,
+				BB1832BB7F0104122B0D0B7E /* PlanGrantTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
