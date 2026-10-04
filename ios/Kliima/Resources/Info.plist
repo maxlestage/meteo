@@ -9,7 +9,7 @@
 	  du relais). Le code, lui, ne sert que si le relais en exige un.
 	-->
 	<key>KliimaRelay</key>
-	<string></string>
+	<string>https://klima-dc0ad7d734c4.herokuapp.com</string>
 	<key>KliimaProCode</key>
 	<string></string>
 	<key>CFBundleDevelopmentRegion</key>
