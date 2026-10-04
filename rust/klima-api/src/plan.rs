@@ -33,18 +33,36 @@ pub fn plan_url(relais: &str, courriel: Option<&str>) -> String {
     }
 }
 
+/// Ce que le relais a répondu — et le fait qu'il n'ait rien répondu.
+///
+/// La distinction est tout l'objet de ce type. Un « non » et un silence mènent
+/// au même palier à la première question, mais pas à la seconde : un refus
+/// retire un accès, un silence ne doit rien retirer du tout. Les confondre,
+/// c'est faire perdre son palier à qui passe sous un tunnel.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum Verdict {
+    Accorde,
+    Refuse,
+    /// Pas de réseau, ou une réponse qu'on ne sait pas lire.
+    Injoignable,
+}
+
 /// Lit la réponse du relais : `{"plan":"pro"}` ou `{"plan":"libre"}`.
 ///
-/// Un relais en panne, une réponse tronquée, une page d'erreur : aucune de ces
-/// choses n'ouvre un palier payant. Le doute vaut toujours « libre ».
-pub fn decode_plan(corps: &str) -> Plan {
+/// Seul un `libre` bien formé vaut un refus. Un corps tronqué, une page
+/// d'erreur, un JSON d'une autre forme : le relais n'a pas dit non, il a dit
+/// quelque chose qu'on ne comprend pas — et on ne retire pas un accès sur une
+/// phrase qu'on n'a pas comprise. Accorder, en revanche, demande toujours un
+/// « oui » franc : le doute n'ouvre jamais rien.
+pub fn decode_verdict(corps: &str) -> Verdict {
     let lu: Option<String> = serde_json::from_str::<serde_json::Value>(corps)
         .ok()
         .and_then(|valeur| valeur.get("plan")?.as_str().map(str::to_owned));
 
     match lu.as_deref() {
-        Some(code) if code == Plan::Pro.code() => Plan::Pro,
-        _ => Plan::Libre,
+        Some(code) if code == Plan::Pro.code() => Verdict::Accorde,
+        Some(code) if code == Plan::Libre.code() => Verdict::Refuse,
+        _ => Verdict::Injoignable,
     }
 }
 
@@ -100,13 +118,20 @@ mod tests {
 
     #[test]
     fn un_oui_franc_accorde_le_palier() {
-        assert_eq!(decode_plan(r#"{"plan":"pro"}"#), Plan::Pro);
+        assert_eq!(decode_verdict(r#"{"plan":"pro"}"#), Verdict::Accorde);
     }
 
     #[test]
-    fn tout_le_reste_vaut_libre() {
+    fn un_non_franc_est_le_seul_refus() {
+        assert_eq!(decode_verdict(r#"{"plan":"libre"}"#), Verdict::Refuse);
+    }
+
+    #[test]
+    fn ce_quon_ne_comprend_pas_ne_retire_rien() {
+        // Ni n'accorde rien : « injoignable » laisse le palier où il est.
+        // C'est la différence entre un relais qui dit non et un relais muet,
+        // et elle décide si un creux de réseau coûte son accès à un testeur.
         for corps in [
-            r#"{"plan":"libre"}"#,
             r#"{"plan":"Pro"}"#,
             r#"{"plan":""}"#,
             r#"{"palier":"pro"}"#,
@@ -116,7 +141,7 @@ mod tests {
             "<html>502 Bad Gateway</html>",
             "",
         ] {
-            assert_eq!(decode_plan(corps), Plan::Libre, "{corps}");
+            assert_eq!(decode_verdict(corps), Verdict::Injoignable, "{corps}");
         }
     }
 }
