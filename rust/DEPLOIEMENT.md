@@ -15,15 +15,26 @@ endroit qui reste allumé.
 L'API garde la priorité : elle est tout entière sous `/v1/`, et le partage est
 vérifié par des tests.
 
-**Sur Heroku, le relais ne sert que l'API.** Le buildpack Rust n'a aucun
-mécanisme pour lancer un script avant la compilation — il n'y a pas de clé
-`BUILD_HOOK`, quoi qu'un `RustConfig` ait pu prétendre — donc `construire.sh`
-ne tourne pas là-bas et il n'y a pas de dossier `public` à servir. Les deux
-interfaces sont publiées par GitHub Pages (`.github/workflows/pages.yml`), et
-`construire.sh` reste l'outil local et celui de Pages. Pour servir la vitrine
-depuis Heroku aussi, il faudrait un second buildpack chargé d'exécuter le
-script ; ce n'est pas nécessaire au téléphone, qui ne demande que `/v1/`.
-Conséquence à connaître : `/` sur l'adresse Heroku ne montre pas la vitrine.
+**Sur Heroku, le relais sert tout** : la vitrine à `/`, l'application à
+`/app/`, l'API sous `/v1/` — une seule adresse, et l'application appelle son
+relais sur la même origine, sans réglage de partage.
+
+Le buildpack Rust ne sait faire qu'une chose, `cargo build --release`, et n'a
+aucun crochet pour lancer autre chose. C'est donc la compilation du relais qui
+construit le site : `rust/klima-relay/build.rs` appelle `construire.sh` — le
+même script qu'en local et que pour GitHub Pages. Il ne s'éveille que chez
+Heroku (`STACK=heroku-…`, que la plateforme pose pendant la construction) ou
+sur demande (`KLIMA_CONSTRUIRE_SITE=1`) ; en développement, en CI et sous
+`cargo test`, il ne fait rien. Le cargo imbriqué reçoit son propre dossier de
+compilation, voisin de celui du buildpack — sans quoi il attendrait pour
+toujours le verrou que tient son parent — et ce dossier vit dans le cache, comme
+Trunk, téléchargé une fois. Si le site ne se construit pas, le déploiement
+échoue et Heroku garde la version en service : mieux vaut cela que remplacer
+une version qui servait le site par une qui ne le sert plus.
+
+Répété hors d'Heroku, dans un dépôt copié à neuf, sans Trunk préinstallé :
+1 min 54 s pour le relais et les deux interfaces, puis la commande exacte du
+`Procfile` sert `/`, `/app/`, `/health` et `/v1/plan`.
 
 ## Le geste qui reste, et il est dans l'interface d'Heroku
 
@@ -53,7 +64,7 @@ seconde se voit du dehors.
 - `rust/scripts/construire.sh` — télécharge Trunk (binaire publié, pas de
   compilation : une compilation de Trunk sur un dyno dépasserait le temps de
   construction), construit la vitrine et l'application, puis les assemble. Il
-  sert en local et à GitHub Pages ; **le buildpack ne l'appelle pas**.
+  sert en local, à GitHub Pages, et chez Heroku par `klima-relay/build.rs`.
 
 Le `Procfile` est déjà posé :
 
@@ -67,7 +78,7 @@ web: rust/target/release/klima-relay
 | ---------------- | ----------------------------------------------------------------- |
 | `OPEN_METEO_KEY` | La clé du plan commercial, quand il y en aura une                 |
 | `KLIMA_ORIGINS`  | Les origines admises — inutile si le site est servi par le relais |
-| `KLIMA_PUBLIC`   | Où sont les fichiers du site. `public` par défaut, absent sur Heroku |
+| `KLIMA_PUBLIC`   | Où sont les fichiers du site. `public` par défaut — rien à régler |
 | `KLIMA_PRO`      | Le palier accordé pendant l'essai — voir plus bas                 |
 | `KLIMA_SESSION_SECRET` | Le secret qui signe les sessions des comptes — voir plus bas |
 
