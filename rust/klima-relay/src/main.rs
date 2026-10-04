@@ -9,6 +9,7 @@
 //! `upstream`, les fichiers dans `site`, le cache dans `cache`.
 
 mod cache;
+mod identite;
 mod pro;
 mod routes;
 mod site;
@@ -36,6 +37,11 @@ async fn main() {
     // version pour être retirée.
     etat.accord_pro = pro::Accord::depuis(std::env::var("KLIMA_PRO").ok().as_deref());
 
+    // Les comptes. Sans secret, ils sont désactivés : mieux vaut un relais qui
+    // le dit qu'un secret tiré au hasard à chaque démarrage, qui déconnecterait
+    // tout le monde au premier recyclage du dyno — chaque jour sur Heroku.
+    etat.comptes = comptes_depuis_l_environnement();
+
     if let Some(origines) = std::env::var("KLIMA_ORIGINS").ok().filter(|o| !o.is_empty()) {
         etat.allowed_origins =
             origines.split(',').map(|o| o.trim().to_owned()).filter(|o| !o.is_empty()).collect();
@@ -49,13 +55,14 @@ async fn main() {
     etat.site = racine.is_dir().then_some(racine.clone());
 
     println!(
-        "relais Klima (Rust) sur :{port} — clé Open-Meteo {}, palier accordé : {}{}",
+        "relais Klima (Rust) sur :{port} — clé Open-Meteo {}, palier accordé : {}, comptes {}{}",
         if etat.open_meteo_key.is_some() {
             "configurée"
         } else {
             "absente (plan gratuit, usage non commercial)"
         },
         etat.accord_pro.etiquette(),
+        if etat.comptes.is_some() { "activés" } else { "désactivés" },
         match &etat.site {
             Some(racine) => format!(", site servi depuis {}", racine.display()),
             None => ", sans site".to_owned(),
@@ -83,6 +90,35 @@ fn balayer_regulierement(etat: routes::Etat) {
             etat.searches.sweep();
         }
     });
+}
+
+/// Le secret des sessions doit être long : 32 octets au moins, ce que donne
+/// `openssl rand -hex 32` (64 caractères). Plus court, HS256 se force.
+const SECRET_MIN: usize = 32;
+
+/// Ce qu'il faut pour reconnaître les comptes, d'après l'environnement.
+fn comptes_depuis_l_environnement() -> Option<routes::Comptes> {
+    let secret = std::env::var("KLIMA_SESSION_SECRET").ok()?;
+    let secret = secret.trim();
+    if secret.len() < SECRET_MIN {
+        // Dit au journal, jamais la valeur : seulement qu'elle est trop courte.
+        eprintln!(
+            "KLIMA_SESSION_SECRET fait {} octets, il en faut {SECRET_MIN} : comptes désactivés",
+            secret.len()
+        );
+        return None;
+    }
+
+    let mut comptes = routes::Comptes::new(secret.as_bytes().to_vec());
+    // Pour une autre application, ou pour pointer les clés vers un faux Apple
+    // dans un essai. Rien à régler en temps normal.
+    if let Some(audience) = std::env::var("KLIMA_APPLE_AUDIENCE").ok().filter(|v| !v.is_empty()) {
+        comptes.audience = audience;
+    }
+    if let Some(adresse) = std::env::var("KLIMA_APPLE_KEYS").ok().filter(|v| !v.is_empty()) {
+        comptes.adresse_cles = adresse;
+    }
+    Some(comptes)
 }
 
 /// Millisecondes depuis l'époque.

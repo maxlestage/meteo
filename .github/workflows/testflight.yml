@@ -197,6 +197,13 @@ jobs:
       # affiche alors la parcelle par défaut au lieu de celle de
       # l'application — dégradé, mais installable. Le jour où le groupe existe,
       # cocher la case au lancement rend le partage.
+      #
+      # On retire **la clé du groupe**, et elle seule. Vider tout le fichier de
+      # droits — ce que faisait « CODE_SIGN_ENTITLEMENTS= » — emportait avec lui
+      # « Se connecter avec Apple » : l'archive s'installait, et la connexion
+      # échouait sur le téléphone sans rien dire de plus qu'une erreur 1000.
+      # La capacité, elle, s'active chez Apple par « -allowProvisioningUpdates » :
+      # contrairement aux groupes, l'API sait la déclarer.
       - name: Archiver
         env:
           TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
@@ -209,7 +216,17 @@ jobs:
             echo "Groupe d'applications : demandé, les habilitations le déclarent."
           else
             echo "::warning::Archive sans groupe d'applications : le widget et la montre ne liront pas la parcelle choisie dans l'application."
-            reglages+=(CODE_SIGN_ENTITLEMENTS=)
+            # Sur la copie de travail de la CI seulement : rien n'est commité.
+            for droits in ios/Kliima/Kliima.entitlements \
+                          ios/KliimaWidgets/KliimaWidgets.entitlements \
+                          ios/KliimaWatch/KliimaWatch.entitlements \
+                          ios/KliimaWatchWidgets/KliimaWatchWidgets.entitlements; do
+              /usr/libexec/PlistBuddy -c "Delete :com.apple.security.application-groups" "$droits" \
+                || { echo "::error::$droits : impossible de retirer le groupe"; exit 1; }
+            done
+            # Ce qui doit rester : la connexion avec Apple, côté application.
+            /usr/libexec/PlistBuddy -c "Print :com.apple.developer.applesignin" ios/Kliima/Kliima.entitlements \
+              || { echo "::error::« Se connecter avec Apple » a disparu des droits de l'application"; exit 1; }
           fi
 
           xcodebuild archive \

@@ -72,14 +72,20 @@ nouvelle pull request.
   perdre un abonnement réel. Le relais ne répète jamais ce qu'il attend, ni
   dans sa réponse ni dans `/health` : d'un refus on ne peut pas déduire qu'une
   adresse est inconnue, sinon la liste s'énumère une adresse à la fois.
-- **L'essai se nomme, il ne se partage pas.** La forme à préférer pour
-  `KLIMA_PRO` est une liste d'adresses électroniques : le testeur saisit la
-  sienne, rien de secret ne voyage dans le binaire, et on retire quelqu'un sans
-  toucher aux autres ni republier. `KliimaProCode` reste vide dans le dépôt, et
-  un test le vérifie — un code écrit là est lisible par quiconque lit le dépôt,
-  bien avant d'être extrait du binaire. Une liste d'adresses n'est pas une
-  preuve d'identité et ne prétend pas l'être : vendre un abonnement reste le
-  travail de StoreKit.
+- **Un compte par personne, prouvé par Apple.** Maxime Nathan Lestage a
+  tranché : pas de `tous`, des comptes séparés. Sur iPhone, « Se connecter
+  avec Apple » prouve l'adresse ; le relais vérifie le jeton (signature RS256
+  avec les clés publiques d'Apple, émetteur, destinataire `com.kliima.app`,
+  échéance) et rend une session qu'il signe avec `KLIMA_SESSION_SECRET`. La
+  session prouve une identité, elle n'accorde rien : c'est `KLIMA_PRO`, liste
+  d'adresses, qui décide à chaque question — retirer quelqu'un de la liste lui
+  retire l'accès tout de suite. Pas de mot de passe, pas de base de données.
+  Le secret vit dans le relais et nulle part ailleurs ; sans lui, les comptes
+  sont désactivés et le relais le dit. La session va dans le trousseau, et
+  dans l'en-tête `Authorization`, jamais dans une adresse. `KliimaProCode`
+  reste vide dans le dépôt, et un test le vérifie. Le site, lui, n'a pas
+  encore de comptes : son champ d'adresse n'est pas une preuve, et la
+  documentation le dit.
 - **Le plan gratuit d'Open-Meteo est réservé à un usage non commercial.** Le
   jour où Klima se vend, tout le trafic passe par un plan payant, donc par une
   clé — qui vit dans le relais et nulle part ailleurs. Une clé dans un binaire
