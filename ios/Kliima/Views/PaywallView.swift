@@ -17,6 +17,7 @@ import SwiftUI
 struct PaywallView: View {
     @ObservedObject var subscription: Subscription
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.colorScheme) private var scheme
 
     /// Renseigné quand on arrive ici en butant sur une fonction précise : on
     /// rappelle laquelle plutôt que d'afficher un argumentaire générique.
@@ -145,7 +146,11 @@ struct PaywallView: View {
                             connexion = false
                         }
                     }
-                    .signInWithAppleButtonStyle(.white)
+                    // Blanc sur fond sombre, noir sur fond clair, comme le veut
+                    // Apple. Le bouton ne suit pas seul un changement de thème :
+                    // `.id` le recrée quand le thème change.
+                    .signInWithAppleButtonStyle(scheme == .dark ? .white : .black)
+                    .id(scheme)
                     .frame(height: 44)
                     .disabled(connexion)
                 }
@@ -157,7 +162,7 @@ struct PaywallView: View {
                 }
             }
             .padding(14)
-            .background(Color.white.opacity(0.06), in: RoundedRectangle(cornerRadius: 14))
+            .background(Color.encre.opacity(0.06), in: RoundedRectangle(cornerRadius: 14))
         }
     }
 

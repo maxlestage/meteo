@@ -25,7 +25,7 @@ struct SprayCardView: View {
 
             Text(caption)
                 .font(.subheadline)
-                .foregroundStyle(.white.opacity(0.62))
+                .foregroundStyle(Color.encreDouce)
                 .padding(.bottom, 8)
 
             HStack(spacing: 2) {
@@ -47,7 +47,7 @@ struct SprayCardView: View {
                 Text(Localized.text("spray.plus24"))
             }
             .font(.system(size: 11))
-            .foregroundStyle(.white.opacity(0.62))
+            .foregroundStyle(Color.encreDouce)
             .padding(.top, 5)
 
             if canFollow, nextSpray != nil {
@@ -59,7 +59,7 @@ struct SprayCardView: View {
                     .font(.subheadline)
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 8)
-                    .background(Color.white.opacity(0.14), in: RoundedRectangle(cornerRadius: 10))
+                    .background(Color.filet, in: RoundedRectangle(cornerRadius: 10))
                 }
                 .buttonStyle(.plain)
                 .padding(.top, 10)
@@ -87,7 +87,7 @@ struct SprayCardView: View {
         switch verdict {
         case .favorable: return Color(red: 0.494, green: 0.816, blue: 0.478)
         case .acceptable: return Color(red: 0.941, green: 0.757, blue: 0.294)
-        case .defavorable: return Color.white.opacity(0.22)
+        case .defavorable: return Color.encre.opacity(0.22)
         }
     }
 }

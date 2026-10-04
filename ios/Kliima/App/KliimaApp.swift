@@ -1,7 +1,14 @@
 import SwiftUI
+import UserNotifications
 
 @main
 struct KliimaApp: App {
+    init() {
+        // Avant toute notification : sans délégué, celles qui arrivent
+        // application ouverte ne s'affichent pas.
+        UNUserNotificationCenter.current().delegate = AlertScheduler.presentation
+    }
+
     var body: some Scene {
         WindowGroup {
             DashboardView()

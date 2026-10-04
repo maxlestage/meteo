@@ -20,6 +20,23 @@ import UserNotifications
 /// vérifié syntaxiquement, pas à l'usage.
 enum AlertScheduler {
 
+    /// Fait afficher les alertes même quand l'application est ouverte.
+    ///
+    /// Par défaut, iOS tait une notification qui arrive au premier plan. Les
+    /// alertes étant maintenant posées à chaque chargement, une alerte due tout
+    /// de suite partait une seconde plus tard, application ouverte — et
+    /// disparaissait, comptée comme envoyée, donc jamais redite.
+    static let presentation = PresentationAuPremierPlan()
+
+    final class PresentationAuPremierPlan: NSObject, UNUserNotificationCenterDelegate {
+        func userNotificationCenter(
+            _ center: UNUserNotificationCenter,
+            willPresent notification: UNNotification
+        ) async -> UNNotificationPresentationOptions {
+            [.banner, .list, .sound]
+        }
+    }
+
     /// Demande l'autorisation. Sans elle, on ne pose rien et on ne redemande
     /// pas : le système ne montre la question qu'une fois.
     static func requestAuthorization() async -> Bool {
