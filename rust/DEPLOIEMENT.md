@@ -138,6 +138,12 @@ heroku config:unset KLIMA_PRO -a VOTRE-APP   # et le palier redescend
 à qui demande l'accorde à tout le monde. C'est ce qu'on veut tant que le relais
 n'est connu que des testeurs qu'on a invités.
 
+C'est aussi la forme qui ne demande **rien à saisir** : les deux interfaces
+interrogent `/v1/plan` au lancement, sans rien présenter, et le palier s'ouvre
+seul. La liste d'adresses, elle, coûte une saisie par appareil — une seule, elle
+est mémorisée — et c'est ce qu'on paie pour que le site public n'ouvre pas le
+registre à qui passe.
+
 ### Par code partagé
 
 Un code long et aléatoire marche aussi — le relais ne le répète jamais, ni dans

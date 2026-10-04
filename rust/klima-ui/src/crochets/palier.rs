@@ -70,17 +70,23 @@ pub fn use_palier(relais: Option<String>) -> Palier {
         use_effect_with((relais, courriel, *nonce), move |(relais, courriel, _)| {
             let Some(relais) = relais.clone() else { return };
             let courriel = courriel.trim().to_owned();
-            if courriel.is_empty() {
-                return;
-            }
+
+            // On demande même sans adresse. Un relais réglé sur « tous »
+            // accorde à qui demande, sans rien présenter : c'est ainsi que
+            // l'iPhone l'obtient, et s'abstenir ici faisait répondre les deux
+            // plateformes différemment à la même variable — le palier
+            // s'ouvrait sur le téléphone et pas sur le site.
+            let presente = (!courriel.is_empty()).then(|| courriel.clone());
 
             wasm_bindgen_futures::spawn_local(async move {
-                let url = plan_url(&relais, Some(&courriel));
-                // Un relais muet ne retire rien : on garde ce qu'on savait, et
-                // on ne dit pas « refusée » d'une adresse qui n'a pas été vue.
+                let url = plan_url(&relais, presente.as_deref());
+                // Un relais muet ne retire rien : on garde ce qu'on savait.
+                // Et « refusée » ne se dit que d'une adresse réellement
+                // présentée : sans rien à refuser, un « libre » est la réponse
+                // normale d'un relais qui attend qu'on se nomme.
                 let (plan, refuse) = match reseau::plan(&url).await {
                     Verdict::Accorde => (Plan::Pro, false),
-                    Verdict::Refuse => (Plan::Libre, true),
+                    Verdict::Refuse => (Plan::Libre, presente.is_some()),
                     Verdict::Injoignable => (etat.plan, false),
                 };
                 etat.set(Etat { plan, refuse, courriel, verification: false });
