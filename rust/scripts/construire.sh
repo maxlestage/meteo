@@ -13,12 +13,18 @@ DEHORS="${1:-$RACINE/../public}"
 
 cd "$RACINE"
 
+# Où poser Trunk. Chez Heroku, `KLIMA_OUTILS` pointe dans le cache de
+# construction : téléchargé une fois, gardé d'un déploiement à l'autre.
+OUTILS="${KLIMA_OUTILS:-$HOME/.local/bin}"
+
 if ! command -v trunk > /dev/null; then
-  echo "— Trunk $VERSION_TRUNK"
-  mkdir -p "$HOME/.local/bin"
-  url="https://github.com/trunk-rs/trunk/releases/download/v$VERSION_TRUNK/trunk-x86_64-unknown-linux-gnu.tar.gz"
-  curl --fail --location --silent "$url" | tar -xz -C "$HOME/.local/bin"
-  export PATH="$HOME/.local/bin:$PATH"
+  if [ ! -x "$OUTILS/trunk" ]; then
+    echo "— Trunk $VERSION_TRUNK"
+    mkdir -p "$OUTILS"
+    url="https://github.com/trunk-rs/trunk/releases/download/v$VERSION_TRUNK/trunk-x86_64-unknown-linux-gnu.tar.gz"
+    curl --fail --location --silent "$url" | tar -xz -C "$OUTILS"
+  fi
+  export PATH="$OUTILS:$PATH"
 fi
 
 rustup target add wasm32-unknown-unknown
