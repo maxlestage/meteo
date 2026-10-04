@@ -91,6 +91,15 @@ Côté application, deux clés d'`Info.plist`, vides par défaut : `KliimaRelay`
 à ce que dit StoreKit : un relais muet ne fait pas perdre un abonnement réel, et
 une boutique vide n'annule pas l'accord du relais.
 
+`KliimaRelay` est renseigné : c'est une adresse publique, elle n'a rien à cacher.
+`KliimaProCode` reste vide dans le dépôt et le restera. Un code écrit ici serait
+lisible par quiconque lit le dépôt, bien avant d'être extrait du binaire — ce qui
+ne laisserait plus qu'à le changer des deux côtés. Si une version d'essai doit
+présenter un code, il se pose dans Xcode au moment de l'archivage, sur une copie
+locale du fichier, et il ne revient pas dans un commit. Tant que `KLIMA_PRO` vaut
+`tous`, la question ne se pose pas : le relais accorde le palier sans qu'on lui
+présente quoi que ce soit, et l'application n'a aucun code à porter.
+
 ## Vérifier
 
 ```bash
