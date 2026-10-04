@@ -9,8 +9,6 @@ struct SprayLiveActivity: Widget {
     var body: some WidgetConfiguration {
         ActivityConfiguration(for: SprayActivityAttributes.self) { context in
             LockScreenView(context: context)
-                .activityBackgroundTint(Color.black.opacity(0.55))
-                .activitySystemActionForegroundColor(.white)
         } dynamicIsland: { context in
             DynamicIsland {
                 DynamicIslandExpandedRegion(.leading) {

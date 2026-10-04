@@ -29,7 +29,9 @@ use klima_core::plan::Plan;
 use reqwest::Url;
 
 use crate::cache::{Clock, ForecastCache, Served};
+use crate::apns::Apns;
 use crate::identite::{self, Cles, Identite, Refus};
+use crate::iles::{self, Iles};
 use crate::pro::Accord;
 use crate::site;
 use crate::upstream::{self, Call, Fetch, Params, UpstreamError};
@@ -69,6 +71,11 @@ pub struct Etat {
     /// Ce qu'il faut pour reconnaître un compte. Absent, les comptes sont
     /// désactivés — et `/v1/session` le dit plutôt que de faire semblant.
     pub comptes: Option<Comptes>,
+    /// Les îles dynamiques suivies, à qui pousser l'heure qui commence.
+    pub iles: Arc<Iles>,
+    /// De quoi pousser. Absent, les îles basculent seules à l'heure pile, et
+    /// `/v1/activites` répond qu'il n'y a pas de poussée.
+    pub apns: Option<Apns>,
 }
 
 /// Les comptes : de quoi vérifier ce qu'Apple prouve, et signer ce qu'on en tire.
@@ -152,6 +159,16 @@ async fn handle(State(etat): State<Etat>, request: Request) -> Response {
             return texte(StatusCode::METHOD_NOT_ALLOWED, "méthode non permise", &cors);
         }
         return ouvrir_session(&etat, request.into_body(), &cors).await;
+    }
+
+    // Les îles dynamiques : l'iPhone inscrit celle qu'il ouvre, et la retire
+    // quand il la ferme.
+    if chemin == "/v1/activites" {
+        let methode = request.method().clone();
+        if methode != Method::POST && methode != Method::DELETE {
+            return texte(StatusCode::METHOD_NOT_ALLOWED, "méthode non permise", &cors);
+        }
+        return activite(&etat, methode, request.into_body(), &cors).await;
     }
 
     if request.method() != Method::GET {
@@ -274,13 +291,16 @@ async fn handle(State(etat): State<Etat>, request: Request) -> Response {
 /// qu'ils soient là.
 fn sante(etat: &Etat) -> String {
     format!(
-        r#"{{"statut":"ok","cellules":{},"interrogations":{},"cleOpenMeteo":"{}","pro":"{}","comptes":"{}"}}"#,
+        r#"{{"statut":"ok","cellules":{},"interrogations":{},"cleOpenMeteo":"{}","pro":"{}","comptes":"{}","poussee":"{}","iles":{}}}"#,
         etat.forecasts.size(),
         etat.forecasts.calls() + etat.searches.calls(),
         if etat.open_meteo_key.is_some() { "configurée" } else { "absente" },
         etat.accord_pro.etiquette(),
         // L'état, jamais le secret.
-        if etat.comptes.is_some() { "activés" } else { "désactivés" }
+        if etat.comptes.is_some() { "activés" } else { "désactivés" },
+        // Le fait d'avoir une clé APNs, jamais la clé ni ses identifiants.
+        if etat.apns.is_some() { "activée" } else { "désactivée" },
+        etat.iles.taille()
     )
 }
 
@@ -314,7 +334,7 @@ fn cors_headers(origin: Option<&str>, allowed: &[String]) -> HeaderMap {
 /// Tout ce qui n'est pas le point entre donc dans la clé. On la condense
 /// (FNV-1a, 64 bits) parce que les listes de variables font quatre cents
 /// caractères, et qu'une clé de cache n'a pas à être lisible.
-fn empreinte(params: &Params) -> String {
+pub(crate) fn empreinte(params: &Params) -> String {
     let mut hachage: u64 = 0xcbf2_9ce4_8422_2325;
     for (nom, valeur) in params {
         if nom == "latitude" || nom == "longitude" || nom == "lat" || nom == "lon" {
@@ -418,6 +438,43 @@ async fn ouvrir_session(etat: &Etat, corps: Body, cors: &HeaderMap) -> Response 
     }
 }
 
+/// Inscrit ou retire une île dynamique.
+///
+/// Inscrire : `{"jeton", "latitude", "longitude"}`. Retirer : `{"jeton"}`.
+/// Retirer répond toujours 204 : un jeton inconnu est déjà retiré.
+async fn activite(etat: &Etat, methode: Method, corps: Body, cors: &HeaderMap) -> Response {
+    let illisible = || json(StatusCode::BAD_REQUEST, r#"{"erreur":"corps illisible"}"#.to_owned(), cors);
+    let Ok(octets) = axum::body::to_bytes(corps, 4 * 1024).await else { return illisible() };
+    let Ok(lu) = serde_json::from_slice::<serde_json::Value>(&octets) else { return illisible() };
+    let Some(jeton) = lu.get("jeton").and_then(serde_json::Value::as_str) else { return illisible() };
+
+    if methode == Method::DELETE {
+        etat.iles.retirer(jeton);
+        return (StatusCode::NO_CONTENT, cors.clone()).into_response();
+    }
+
+    // Sans clé, inutile de garder un jeton auquel on n'enverra rien : l'iPhone
+    // l'apprend, et laisse l'île basculer seule.
+    if etat.apns.is_none() {
+        return json(
+            StatusCode::SERVICE_UNAVAILABLE,
+            r#"{"erreur":"poussée désactivée"}"#.to_owned(),
+            cors,
+        );
+    }
+    let nombre = |nom: &str| lu.get(nom).and_then(serde_json::Value::as_f64);
+    let (Some(latitude), Some(longitude)) = (nombre("latitude"), nombre("longitude")) else {
+        return illisible();
+    };
+    match etat.iles.inscrire(jeton, latitude, longitude, (etat.now)()) {
+        Ok(()) => (StatusCode::NO_CONTENT, cors.clone()).into_response(),
+        Err(iles::Refus::Plein) => {
+            json(StatusCode::SERVICE_UNAVAILABLE, r#"{"erreur":"complet"}"#.to_owned(), cors)
+        }
+        Err(_) => illisible(),
+    }
+}
+
 async fn verifier_avec_cles(
     etat: &Etat,
     comptes: &Comptes,
@@ -495,6 +552,8 @@ pub fn etat(fetch: Fetch, now: crate::cache::Clock) -> Etat {
         })),
         now,
         comptes: None,
+        iles: Arc::new(Iles::new()),
+        apns: None,
         open_meteo_key: None,
         accord_pro: Accord::Aucun,
         allowed_origins: vec![DEFAULT_ORIGIN.to_owned()],
@@ -1260,5 +1319,88 @@ mod tests {
 
         assert_eq!(reponse.status(), StatusCode::METHOD_NOT_ALLOWED);
         assert_eq!(faux.appels(), 0);
+    }
+
+    /* -------------------- îles dynamiques -------------------- */
+
+    const JETON_ILE: &str = "a1b2c3d4e5f60718293a4b5c6d7e8f90";
+
+    fn avec_poussee(faux: &Faux) -> Etat {
+        let mut etat = relais(faux);
+        let (pem, _) = crate::apns::tests::cle_p8();
+        etat.apns = Some(Apns::new(&pem, "ABC123DEFG", "TEAM123456", crate::apns::tests::muet()).unwrap());
+        etat
+    }
+
+    async fn efface(etat: Etat, corps: &str) -> StatusCode {
+        let requete = Request::builder()
+            .method(Method::DELETE)
+            .uri("/v1/activites")
+            .body(Body::from(corps.to_owned()))
+            .unwrap();
+        router(etat).oneshot(requete).await.expect("réponse").status()
+    }
+
+    #[tokio::test]
+    async fn une_ile_sinscrit_et_se_retire() {
+        let faux = Faux::new();
+        let etat = avec_poussee(&faux);
+        let corps = format!(r#"{{"jeton":"{JETON_ILE}","latitude":48.45,"longitude":1.49}}"#);
+        let (status, _) = poste(etat.clone(), "/v1/activites", &corps).await;
+        assert_eq!(status, StatusCode::NO_CONTENT);
+        assert_eq!(etat.iles.taille(), 1);
+
+        let (_, _, sante) = get(etat.clone(), "/health").await;
+        assert!(sante.contains(r#""poussee":"activée","iles":1"#), "{sante}");
+
+        assert_eq!(efface(etat.clone(), &format!(r#"{{"jeton":"{JETON_ILE}"}}"#)).await, StatusCode::NO_CONTENT);
+        assert_eq!(etat.iles.taille(), 0);
+        // Rien n'a été interrogé : l'inscription ne coûte rien au fournisseur.
+        assert_eq!(faux.appels(), 0);
+    }
+
+    #[tokio::test]
+    async fn sans_cle_apns_linscription_est_refusee_et_la_sante_le_dit() {
+        let faux = Faux::new();
+        let etat = relais(&faux);
+        let corps = format!(r#"{{"jeton":"{JETON_ILE}","latitude":48.45,"longitude":1.49}}"#);
+        let (status, reponse) = poste(etat.clone(), "/v1/activites", &corps).await;
+        assert_eq!(status, StatusCode::SERVICE_UNAVAILABLE);
+        assert!(reponse.contains("poussée désactivée"));
+        assert_eq!(etat.iles.taille(), 0);
+
+        let (_, _, sante) = get(etat, "/health").await;
+        assert!(sante.contains(r#""poussee":"désactivée","iles":0"#), "{sante}");
+    }
+
+    #[tokio::test]
+    async fn une_inscription_bancale_est_refusee() {
+        let faux = Faux::new();
+        let etat = avec_poussee(&faux);
+        for corps in [
+            "pas du json".to_owned(),
+            r#"{"latitude":48.45,"longitude":1.49}"#.to_owned(),
+            format!(r#"{{"jeton":"{JETON_ILE}"}}"#),
+            format!(r#"{{"jeton":"{JETON_ILE}","latitude":123,"longitude":1.49}}"#),
+            r#"{"jeton":"pas-un-jeton","latitude":48.45,"longitude":1.49}"#.to_owned(),
+        ] {
+            let (status, _) = poste(etat.clone(), "/v1/activites", &corps).await;
+            assert_eq!(status, StatusCode::BAD_REQUEST, "{corps}");
+        }
+        assert_eq!(etat.iles.taille(), 0);
+    }
+
+    #[tokio::test]
+    async fn la_sante_ne_dit_rien_de_la_cle_apns() {
+        let faux = Faux::new();
+        let (_, _, sante) = get(avec_poussee(&faux), "/health").await;
+        assert!(!sante.contains("ABC123DEFG") && !sante.contains("TEAM123456"), "{sante}");
+    }
+
+    #[tokio::test]
+    async fn les_iles_ne_se_lisent_pas() {
+        let faux = Faux::new();
+        let (status, _, _) = get(avec_poussee(&faux), "/v1/activites").await;
+        assert_eq!(status, StatusCode::METHOD_NOT_ALLOWED);
     }
 }

@@ -26,7 +26,7 @@ struct DashboardView: View {
                     VStack(spacing: 12) {
                         if viewModel.isLoading && viewModel.forecast == nil {
                             ProgressView(Localized.text("app.loading"))
-                                .tint(.white)
+                                .tint(Color.encre)
                                 .padding(.top, 80)
                         }
 
@@ -52,7 +52,7 @@ struct DashboardView: View {
                                     .font(.footnote.weight(.semibold))
                                 }
                                 .buttonStyle(.plain)
-                                .foregroundStyle(.white.opacity(0.85))
+                                .foregroundStyle(Color.encre.opacity(0.85))
                                 .frame(maxWidth: .infinity, alignment: .leading)
                             }
 
@@ -96,7 +96,7 @@ struct DashboardView: View {
                 }
                 .scrollIndicators(.hidden)
             }
-            .foregroundStyle(.white)
+            .foregroundStyle(Color.encre)
             .toolbarBackground(.hidden, for: .navigationBar)
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
@@ -105,7 +105,7 @@ struct DashboardView: View {
                     } label: {
                         Label(Localized.text("app.locate"), systemImage: "location")
                     }
-                    .tint(.white)
+                    .tint(Color.encre)
                 }
 
                 // L'accès à l'abonnement ne se montre qu'au palier libre :
@@ -119,7 +119,7 @@ struct DashboardView: View {
                         } label: {
                             Label(Localized.text("plan.pro"), systemImage: "sparkles")
                         }
-                        .tint(.white)
+                        .tint(Color.encre)
                     }
                 }
             }
@@ -145,8 +145,17 @@ struct DashboardView: View {
                 // stockage partagé n'en est que la copie pour les extensions.
                 await subscription.refresh()
             }
+            .onChange(of: subscription.plan) { _, plan in
+                // Le palier vient de s'ouvrir — achat ou compte d'essai : c'est
+                // le moment de demander la permission des alertes et de les
+                // poser, plutôt qu'au prochain chargement.
+                guard plan.allows(.alertes),
+                      let forecast = viewModel.forecast,
+                      let summary = viewModel.summary
+                else { return }
+                Task { await scheduleAlerts(forecast: forecast, summary: summary) }
+            }
         }
-        .preferredColorScheme(.dark)
     }
 
     // MARK: Activité en direct
@@ -158,6 +167,32 @@ struct DashboardView: View {
         guard let forecast = viewModel.forecast, let summary = viewModel.summary else { return }
         await activity.refresh(hours: forecast.hourly, opportunity: summary.nextSpray)
         await weather.refresh(forecast: forecast)
+        await scheduleAlerts(forecast: forecast, summary: summary)
+    }
+
+    /// Demande la permission, puis pose les alertes — à chaque chargement.
+    ///
+    /// Deux défauts, et aucune notification ne pouvait partir. La permission
+    /// n'était demandée nulle part : `requestAuthorization()` existait et
+    /// personne ne l'appelait, et une notification posée sans autorisation ne
+    /// s'affiche jamais. Et les alertes n'étaient examinées qu'au réveil
+    /// d'arrière-plan, qu'iOS accorde quand il veut — parfois pas de la
+    /// journée.
+    ///
+    /// La permission ne se demande qu'au palier qui ouvre les alertes : la
+    /// réclamer à quelqu'un qui n'en recevra aucune serait gâcher l'unique
+    /// question que le système accepte de poser. Après un refus, il ne la
+    /// repose pas, et on n'insiste pas.
+    private func scheduleAlerts(forecast: AgroForecast, summary: AgroSummary) async {
+        let plan = subscription.plan
+        guard plan.allows(.alertes), await AlertScheduler.requestAuthorization() else { return }
+        let state = await AlertScheduler.schedule(
+            summary: summary,
+            hours: forecast.hourly,
+            plan: plan,
+            state: SharedStore.loadAlertState()
+        )
+        SharedStore.save(state)
     }
 
     private func toggleWeather(_ forecast: AgroForecast) {
@@ -196,14 +231,14 @@ struct DashboardView: View {
                         Spacer()
                         Text(result.subtitle)
                             .font(.footnote)
-                            .foregroundStyle(.white.opacity(0.62))
+                            .foregroundStyle(Color.encreDouce)
                     }
                     .padding(.horizontal, 16)
                     .padding(.vertical, 11)
                     .contentShape(Rectangle())
                 }
                 .buttonStyle(.plain)
-                Divider().overlay(Color.white.opacity(0.14))
+                Divider().overlay(Color.filet)
             }
         }
         .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 14))
@@ -216,7 +251,7 @@ struct DashboardView: View {
                 .multilineTextAlignment(.center)
             Button(Localized.text("app.retry")) { Task { await viewModel.load() } }
                 .buttonStyle(.bordered)
-                .tint(.white)
+                .tint(Color.encre)
         }
         .padding(.top, 40)
     }
@@ -224,7 +259,7 @@ struct DashboardView: View {
     private func source(_ forecast: AgroForecast) -> some View {
         Text(Localized.text("app.source", AgroFormat.unit(forecast.elevation, "m", decimals: 0)))
             .font(.caption2)
-            .foregroundStyle(.white.opacity(0.62))
+            .foregroundStyle(Color.encreDouce)
             .multilineTextAlignment(.center)
             .padding(.top, 6)
     }

@@ -14,6 +14,7 @@ pub mod cumuls;
 pub mod endpoints;
 pub mod format;
 pub mod grid;
+pub mod horizon;
 pub mod i18n;
 pub mod agro;
 pub mod consensus;

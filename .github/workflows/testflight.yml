@@ -227,6 +227,10 @@ jobs:
             # Ce qui doit rester : la connexion avec Apple, côté application.
             /usr/libexec/PlistBuddy -c "Print :com.apple.developer.applesignin" ios/Kliima/Kliima.entitlements \
               || { echo "::error::« Se connecter avec Apple » a disparu des droits de l'application"; exit 1; }
+            # Et la poussée : sans elle, le relais ne peut plus tenir l'île
+            # dynamique à l'heure.
+            /usr/libexec/PlistBuddy -c "Print :aps-environment" ios/Kliima/Kliima.entitlements \
+              || { echo "::error::La poussée (aps-environment) a disparu des droits de l'application"; exit 1; }
           fi
 
           xcodebuild archive \
