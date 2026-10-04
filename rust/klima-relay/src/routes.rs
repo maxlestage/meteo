@@ -121,19 +121,23 @@ async fn handle(State(etat): State<Etat>, request: Request) -> Response {
 
     // Les fichiers du site, s'il y en a. L'API garde la priorité : elle est
     // tout entière sous « /v1/ », et « /health » vient d'être traité.
-    if let Some(racine) = &etat.site {
-        if !chemin.starts_with("/v1/") {
+    //
+    // Ce qui n'est pas sous « /v1/ » s'arrête ici, qu'il y ait un site ou non.
+    // Sans cela la requête tomberait sur la lecture des coordonnées, et une
+    // image manquante répondrait « coordonnées manquantes » — vrai, et
+    // incompréhensible. Le cas sans site n'est pas théorique : c'est celui du
+    // déploiement, où les interfaces sont publiées ailleurs, et où « / »
+    // répondait donc 400 à qui ouvrait simplement l'adresse.
+    if !chemin.starts_with("/v1/") {
+        if let Some(racine) = &etat.site {
             if let Some(fichier) = site::servir(racine, &chemin).await {
                 let mut entetes = cors.clone();
                 inserer(&mut entetes, header::CONTENT_TYPE, fichier.content_type);
                 inserer(&mut entetes, header::CACHE_CONTROL, fichier.cache_control);
                 return (StatusCode::OK, entetes, fichier.contenu).into_response();
             }
-            // Un fichier absent est absent. Sans ce retour, la requête
-            // tomberait sur la lecture des coordonnées et une image manquante
-            // répondrait « coordonnées manquantes » — vrai, et incompréhensible.
-            return texte(StatusCode::NOT_FOUND, "introuvable", &cors);
         }
+        return texte(StatusCode::NOT_FOUND, "introuvable", &cors);
     }
 
     // Le géocodage n'a pas de point : il se met en cache sur le texte cherché.
@@ -796,12 +800,29 @@ mod tests {
     }
 
     #[tokio::test]
-    async fn sans_site_la_racine_repond_comme_avant() {
+    async fn sans_site_la_racine_repond_404_et_non_une_erreur_de_coordonnees() {
+        // Ce test disait « répond comme avant » : il gelait l'état du jour où
+        // le relais a appris à servir un site, sans acter que cet état fût bon.
+        // Il ne l'était pas. Le déploiement n'a pas de site — les interfaces
+        // sont publiées ailleurs — donc « / » tombait sur la lecture des
+        // coordonnées et répondait 400 « coordonnées manquantes » à qui ouvrait
+        // simplement l'adresse. Vrai, et incompréhensible : la même raison qui
+        // avait fait écrire le 404 juste au-dessus, pour le cas avec site.
         let faux = Faux::new();
-        let (status, _, corps) = get(relais(&faux), "/").await;
+        let (status, _, _) = get(relais(&faux), "/").await;
+        assert_eq!(status, StatusCode::NOT_FOUND);
+    }
+
+    #[tokio::test]
+    async fn sans_site_lapi_reste_entiere() {
+        // Le 404 ci-dessus ne doit pas avaler ce qui est sous « /v1/ » : une
+        // demande sans coordonnées doit toujours dire que ce sont elles qui
+        // manquent, et non que le chemin n'existe pas.
+        let faux = Faux::new();
+        let (status, _, corps) = get(relais(&faux), "/v1/open-meteo/forecast").await;
 
         assert_eq!(status, StatusCode::BAD_REQUEST);
-        assert!(corps.contains("erreur"));
+        assert!(corps.contains("coordonnées"), "{corps}");
     }
 
     #[tokio::test]
