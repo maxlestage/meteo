@@ -1,7 +1,5 @@
 //! Synthèse de la journée en cours.
 //!
-//! Miroir de `core/src/today.ts`.
-//!
 //! C'est ce qu'affiche la section « météo du jour » du site de présentation :
 //! le temps qu'il fera aujourd'hui, et ce que Klima en déduit pour la
 //! parcelle.

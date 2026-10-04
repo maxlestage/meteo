@@ -1,7 +1,6 @@
 //! La météo du jour, et rien d'autre : ce que Klima dit de la journée en cours
 //! sur la parcelle choisie.
 //!
-//! Miroir de `site/src/components/TodaySection.tsx`.
 
 use klima_api::today::DayDigest;
 use klima_core::agro::{CurrentSample, FrostSeverity, SoilState};

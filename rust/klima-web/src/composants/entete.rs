@@ -1,6 +1,5 @@
 //! L'en-tête : commune, température, temps et amplitude du jour.
 //!
-//! Miroir de `web/src/components/Hero.tsx`.
 
 use klima_api::open_meteo::AgroForecast;
 use klima_core::weather::weather_condition;

@@ -15,22 +15,16 @@ reste allumé.
 L'API garde la priorité : elle est tout entière sous `/v1/`, et le partage est
 vérifié par des tests.
 
-## Ce que la bascule demande, et pourquoi elle n'est pas automatique
+## Le geste qui reste, et il est dans l'interface d'Heroku
 
-Heroku déploie à chaque fusion sur `master`. Le `Procfile` et le buildpack
-doivent donc changer **ensemble** : un `Procfile` qui lance un binaire Rust
-alors que le buildpack Node est encore en place ne trouverait rien à lancer,
-et l'application tomberait en boucle de redémarrage.
+**Heroku → Settings → Buildpacks** : retirer `heroku/nodejs`, ajouter
+`https://github.com/emk/heroku-buildpack-rust`.
 
-Le buildpack se règle dans l'interface d'Heroku, pas dans le dépôt. Les deux
-gestes, dans cet ordre :
-
-1. **Heroku → Settings → Buildpacks** : retirer `heroku/nodejs`, ajouter
-   `https://github.com/emk/heroku-buildpack-rust`.
-2. Fusionner le changement de `Procfile` (une ligne, préparée ci-dessous).
-
-Tant que le premier geste n'est pas fait, le dépôt continue de livrer le
-relais Bun, qui fonctionne : rien ne presse.
+Le buildpack se règle là et pas dans le dépôt. Tant qu'il n'est pas changé,
+les constructions échouent — le buildpack Node ne trouve plus ni `package.json`
+ni rien à installer. **Un échec de construction ne remplace pas la version en
+service** : ce qui tourne continue de tourner, simplement plus rien ne se
+déploie jusqu'à ce que le buildpack soit le bon.
 
 ## Les fichiers, déjà en place
 
@@ -41,7 +35,7 @@ relais Bun, qui fonctionne : rien ne presse.
   compilation : une compilation de Trunk sur un dyno dépasserait le temps de
   construction), construit la vitrine et l'application, puis les assemble.
 
-Le `Procfile` à poser, le jour de la bascule :
+Le `Procfile` est déjà posé :
 
 ```
 web: rust/target/release/klima-relay
@@ -53,7 +47,7 @@ web: rust/target/release/klima-relay
 | ---------------- | ----------------------------------------------------------------- |
 | `OPEN_METEO_KEY` | La clé du plan commercial, quand il y en aura une                 |
 | `KLIMA_ORIGINS`  | Les origines admises — inutile si le site est servi par le relais |
-| `KLIMA_PUBLIC`   | Où sont les fichiers du site. `server/public` par défaut          |
+| `KLIMA_PUBLIC`   | Où sont les fichiers du site. `public` par défaut                 |
 | `KLIMA_PRO`      | Le palier accordé pendant l'essai — voir plus bas                 |
 
 `OPEN_METEO_KEY` peut rester vide : le relais tourne alors sur le plan gratuit

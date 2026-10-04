@@ -1,6 +1,6 @@
 //! Les paliers d'abonnement.
 //!
-//! Miroirs : `core/src/plan.ts` et `ios/Kliima/Models/Plan.swift`.
+//! Miroir Swift : `ios/Kliima/Models/Plan.swift`.
 //!
 //! Un principe gouverne le découpage : **on ne coupe jamais la réponse du
 //! jour.** Un agriculteur qui ouvre Klima pour savoir s'il traite cet

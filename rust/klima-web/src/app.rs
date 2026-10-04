@@ -1,6 +1,5 @@
 //! L'application web de Klima.
 //!
-//! Miroir de `web/src/App.tsx`.
 
 use klima_core::agro::summarize;
 use klima_core::agro::thresholds::{GDD_BASE, SPRAY_WIND_MAX};

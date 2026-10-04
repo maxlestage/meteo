@@ -1,7 +1,5 @@
 //! La liste des jours, avec la barre d'amplitude thermique de la semaine.
 //!
-//! Miroir de `web/src/components/DailyList.tsx`.
-//!
 //! Toutes les barres se lisent sur la même échelle — celle de la semaine —
 //! sinon une journée douce et une journée froide auraient la même barre à deux
 //! endroits différents, et la comparaison d'un coup d'œil serait fausse.

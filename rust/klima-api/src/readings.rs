@@ -1,7 +1,5 @@
 //! Ce que chaque fournisseur répond, et comment on le lit.
 //!
-//! Miroirs : `core/src/providers/openMeteo.ts`, `metNorway.ts`, `brightSky.ts`.
-//!
 //! Trois services, trois formes de réponse, un seul type en sortie :
 //! `SourceReading`. C'est ce qui permet au recoupement de comparer des choses
 //! comparables — et de ne pas savoir d'où elles viennent.

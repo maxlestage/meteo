@@ -1,8 +1,6 @@
 //! Le pied de page : ce que le produit couvre, d'où viennent ses chiffres, qui
 //! l'a fait, et ce qu'il ne prétend pas remplacer.
 //!
-//! Miroir de `site/src/components/Footer.tsx`.
-//!
 //! Pas de lien vers le code source : c'est une règle du dépôt, et un test du
 //! catalogue la tient.
 

@@ -72,16 +72,15 @@ jobs:
           # pas — les quatre cibles réclamaient « a development team ».
           [ -n "$CERT_P12" ] && echo "certificat fourni" || echo "pas de certificat : signature gérée par Apple"
 
-      - uses: oven-sh/setup-bun@v2
-        with:
-          bun-version: latest
-
       # Le cœur partagé porte les règles que le Swift recopie. S'il est rouge,
-      # rien ne sert de compiler l'application.
+      # rien ne sert de compiler l'application. Le garde-fou du défilement
+      # horizontal lit les vues SwiftUI : il tient à cette étape, pas au
+      # simulateur.
       - name: Tests du cœur partagé
         run: |
-          bun install --frozen-lockfile
-          bun test
+          cargo test
+          cargo test --manifest-path klima-web/Cargo.toml --test defilement
+        working-directory: rust
 
       - name: Revalider le projet Xcode
         run: python3 ios/Tools/validate_pbxproj.py "$PROJECT/project.pbxproj"

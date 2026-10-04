@@ -44,7 +44,7 @@ async fn main() {
     // Le dossier est construit au déploiement. S'il n'est pas là — en
     // développement, par exemple — le relais ne fait que relayer.
     let racine = PathBuf::from(
-        std::env::var("KLIMA_PUBLIC").unwrap_or_else(|_| "server/public".to_owned()),
+        std::env::var("KLIMA_PUBLIC").unwrap_or_else(|_| "public".to_owned()),
     );
     etat.site = racine.is_dir().then_some(racine.clone());
 

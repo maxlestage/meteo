@@ -1,7 +1,5 @@
 //! Le bandeau horaire.
 //!
-//! Miroir de `web/src/components/HourlyStrip.tsx`.
-//!
 //! Ce qu'on montre sans rien demander : douze heures, une demi-journée. Les
 //! vingt-quatre repliées en grille tenaient dans la carte, mais la carte
 //! tenait tout l'écran. Le reste se déplie d'un bouton — et **rien ne défile

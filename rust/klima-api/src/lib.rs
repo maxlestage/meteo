@@ -7,9 +7,8 @@
 //! en dépendent tous les deux : une réponse d'Open-Meteo se lit de la même
 //! façon qu'on soit serveur ou navigateur.
 //!
-//! En TypeScript, le client HTTP et le décodage habitent le même fichier
-//! (`core/src/openMeteo.ts`). Ici le décodage est séparé de l'appel : il est
-//! pur, donc testable sur une réponse enregistrée, sans réseau ni horloge.
+//! Le décodage est séparé de l'appel : il est pur, donc testable sur une
+//! réponse enregistrée, sans réseau ni horloge.
 
 pub mod open_meteo;
 pub mod parcelle_url;

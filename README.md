@@ -19,19 +19,14 @@ rust/   Tout ce qui tourne hors iOS, en Rust
   klima-web/    Application web complète (Yew + WebAssembly)
   klima-site/   Site de présentation, avec la météo du jour (Yew + WebAssembly)
 ios/    Application iOS (SwiftUI, projet Xcode avec project.pbxproj versionné)
-core/   Cœur partagé TypeScript — la version sortante
-server/ Relais Bun — la version sortante, qui sert encore la production
-web/    Application web React — la version sortante
-site/   Site de présentation React — la version sortante
 ```
 
 Le tout est traduit en **français, anglais et espagnol**.
 
-**Le portage en Rust est fait ; la bascule ne l'est pas.** Les six crates
-reproduisent le TypeScript, cas de test pour cas de test, et ont été essayées
-contre les vrais fournisseurs. Le relais Bun sert encore la production : il
-s'arrêtera le jour où Heroku construira le binaire Rust, et le TypeScript
-partira avec lui. La marche à suivre est dans
+Le dépôt a tenu une version TypeScript de tout cela — cœur, relais, deux
+interfaces React. Elle est partie : les crates la reproduisent, cas de test
+pour cas de test, et ont été essayées contre les vrais fournisseurs. Ce qui
+reste à faire pour que le relais Rust prenne la main en production est dans
 [`rust/DEPLOIEMENT.md`](rust/DEPLOIEMENT.md).
 
 L'application reprend la présentation de l'application Météo du système —
@@ -231,8 +226,6 @@ Rien ne défile de côté : le bandeau horaire est une grille qui se replie et
 montre douze heures — une demi-journée —, les autres se dépliant d'un bouton.
 Une carte ne prend pas tout l'écran.
 
-L'ancienne version React vit encore dans `web/` (`bun run dev`, port 5173) le
-temps de la bascule.
 
 La parcelle est mémorisée dans le navigateur ; la recherche de commune passe par
 le géocodage Open-Meteo et le bouton « Me localiser » par la géolocalisation du
@@ -250,8 +243,6 @@ trunk serve        # http://localhost:8082
 trunk build --release
 ```
 
-L'ancienne version React vit encore dans `site/` (`bun run dev`, port 5174) le
-temps de la bascule.
 
 Les seuils affichés dans la page sont lus dans `AgroThresholds` : la vitrine ne
 peut pas annoncer autre chose que ce que l'application applique.

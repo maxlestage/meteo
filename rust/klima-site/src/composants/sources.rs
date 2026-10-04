@@ -1,7 +1,5 @@
 //! Le recoupement des modèles, montré plutôt qu'affirmé.
 //!
-//! Miroir de `site/src/components/Sources.tsx`.
-//!
 //! Chaque service porte son point sur l'axe des températures, la médiane est
 //! marquée, et l'écart se lit d'un coup d'œil. Dire « nous recoupons cinq
 //! instituts » n'engage à rien ; les montrer en désaccord de 1,9 °C, si.

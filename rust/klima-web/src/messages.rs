@@ -1,6 +1,5 @@
 //! Textes propres à l'application web.
 //!
-//! Miroir de `web/src/i18n/messages.ts`. Les libellés partagés — temps qu'il
 //! fait, états du sol, verdicts, paliers — vivent dans `klima_core::messages`
 //! et ne sont pas recopiés ici : le traducteur lit les deux catalogues, celui
 //! de l'application d'abord.

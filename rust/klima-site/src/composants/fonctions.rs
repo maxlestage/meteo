@@ -1,7 +1,5 @@
 //! Ce que Klima calcule.
 //!
-//! Miroir de `site/src/components/Features.tsx`.
-//!
 //! Les seuils cités viennent du code et sont mis en forme dans la langue
 //! courante : la page ne peut pas annoncer autre chose que ce que
 //! l'application applique.

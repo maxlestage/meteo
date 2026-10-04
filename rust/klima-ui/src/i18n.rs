@@ -1,7 +1,5 @@
 //! La langue de l'interface, portée par un contexte.
 //!
-//! Miroir de `core/src/ui/i18n.tsx`.
-//!
 //! Celle choisie à la visite précédente, sinon celle du navigateur, sinon la
 //! langue de référence. Le choix est écrit dans le stockage local — et son
 //! échec est sans conséquence : en navigation privée, la langue tient le temps

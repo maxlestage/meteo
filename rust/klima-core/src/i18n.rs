@@ -1,7 +1,5 @@
 //! Les langues de Klima, et la traduction des libellés partagés.
 //!
-//! Miroir de `core/src/i18n.ts`.
-//!
 //! Le domaine ne fabrique jamais de phrase : il renvoie des états et des
 //! motifs structurés, que l'interface traduit. C'est pour cela que ce module
 //! est ici et pas dans l'interface : un motif à trous — « il gèlera à

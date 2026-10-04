@@ -1,6 +1,5 @@
 //! Le sélecteur de langue : trois boutons, celui de la langue courante marqué.
 //!
-//! Miroir de `core/src/ui/LanguageSwitcher.tsx`.
 
 use klima_core::i18n::LANGUAGES;
 use yew::prelude::*;

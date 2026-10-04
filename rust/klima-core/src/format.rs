@@ -1,9 +1,9 @@
 //! Mise en forme des nombres selon la langue.
 //!
-//! Miroir de `core/src/format.ts`, mais pas une traduction : le TypeScript
-//! délègue tout à `Intl`, qui n'existe pas en WASM. Les règles sont donc
-//! écrites ici, et relevées sur ce que rend `Intl` pour les trois langues de
-//! Klima — un test les compare à la lettre, séparateurs invisibles comprises.
+//! Le TypeScript que ce module remplace déléguait tout à `Intl`, qui n'existe
+//! pas en WASM. Les règles sont donc écrites ici, et relevées sur ce que rend
+//! `Intl` pour les trois langues de Klima — les valeurs attendues des tests
+//! viennent de là, séparateurs invisibles compris.
 //!
 //! Ce qu'il y a à savoir, et qu'on ne devine pas :
 //!

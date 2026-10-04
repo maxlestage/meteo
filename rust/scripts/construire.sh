@@ -9,7 +9,7 @@ set -euo pipefail
 
 VERSION_TRUNK="${VERSION_TRUNK:-0.21.14}"
 RACINE="$(cd "$(dirname "$0")/.." && pwd)"
-DEHORS="${1:-$RACINE/../server/public}"
+DEHORS="${1:-$RACINE/../public}"
 
 cd "$RACINE"
 

@@ -1,7 +1,5 @@
 //! La marque de Klima.
 //!
-//! Miroir de `core/src/ui/Brand.tsx`.
-//!
 //! Un K dont la hampe porte une goutte et dont les bras sont taillés en lames
 //! de feuille : la lettre du nom, la pluie et le vivant dans un seul signe.
 //! La géométrie est celle des gabarits de `site/public` — favicon, icônes web,
