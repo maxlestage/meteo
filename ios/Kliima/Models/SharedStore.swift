@@ -14,6 +14,7 @@ enum SharedStore {
     private static let parcelleKey = "kliima.parcelle"
     private static let planKey = "kliima.plan"
     private static let alertStateKey = "kliima.alertState"
+    private static let courrielKey = "kliima.courriel"
 
     static var defaults: UserDefaults {
         UserDefaults(suiteName: appGroup) ?? .standard
@@ -48,6 +49,32 @@ enum SharedStore {
     /// en cas de doute, on n'ouvre pas ce qui se paie.
     static func loadPlan() -> Plan {
         Plan(rawValue: defaults.string(forKey: planKey) ?? "") ?? .libre
+    }
+
+    // MARK: Adresse d'essai
+
+    /// L'adresse que le testeur a saisie pour que le relais le reconnaisse.
+    ///
+    /// Elle est rangée ici et nulle part ailleurs : ce n'est pas un compte, le
+    /// relais ne la retient pas, et rien n'en dépend qu'une question posée à
+    /// chaque vérification de palier. Une chaîne vide efface : c'est ainsi
+    /// qu'on se retire de l'essai sans réinstaller.
+    static func saveCourriel(_ courriel: String) {
+        let propre = courriel.trimmingCharacters(in: .whitespacesAndNewlines)
+        if propre.isEmpty {
+            defaults.removeObject(forKey: courrielKey)
+        } else {
+            defaults.set(propre, forKey: courrielKey)
+        }
+    }
+
+    /// Adresse saisie, si elle l'a été. Jamais une chaîne vide : l'absence se
+    /// dit `nil`, pour qu'aucun appelant n'ait à distinguer les deux.
+    static func loadCourriel() -> String? {
+        let valeur = defaults.string(forKey: courrielKey)?
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+        guard let valeur, !valeur.isEmpty else { return nil }
+        return valeur
     }
 
     // MARK: État des alertes

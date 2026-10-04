@@ -187,6 +187,17 @@ STRINGS = {
     "paywall.close": ("Fermer", "Close", "Cerrar"),
     "paywall.unavailable": ("Boutique injoignable pour l'instant.", "Store unreachable for now.",
                             "Tienda no disponible por ahora."),
+
+    # --- Accès de test : n'apparaît que si un relais est configuré ---
+    "paywall.grant.title": ("Accès de test", "Test access", "Acceso de prueba"),
+    "paywall.grant.hint": ("Si votre adresse fait partie des invitées, saisissez-la : le palier s'ouvre sans passer par la boutique.",
+                           "If your address is on the invite list, enter it: the tier opens without going through the store.",
+                           "Si su dirección está entre las invitadas, introdúzcala: el plan se abre sin pasar por la tienda."),
+    "paywall.grant.field": ("Adresse électronique", "Email address", "Dirección de correo"),
+    "paywall.grant.check": ("Vérifier", "Check", "Comprobar"),
+    "paywall.grant.refused": ("Cette adresse n'ouvre rien pour le moment. Elle est gardée : si l'invitation arrive, le palier suivra.",
+                              "This address opens nothing for now. It is kept: if the invitation arrives, the tier will follow.",
+                              "Esta dirección no abre nada por ahora. Queda guardada: si llega la invitación, el plan la seguirá."),
     "tile.locked": ("Avec Kliima ‣ Pro", "With Kliima ‣ Pro", "Con Kliima ‣ Pro"),
 
     "widget.description": ("La prochaine fenêtre de traitement sur votre parcelle.",

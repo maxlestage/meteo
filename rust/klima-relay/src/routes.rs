@@ -104,9 +104,17 @@ async fn handle(State(etat): State<Etat>, request: Request) -> Response {
     }
 
     // Le palier que ce déploiement accorde, en plus de ce que dit la boutique.
-    // La réponse ne porte que le verdict : jamais le code, jamais la règle.
+    // La réponse ne porte que le verdict : jamais le code, jamais la liste,
+    // jamais la règle. Elle ne dit pas non plus *pourquoi* c'est non : savoir
+    // qu'une adresse est inconnue de la liste, c'est pouvoir énumérer la liste.
     if chemin == "/v1/plan" {
-        let accorde = etat.accord_pro.accorde(params.get("code").map(String::as_str));
+        // « courriel » d'abord, « email » ensuite : le second n'est là que pour
+        // qu'un essai à la main ne réponde pas « libre » sur un nom de
+        // paramètre, ce qui se cherche longtemps.
+        let courriel = params.get("courriel").or_else(|| params.get("email"));
+        let accorde = etat
+            .accord_pro
+            .accorde(params.get("code").map(String::as_str), courriel.map(String::as_str));
         let plan = if accorde { Plan::Pro } else { Plan::Libre };
         return json(StatusCode::OK, format!(r#"{{"plan":"{}"}}"#, plan.code()), &cors);
     }
@@ -637,6 +645,85 @@ mod tests {
         let (_, _, sante) = get(etat, "/health").await;
         assert!(!sante.contains("sillon"), "{sante}");
         assert!(sante.contains(r#""pro":"sur code""#), "{sante}");
+    }
+
+    #[tokio::test]
+    async fn une_adresse_invitee_obtient_le_palier_et_les_autres_non() {
+        let faux = Faux::new();
+        let mut etat = relais(&faux);
+        etat.accord_pro = Accord::depuis(Some("max@ferme.fr, ana@vina.es"));
+
+        for invitee in ["max@ferme.fr", "MAX@FERME.FR", "ana@vina.es"] {
+            let (status, _, corps) =
+                get(etat.clone(), &format!("/v1/plan?courriel={invitee}")).await;
+            assert_eq!(status, StatusCode::OK);
+            assert_eq!(corps, r#"{"plan":"pro"}"#, "{invitee}");
+        }
+
+        for etrangere in ["jo@farm.uk", "max@ferme.com", "max", ""] {
+            let (_, _, corps) = get(etat.clone(), &format!("/v1/plan?courriel={etrangere}")).await;
+            assert_eq!(corps, r#"{"plan":"libre"}"#, "{etrangere}");
+        }
+
+        // Rien présenté, rien accordé — et un code ne remplace pas une adresse.
+        let (_, _, sans) = get(etat.clone(), "/v1/plan").await;
+        assert_eq!(sans, r#"{"plan":"libre"}"#);
+        let (_, _, par_code) = get(etat.clone(), "/v1/plan?code=max@ferme.fr").await;
+        assert_eq!(par_code, r#"{"plan":"libre"}"#);
+    }
+
+    #[tokio::test]
+    async fn email_marche_aussi_bien_que_courriel() {
+        // Pour qu'un essai au curl ne réponde pas « libre » sur un nom de
+        // paramètre : ça se cherche longtemps, et la réponse ne dit pas pourquoi.
+        let faux = Faux::new();
+        let mut etat = relais(&faux);
+        etat.accord_pro = Accord::depuis(Some("max@ferme.fr"));
+
+        for parametre in ["courriel", "email"] {
+            let (_, _, corps) =
+                get(etat.clone(), &format!("/v1/plan?{parametre}=max@ferme.fr")).await;
+            assert_eq!(corps, r#"{"plan":"pro"}"#, "{parametre}");
+        }
+    }
+
+    #[tokio::test]
+    async fn une_adresse_a_etiquette_doit_arriver_encodee() {
+        // Une query se lit en form-urlencoded : « + » y vaut une espace. Une
+        // adresse « max+ferme@… » passée telle quelle arrive donc avec un trou
+        // au milieu et ne correspond à rien. C'est au client d'encoder, et
+        // l'application le fait (voir PlanGrantTests) ; ce test fixe la règle
+        // côté relais pour qu'on ne la « corrige » pas ici par mégarde — lire
+        // « + » comme un plus casserait tout formulaire conforme.
+        let faux = Faux::new();
+        let mut etat = relais(&faux);
+        etat.accord_pro = Accord::depuis(Some("max+ferme@ferme.fr"));
+
+        let (_, _, encodee) = get(etat.clone(), "/v1/plan?courriel=max%2Bferme@ferme.fr").await;
+        assert_eq!(encodee, r#"{"plan":"pro"}"#);
+
+        let (_, _, brute) = get(etat, "/v1/plan?courriel=max+ferme@ferme.fr").await;
+        assert_eq!(brute, r#"{"plan":"libre"}"#, "un « + » brut vaut une espace");
+    }
+
+    #[tokio::test]
+    async fn ni_la_reponse_ni_la_sante_ne_disent_les_adresses() {
+        let faux = Faux::new();
+        let mut etat = relais(&faux);
+        etat.accord_pro = Accord::depuis(Some("max@ferme.fr, ana@vina.es"));
+
+        // Un refus ne dit pas que l'adresse est inconnue : savoir cela, c'est
+        // pouvoir énumérer la liste une adresse à la fois.
+        let (_, _, refus) = get(etat.clone(), "/v1/plan?courriel=jo@farm.uk").await;
+        assert_eq!(refus, r#"{"plan":"libre"}"#);
+
+        let (_, _, sante) = get(etat, "/health").await;
+        assert!(!sante.contains("max@"), "{sante}");
+        assert!(!sante.contains("ana@"), "{sante}");
+        assert!(!sante.contains("ferme"), "{sante}");
+        // Le compte, en revanche, est dit : c'est ce qui rend visible du dehors
+        // qu'une virgule oubliée a réduit la liste.
+        assert!(sante.contains(r#""pro":"sur liste (2)""#), "{sante}");
     }
 
     #[tokio::test]
