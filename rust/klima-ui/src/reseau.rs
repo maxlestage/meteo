@@ -10,9 +10,9 @@
 
 use gloo_net::http::Request;
 use klima_api::open_meteo::{AgroApiError, AgroForecast, decode_forecast, decode_search};
+use klima_api::plan::Verdict;
 use klima_api::readings;
 use klima_core::endpoints::Endpoints;
-use klima_core::plan::Plan;
 use klima_core::position::Parcelle;
 use klima_core::providers::{Platform, ProviderOutcome, providers_for};
 
@@ -37,14 +37,15 @@ pub async fn forecast(
     decode_forecast(parcelle.clone(), &texte(&url).await?, maintenant)
 }
 
-/// Le palier que le relais accorde à cette adresse.
+/// Ce que le relais répond sur cette adresse — ou le fait qu'il se taise.
 ///
-/// Toute panne vaut « libre » : un relais muet ne doit pas ouvrir un palier
-/// payant, et il n'a rien à retirer puisque le web ne vend rien.
-pub async fn plan(url: &str) -> Plan {
+/// Un relais injoignable n'ouvre rien et ne retire rien : seul un « libre »
+/// dit franchement est un refus. Sans cette distinction, un creux de réseau
+/// coûterait son palier à qui l'a obtenu.
+pub async fn plan(url: &str) -> Verdict {
     match texte(url).await {
-        Ok(corps) => klima_api::plan::decode_plan(&corps),
-        Err(_) => Plan::Libre,
+        Ok(corps) => klima_api::plan::decode_verdict(&corps),
+        Err(_) => Verdict::Injoignable,
     }
 }
 

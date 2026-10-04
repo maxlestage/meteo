@@ -17,14 +17,20 @@ final class PlanGrantTests: XCTestCase {
     }
 
     func testUnOuiFrancAccordeLePalier() {
-        XCTAssertTrue(PlanGrant.lire(data(#"{"plan":"pro"}"#)))
+        XCTAssertEqual(PlanGrant.lire(data(#"{"plan":"pro"}"#)), .accorde)
     }
 
-    func testToutLeResteNAccordeRien() {
-        // Un relais en panne, une réponse tronquée, une page d'erreur : aucune
-        // de ces choses ne doit ouvrir un palier payant.
-        let refus = [
-            #"{"plan":"libre"}"#,
+    func testUnNonFrancEstLeSeulRefus() {
+        XCTAssertEqual(PlanGrant.lire(data(#"{"plan":"libre"}"#)), .refuse)
+    }
+
+    func testCeQuOnNeComprendPasNeRetireRien() {
+        // Ni n'accorde rien. Un corps tronqué, une page d'erreur, un JSON
+        // d'une autre forme : le relais n'a pas dit non, il a dit quelque
+        // chose qu'on ne comprend pas. On ne retire pas un accès là-dessus —
+        // sinon un creux de réseau coûte son palier à un testeur, et la perte
+        // s'écrit sur le disque.
+        let muets = [
             #"{"plan":"Pro"}"#,
             #"{"plan":""}"#,
             #"{"palier":"pro"}"#,
@@ -33,8 +39,15 @@ final class PlanGrantTests: XCTestCase {
             "<html>502 Bad Gateway</html>",
             "",
         ]
-        for corps in refus {
-            XCTAssertFalse(PlanGrant.lire(data(corps)), corps)
+        for corps in muets {
+            XCTAssertEqual(PlanGrant.lire(data(corps)), .injoignable, corps)
+        }
+    }
+
+    func testAucunCorpsNAccordeLePalierParMegarde() {
+        // L'autre moitié de la règle : le doute n'ouvre jamais rien.
+        for corps in [#"{"plan":"libre"}"#, #"{}"#, "", "<html>502</html>"] {
+            XCTAssertNotEqual(PlanGrant.lire(data(corps)), .accorde, corps)
         }
     }
 
