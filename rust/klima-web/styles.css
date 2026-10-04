@@ -150,6 +150,66 @@ body {
   color: var(--text-muted);
 }
 
+/* Registre de traitement ------------------------------------------------- */
+
+/* Une colonne : étiquette, champ, étiquette, champ, bouton. Rien ne défile de
+   côté — un formulaire qui se lit de haut en bas se remplit au champ, d'une
+   main, sans rien manquer. */
+
+.registre {
+  padding: 16px 18px;
+  border: 1px solid rgb(255 255 255 / 12%);
+  border-radius: 16px;
+  background: rgb(255 255 255 / 6%);
+  display: grid;
+  gap: 8px;
+}
+
+.registre h2 {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+.registre__lead,
+.registre__note {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 13px;
+}
+
+.registre__note {
+  margin-top: 2px;
+  font-size: 12px;
+}
+
+.registre__label {
+  margin-top: 4px;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.registre__field {
+  min-width: 0;
+  width: 100%;
+  padding: 9px 12px;
+  border: 1px solid rgb(255 255 255 / 16%);
+  border-radius: 10px;
+  background: rgb(0 0 0 / 20%);
+  color: inherit;
+  font: inherit;
+  font-size: 14px;
+}
+
+.registre__field::placeholder {
+  color: var(--text-muted);
+}
+
+.registre__download {
+  margin-top: 8px;
+}
+
 /* Bandeau de tête -------------------------------------------------------- */
 
 /* Le signe et la langue, sur une même ligne au-dessus de la recherche. La

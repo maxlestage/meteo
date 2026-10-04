@@ -18,7 +18,7 @@ fn catalog(entries: &[(&'static str, &'static str)]) -> Catalog {
     entries.iter().copied().collect()
 }
 
-const FR: [(&str, &str); 58] = [
+const FR: [(&str, &str); 65] = [
     ("app.loading", "Chargement des données agronomiques…"),
     ("app.retry", "Réessayer"),
     ("app.refresh", "Actualiser"),
@@ -77,9 +77,16 @@ const FR: [(&str, &str); 58] = [
     ("tile.sowing.no", "Déconseillé"),
     ("tile.sowing.caption", "Sol à {temperature} à 6 cm ; il faut 8 °C et un sol ressuyé."),
     ("language.label", "Langue"),
+    ("register.title", "Registre de traitement"),
+    ("register.hint", "Relevez les conditions à l’heure de l’application. Klima n’est pas votre registre : il en fournit la partie pénible à reconstituer après coup."),
+    ("register.hour", "Heure de l’application"),
+    ("register.product", "Produit (facultatif)"),
+    ("register.productPlaceholder", "Klima ne l’invente pas"),
+    ("register.download", "Enregistrer le fichier"),
+    ("register.note", "Le fichier est fabriqué dans cette page et ne passe par aucun serveur. Le verdict de Klima est indicatif et n’a pas de valeur réglementaire."),
 ];
 
-const EN: [(&str, &str); 58] = [
+const EN: [(&str, &str); 65] = [
     ("app.loading", "Loading agronomic data…"),
     ("app.retry", "Try again"),
     ("app.refresh", "Refresh"),
@@ -138,9 +145,16 @@ const EN: [(&str, &str); 58] = [
     ("tile.sowing.no", "Not advised"),
     ("tile.sowing.caption", "Soil at {temperature} at 6 cm; it needs 8 °C and drained soil."),
     ("language.label", "Language"),
+    ("register.title", "Treatment record"),
+    ("register.hint", "Capture the conditions at the hour of application. Klima is not your record book: it supplies the part that is painful to reconstruct afterwards."),
+    ("register.hour", "Hour of application"),
+    ("register.product", "Product (optional)"),
+    ("register.productPlaceholder", "Klima will not invent it"),
+    ("register.download", "Save the file"),
+    ("register.note", "The file is built in this page and passes through no server. Klima’s verdict is indicative and has no regulatory standing."),
 ];
 
-const ES: [(&str, &str); 58] = [
+const ES: [(&str, &str); 65] = [
     ("app.loading", "Cargando los datos agronómicos…"),
     ("app.retry", "Reintentar"),
     ("app.refresh", "Actualizar"),
@@ -199,6 +213,13 @@ const ES: [(&str, &str); 58] = [
     ("tile.sowing.no", "Desaconsejada"),
     ("tile.sowing.caption", "Suelo a {temperature} a 6 cm; hacen falta 8 °C y suelo oreado."),
     ("language.label", "Idioma"),
+    ("register.title", "Registro de tratamiento"),
+    ("register.hint", "Anote las condiciones a la hora de la aplicación. Klima no es su registro: aporta la parte que cuesta reconstruir después."),
+    ("register.hour", "Hora de la aplicación"),
+    ("register.product", "Producto (opcional)"),
+    ("register.productPlaceholder", "Klima no lo inventa"),
+    ("register.download", "Guardar el archivo"),
+    ("register.note", "El archivo se crea en esta página y no pasa por ningún servidor. El veredicto de Klima es indicativo y no tiene valor reglamentario."),
 ];
 
 #[cfg(test)]

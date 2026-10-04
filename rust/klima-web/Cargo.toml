@@ -20,6 +20,10 @@ web-sys = { version = "0.3", features = [
   "Window", "Document", "Element", "HtmlElement", "HtmlInputElement", "Storage",
   "Location", "History", "Navigator", "Geolocation", "Position", "Coordinates",
   "PositionOptions", "PositionError", "EventTarget", "MouseEvent", "Node",
+  # Pour le registre : fabriquer un fichier en mémoire et le faire enregistrer
+  # sans serveur. Un document qu'on peut vous opposer n'a rien à faire sur le
+  # réseau pour revenir à vous.
+  "HtmlSelectElement", "Blob", "BlobPropertyBag", "Url", "HtmlAnchorElement",
 ] }
 
 # Ce qui part sur le réseau compte plus que ce qui compile vite : une parcelle

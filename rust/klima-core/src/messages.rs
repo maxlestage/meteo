@@ -24,7 +24,7 @@ fn catalog(entries: &[(&'static str, &'static str)]) -> Catalog {
     entries.iter().copied().collect()
 }
 
-const FR: [(&str, &str); 85] = [
+const FR: [(&str, &str); 96] = [
     ("wmo.clearSky", "Ciel dégagé"),
     ("wmo.mainlyClear", "Peu nuageux"),
     ("wmo.partlyCloudy", "Partiellement nuageux"),
@@ -110,9 +110,20 @@ const FR: [(&str, &str); 85] = [
     ("plan.feature.alertes", "Prévenu sans ouvrir l’application"),
     ("plan.feature.cumuls", "Cumuls depuis le semis ou le dernier traitement"),
     ("plan.feature.registre", "Export des conditions à l’heure du traitement"),
+    ("register.column.date", "Date"),
+    ("register.column.heure", "Heure"),
+    ("register.column.parcelle", "Parcelle"),
+    ("register.column.produit", "Produit"),
+    ("register.column.temperature", "Température (°C)"),
+    ("register.column.humidite", "Humidité (%)"),
+    ("register.column.vent", "Vent (km/h)"),
+    ("register.column.rafales", "Rafales (km/h)"),
+    ("register.column.pluie", "Pluie (mm)"),
+    ("register.column.verdict", "Verdict Klima"),
+    ("register.column.score", "Score"),
 ];
 
-const EN: [(&str, &str); 85] = [
+const EN: [(&str, &str); 96] = [
     ("wmo.clearSky", "Clear sky"),
     ("wmo.mainlyClear", "Mainly clear"),
     ("wmo.partlyCloudy", "Partly cloudy"),
@@ -198,9 +209,20 @@ const EN: [(&str, &str); 85] = [
     ("plan.feature.alertes", "Warned without opening the app"),
     ("plan.feature.cumuls", "Totals since sowing or the last treatment"),
     ("plan.feature.registre", "Export of the conditions at the hour of treatment"),
+    ("register.column.date", "Date"),
+    ("register.column.heure", "Time"),
+    ("register.column.parcelle", "Field"),
+    ("register.column.produit", "Product"),
+    ("register.column.temperature", "Temperature (°C)"),
+    ("register.column.humidite", "Humidity (%)"),
+    ("register.column.vent", "Wind (km/h)"),
+    ("register.column.rafales", "Gusts (km/h)"),
+    ("register.column.pluie", "Rain (mm)"),
+    ("register.column.verdict", "Klima verdict"),
+    ("register.column.score", "Score"),
 ];
 
-const ES: [(&str, &str); 85] = [
+const ES: [(&str, &str); 96] = [
     ("wmo.clearSky", "Cielo despejado"),
     ("wmo.mainlyClear", "Poco nuboso"),
     ("wmo.partlyCloudy", "Parcialmente nuboso"),
@@ -286,6 +308,17 @@ const ES: [(&str, &str); 85] = [
     ("plan.feature.alertes", "Avisado sin abrir la aplicación"),
     ("plan.feature.cumuls", "Acumulados desde la siembra o el último tratamiento"),
     ("plan.feature.registre", "Exportación de las condiciones a la hora del tratamiento"),
+    ("register.column.date", "Fecha"),
+    ("register.column.heure", "Hora"),
+    ("register.column.parcelle", "Parcela"),
+    ("register.column.produit", "Producto"),
+    ("register.column.temperature", "Temperatura (°C)"),
+    ("register.column.humidite", "Humedad (%)"),
+    ("register.column.vent", "Viento (km/h)"),
+    ("register.column.rafales", "Rachas (km/h)"),
+    ("register.column.pluie", "Lluvia (mm)"),
+    ("register.column.verdict", "Veredicto Klima"),
+    ("register.column.score", "Puntuación"),
 ];
 
 /* ---------------------------------------------------------------- */
@@ -322,6 +355,21 @@ mod tests {
             for language in LANGUAGES {
                 let value = SHARED_MESSAGES.get(language, key).unwrap();
                 assert_eq!(jetons(value), reference, "{language} · {key}");
+            }
+        }
+    }
+
+    #[test]
+    fn toute_colonne_du_registre_est_traduite_dans_les_trois_langues() {
+        // Les en-têtes du CSV sont des clés, pas des phrases : le domaine ne
+        // fabrique pas de texte. Une colonne ajoutée à `REGISTER_COLUMNS` sans
+        // sa traduction sortirait dans un document qu'on peut vous opposer,
+        // avec « humidite » en guise d'en-tête.
+        for colonne in crate::register::REGISTER_COLUMNS {
+            let cle = format!("register.column.{colonne}");
+            for language in LANGUAGES {
+                let valeur = SHARED_MESSAGES.get(language, &cle);
+                assert!(valeur.is_some(), "{language} · {cle} manque");
             }
         }
     }
