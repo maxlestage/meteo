@@ -27,9 +27,11 @@ use axum::extract::{Request, State};
 use axum::http::{HeaderMap, HeaderName, HeaderValue, Method, StatusCode, header};
 use axum::response::{IntoResponse, Response};
 use klima_core::grid::{cell_for, cell_key};
+use klima_core::plan::Plan;
 use reqwest::Url;
 
 use crate::cache::{ForecastCache, Served};
+use crate::pro::Accord;
 use crate::site;
 use crate::upstream::{self, Fetch, Params, UpstreamError};
 
@@ -52,6 +54,8 @@ pub struct Etat {
     pub forecasts: Arc<ForecastCache<String>>,
     pub searches: Arc<ForecastCache<String>>,
     pub open_meteo_key: Option<String>,
+    /// Ce que ce déploiement accorde comme palier, en plus de la boutique.
+    pub accord_pro: Accord,
     /// Origines autorisées à appeler le relais depuis un navigateur.
     pub allowed_origins: Vec<String>,
     pub fetch: Fetch,
@@ -99,6 +103,14 @@ async fn handle(State(etat): State<Etat>, request: Request) -> Response {
 
     if chemin == "/health" {
         return json(StatusCode::OK, sante(&etat), &cors);
+    }
+
+    // Le palier que ce déploiement accorde, en plus de ce que dit la boutique.
+    // La réponse ne porte que le verdict : jamais le code, jamais la règle.
+    if chemin == "/v1/plan" {
+        let accorde = etat.accord_pro.accorde(params.get("code").map(String::as_str));
+        let plan = if accorde { Plan::Pro } else { Plan::Libre };
+        return json(StatusCode::OK, format!(r#"{{"plan":"{}"}}"#, plan.code()), &cors);
     }
 
     // Les fichiers du site, s'il y en a. L'API garde la priorité : elle est
@@ -168,14 +180,15 @@ async fn handle(State(etat): State<Etat>, request: Request) -> Response {
     servir(lu, &cors)
 }
 
-/// L'état de santé. La clé n'y apparaît jamais, seulement le fait qu'elle soit
-/// là.
+/// L'état de santé. Ni la clé ni le code n'y apparaissent — seulement le fait
+/// qu'ils soient là.
 fn sante(etat: &Etat) -> String {
     format!(
-        r#"{{"statut":"ok","cellules":{},"interrogations":{},"cleOpenMeteo":"{}"}}"#,
+        r#"{{"statut":"ok","cellules":{},"interrogations":{},"cleOpenMeteo":"{}","pro":"{}"}}"#,
         etat.forecasts.size(),
         etat.forecasts.calls() + etat.searches.calls(),
-        if etat.open_meteo_key.is_some() { "configurée" } else { "absente" }
+        if etat.open_meteo_key.is_some() { "configurée" } else { "absente" },
+        etat.accord_pro.etiquette()
     )
 }
 
@@ -305,6 +318,7 @@ pub fn etat(fetch: Fetch, now: crate::cache::Clock) -> Etat {
             now,
         })),
         open_meteo_key: None,
+        accord_pro: Accord::Aucun,
         allowed_origins: vec![DEFAULT_ORIGIN.to_owned()],
         fetch,
         site: None,
@@ -583,6 +597,58 @@ mod tests {
         let (_, _, corps) = get(etat, "/health").await;
         assert!(corps.contains("configurée"));
         assert!(!corps.contains("clé-secrète"));
+    }
+
+    /* ---- le palier accordé par le déploiement ---- */
+
+    #[tokio::test]
+    async fn sans_rien_de_configure_le_relais_naccorde_aucun_palier() {
+        // StoreKit décide seul, comme en production.
+        let faux = Faux::new();
+        let (_, _, corps) = get(relais(&faux), "/v1/plan").await;
+        assert_eq!(corps, r#"{"plan":"libre"}"#);
+    }
+
+    #[tokio::test]
+    async fn le_mode_tous_accorde_a_qui_demande() {
+        let faux = Faux::new();
+        let mut etat = relais(&faux);
+        etat.accord_pro = Accord::Tous;
+
+        let (status, _, corps) = get(etat, "/v1/plan").await;
+        assert_eq!(status, StatusCode::OK);
+        assert_eq!(corps, r#"{"plan":"pro"}"#);
+    }
+
+    #[tokio::test]
+    async fn un_code_naccorde_quau_code_et_le_relais_ne_le_repete_jamais() {
+        let faux = Faux::new();
+        let mut etat = relais(&faux);
+        etat.accord_pro = Accord::SurCode("sillon-2026-dUx7".to_owned());
+
+        let (_, _, juste) = get(etat.clone(), "/v1/plan?code=sillon-2026-dUx7").await;
+        assert_eq!(juste, r#"{"plan":"pro"}"#);
+
+        let (_, _, faux_code) = get(etat.clone(), "/v1/plan?code=sillon").await;
+        assert_eq!(faux_code, r#"{"plan":"libre"}"#);
+
+        let (_, _, sans) = get(etat.clone(), "/v1/plan").await;
+        assert_eq!(sans, r#"{"plan":"libre"}"#);
+
+        // Ni la réponse ni l'état de santé ne redisent le code.
+        let (_, _, sante) = get(etat, "/health").await;
+        assert!(!sante.contains("sillon"), "{sante}");
+        assert!(sante.contains(r#""pro":"sur code""#), "{sante}");
+    }
+
+    #[tokio::test]
+    async fn letat_de_sante_dit_la_situation_sans_la_regle() {
+        let faux = Faux::new();
+        let mut etat = relais(&faux);
+        etat.accord_pro = Accord::Tous;
+
+        let (_, _, corps) = get(etat, "/health").await;
+        assert!(corps.contains(r#""pro":"tous""#), "{corps}");
     }
 
     #[tokio::test]

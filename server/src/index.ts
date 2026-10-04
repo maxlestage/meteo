@@ -23,6 +23,7 @@
 import { existsSync } from 'node:fs'
 import { ForecastCache } from './cache'
 import { cellFor, cellKey } from './grid'
+import { accorde, accordDepuis, etiquette, type Accord } from './pro'
 import { staticSite } from './static'
 import {
   brightSkyCurrent,
@@ -47,6 +48,11 @@ const SEARCH_TTL_MS = 86_400_000
 
 export interface ServerOptions extends UpstreamConfig {
   port?: number
+  /**
+   * Ce que ce déploiement accorde comme palier, en plus de la boutique.
+   * Absent : StoreKit décide seul, comme en production.
+   */
+  accordPro?: Accord
   /** Origines autorisées à appeler le relais depuis un navigateur. */
   allowedOrigins?: readonly string[]
   now?: () => number
@@ -113,6 +119,7 @@ export function createHandler(options: ServerOptions = {}) {
   const forecasts = new ForecastCache({ ttlMs: TTL_MS, staleMs: STALE_MS, now: options.now })
   const searches = new ForecastCache({ ttlMs: SEARCH_TTL_MS, staleMs: SEARCH_TTL_MS, now: options.now })
   const allowed = options.allowedOrigins ?? ['https://maxlestage.github.io']
+  const accordPro: Accord = options.accordPro ?? { type: 'aucun' }
 
   return async function handle(request: Request): Promise<Response> {
     const url = new URL(request.url)
@@ -136,9 +143,17 @@ export function createHandler(options: ServerOptions = {}) {
           cellules: forecasts.size,
           interrogations: forecasts.calls + searches.calls,
           cleOpenMeteo: options.openMeteoKey ? 'configurée' : 'absente',
+          pro: etiquette(accordPro),
         },
         { headers: cors },
       )
+    }
+
+    // Le palier que ce déploiement accorde, en plus de ce que dit la boutique.
+    // La réponse ne porte que le verdict : jamais le code, jamais la règle.
+    if (url.pathname === '/v1/plan') {
+      const ouvert = accorde(accordPro, url.searchParams.get('code'))
+      return Response.json({ plan: ouvert ? 'pro' : 'libre' }, { headers: cors })
     }
 
     // Les fichiers du site, s'il y en a. L'API garde la priorité : elle est
@@ -238,12 +253,17 @@ if (import.meta.main) {
 
   const options: ServerOptions = {
     openMeteoKey: process.env.OPEN_METEO_KEY,
+    // La valeur vit ici et nulle part ailleurs : elle s'enlève en une
+    // commande, là où une valeur glissée dans l'application demanderait une
+    // nouvelle version pour être retirée.
+    accordPro: accordDepuis(process.env.KLIMA_PRO),
     allowedOrigins: process.env.KLIMA_ORIGINS?.split(',').map((o) => o.trim()),
     site: sert ? staticSite(racine, (chemin) => Bun.file(chemin)) : undefined,
   }
   const port = Number(process.env.PORT ?? 8787)
   Bun.serve({ port, fetch: createHandler(options) })
   console.log(`relais Klima sur :${port} — clé Open-Meteo ${
-    options.openMeteoKey ? 'configurée' : 'absente (plan gratuit, usage non commercial)'}`
+    options.openMeteoKey ? 'configurée' : 'absente (plan gratuit, usage non commercial)'
+  }, palier accordé : ${etiquette(options.accordPro ?? { type: 'aucun' })}`
     + (sert ? `, site servi depuis ${racine}` : ', sans site'))
 }
