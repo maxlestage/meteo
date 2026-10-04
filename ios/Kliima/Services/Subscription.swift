@@ -50,6 +50,13 @@ final class Subscription: ObservableObject {
     /// atteste, et ce que le déploiement accorde (`KLIMA_PRO`, côté relais)
     /// pendant l'essai. Un relais muet ne fait donc pas perdre un abonnement
     /// réel, et une boutique vide n'annule pas l'accord du relais.
+    ///
+    /// **Un silence n'est pas un refus.** Le relais injoignable — un tunnel,
+    /// un avion, un redémarrage de serveur — laisse le palier tel qu'il était.
+    /// Sans cela, un testeur perdait son accès au premier creux de réseau, et
+    /// la perte était écrite sur le disque : au lancement suivant, l'écran
+    /// repartait du palier libre avant même d'avoir pu redemander. Seul un
+    /// `libre` dit franchement par le relais retire quelque chose.
     func refresh() async {
         var entitled = false
         for await result in Transaction.currentEntitlements {
@@ -61,8 +68,18 @@ final class Subscription: ObservableObject {
             }
         }
 
-        let accorde = await PlanGrant.accorde()
-        let next: Plan = (entitled || accorde) ? .pro : .libre
+        // Ce que la boutique atteste ne dépend d'aucun relais.
+        let next: Plan
+        if entitled {
+            next = .pro
+        } else {
+            switch await PlanGrant.verdict() {
+            case .accorde: next = .pro
+            case .refuse: next = .libre
+            case .injoignable: next = plan
+            }
+        }
+
         plan = next
         SharedStore.save(next)
     }

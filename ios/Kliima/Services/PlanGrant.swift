@@ -79,34 +79,56 @@ struct PlanGrant {
         return valeur.addingPercentEncoding(withAllowedCharacters: permis) ?? valeur
     }
 
-    /// Demande au relais ce qu'il accorde.
+    /// Ce que le relais a répondu — et le fait qu'il n'ait rien répondu.
     ///
-    /// Renvoie `false` dès que quelque chose manque — pas de relais, pas de
-    /// réseau, réponse illisible. Un relais muet ne doit jamais faire perdre
-    /// un abonnement réel, ni en inventer un.
-    static func accorde(session: URLSession = .shared) async -> Bool {
+    /// La distinction est tout l'objet de ce type. Un « non » et un silence
+    /// mènent au même palier à la première question, mais pas à la seconde :
+    /// un refus retire un accès, un silence ne doit rien retirer du tout.
+    /// Les confondre, c'est faire perdre son palier à un testeur qui passe
+    /// sous un tunnel, et écrire cette perte sur le disque.
+    enum Verdict {
+        case accorde
+        case refuse
+        /// Pas de relais, pas de réseau, ou une réponse qu'on ne sait pas lire.
+        case injoignable
+    }
+
+    /// Demande au relais ce qu'il accorde.
+    static func verdict(session: URLSession = .shared) async -> Verdict {
         guard
             let base = relayURL,
             let url = requete(base: base, code: code, courriel: courriel)
-        else { return false }
+        else { return .injoignable }
 
         do {
             let (data, response) = try await session.data(from: url)
             guard let http = response as? HTTPURLResponse, (200..<300).contains(http.statusCode) else {
-                return false
+                return .injoignable
             }
             return lire(data)
         } catch {
-            return false
+            return .injoignable
         }
     }
 
     /// Lit la réponse du relais : `{"plan":"pro"}` ou `{"plan":"libre"}`.
     ///
     /// Séparé de l'appel pour être vérifiable sans réseau.
-    static func lire(_ data: Data) -> Bool {
+    ///
+    /// Seul un `libre` bien formé vaut un refus. Un corps tronqué, une page
+    /// d'erreur, un JSON d'une autre forme : le relais n'a pas dit non, il a
+    /// dit quelque chose qu'on ne comprend pas — et on ne retire pas un accès
+    /// sur une phrase qu'on n'a pas comprise. Accorder, en revanche, demande
+    /// toujours un « oui » franc : le doute n'ouvre jamais rien.
+    static func lire(_ data: Data) -> Verdict {
         struct Reponse: Decodable { let plan: String }
-        guard let reponse = try? JSONDecoder().decode(Reponse.self, from: data) else { return false }
-        return reponse.plan == Plan.pro.rawValue
+        guard let reponse = try? JSONDecoder().decode(Reponse.self, from: data) else {
+            return .injoignable
+        }
+        switch reponse.plan {
+        case Plan.pro.rawValue: return .accorde
+        case Plan.libre.rawValue: return .refuse
+        default: return .injoignable
+        }
     }
 }
