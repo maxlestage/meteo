@@ -135,11 +135,14 @@ final class Subscription: ObservableObject {
         else {
             // Annuler la feuille d'Apple n'est pas un échec à afficher : la
             // personne a changé d'avis, rien de plus.
-            if case .failure(let erreur) = resultat,
-               (erreur as? ASAuthorizationError)?.code == .canceled {
-                return false
+            if case .failure(let erreur) = resultat {
+                let code = (erreur as NSError).code
+                if (erreur as? ASAuthorizationError)?.code == .canceled { return false }
+                echecConnexion = .apple(code: code)
+            } else {
+                // Apple a répondu, mais sans jeton d'identité lisible.
+                echecConnexion = .apple(code: -1)
             }
-            echecConnexion = .refuse
             return false
         }
 

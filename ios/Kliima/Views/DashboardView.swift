@@ -109,8 +109,10 @@ struct DashboardView: View {
                 }
 
                 // L'accès à l'abonnement ne se montre qu'au palier libre :
-                // rappeler à un abonné qu'il paie n'apporte rien.
-                if subscription.plan == .libre {
+                // rappeler à un abonné qu'il paie n'apporte rien. Sauf compte
+                // d'essai connecté : c'est par là qu'on voit avec quelle
+                // adresse, et qu'on se déconnecte.
+                if subscription.plan == .libre || subscription.compte != nil {
                     ToolbarItem(placement: .topBarLeading) {
                         Button {
                             paywallFor = .recoupement
