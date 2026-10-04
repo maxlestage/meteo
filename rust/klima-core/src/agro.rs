@@ -2,8 +2,8 @@
 //!
 //! Toutes les fonctions sont pures : elles prennent des mesures météo brutes
 //! et renvoient des indicateurs exploitables au champ. Les mêmes seuils vivent
-//! dans `core/src/agro.ts` et dans `ios/Kliima/Models/AgroIndicators.swift` ;
-//! les cas de test sont recopiés à l'identique des trois côtés.
+//! dans `ios/Kliima/Models/AgroIndicators.swift` ; les cas de test sont
+//! recopiés à l'identique des deux côtés.
 //!
 //! Les horodatages sont des millisecondes depuis l'époque, et non un type date
 //! d'une bibliothèque : le cœur n'a aucune dépendance, et une règle
@@ -523,7 +523,7 @@ fn round(value: f64, decimals: u32) -> f64 {
 mod tests {
     use super::*;
 
-    /// Même gabarit que `core/src/agro.test.ts` : 12 mai 2026, 6 h UTC.
+    /// Le gabarit des trois suites : 12 mai 2026, 6 h UTC.
     const BASE_MS: i64 = 1_778_997_600_000;
 
     fn hour(index: i64) -> HourlySample {

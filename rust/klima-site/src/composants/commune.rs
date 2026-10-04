@@ -1,6 +1,5 @@
 //! Le petit sélecteur de commune, pour essayer la section sur sa parcelle.
 //!
-//! Miroir de `site/src/components/CommuneSearch.tsx`.
 
 use klima_core::endpoints::Endpoints;
 use klima_core::i18n::params;

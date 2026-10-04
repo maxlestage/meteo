@@ -1,7 +1,5 @@
 //! Illustrations vectorielles, dessinées à la main.
 //!
-//! Miroir de `site/src/components/Illustrations.tsx`.
-//!
 //! Pas de photographies : rien à licencier, rien à charger, et le trait reste
 //! net à toutes les tailles. Les animations sont en CSS et se coupent
 //! d'elles-mêmes si le système demande moins de mouvement.

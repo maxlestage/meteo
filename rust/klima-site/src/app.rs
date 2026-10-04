@@ -1,6 +1,5 @@
 //! La vitrine de Klima.
 //!
-//! Miroir de `site/src/App.tsx`.
 
 use klima_api::today::day_digest;
 use klima_core::agro::thresholds::{SPRAY_GUST_MAX, SPRAY_WIND_MAX, SPRAY_WIND_MIN};

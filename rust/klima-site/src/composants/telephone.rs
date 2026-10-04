@@ -1,7 +1,6 @@
 //! L'aperçu de l'application iOS, alimenté par la commune choisie plus haut :
 //! ce que le visiteur voit ici, il le retrouve sur son téléphone.
 //!
-//! Miroir de `site/src/components/PhoneMockup.tsx`.
 
 use klima_api::today::DayDigest;
 use klima_core::agro::CurrentSample;

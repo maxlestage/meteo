@@ -1,6 +1,6 @@
 //! Le registre : les conditions à l'heure d'un traitement.
 //!
-//! Miroirs : `core/src/register.ts` et `ios/Kliima/Models/Register.swift`.
+//! Miroir Swift : `ios/Kliima/Models/Register.swift`.
 //!
 //! Tenir un registre des traitements phytosanitaires est une obligation. Klima
 //! **n'est pas ce registre** et ne prétend pas l'être : il fournit la partie
@@ -351,9 +351,9 @@ mod tests {
 
     #[test]
     fn le_fichier_est_octet_pour_octet_celui_du_typescript() {
-        // Relevé identique passé dans `core/src/register.ts` : c'est la seule
-        // façon d'être sûr que personne n'héritera de deux registres
-        // différents selon l'application qui l'a exporté.
+        // Octet pour octet ce que produisait le TypeScript sur le même
+        // relevé : personne n'héritera de deux registres différents selon
+        // l'application qui l'a exporté.
         assert_eq!(
             to_csv(&[releve()], &CsvOptions::default()),
             concat!(

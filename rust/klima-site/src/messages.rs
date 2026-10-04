@@ -1,6 +1,5 @@
 //! Textes du site de présentation.
 //!
-//! Miroir de `site/src/i18n/messages.ts`. Les libellés partagés viennent de
 //! `klima_core::messages` : le traducteur lit les deux catalogues, celui du
 //! site d'abord.
 

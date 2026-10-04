@@ -1,6 +1,5 @@
 //! La tuile de détail, dans l'esprit des cartes « Vent » ou « Indice UV ».
 //!
-//! Miroir de `web/src/components/DetailTile.tsx`.
 
 use yew::prelude::*;
 

@@ -1,7 +1,5 @@
 //! Le montage de la vitrine, en Yew et WebAssembly.
 //!
-//! Miroir de `site/src/main.tsx`.
-//!
 //! L'acheminement des appels météo suit la même règle que l'application :
 //! sans relais configuré, le navigateur interroge les fournisseurs lui-même ;
 //! avec un relais, tout passe par lui. Le réglage est lu à la compilation

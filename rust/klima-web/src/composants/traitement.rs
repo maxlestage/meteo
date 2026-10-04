@@ -1,6 +1,5 @@
 //! La carte des conditions de pulvérisation.
 //!
-//! Miroir de `web/src/components/SprayCard.tsx` : la prochaine fenêtre en
 //! clair, puis une frise des vingt-quatre prochaines heures.
 
 use klima_core::agro::{HourlySample, SprayOpportunity, SprayVerdict, spray_windows};

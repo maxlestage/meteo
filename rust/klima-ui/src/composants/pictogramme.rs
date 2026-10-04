@@ -1,8 +1,8 @@
 //! Le pictogramme météo.
 //!
-//! Miroir de `core/src/ui/WeatherIcon.tsx`. Peu de formes, un trait large,
-//! dans l'esprit des symboles du système : le même dessin tient dans une
-//! colonne de bandeau horaire et dans une ligne de prévision.
+//! Peu de formes, un trait large, dans l'esprit des symboles du système : le
+//! même dessin tient dans une colonne de bandeau horaire et dans une ligne de
+//! prévision.
 
 use klima_core::weather::ConditionIcon;
 use yew::prelude::*;

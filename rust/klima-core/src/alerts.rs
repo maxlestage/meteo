@@ -1,6 +1,6 @@
 //! Les alertes : ce que Klima dit sans qu'on ouvre l'application.
 //!
-//! Miroirs : `core/src/alerts.ts` et `ios/Kliima/Models/Alerts.swift`.
+//! Miroir Swift : `ios/Kliima/Models/Alerts.swift`.
 //!
 //! Ce module ne notifie rien. Il répond à une seule question — « qu'y a-t-il à
 //! dire, maintenant ? » — à partir de la prévision et de ce qu'on a déjà dit.

@@ -1,7 +1,5 @@
 //! Où l'on va chercher la météo.
 //!
-//! Miroir de `core/src/endpoints.ts`.
-//!
 //! Deux acheminements, et le choix a des conséquences juridiques autant que
 //! techniques :
 //!

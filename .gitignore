@@ -1,12 +1,14 @@
-node_modules
+# Le site construit, et ce que le relais sert
 dist
-*.tsbuildinfo
-.DS_Store
+/public
 
-# Le site construit pour le relais
-server/public
+.DS_Store
 
 # Compilation Rust. Les interfaces ont leur propre espace de travail, donc
 # leur propre dossier de compilation.
 rust/target
 rust/*/target
+
+# Xcode
+*.xcuserdatad
+DerivedData/

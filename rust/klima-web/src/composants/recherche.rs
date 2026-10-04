@@ -1,7 +1,5 @@
 //! La barre de recherche de commune, avec repli sur la géolocalisation.
 //!
-//! Miroir de `web/src/components/ParcelleSearch.tsx`.
-//!
 //! Deux attentions qui ne se voient pas : la recherche est différée d'un quart
 //! de seconde — on laisse finir de taper, et une requête par lettre serait
 //! quatre requêtes pour « Reims » —, et la liste se referme quand on clique

@@ -1,7 +1,5 @@
 //! Ce que l'abonnement ajoute, et où.
 //!
-//! Miroir de `web/src/components/ProNote.tsx`.
-//!
 //! L'application web n'a pas de boutique : elle ne peut pas vendre, et lui
 //! greffer des comptes pour encaisser un euro par mois coûterait plus que ça
 //! ne rapporterait. Elle dit donc simplement ce qui existe ailleurs.
