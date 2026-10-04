@@ -8,8 +8,17 @@
 //! qu'une question posée à l'ouverture, et l'effacer suffit à se retirer.
 //! Ce n'est pas non plus une identification : personne ne vérifie que celui qui
 //! présente une adresse la relève. Pour un essai fermé, c'est assumé.
+//!
+//! **Un écart avec iOS, et il est voulu.** Là-bas le palier est recopié sur le
+//! disque et survit à un relais muet : des fonctions en dépendent, et un
+//! testeur ne doit pas les perdre dans un tunnel. Ici rien n'est verrouillé —
+//! l'adresse seule est mémorisée, le palier se redemande à chaque ouverture, et
+//! un relais injoignable laisse simplement le champ. Mémoriser un palier que
+//! rien ne consulte serait de l'état pour l'état. En revanche, dans la session,
+//! un silence ne retire rien : vérifier hors réseau ne doit pas afficher un
+//! refus qui n'a pas eu lieu.
 
-use klima_api::plan::plan_url;
+use klima_api::plan::{Verdict, plan_url};
 use klima_core::plan::Plan;
 use yew::prelude::*;
 
@@ -67,13 +76,14 @@ pub fn use_palier(relais: Option<String>) -> Palier {
 
             wasm_bindgen_futures::spawn_local(async move {
                 let url = plan_url(&relais, Some(&courriel));
-                let plan = reseau::plan(&url).await;
-                etat.set(Etat {
-                    plan,
-                    refuse: plan != Plan::Pro,
-                    courriel,
-                    verification: false,
-                });
+                // Un relais muet ne retire rien : on garde ce qu'on savait, et
+                // on ne dit pas « refusée » d'une adresse qui n'a pas été vue.
+                let (plan, refuse) = match reseau::plan(&url).await {
+                    Verdict::Accorde => (Plan::Pro, false),
+                    Verdict::Refuse => (Plan::Libre, true),
+                    Verdict::Injoignable => (etat.plan, false),
+                };
+                etat.set(Etat { plan, refuse, courriel, verification: false });
             });
         });
     }
