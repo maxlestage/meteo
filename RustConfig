@@ -1,8 +1,24 @@
-# Réglages du buildpack Rust d'Heroku.
+# Réglages du buildpack Rust d'Heroku — `emk/heroku-buildpack-rust`.
 #
-# L'espace de travail est dans `rust/` ; les interfaces se construisent avant
-# le relais, parce que c'est lui qui les sert.
-RUST_SKIP_BUILD=no
-RUST_TOOLCHAIN_FILE=rust-toolchain.toml
-BUILD_PATH=rust/klima-relay
-BUILD_HOOK=rust/scripts/construire.sh
+# Ce fichier est *sourcé* par le `bin/compile` du buildpack : seules les
+# variables que ce script déclare lui-même ont un effet. Une clé inventée ne
+# fait rien, et ne le dit pas. Un test — `tests/deploiement.rs` — vérifie donc
+# que chaque clé écrite ici en est bien une.
+#
+# Même prudence sur les valeurs : le script compare `RUST_SKIP_BUILD` avec
+# `-ne`, qui attend un nombre. Une valeur comme « no » fait échouer le test, la
+# branche n'est pas prise, et la construction est *sautée* — en silence, avec un
+# code de sortie nul. On ne met donc pas cette clé du tout : son défaut est 0.
+
+# Le buildpack ne lit que l'ancien fichier `rust-toolchain` en texte brut ; il
+# ignore `rust-toolchain.toml`, qui est la forme que ce dépôt utilise. Sans
+# cette ligne il compilerait donc sur « stable », quoi que dise le `.toml`. Le
+# test vérifie que les deux versions concordent.
+VERSION=1.94.1
+
+# L'espace de travail est dans `rust/`. Le buildpack s'y place, construit, puis
+# recopie les exécutables dans `target/release` *relatif à ce dossier* — d'où
+# le chemin du `Procfile`, `rust/target/release/klima-relay`. Pointer ici la
+# caisse plutôt que l'espace de travail décalerait le binaire d'un cran et le
+# `Procfile` ne le trouverait plus. Le test compare les deux.
+BUILD_PATH=rust

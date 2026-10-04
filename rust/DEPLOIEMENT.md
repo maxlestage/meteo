@@ -1,19 +1,29 @@
 # Mettre le relais Rust en ligne
 
 Le relais est un seul binaire : il écoute, interroge les fournisseurs une fois
-pour tout le monde, rend la réponse, et sert la vitrine et l'application
-depuis la même origine. Pas de base de données, rien à part un endroit qui
-reste allumé.
+pour tout le monde, rend la réponse, et sait aussi servir la vitrine et
+l'application depuis la même origine. Pas de base de données, rien à part un
+endroit qui reste allumé.
 
 | Chemin    | Ce qu'on y trouve                       |
 | --------- | --------------------------------------- |
-| `/`       | La vitrine                              |
-| `/app/`   | L'application                           |
+| `/`       | La vitrine, **si** `KLIMA_PUBLIC` pointe dessus |
+| `/app/`   | L'application, à la même condition      |
 | `/health` | L'état du relais                        |
 | `/v1/…`   | L'API : les fournisseurs, vus du relais |
 
 L'API garde la priorité : elle est tout entière sous `/v1/`, et le partage est
 vérifié par des tests.
+
+**Sur Heroku, le relais ne sert que l'API.** Le buildpack Rust n'a aucun
+mécanisme pour lancer un script avant la compilation — il n'y a pas de clé
+`BUILD_HOOK`, quoi qu'un `RustConfig` ait pu prétendre — donc `construire.sh`
+ne tourne pas là-bas et il n'y a pas de dossier `public` à servir. Les deux
+interfaces sont publiées par GitHub Pages (`.github/workflows/pages.yml`), et
+`construire.sh` reste l'outil local et celui de Pages. Pour servir la vitrine
+depuis Heroku aussi, il faudrait un second buildpack chargé d'exécuter le
+script ; ce n'est pas nécessaire au téléphone, qui ne demande que `/v1/`.
+Conséquence à connaître : `/` sur l'adresse Heroku ne montre pas la vitrine.
 
 ## Le geste qui reste, et il est dans l'interface d'Heroku
 
@@ -23,17 +33,27 @@ vérifié par des tests.
 Le buildpack se règle là et pas dans le dépôt. Tant qu'il n'est pas changé,
 les constructions échouent — le buildpack Node ne trouve plus ni `package.json`
 ni rien à installer. **Un échec de construction ne remplace pas la version en
-service** : ce qui tourne continue de tourner, simplement plus rien ne se
-déploie jusqu'à ce que le buildpack soit le bon.
+service** — mais cela ne protège que ce qui tournait déjà : si la version en
+service est elle-même un `Procfile` qui ne trouve pas son binaire, le dyno
+démarre, meurt, et le routeur répond 503 sur tous les chemins. C'est la
+différence entre « rien ne se déploie » et « rien ne sert », et seule la
+seconde se voit du dehors.
 
 ## Les fichiers, déjà en place
 
 - `rust-toolchain.toml` — la version de Rust et la cible `wasm32-unknown-unknown`.
 - `RustConfig` — dit au buildpack de compiler l'espace de travail du dossier
-  `rust/`, et de construire les deux interfaces avant le relais.
+  `rust/`, et sur quelle version. **Attention** : ce fichier est sourcé par le
+  `bin/compile` du buildpack, qui ne lit que les variables qu'il déclare
+  lui-même. Une clé inventée ne fait rien et ne le dit pas ; une valeur non
+  numérique dans `RUST_SKIP_BUILD` fait *sauter* la compilation, en silence et
+  avec un code de sortie nul. `rust/klima-relay/tests/deploiement.rs` vérifie
+  donc les clés, la version, et que le `Procfile` vise bien là où le buildpack
+  pose le binaire.
 - `rust/scripts/construire.sh` — télécharge Trunk (binaire publié, pas de
   compilation : une compilation de Trunk sur un dyno dépasserait le temps de
-  construction), construit la vitrine et l'application, puis les assemble.
+  construction), construit la vitrine et l'application, puis les assemble. Il
+  sert en local et à GitHub Pages ; **le buildpack ne l'appelle pas**.
 
 Le `Procfile` est déjà posé :
 
@@ -47,7 +67,7 @@ web: rust/target/release/klima-relay
 | ---------------- | ----------------------------------------------------------------- |
 | `OPEN_METEO_KEY` | La clé du plan commercial, quand il y en aura une                 |
 | `KLIMA_ORIGINS`  | Les origines admises — inutile si le site est servi par le relais |
-| `KLIMA_PUBLIC`   | Où sont les fichiers du site. `public` par défaut                 |
+| `KLIMA_PUBLIC`   | Où sont les fichiers du site. `public` par défaut, absent sur Heroku |
 | `KLIMA_PRO`      | Le palier accordé pendant l'essai — voir plus bas                 |
 
 `OPEN_METEO_KEY` peut rester vide : le relais tourne alors sur le plan gratuit
