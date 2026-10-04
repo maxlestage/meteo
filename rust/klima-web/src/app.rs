@@ -15,6 +15,7 @@ use klima_ui::composants::langue::SelecteurDeLangue;
 use klima_ui::composants::marque::MarqueEtNom;
 use crate::composants::pro::NotePro;
 use crate::composants::recherche::Recherche;
+use crate::composants::registre::Registre;
 use crate::composants::traitement::Traitement;
 use crate::composants::tuile::{Jauge, Tuile};
 use klima_ui::crochets::palier::use_palier;
@@ -251,6 +252,14 @@ pub fn App(props: &Props) -> Html {
                             />
                         </div>
 
+                        <Registre
+                            hours={forecast.hourly.clone()}
+                            parcelle={lieu.parcelle.name.clone()}
+                            plan={palier.plan}
+                            maintenant={klima_ui::horloge::maintenant_a_la_parcelle(
+                                forecast.utc_offset_seconds,
+                            )}
+                        />
                         <NotePro palier={palier.clone()} />
 
                         <footer class="footer">
