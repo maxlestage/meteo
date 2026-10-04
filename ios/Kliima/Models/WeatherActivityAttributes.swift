@@ -87,6 +87,11 @@ struct WeatherActivityAttributes: Codable, Hashable {
     var parcelleName: String
     /// Fuseau de la parcelle : l'activité affiche ses heures, pas les nôtres.
     var timeZoneIdentifier: String
+    /// Où est la parcelle, pour que le relais sache quelle prévision pousser.
+    /// Facultatifs : une activité ouverte par une version précédente n'en a
+    /// pas, et doit se relire quand même.
+    var latitude: Double?
+    var longitude: Double?
 
     var timeZone: TimeZone {
         TimeZone(identifier: timeZoneIdentifier) ?? .current

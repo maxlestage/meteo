@@ -24,6 +24,7 @@
 		23D4D55E45A75CD9C2731FCE /* Session.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6202144CAAD11B150D2A067A /* Session.swift */; };
 		24141C10E98B7C3F39FDEA2F /* WatchViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9DFCEE1BB00EFE0321D4C01A /* WatchViewModel.swift */; };
 		257D3B727C84AFDA7BB58E05 /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = BDAA24888AF82B3F0F77BEAC /* Localizable.xcstrings */; };
+		2623BCFEFD18F32FFDC79756 /* IlesRelais.swift in Sources */ = {isa = PBXBuildFile; fileRef = F047E762B19A20BE5BE32006 /* IlesRelais.swift */; };
 		294494102F3820F390FEB5FA /* KliimaWatchWidgetsBundle.swift in Sources */ = {isa = PBXBuildFile; fileRef = E2F29AC239FEE014AA2A291D /* KliimaWatchWidgetsBundle.swift */; };
 		2AEC62A5036EAA7E15DEBBBF /* WeatherProviders.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B02EF58B1456D6BD190EA69 /* WeatherProviders.swift */; };
 		2BA6437E69EC0235D55E9D2F /* AgroIndicators.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9535087DBAA65F2039A9CA7B /* AgroIndicators.swift */; };
@@ -101,6 +102,7 @@
 		BCA77F887960BBB8B6530C3D /* SharedStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 817D0E86880F9A5C255CC9CA /* SharedStore.swift */; };
 		BFECAE5FE146209EE48874C0 /* HeroView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 07648D3F3C3D6F0CFF6F562F /* HeroView.swift */; };
 		C188257FC6E79EA1D45FD4E5 /* SprayActivityAttributes.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3CC70E8067AA900DADB695A0 /* SprayActivityAttributes.swift */; };
+		C4EDCD12F4C4C33DE5043197 /* IlesRelaisTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7748536D30C8CF45EA5382D1 /* IlesRelaisTests.swift */; };
 		C7F3184030D7D939A4CF6885 /* Consensus.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4720B7B1832151B0FB656485 /* Consensus.swift */; };
 		C95DA666AA21E005D127B225 /* Localized.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5450F8A4FCE049DD06100EC9 /* Localized.swift */; };
 		C9C810C3BF18F031960B0D73 /* Position.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB8F1DD4A8E34FF10F2CCB10 /* Position.swift */; };
@@ -195,6 +197,7 @@
 		70A323DF1CDDEA680AC90086 /* AlertsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlertsTests.swift; sourceTree = "<group>"; };
 		72250014395A5607AA9841A4 /* PaywallView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaywallView.swift; sourceTree = "<group>"; };
 		759A50D03E2923056A2614D4 /* SprayCardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SprayCardView.swift; sourceTree = "<group>"; };
+		7748536D30C8CF45EA5382D1 /* IlesRelaisTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IlesRelaisTests.swift; sourceTree = "<group>"; };
 		77B55B9E0D7865BFA00A4D86 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		817D0E86880F9A5C255CC9CA /* SharedStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SharedStore.swift; sourceTree = "<group>"; };
 		884410DA2162211647EB6D45 /* LocalizationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalizationTests.swift; sourceTree = "<group>"; };
@@ -237,6 +240,7 @@
 		EB3BB0251C5B6D7194C4AEE4 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		EBE1FBED16537140FD9D2E11 /* KliimaWatchWidgets.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = KliimaWatchWidgets.entitlements; sourceTree = "<group>"; };
 		EC2943147A1F876131069F7E /* WeatherActivityController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeatherActivityController.swift; sourceTree = "<group>"; };
+		F047E762B19A20BE5BE32006 /* IlesRelais.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IlesRelais.swift; sourceTree = "<group>"; };
 		F20A680382FE74EE4D9DD82E /* SprayActivityController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SprayActivityController.swift; sourceTree = "<group>"; };
 		F265DD9AEA66CC782EE18E84 /* WeatherLiveActivity.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeatherLiveActivity.swift; sourceTree = "<group>"; };
 		F5DE221E004C2ABBAC38370E /* Register.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Register.swift; sourceTree = "<group>"; };
@@ -401,6 +405,7 @@
 				EC2943147A1F876131069F7E /* WeatherActivityController.swift */,
 				CFD368A2A4B59C7B26F9AB9F /* PlanGrant.swift */,
 				6202144CAAD11B150D2A067A /* Session.swift */,
+				F047E762B19A20BE5BE32006 /* IlesRelais.swift */,
 			);
 			path = Services;
 			sourceTree = "<group>";
@@ -506,6 +511,7 @@
 				F88A878C2B02CB2543E34A76 /* PlanGrantTests.swift */,
 				C4CC9F49C325FC15E741F577 /* SessionTests.swift */,
 				192B737833F30139C0992522 /* HorizonTests.swift */,
+				7748536D30C8CF45EA5382D1 /* IlesRelaisTests.swift */,
 			);
 			path = KliimaTests;
 			sourceTree = "<group>";
@@ -734,6 +740,7 @@
 				FBFE7ECDAA7CBD948D6E7572 /* WeatherActivityController.swift in Sources */,
 				42043A473875D12D735301EF /* PlanGrant.swift in Sources */,
 				23D4D55E45A75CD9C2731FCE /* Session.swift in Sources */,
+				2623BCFEFD18F32FFDC79756 /* IlesRelais.swift in Sources */,
 				F1BB1FE2BA5912881D1C4E38 /* DashboardViewModel.swift in Sources */,
 				A5096683B0D64D48DE29C934 /* DashboardView.swift in Sources */,
 				0361672A474EBC61E33E5BDF /* DailyListView.swift in Sources */,
@@ -847,6 +854,7 @@
 				BB1832BB7F0104122B0D0B7E /* PlanGrantTests.swift in Sources */,
 				E06580C77FB4AC245ED5437E /* SessionTests.swift in Sources */,
 				5B4420AB5C34E782A5881818 /* HorizonTests.swift in Sources */,
+				C4EDCD12F4C4C33DE5043197 /* IlesRelaisTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

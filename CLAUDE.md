@@ -86,6 +86,14 @@ nouvelle pull request.
   reste vide dans le dépôt, et un test le vérifie. Le site, lui, n'a pas
   encore de comptes : son champ d'adresse n'est pas une preuve, et la
   documentation le dit.
+- **L'île dynamique se tient à l'heure par le relais.** L'iPhone calcule
+  l'heure suivante d'avance et pose la péremption au début de l'heure qui
+  vient : l'île bascule seule, même sans réseau. Le relais, s'il a une clé
+  APNs (`KLIMA_APNS_KEY`, `_KEY_ID`, `_TEAM_ID` — dans le relais et nulle part
+  ailleurs), pousse ce qui change ; il ne garde que le jeton et la maille, en
+  mémoire. Le `content-state` qu'il produit (`klima-relay/src/iles.rs`) et
+  celui que décode `WeatherActivityAttributes.swift` sont un seul contrat,
+  vérifié des deux côtés : les dates y sont en secondes depuis 2001.
 - **Le plan gratuit d'Open-Meteo est réservé à un usage non commercial.** Le
   jour où Klima se vend, tout le trafic passe par un plan payant, donc par une
   clé — qui vit dans le relais et nulle part ailleurs. Une clé dans un binaire

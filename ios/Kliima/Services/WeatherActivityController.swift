@@ -19,6 +19,7 @@ final class WeatherActivityController: ObservableObject {
 
     init() {
         isRunning = Self.hasActivities
+        Self.suivreLesJetons()
     }
 
     /// Vrai si l'appareil et les réglages autorisent les activités en direct.
@@ -55,23 +56,29 @@ final class WeatherActivityController: ObservableObject {
 
         let attributes = WeatherActivityAttributes(
             parcelleName: parcelle.name,
-            timeZoneIdentifier: forecast.timezone
+            timeZoneIdentifier: forecast.timezone,
+            latitude: parcelle.latitude,
+            longitude: parcelle.longitude
         )
         let now = Date()
-        do {
-            _ = try Activity.request(
-                attributes: attributes,
-                content: ActivityContent(
-                    state: Self.state(from: forecast, at: now),
-                    staleDate: Self.staleDate(for: forecast, at: now)
-                ),
-                pushType: nil
-            )
-            isRunning = true
-        } catch {
-            // Quota atteint ou activités refusées : l'application continue sans.
-            isRunning = Self.hasActivities
+        let content = ActivityContent(
+            state: Self.state(from: forecast, at: now),
+            staleDate: Self.staleDate(for: forecast, at: now)
+        )
+        // Avec un jeton de poussée quand il y a un relais pour s'en servir.
+        // Si iOS refuse — droit de poussée absent de la signature, par
+        // exemple —, on retente sans : une île qui bascule seule vaut mieux
+        // que pas d'île du tout.
+        let activity: Activity<WeatherActivityAttributes>?
+        if PlanGrant.relayURL != nil,
+           let avecPoussee = try? Activity.request(attributes: attributes, content: content, pushType: .token) {
+            activity = avecPoussee
+        } else {
+            activity = try? Activity.request(attributes: attributes, content: content, pushType: nil)
         }
+        // Quota atteint ou activités refusées : l'application continue sans.
+        isRunning = activity != nil || Self.hasActivities
+        if let activity { Self.suivre(activity) }
         #endif
     }
 
@@ -86,6 +93,10 @@ final class WeatherActivityController: ObservableObject {
         #if canImport(ActivityKit)
         if #available(iOS 16.2, *) {
             for activity in Activity<WeatherActivityAttributes>.activities {
+                // Le relais d'abord : il cesse de pousser vers une île fermée.
+                if let jeton = activity.pushToken {
+                    await IlesRelais.retirer(jeton: jeton)
+                }
                 await activity.end(nil, dismissalPolicy: .immediate)
             }
         }
@@ -100,6 +111,7 @@ final class WeatherActivityController: ObservableObject {
     static func update(forecast: AgroForecast, at now: Date = Date()) async {
         #if canImport(ActivityKit)
         guard #available(iOS 16.2, *) else { return }
+        suivreLesJetons()
         for activity in Activity<WeatherActivityAttributes>.activities {
             await activity.update(ActivityContent(
                 state: state(from: forecast, at: now),
@@ -108,6 +120,45 @@ final class WeatherActivityController: ObservableObject {
         }
         #endif
     }
+
+    // MARK: Poussée par le relais
+
+    /// Les activités dont on écoute déjà le jeton.
+    private static var suivies = Set<String>()
+
+    /// Écoute le jeton de chaque activité affichée, y compris celles d'un
+    /// lancement précédent : une activité survit à l'application, et son
+    /// inscription au relais — en mémoire, sur le serveur — peut ne pas avoir
+    /// survécu à un redémarrage de celui-ci.
+    static func suivreLesJetons() {
+        #if canImport(ActivityKit)
+        guard #available(iOS 16.2, *) else { return }
+        for activity in Activity<WeatherActivityAttributes>.activities {
+            suivre(activity)
+        }
+        #endif
+    }
+
+    #if canImport(ActivityKit)
+    /// Inscrit l'activité au relais, et la réinscrit à chaque jeton neuf :
+    /// Apple peut en changer au cours de la vie de l'activité.
+    @available(iOS 16.2, *)
+    private static func suivre(_ activity: Activity<WeatherActivityAttributes>) {
+        guard PlanGrant.relayURL != nil,
+              let latitude = activity.attributes.latitude,
+              let longitude = activity.attributes.longitude,
+              suivies.insert(activity.id).inserted
+        else { return }
+
+        Task {
+            for await jeton in activity.pushTokenUpdates {
+                await IlesRelais.inscrire(jeton: jeton, latitude: latitude, longitude: longitude)
+            }
+            // La file se tarit quand l'activité se termine.
+            suivies.remove(activity.id)
+        }
+    }
+    #endif
 
     /// Le moment où ce qui est affiché cesse d'être l'heure en cours : le
     /// début de l'heure suivante de la série. La vue montre alors l'heure
