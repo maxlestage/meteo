@@ -24,7 +24,8 @@ MODELS = ["AgroSamples.swift", "AgroIndicators.swift", "WeatherCondition.swift",
           "Register.swift", "Position.swift", "WeatherActivityAttributes.swift"]
 SERVICES = ["AgroWeatherService.swift", "WeatherProviders.swift", "LocationService.swift",
             "SprayActivityController.swift", "BackgroundRefresh.swift", "Subscription.swift",
-            "AlertScheduler.swift", "WeatherActivityController.swift", "PlanGrant.swift"]
+            "AlertScheduler.swift", "WeatherActivityController.swift", "PlanGrant.swift",
+            "Session.swift"]
 VIEWMODELS = ["DashboardViewModel.swift"]
 VIEWS = ["DashboardView.swift", "DailyListView.swift", "DetailTile.swift", "HeroView.swift",
          "HourlyStripView.swift", "SkyBackground.swift", "SprayCardView.swift",
@@ -71,7 +72,8 @@ TEST_FILES = [(TESTS, n) for n in ["AgroIndicatorsTests.swift", "AgroWeatherDeco
                                    "ConsensusTests.swift", "ProvidersTests.swift",
                                    "PlanTests.swift", "AlertsTests.swift",
                                    "CumulsTests.swift", "RegisterTests.swift",
-                                   "PositionTests.swift", "PlanGrantTests.swift"]]
+                                   "PositionTests.swift", "PlanGrantTests.swift",
+                                   "SessionTests.swift"]]
 
 # Sources compilées par chaque cible. Le noyau (Models) est partagé ; la montre
 # ajoute le réseau et la position, le widget se limite à ce qu'il affiche.

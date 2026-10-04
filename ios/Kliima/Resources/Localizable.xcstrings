@@ -1,6 +1,190 @@
 {
   "sourceLanguage": "fr",
   "strings": {
+    "account.error.closed": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Accounts are not open on the server yet."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Las cuentas aún no están abiertas en el servidor."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Les comptes ne sont pas encore ouverts sur le serveur."
+          }
+        }
+      }
+    },
+    "account.error.refused": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Apple could not confirm this account. Try again."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Apple no pudo confirmar esta cuenta. Inténtelo de nuevo."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Apple n'a pas pu confirmer ce compte. Réessayez."
+          }
+        }
+      }
+    },
+    "account.error.unreachable": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Server unreachable for now. Try again later."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Servidor inaccesible por ahora. Inténtelo más tarde."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Serveur injoignable pour l'instant. Réessayez plus tard."
+          }
+        }
+      }
+    },
+    "account.hint": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sign in with Apple: if your account is invited, the tier opens without going through the store. Nothing to type."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Inicie sesión con Apple: si su cuenta está invitada, el plan se abre sin pasar por la tienda. Nada que escribir."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Connectez-vous avec Apple : si votre compte est invité, le palier s'ouvre sans passer par la boutique. Rien à saisir."
+          }
+        }
+      }
+    },
+    "account.notInvited": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This account is not invited yet. Send the address above to whoever runs the trial: that is the one to add."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Esta cuenta aún no está invitada. Envíe la dirección de arriba a quien gestiona la prueba: es la que hay que añadir."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ce compte n'est pas encore invité. Transmettez l'adresse ci-dessus à qui gère l'essai : c'est elle qu'il faut ajouter."
+          }
+        }
+      }
+    },
+    "account.signOut": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sign out"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cerrar sesión"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Se déconnecter"
+          }
+        }
+      }
+    },
+    "account.signedIn": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Signed in: %1$@"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Conectado: %1$@"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Connecté : %1$@"
+          }
+        }
+      }
+    },
+    "account.title": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Trial account"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cuenta de prueba"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Compte d'essai"
+          }
+        }
+      }
+    },
     "activity.allClear": {
       "extractionState": "manual",
       "localizations": {
@@ -1055,121 +1239,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Une parcelle et la journée entière restent gratuites, sans compte ni publicité."
-          }
-        }
-      }
-    },
-    "paywall.grant.check": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Check"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Comprobar"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Vérifier"
-          }
-        }
-      }
-    },
-    "paywall.grant.field": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Email address"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Dirección de correo"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Adresse électronique"
-          }
-        }
-      }
-    },
-    "paywall.grant.hint": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "If your address is on the invite list, enter it: the tier opens without going through the store."
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Si su dirección está entre las invitadas, introdúzcala: el plan se abre sin pasar por la tienda."
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Si votre adresse fait partie des invitées, saisissez-la : le palier s'ouvre sans passer par la boutique."
-          }
-        }
-      }
-    },
-    "paywall.grant.refused": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "This address opens nothing for now. It is kept: if the invitation arrives, the tier will follow."
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Esta dirección no abre nada por ahora. Queda guardada: si llega la invitación, el plan la seguirá."
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Cette adresse n'ouvre rien pour le moment. Elle est gardée : si l'invitation arrive, le palier suivra."
-          }
-        }
-      }
-    },
-    "paywall.grant.title": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Test access"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Acceso de prueba"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Accès de test"
           }
         }
       }
