@@ -45,6 +45,10 @@ enum Session {
         case comptesFermes
         /// Le relais n'a pas reconnu le jeton d'Apple.
         case refuse
+        /// Apple n'a pas ouvert la connexion, avec son code d'erreur. Le
+        /// code est montré tel quel : c'est lui qui dit si c'est l'appareil,
+        /// le compte Apple ou la configuration de l'application.
+        case apple(code: Int)
         /// Pas de réseau, ou une réponse qu'on ne sait pas lire.
         case injoignable
     }
