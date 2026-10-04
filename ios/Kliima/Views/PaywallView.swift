@@ -38,6 +38,11 @@ struct PaywallView: View {
                     Text(Localized.text("paywall.title"))
                         .font(.largeTitle.weight(.bold))
 
+                    // Pendant l'essai, c'est l'action principale de cet écran :
+                    // elle vient avant l'argumentaire, pas sous les conditions
+                    // de vente, où il fallait faire défiler pour la trouver.
+                    compte
+
                     VStack(alignment: .leading, spacing: 14) {
                         ForEach(Feature.allCases, id: \.self) { feature in
                             Label {
@@ -65,8 +70,6 @@ struct PaywallView: View {
                     Text(Localized.text("paywall.terms"))
                         .font(.caption2)
                         .foregroundStyle(.secondary)
-
-                    compte
                 }
                 .padding(24)
             }
@@ -99,8 +102,6 @@ struct PaywallView: View {
     @ViewBuilder
     private var compte: some View {
         if PlanGrant.relayURL != nil {
-            Divider()
-
             VStack(alignment: .leading, spacing: 10) {
                 Text(Localized.text("account.title"))
                     .font(.subheadline.weight(.semibold))
@@ -109,7 +110,10 @@ struct PaywallView: View {
                     Text(Localized.text("account.signedIn", ouvert.courriel))
                         .font(.footnote)
 
-                    if subscription.plan != .pro {
+                    if subscription.plan == .pro {
+                        Text(Localized.text("account.active"))
+                            .font(.footnote.weight(.semibold))
+                    } else {
                         // Le compte est ouvert mais pas invité. On montre
                         // l'adresse qu'Apple a prouvée — c'est la sienne, il
                         // n'y a rien là à énumérer — parce que c'est elle qu'il
@@ -147,21 +151,29 @@ struct PaywallView: View {
                 }
 
                 if let echec = subscription.echecConnexion {
-                    Text(Localized.text(cle(echec)))
+                    Text(texte(echec))
                         .font(.footnote)
                         .foregroundStyle(.secondary)
                 }
             }
+            .padding(14)
+            .background(Color.white.opacity(0.06), in: RoundedRectangle(cornerRadius: 14))
         }
     }
 
     /// La phrase d'un échec de connexion. Le domaine rend un motif, l'écran le
     /// traduit — comme partout ailleurs.
-    private func cle(_ echec: Session.Echec) -> String {
+    ///
+    /// Chaque panne a la sienne : « Apple n'a pas ouvert la connexion » et
+    /// « le serveur n'a pas reconnu la preuve » se réparent à deux endroits
+    /// différents, et les confondre rendait tout retour de testeur impossible à
+    /// lire.
+    private func texte(_ echec: Session.Echec) -> String {
         switch echec {
-        case .sansRelais, .injoignable: return "account.error.unreachable"
-        case .comptesFermes: return "account.error.closed"
-        case .refuse: return "account.error.refused"
+        case .sansRelais, .injoignable: return Localized.text("account.error.unreachable")
+        case .comptesFermes: return Localized.text("account.error.closed")
+        case .refuse: return Localized.text("account.error.refused")
+        case .apple(let code): return Localized.text("account.error.apple", String(code))
         }
     }
 
