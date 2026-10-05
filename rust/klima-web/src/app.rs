@@ -110,6 +110,9 @@ pub fn App(props: &Props) -> Html {
                 if let Some(forecast) = &etat.forecast {
                     <>
                         <Entete forecast={forecast.clone()} />
+                        // La première question : faut-il un parapluie, et
+                        // jusqu'à quand — puis ce qu'il faut emporter.
+                        <CartePluie hours={forecast.hourly.clone()} />
                         <Bandeau
                             hours={forecast.hourly.clone()}
                             current={forecast.current.clone()}
@@ -123,8 +126,6 @@ pub fn App(props: &Props) -> Html {
                         if let Some(consensus) = &etat.consensus {
                             <Sources consensus={consensus.clone()} />
                         }
-                        <CartePluie hours={forecast.hourly.clone()} />
-
                         <div class="tiles">
                             <Tuile
                                 label={i18n.t("tile.feelsLike")}

@@ -17,6 +17,7 @@ use yew::prelude::*;
 
 use crate::composants::aujourdhui::SectionDuJour;
 use crate::composants::fonctions::Fonctions;
+use crate::composants::galerie::Galerie;
 use crate::composants::illustrations::{EchelleUv, SceneDeCiel, ScenePluie};
 use crate::composants::pied::Pied;
 use crate::composants::sources::Sources;
@@ -87,6 +88,7 @@ pub fn App(props: &Props) -> Html {
                 </a>
                 <div class="nav__end">
                     <nav>
+                        <a href="#images">{ i18n.t("nav.images") }</a>
                         <a href="#aujourdhui">{ i18n.t("nav.today") }</a>
                         <a href="#indicateurs">{ i18n.t("nav.indicators") }</a>
                         <a href="#sources">{ i18n.t("nav.sources") }</a>
@@ -125,6 +127,8 @@ pub fn App(props: &Props) -> Html {
                         raining={pluie}
                     />
                 </div>
+
+                <Galerie />
 
                 <SectionDuJour
                     parcelle={lieu.parcelle.clone()}
