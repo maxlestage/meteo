@@ -65,6 +65,22 @@ pub fn parcelle_from_position(name: &str, latitude: f64, longitude: f64) -> Parc
     Parcelle::new(name, snap(latitude), snap(longitude))
 }
 
+/// Les noms que l'époque agricole donnait à la position de la personne, dans
+/// les trois langues. Une ville enregistrée sous l'un d'eux — dans le
+/// navigateur, dans une adresse partagée, sur le téléphone — vient de là, et
+/// se renomme avec le nom d'aujourd'hui plutôt que d'afficher « Ma parcelle »
+/// dans une météo de ville.
+pub const NOMS_HERITES: [&str; 3] = ["Ma parcelle", "My field", "Mi parcela"];
+
+/// La même ville, renommée si elle porte un nom hérité.
+pub fn renommee(parcelle: Parcelle, nom_actuel: &str) -> Parcelle {
+    if NOMS_HERITES.contains(&parcelle.name.trim()) {
+        Parcelle { name: nom_actuel.to_owned(), ..parcelle }
+    } else {
+        parcelle
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -80,6 +96,20 @@ mod tests {
     fn une_adresse_partagee_ou_une_parcelle_choisie_ne_se_defont_pas() {
         assert!(!locates_on_start(ParcelleOrigin::Adresse));
         assert!(!locates_on_start(ParcelleOrigin::Memoire));
+    }
+
+    #[test]
+    fn un_nom_herite_de_lepoque_agricole_prend_le_nom_daujourdhui() {
+        for ancien in NOMS_HERITES {
+            assert_eq!(renommee(Parcelle::new(ancien, 48.86, 2.34), "Ma ville").name, "Ma ville");
+        }
+        let p = renommee(Parcelle::new(" Ma parcelle ", 48.86, 2.34), "My city");
+        assert_eq!((p.name.as_str(), p.latitude), ("My city", 48.86));
+    }
+
+    #[test]
+    fn une_vraie_ville_garde_son_nom() {
+        assert_eq!(renommee(Parcelle::new("Lyon", 45.76, 4.84), "Ma ville").name, "Lyon");
     }
 
     #[test]

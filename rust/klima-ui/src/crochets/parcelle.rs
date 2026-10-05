@@ -10,7 +10,7 @@
 //! consultée, puis celle par défaut.
 
 use klima_api::parcelle_url::{parcelle_from_query, same_parcelle, url_for_parcelle};
-use klima_core::position::{Parcelle, ParcelleOrigin};
+use klima_core::position::{Parcelle, ParcelleOrigin, renommee};
 use wasm_bindgen::closure::Closure;
 use wasm_bindgen::{JsCast, JsValue};
 use yew::prelude::*;
@@ -28,15 +28,23 @@ pub struct ParcelleEnUrl {
     pub origine: ParcelleOrigin,
 }
 
+/// `nom_position` : le nom qu'on donne à la position de la personne, dans sa
+/// langue. Une ville enregistrée sous un nom de l'époque agricole
+/// (« Ma parcelle ») le prend à sa place, et l'adresse est corrigée sans
+/// créer d'étape d'historique.
 #[hook]
-pub fn use_parcelle(defaut: Parcelle) -> ParcelleEnUrl {
+pub fn use_parcelle(defaut: Parcelle, nom_position: String) -> ParcelleEnUrl {
     // L'origine est calculée une seule fois, avec la parcelle de départ.
     let depart = use_state(|| {
         if let Some(adresse) = depuis_adresse() {
-            return (adresse, ParcelleOrigin::Adresse);
+            let renommee = renommee(adresse.clone(), &nom_position);
+            if renommee != adresse {
+                remplacer_dans_lhistorique(&renommee);
+            }
+            return (renommee, ParcelleOrigin::Adresse);
         }
         if let Some(memoire) = depuis_memoire() {
-            return (memoire, ParcelleOrigin::Memoire);
+            return (renommee(memoire, &nom_position), ParcelleOrigin::Memoire);
         }
         (defaut.clone(), ParcelleOrigin::Defaut)
     });
@@ -110,6 +118,20 @@ fn pousser_dans_lhistorique(parcelle: &Parcelle) {
     let Ok(historique) = window.history() else { return };
 
     let _ = historique.push_state_with_url(
+        &JsValue::NULL,
+        "",
+        Some(&url_for_parcelle(&href, parcelle)),
+    );
+}
+
+/// Corrige l'adresse sur place, sans étape d'historique : le bouton retour
+/// n'a pas à ramener un nom périmé.
+fn remplacer_dans_lhistorique(parcelle: &Parcelle) {
+    let Some(window) = web_sys::window() else { return };
+    let Ok(href) = window.location().href() else { return };
+    let Ok(historique) = window.history() else { return };
+
+    let _ = historique.replace_state_with_url(
         &JsValue::NULL,
         "",
         Some(&url_for_parcelle(&href, parcelle)),

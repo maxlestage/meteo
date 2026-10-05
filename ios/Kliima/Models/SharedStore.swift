@@ -25,8 +25,12 @@ enum SharedStore {
     }
 
     static func loadParcelle() -> Parcelle? {
-        guard let data = defaults.data(forKey: parcelleKey) else { return nil }
-        return try? JSONDecoder().decode(Parcelle.self, from: data)
+        guard let data = defaults.data(forKey: parcelleKey),
+              let parcelle = try? JSONDecoder().decode(Parcelle.self, from: data)
+        else { return nil }
+        // Enregistrée du temps où Kliima ‣ parlait de parcelles : le nom
+        // d'aujourd'hui remplace « Ma parcelle ».
+        return Position.renommee(parcelle, nomActuel: Localized.text("search.myField"))
     }
 
     // MARK: Palier

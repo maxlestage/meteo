@@ -48,7 +48,7 @@ pub fn App(props: &Props) -> Html {
     // La ville consultée vit dans l'adresse : le bouton retour la défait, et
     // l'adresse envoyée à quelqu'un lui montre bien la ville qu'on a
     // regardée.
-    let lieu = use_parcelle(defaut());
+    let lieu = use_parcelle(defaut(), i18n.t("search.myField"));
 
     // La vitrine montre une vraie prévision : autant que ce soit celle du
     // visiteur. Un refus laisse la ville par défaut.
