@@ -29,7 +29,8 @@ SERVICES = ["AgroWeatherService.swift", "WeatherProviders.swift", "LocationServi
 VIEWMODELS = ["DashboardViewModel.swift"]
 VIEWS = ["DashboardView.swift", "DailyListView.swift", "DetailTile.swift", "HeroView.swift",
          "HourlyStripView.swift", "SkyBackground.swift", "PluieCardView.swift",
-         "GuetteurCardView.swift", "VillesView.swift",
+         "GuetteurCardView.swift", "VillesView.swift", "CielVivant.swift",
+         "Animations.swift",
          "PaywallView.swift", "SourcesCardView.swift"]
 
 # (groupe, nom) ; le groupe est le chemin relatif au dépôt.

@@ -81,10 +81,12 @@
 		8BA393159166D0DF7448F594 /* Ville.swift in Sources */ = {isa = PBXBuildFile; fileRef = 471C0497ED82D84B7F8C9299 /* Ville.swift */; };
 		8BE83CA9E5B699D4CA061FBF /* Plan.swift in Sources */ = {isa = PBXBuildFile; fileRef = ACDA8384F78BD3E95B72FB7A /* Plan.swift */; };
 		8DA17F2E82EF39FB47A9BC23 /* Localized.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5450F8A4FCE049DD06100EC9 /* Localized.swift */; };
+		8E7411E4F023BFFCB10BBDD3 /* CielVivant.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7A2590617CE8DE92FE511AE7 /* CielVivant.swift */; };
 		8F4E7FAC158D1BB25607DBCD /* AgroWeatherDecodingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50FD6BD0437A604828C49471 /* AgroWeatherDecodingTests.swift */; };
 		900176DFAC3BB33859BD5893 /* SkyBackground.swift in Sources */ = {isa = PBXBuildFile; fileRef = A37F792453EED1853EB12C4B /* SkyBackground.swift */; };
 		96A4E1A6DD8A75B811BE93A9 /* AgroWeatherService.swift in Sources */ = {isa = PBXBuildFile; fileRef = B4F0E666C771746CB3FD57AF /* AgroWeatherService.swift */; };
 		9807FA4062BFA9227641A80D /* Horizon.swift in Sources */ = {isa = PBXBuildFile; fileRef = A108654E8394458F85F1FD47 /* Horizon.swift */; };
+		9B6C2BD9998A4B1C9345EA61 /* Animations.swift in Sources */ = {isa = PBXBuildFile; fileRef = 79B5C71DD4D3CCC7FEFA0890 /* Animations.swift */; };
 		A35705900F8A5AD21D521540 /* Veille.swift in Sources */ = {isa = PBXBuildFile; fileRef = 709FE1DF782C6EA2B2E1890B /* Veille.swift */; };
 		A41D0AEDD3950F1E162A5EB2 /* Plan.swift in Sources */ = {isa = PBXBuildFile; fileRef = ACDA8384F78BD3E95B72FB7A /* Plan.swift */; };
 		A5096683B0D64D48DE29C934 /* DashboardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 433301E88D0ACA32C67F98AB /* DashboardView.swift */; };
@@ -203,6 +205,8 @@
 		72250014395A5607AA9841A4 /* PaywallView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaywallView.swift; sourceTree = "<group>"; };
 		7748536D30C8CF45EA5382D1 /* IlesRelaisTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IlesRelaisTests.swift; sourceTree = "<group>"; };
 		77B55B9E0D7865BFA00A4D86 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		79B5C71DD4D3CCC7FEFA0890 /* Animations.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Animations.swift; sourceTree = "<group>"; };
+		7A2590617CE8DE92FE511AE7 /* CielVivant.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CielVivant.swift; sourceTree = "<group>"; };
 		817D0E86880F9A5C255CC9CA /* SharedStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SharedStore.swift; sourceTree = "<group>"; };
 		884410DA2162211647EB6D45 /* LocalizationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalizationTests.swift; sourceTree = "<group>"; };
 		8B148DA87ACC29FF2D439C47 /* KliimaWidgetsBundle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KliimaWidgetsBundle.swift; sourceTree = "<group>"; };
@@ -431,6 +435,8 @@
 				954C047D701144696A0E10CE /* PluieCardView.swift */,
 				E180D8A446FE13E9A5A11FD8 /* GuetteurCardView.swift */,
 				A59DEE09CE718866E39A6018 /* VillesView.swift */,
+				7A2590617CE8DE92FE511AE7 /* CielVivant.swift */,
+				79B5C71DD4D3CCC7FEFA0890 /* Animations.swift */,
 				72250014395A5607AA9841A4 /* PaywallView.swift */,
 				B175D0A665599A8678363959 /* SourcesCardView.swift */,
 			);
@@ -752,6 +758,8 @@
 				A673A6532037892E4C8F2867 /* PluieCardView.swift in Sources */,
 				88F3737F4A9419DA9763E1EB /* GuetteurCardView.swift in Sources */,
 				2FC0D2B39291394B25860C8D /* VillesView.swift in Sources */,
+				8E7411E4F023BFFCB10BBDD3 /* CielVivant.swift in Sources */,
+				9B6C2BD9998A4B1C9345EA61 /* Animations.swift in Sources */,
 				51EABAB1CB6EC84EC5CDA384 /* PaywallView.swift in Sources */,
 				DAB162651C96B99719D6671C /* SourcesCardView.swift in Sources */,
 			);

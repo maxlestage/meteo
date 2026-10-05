@@ -28,7 +28,7 @@ struct DailyListView: View {
                     if index > 0 {
                         Divider().overlay(Color.filet)
                     }
-                    row(for: day, isToday: index == 0)
+                    row(for: day, isToday: index == 0, rang: index)
                 }
             }
         }
@@ -40,7 +40,7 @@ struct DailyListView: View {
     private var weekHigh: Double { days.map(\.temperatureMax).max() ?? 1 }
     private var span: Double { max(weekHigh - weekLow, 1) }
 
-    private func row(for day: DailySample, isToday: Bool) -> some View {
+    private func row(for day: DailySample, isToday: Bool, rang: Int) -> some View {
         let condition = WeatherCondition.forCode(day.weatherCode)
 
         return HStack(spacing: 10) {
@@ -70,7 +70,7 @@ struct DailyListView: View {
                 .minimumScaleFactor(0.75)
                 .frame(width: largeurTemperature, alignment: .trailing)
 
-            temperatureBar(for: day, isToday: isToday)
+            temperatureBar(for: day, isToday: isToday, rang: rang)
 
             Text(AgroFormat.temperature(day.temperatureMax))
                 .lineLimit(1)
@@ -83,7 +83,7 @@ struct DailyListView: View {
         .accessibilityElement(children: .combine)
     }
 
-    private func temperatureBar(for day: DailySample, isToday: Bool) -> some View {
+    private func temperatureBar(for day: DailySample, isToday: Bool, rang: Int) -> some View {
         GeometryReader { geometry in
             let width = geometry.size.width
             let start = (day.temperatureMin - weekLow) / span
@@ -103,6 +103,8 @@ struct DailyListView: View {
                         endPoint: .trailing
                     ))
                     .frame(width: width * length)
+                    // L'amplitude s'étire depuis le minimum du jour.
+                    .pousse(rang + 4, horizontal: true)
                     .offset(x: width * start)
 
                 if isToday {

@@ -36,73 +36,86 @@ struct DashboardView: View {
                         }
 
                         if let forecast = viewModel.forecast {
-                            HeroView(forecast: forecast)
+                            // Une colonne par ville : quand elle change, les cartes
+                            // reviennent en cascade, comme sur le web.
+                            VStack(spacing: 12) {
+                                HeroView(forecast: forecast)
+                                    .entreeEnCascade(0)
 
-                            // L'activité en direct de la météo s'ouvre et se
-                            // ferme à la main : elle ne suit aucun événement
-                            // borné, et iOS la termine de lui-même au bout de
-                            // huit heures environ.
-                            if weather.isAvailable {
-                                Button {
-                                    toggleWeather(forecast)
-                                } label: {
-                                    Label(
-                                        Localized.text(weather.isRunning ? "weather.stop" : "weather.follow"),
-                                        systemImage: weather.isRunning ? "livephoto.slash" : "livephoto"
-                                    )
-                                    .font(.footnote.weight(.semibold))
+                                // L'activité en direct de la météo s'ouvre et se
+                                // ferme à la main : elle ne suit aucun événement
+                                // borné, et iOS la termine de lui-même au bout de
+                                // huit heures environ.
+                                if weather.isAvailable {
+                                    Button {
+                                        toggleWeather(forecast)
+                                    } label: {
+                                        Label(
+                                            Localized.text(weather.isRunning ? "weather.stop" : "weather.follow"),
+                                            systemImage: weather.isRunning ? "livephoto.slash" : "livephoto"
+                                        )
+                                        .font(.footnote.weight(.semibold))
+                                    }
+                                    .buttonStyle(.plain)
+                                    .foregroundStyle(Color.encre.opacity(0.85))
+                                    .frame(maxWidth: .infinity, alignment: .leading)
                                 }
-                                .buttonStyle(.plain)
-                                .foregroundStyle(Color.encre.opacity(0.85))
-                                .frame(maxWidth: .infinity, alignment: .leading)
-                            }
 
-                            // La demi-heure en cours et les deux heures qui
-                            // viennent, au quart d'heure : la question qu'on
-                            // pose la main sur la poignée.
-                            GuetteurCardView(
-                                quarts: viewModel.quartsDeLaVille,
-                                luA: viewModel.quartsLusA,
-                                enLecture: viewModel.veilleEnLecture,
-                                timeZone: viewModel.timeZone
-                            )
+                                // La demi-heure en cours et les deux heures qui
+                                // viennent, au quart d'heure : la question qu'on
+                                // pose la main sur la poignée.
+                                GuetteurCardView(
+                                    quarts: viewModel.quartsDeLaVille,
+                                    luA: viewModel.quartsLusA,
+                                    enLecture: viewModel.veilleEnLecture,
+                                    timeZone: viewModel.timeZone
+                                )
+                                .entreeEnCascade(1)
 
-                            // Puis la journée : faut-il un parapluie, et
-                            // jusqu'à quand — puis ce qu'il faut emporter.
-                            PluieCardView(hours: forecast.hourly, timeZone: viewModel.timeZone)
+                                // Puis la journée : faut-il un parapluie, et
+                                // jusqu'à quand — puis ce qu'il faut emporter.
+                                PluieCardView(hours: forecast.hourly, timeZone: viewModel.timeZone)
+                                    .entreeEnCascade(2)
 
-                            HourlyStripView(
-                                hours: forecast.hourly,
-                                current: forecast.current,
-                                timeZone: viewModel.timeZone
-                            )
+                                HourlyStripView(
+                                    hours: forecast.hourly,
+                                    current: forecast.current,
+                                    timeZone: viewModel.timeZone
+                                )
+                                .entreeEnCascade(3)
 
-                            DailyListView(
-                                days: forecast.daily,
-                                currentTemperature: forecast.current.temperature,
-                                timeZone: viewModel.timeZone
-                            )
+                                DailyListView(
+                                    days: forecast.daily,
+                                    currentTemperature: forecast.current.temperature,
+                                    timeZone: viewModel.timeZone
+                                )
+                                .entreeEnCascade(4)
 
-                            // Chaque source, nommée : qui annonce quoi pour
-                            // la ville. Même palier que la tuile d'accord, qui
-                            // la résume — fermée, c'est elle qui le dit.
-                            if subscription.plan.allows(.recoupement),
-                               let consensus = viewModel.consensus {
-                                SourcesCardView(consensus: consensus)
-                            }
-
-                            LazyVGrid(columns: tiles, spacing: 12) {
-                                ForEach(detailTiles(forecast), id: \.label) { tile in
-                                    DetailTile(
-                                        label: tile.label,
-                                        value: tile.value,
-                                        caption: tile.caption,
-                                        gauge: tile.gauge
-                                    )
+                                // Chaque source, nommée : qui annonce quoi pour
+                                // la ville. Même palier que la tuile d'accord, qui
+                                // la résume — fermée, c'est elle qui le dit.
+                                if subscription.plan.allows(.recoupement),
+                                   let consensus = viewModel.consensus {
+                                    SourcesCardView(consensus: consensus)
+                                        .entreeEnCascade(5)
                                 }
-                            }
 
-                            source(forecast)
+                                LazyVGrid(columns: tiles, spacing: 12) {
+                                    ForEach(detailTiles(forecast), id: \.label) { tile in
+                                        DetailTile(
+                                            label: tile.label,
+                                            value: tile.value,
+                                            caption: tile.caption,
+                                            gauge: tile.gauge
+                                        )
+                                    }
+                                }
+                                .entreeEnCascade(6)
+
+                                source(forecast)
+                                    .entreeEnCascade(7)
+                            }
+                            .id(forecast.parcelle)
                         }
                     }
                     .padding(.horizontal, 16)

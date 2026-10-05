@@ -18,7 +18,8 @@ extension Color {
 }
 
 /// Le fond suit le ciel : nuit, journée couverte ou journée dégagée — et le
-/// thème du système, clair ou sombre.
+/// thème du système, clair ou sombre. Par-dessus, le ciel vivant
+/// (`CielVivant`) dessine le temps qu'il fait.
 struct SkyBackground: View {
     let isDay: Bool
     let weatherCode: Int
@@ -26,8 +27,15 @@ struct SkyBackground: View {
     @Environment(\.colorScheme) private var scheme
 
     var body: some View {
-        LinearGradient(colors: colors, startPoint: .top, endPoint: .bottom)
-            .ignoresSafeArea()
+        ZStack {
+            LinearGradient(colors: colors, startPoint: .top, endPoint: .bottom)
+                .ignoresSafeArea()
+                // Un changement de ville ne fait pas sauter la couleur.
+                .animation(.easeInOut(duration: 1.2), value: colors)
+            // Le temps qu'il fait, par-dessus : soleil ou étoiles, nuages,
+            // pluie, neige, éclairs, brouillard.
+            CielVivant(isDay: isDay, weatherCode: weatherCode)
+        }
     }
 
     private var colors: [Color] {
