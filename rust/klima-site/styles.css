@@ -30,7 +30,7 @@
 
 :root {
   /* Le site vit sous le même ciel que l'application : un dégradé fixe, une
-     parcelle en bas de fenêtre, et des cartes de verre posées dessus. */
+     ville en bas de fenêtre, et des cartes de verre posées dessus. */
   --sky-1: #3c556e;
   --sky-2: #2b3d52;
   --sky-3: #1d2836;
@@ -88,7 +88,7 @@ a {
   color: inherit;
 }
 
-/* Le ciel et la parcelle : deux couches fixes, derrière toute la page. On
+/* Le ciel et la ville : deux couches fixes, derrière toute la page. On
    dessine sur des pseudo-éléments plutôt qu'en « background-attachment: fixed »,
    que Safari mobile rend mal. */
 body::before,
@@ -108,8 +108,8 @@ body::after {
   top: auto;
   height: 240px;
   background:
-    linear-gradient(to top, rgb(45 74 24 / 78%), rgb(45 74 24 / 0%)),
-    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1200 240' preserveAspectRatio='none'%3E%3Cpath d='M0 104 Q600 44 1200 104 L1200 240 L0 240 Z' fill='%235d7c3a' opacity='.55'/%3E%3Cpath d='M0 158 Q600 108 1200 158 L1200 240 L0 240 Z' fill='%234d6b2e' opacity='.6'/%3E%3C/svg%3E")
+    linear-gradient(to top, rgb(20 29 40 / 85%), rgb(20 29 40 / 0%)),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1200 240' preserveAspectRatio='none'%3E%3Cg fill='%2324334a' opacity='.55'%3E%3Crect x='0' y='144' width='66' height='96'/%3E%3Crect x='70' y='176' width='52' height='64'/%3E%3Crect x='126' y='120' width='80' height='120'/%3E%3Crect x='210' y='160' width='58' height='80'/%3E%3Crect x='272' y='104' width='92' height='136'/%3E%3Crect x='368' y='168' width='54' height='72'/%3E%3Crect x='426' y='136' width='70' height='104'/%3E%3Crect x='500' y='112' width='84' height='128'/%3E%3Crect x='588' y='152' width='56' height='88'/%3E%3Crect x='648' y='128' width='88' height='112'/%3E%3Crect x='740' y='164' width='60' height='76'/%3E%3Crect x='804' y='100' width='82' height='140'/%3E%3Crect x='890' y='156' width='54' height='84'/%3E%3Crect x='948' y='120' width='92' height='120'/%3E%3Crect x='1044' y='144' width='66' height='96'/%3E%3Crect x='1114' y='164' width='82' height='76'/%3E%3C/g%3E%3Cg fill='%23141d28' opacity='.8'%3E%3Crect x='30' y='180' width='60' height='60'/%3E%3Crect x='150' y='188' width='80' height='52'/%3E%3Crect x='300' y='174' width='70' height='66'/%3E%3Crect x='470' y='192' width='90' height='48'/%3E%3Crect x='620' y='178' width='64' height='62'/%3E%3Crect x='780' y='184' width='84' height='56'/%3E%3Crect x='930' y='176' width='72' height='64'/%3E%3Crect x='1080' y='190' width='90' height='50'/%3E%3C/g%3E%3C/svg%3E")
       bottom / 100% 240px no-repeat;
 }
 
@@ -201,7 +201,7 @@ body::after {
  * vingt-cinq pixels, et toute la page se mettait à défiler de côté. On resserre
  * plutôt que de laisser déborder.
  */
-@media (max-width: 380px) {
+@media (max-width: 400px) {
   .nav {
     gap: 12px;
     padding: 16px 12px;
@@ -865,15 +865,14 @@ section {
   animation: fall 1.5s linear infinite;
 }
 
-@keyframes sway {
-  from { transform: rotate(-2.5deg); }
-  to { transform: rotate(2.5deg); }
+@keyframes flicker {
+  0%, 70% { opacity: 0.9; }
+  80% { opacity: 0.25; }
+  100% { opacity: 0.9; }
 }
 
-.scene__wheat g {
-  transform-box: fill-box;
-  transform-origin: bottom center;
-  animation: sway 4.5s ease-in-out infinite alternate;
+.scene__windows rect {
+  animation: flicker 7s ease-in-out infinite;
 }
 
 /* Figures ----------------------------------------------------------------- */
@@ -907,61 +906,30 @@ section {
   font-size: 14px;
 }
 
-.soil__label {
-  fill: #efe8d8;
-  font-size: 11px;
-  font-weight: 600;
-}
-
-@keyframes seep {
-  from { opacity: 0.18; }
-  to { opacity: 0.42; }
-}
-
-.soil__band {
-  animation: seep 4s ease-in-out infinite alternate;
-}
-
-@keyframes grow {
-  from { stroke-dashoffset: 180; }
-  to { stroke-dashoffset: 0; }
-}
-
-.soil__root {
-  stroke-dasharray: 180;
-  animation: grow 3.5s ease-out forwards;
-}
-
 @keyframes rise {
-  from { transform: translateY(10px) scaleY(0.7); }
-  to { transform: translateY(0) scaleY(1); }
+  from { transform: scaleY(0.2); }
+  to { transform: scaleY(1); }
 }
 
-.soil__mercury {
+.rain-scene__bar {
   transform-box: fill-box;
   transform-origin: bottom center;
-  animation: rise 3s ease-in-out infinite alternate;
+  animation: rise 1.2s ease-out both;
 }
 
-@keyframes gust {
-  from { transform: translateX(-6px); opacity: 0.5; }
-  to { transform: translateX(6px); opacity: 1; }
+@keyframes glow {
+  from { opacity: 0.85; }
+  to { opacity: 1; }
 }
 
-.spray-scene__wind path {
-  animation: gust 3.2s ease-in-out infinite alternate;
+.uv-scene__sun {
+  animation: glow 2.6s ease-in-out infinite alternate;
 }
 
-.spray-scene__wind path:nth-child(2) { animation-duration: 2.4s; }
-.spray-scene__wind path:nth-child(3) { animation-duration: 4s; }
-
-@keyframes spray {
-  from { opacity: 0.15; transform: translateY(-6px); }
-  to { opacity: 0.7; transform: translateY(2px); }
-}
-
-.spray-scene__jet {
-  animation: spray 1.6s ease-in-out infinite alternate;
+.uv-scene__label {
+  fill: #e8edf2;
+  font-size: 12px;
+  font-weight: 600;
 }
 
 /* Sources ----------------------------------------------------------------- */
@@ -1292,17 +1260,10 @@ section {
   .scene__cloud,
   .scene__sun circle:last-child,
   .scene__rain line,
-  .scene__wheat g,
-  .soil__band,
-  .soil__root,
-  .soil__mercury,
-  .spray-scene__wind path,
-  .spray-scene__jet,
+  .scene__windows rect,
+  .rain-scene__bar,
+  .uv-scene__sun,
   .models__dot {
     animation: none;
-  }
-
-  .soil__root {
-    stroke-dasharray: none;
   }
 }

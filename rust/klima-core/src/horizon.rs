@@ -11,7 +11,7 @@
 //! Les instants sont ceux du reste du cœur : des millisecondes à l'heure de la
 //! parcelle. L'appelant compare donc avec « maintenant à la parcelle ».
 
-use crate::agro::{DailySample, HourlySample};
+use crate::meteo::{DailySample, HourlySample};
 
 const HEURE_MS: i64 = 3_600_000;
 
@@ -60,15 +60,13 @@ mod tests {
             is_day: true,
             precipitation_probability: 20.0,
             temperature,
+            apparent_temperature: temperature,
             relative_humidity: 65.0,
             dew_point: 11.0,
             precipitation: 0.0,
             wind_speed: 8.0,
             wind_gusts: 14.0,
-            soil_temperature_6cm: 15.0,
-            soil_moisture_3to9cm: 0.24,
-            et0: 0.2,
-            vapour_pressure_deficit: 0.7,
+            uv_index: 1.0,
         }
     }
 
@@ -128,7 +126,7 @@ mod tests {
             temperature_max: 20.0,
             precipitation_sum: 0.0,
             precipitation_probability_max: 0.0,
-            et0_sum: 0.0,
+            uv_index_max: 0.0,
             wind_gusts_max: 0.0,
             sunrise: None,
             sunset: None,

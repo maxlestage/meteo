@@ -1,9 +1,10 @@
 //! La météo du jour, et rien d'autre : ce que Klima dit de la journée en cours
-//! sur la parcelle choisie.
+//! dans la ville choisie.
 //!
 
 use klima_api::today::DayDigest;
-use klima_core::agro::{CurrentSample, FrostSeverity, SoilState};
+use klima_core::meteo::CurrentSample;
+use klima_core::ville::{NiveauUv, Pluie, niveau_uv};
 use klima_core::endpoints::Endpoints;
 use klima_core::i18n::params;
 use klima_core::position::Parcelle;
@@ -149,85 +150,72 @@ fn Contenu(props: &ContenuProps) -> Html {
                     ]))}
                 />
                 <Fait
-                    label={i18n.t("today.et0")}
-                    value={f.unit(digest.et0_sum, "mm", 1)}
-                    detail={i18n.t("today.et0.detail")}
+                    label={i18n.t("today.uv")}
+                    value={f.decimal(digest.uv_index_max, 0)}
+                    detail={i18n.t(&digest.uv.key())}
                 />
             </dl>
 
             <div class="today__agro">
                 <Conseil
-                    label={i18n.t("today.spray")}
-                    value={match &digest.spray {
-                        Some(spray) => format!(
-                            "{} → {}",
-                            dates::heure(spray.start, i18n.locale()),
-                            dates::heure(spray.end, i18n.locale())
-                        ),
-                        None => i18n.t("today.spray.none"),
-                    }}
-                    detail={match &digest.spray {
-                        Some(spray) => i18n.with("today.spray.score", &params([
-                            ("score", spray.score.into()),
+                    label={i18n.t("today.next")}
+                    value={match &digest.pluie {
+                        Pluie::Aucune { heures } => i18n.with("rain.none", &params([("hours", (*heures).into())])),
+                        Pluie::EnCours { fin: Some(fin) } => i18n.with("rain.now", &params([
+                            ("time", dates::heure(*fin, i18n.locale()).as_str().into()),
                         ])),
-                        None => i18n.t("today.spray.blocked"),
+                        Pluie::EnCours { fin: None } => i18n.t("rain.nowLasting"),
+                        Pluie::Prevue { debut, .. } => i18n.with("rain.soon", &params([
+                            ("time", dates::heure(*debut, i18n.locale()).as_str().into()),
+                        ])),
                     }}
-                    ton={match &digest.spray {
-                        Some(spray) if spray.score >= 80 => Ton::Bon,
-                        Some(_) => Ton::Attention,
-                        None => Ton::Mauvais,
+                    detail={match &digest.pluie {
+                        Pluie::Prevue { probabilite, cumul, .. } => i18n.with("rain.detail", &params([
+                            ("probability", f.percent(*probabilite).as_str().into()),
+                            ("amount", f.unit(*cumul, "mm", 1).as_str().into()),
+                        ])),
+                        _ => i18n.t("today.next.detail"),
+                    }}
+                    ton={match &digest.pluie {
+                        Pluie::Aucune { .. } => Ton::Bon,
+                        Pluie::Prevue { .. } => Ton::Attention,
+                        Pluie::EnCours { .. } => Ton::Mauvais,
                     }}
                 />
                 <Conseil
-                    label={i18n.t("today.balance")}
-                    value={f.signed_unit(digest.balance, "mm", 1)}
-                    detail={i18n.t(if digest.balance < 0.0 {
-                        "today.balance.deficit"
+                    label={i18n.t("advice.title")}
+                    value={match digest.conseils.first() {
+                        Some(premier) => i18n.t(&premier.key()),
+                        None => i18n.t("today.advice.none"),
+                    }}
+                    detail={if digest.conseils.len() > 1 {
+                        digest.conseils[1..].iter().map(|c| i18n.t(&c.key())).collect::<Vec<_>>().join(" · ")
                     } else {
-                        "today.balance.ok"
-                    })}
-                    ton={if digest.balance < 0.0 { Ton::Attention } else { Ton::Bon }}
+                        i18n.t("today.advice.detail")
+                    }}
+                    ton={if digest.conseils.is_empty() { Ton::Bon } else { Ton::Attention }}
                 />
                 <Conseil
-                    label={i18n.t("today.soil")}
-                    value={i18n.t(match digest.soil.state {
-                        SoilState::Sature => "soil.sature",
-                        SoilState::Ressuye => "soil.ressuye",
-                        SoilState::Sec => "soil.sec",
-                    })}
-                    detail={i18n.with("today.soil.detail", &params([
-                        ("moisture", f.percent(digest.soil.moisture * 100.0).as_str().into()),
-                        ("state", i18n.t(if digest.soil.trafficable {
-                            "soil.trafficable"
-                        } else {
-                            "soil.compaction"
-                        }).to_lowercase().as_str().into()),
+                    label={i18n.t("today.feels")}
+                    value={f.temperature(props.current.apparent_temperature)}
+                    detail={i18n.with("today.feels.detail", &params([
+                        ("temperature", f.temperature(props.current.temperature).as_str().into()),
                     ]))}
-                    ton={match digest.soil.state {
-                        SoilState::Sature => Ton::Mauvais,
-                        SoilState::Sec => Ton::Attention,
-                        SoilState::Ressuye => Ton::Bon,
+                    ton={if (0.0..30.0).contains(&props.current.apparent_temperature) {
+                        Ton::Bon
+                    } else {
+                        Ton::Attention
                     }}
                 />
                 <Conseil
-                    label={i18n.t("today.frost")}
-                    value={i18n.t(match digest.frost.severity {
-                        FrostSeverity::Aucun => "frost.aucun",
-                        FrostSeverity::Faible => "frost.faible",
-                        FrostSeverity::Modere => "frost.modere",
-                        FrostSeverity::Severe => "frost.severe",
-                    })}
-                    detail={i18n.with("today.frost.detail", &params([
-                        ("temperature", f.unit(digest.frost.min_temperature, "°C", 1).as_str().into()),
-                        ("hoarFrost", if digest.frost.hoar_frost {
-                            format!(" · {}", i18n.t("frost.hoarFrost")).into()
-                        } else {
-                            "".into()
-                        }),
+                    label={i18n.t("today.sun")}
+                    value={i18n.t(&niveau_uv(digest.uv_index_max).key())}
+                    detail={i18n.with("today.sun.detail", &params([
+                        ("index", f.decimal(digest.uv_index_max, 0).as_str().into()),
                     ]))}
-                    ton={match digest.frost.severity {
-                        FrostSeverity::Aucun => Ton::Bon,
-                        FrostSeverity::Faible => Ton::Attention,
+                    ton={match digest.uv {
+                        NiveauUv::Faible | NiveauUv::Modere => Ton::Bon,
+                        NiveauUv::Eleve => Ton::Attention,
                         _ => Ton::Mauvais,
                     }}
                 />

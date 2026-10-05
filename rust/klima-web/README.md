@@ -1,8 +1,8 @@
 # L'application web, en Yew
 
-La même chose que sur iPhone, dans un navigateur : la journée en cours, la
-semaine, les fenêtres de traitement et les indicateurs agronomiques de la
-parcelle.
+La même chose que sur iPhone, dans un navigateur : la météo d'une ville — la
+journée, la semaine, la pluie qui vient, ce qu'il faut emporter, l'UV, l'air
+et les pollens, et ce que dit chaque source.
 
 ## Ce qui ne se négocie pas
 
@@ -11,10 +11,10 @@ parcelle.
   bouton. Seule l'application iOS a un bandeau qui glisse.
 - **Une carte ne prend pas tout l'écran.**
 - **On part de là où est la personne.** La position n'est demandée qu'à
-  défaut — jamais par-dessus une parcelle déjà choisie ni par-dessus un lien
+  défaut — jamais par-dessus une ville déjà choisie ni par-dessus un lien
   partagé —, elle ne bloque pas l'affichage, et un refus ne dit rien.
-- **La parcelle vit dans l'adresse.** Le bouton retour la défait, et l'adresse
-  envoyée à quelqu'un lui montre bien la parcelle qu'on a regardée.
+- **La ville vit dans l'adresse.** Le bouton retour la défait, et l'adresse
+  envoyée à quelqu'un lui montre bien la ville qu'on a regardée.
 
 ## Construire
 
