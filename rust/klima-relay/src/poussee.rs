@@ -13,7 +13,7 @@
 
 use std::collections::HashMap;
 
-use klima_api::open_meteo::{decode_forecast, forecast_url, AgroForecast};
+use klima_api::open_meteo::{decode_forecast, forecast_url, Forecast};
 use klima_core::endpoints::Endpoints;
 use klima_core::grid::{cell_for, cell_key};
 use klima_core::position::Parcelle;
@@ -87,7 +87,7 @@ pub async fn ronde(etat: &Etat) -> Bilan {
 }
 
 /// La prévision d'une maille, par le cache du relais.
-async fn prevision(etat: &Etat, latitude: f64, longitude: f64) -> Option<AgroForecast> {
+async fn prevision(etat: &Etat, latitude: f64, longitude: f64) -> Option<Forecast> {
     let parcelle = Parcelle::new("", latitude, longitude);
     let adresse = Url::parse(&forecast_url(&Endpoints::direct(), &parcelle, JOURS)).ok()?;
     let params: Params = adresse.query_pairs().map(|(k, v)| (k.into_owned(), v.into_owned())).collect();

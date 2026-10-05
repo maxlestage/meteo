@@ -1,7 +1,7 @@
 //! L'en-tête : commune, température, temps et amplitude du jour.
 //!
 
-use klima_api::open_meteo::AgroForecast;
+use klima_api::open_meteo::Forecast;
 use klima_core::weather::weather_condition;
 use yew::prelude::*;
 
@@ -9,7 +9,7 @@ use klima_ui::i18n::use_i18n;
 
 #[derive(Properties, PartialEq)]
 pub struct Props {
-    pub forecast: AgroForecast,
+    pub forecast: Forecast,
 }
 
 #[function_component]

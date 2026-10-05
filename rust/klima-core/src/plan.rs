@@ -3,9 +3,9 @@
 //! Miroir Swift : `ios/Kliima/Models/Plan.swift`.
 //!
 //! Un principe gouverne le découpage : **on ne coupe jamais la réponse du
-//! jour.** Un agriculteur qui ouvre Klima pour savoir s'il traite cet
+//! jour.** Qui ouvre Klima pour savoir s'il prend un parapluie cet
 //! après-midi doit l'obtenir sans payer. Ce qui se facture, c'est l'échelle
-//! (plusieurs parcelles) et l'anticipation (alertes, cumuls, recoupement).
+//! (plusieurs villes) et l'anticipation (alertes, air, recoupement).
 //! Amputer aujourd'hui rendrait le palier libre inutile, donc l'application
 //! invendable.
 //!
@@ -46,22 +46,19 @@ pub enum Feature {
     Recoupement,
     /// Être prévenu sans ouvrir l'application.
     Alertes,
-    /// Cumuls de pluie et de degrés-jours depuis une date choisie.
-    Cumuls,
-    /// Export des conditions à l'heure d'un traitement.
-    Registre,
+    /// Qualité de l'air et pollens.
+    Air,
 }
 
-pub const FEATURES: [Feature; 4] =
-    [Feature::Recoupement, Feature::Alertes, Feature::Cumuls, Feature::Registre];
+pub const FEATURES: [Feature; 3] =
+    [Feature::Recoupement, Feature::Alertes, Feature::Air];
 
 impl Feature {
     pub fn code(self) -> &'static str {
         match self {
             Feature::Recoupement => "recoupement",
             Feature::Alertes => "alertes",
-            Feature::Cumuls => "cumuls",
-            Feature::Registre => "registre",
+            Feature::Air => "air",
         }
     }
 
@@ -71,8 +68,7 @@ impl Feature {
         match self {
             Feature::Recoupement => "plan.reason.recoupement",
             Feature::Alertes => "plan.reason.alertes",
-            Feature::Cumuls => "plan.reason.cumuls",
-            Feature::Registre => "plan.reason.registre",
+            Feature::Air => "plan.reason.air",
         }
     }
 
@@ -81,8 +77,7 @@ impl Feature {
         match self {
             Feature::Recoupement => "plan.feature.recoupement",
             Feature::Alertes => "plan.feature.alertes",
-            Feature::Cumuls => "plan.feature.cumuls",
-            Feature::Registre => "plan.feature.registre",
+            Feature::Air => "plan.feature.air",
         }
     }
 }

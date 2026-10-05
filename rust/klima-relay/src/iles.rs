@@ -20,8 +20,8 @@
 use std::collections::HashMap;
 use std::sync::Mutex;
 
-use klima_api::open_meteo::AgroForecast;
-use klima_core::agro::HourlySample;
+use klima_api::open_meteo::Forecast;
+use klima_core::meteo::HourlySample;
 use klima_core::grid::cell_for;
 use klima_core::horizon;
 use serde_json::{Value, json};
@@ -169,7 +169,7 @@ pub struct Contenu {
 /// de 13 h 45 n'a pas à se présenter comme celui de 14 h 05. Faute de
 /// ressenti dans la prévision horaire, il vaut la température : c'est ce que
 /// fait `CurrentSample(prevu:)` côté iPhone.
-pub fn contenu(prevision: &AgroForecast, maintenant: i64) -> Option<Contenu> {
+pub fn contenu(prevision: &Forecast, maintenant: i64) -> Option<Contenu> {
     let local = maintenant + prevision.utc_offset_seconds * 1000;
     let heure = horizon::heure_contenant(local, &prevision.hourly)?;
     let jour = horizon::jour_contenant(local, &prevision.daily);
@@ -282,7 +282,7 @@ pub(crate) mod tests {
         .to_string()
     }
 
-    fn prevision() -> AgroForecast {
+    fn prevision() -> Forecast {
         klima_api::open_meteo::decode_forecast(Parcelle::new("Essai", 48.45, 1.49), &reponse(), 0)
             .expect("réponse lisible")
     }

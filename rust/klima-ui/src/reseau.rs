@@ -2,14 +2,14 @@
 //!
 //! Le décodage est dans `klima-api` et ne connaît pas le réseau ; ce module
 //! est la moitié qui manque : il envoie, lit le corps, et traduit une panne en
-//! `AgroApiError` — une clé de catalogue, pas une phrase.
+//! `ApiError` — une clé de catalogue, pas une phrase.
 //!
 //! Ce que le navigateur ne fait pas : poser un `User-Agent`. C'est pour cela
 //! que MET Norway n'est appelé d'ici qu'à travers le relais, et
 //! `providers_for` le sait.
 
 use gloo_net::http::Request;
-use klima_api::open_meteo::{AgroApiError, AgroForecast, decode_forecast, decode_search};
+use klima_api::open_meteo::{ApiError, Forecast, decode_forecast, decode_search};
 use klima_api::plan::Verdict;
 use klima_api::readings;
 use klima_core::endpoints::Endpoints;
@@ -17,24 +17,31 @@ use klima_core::position::Parcelle;
 use klima_core::providers::{Platform, ProviderOutcome, providers_for};
 
 /// Récupère un corps de réponse, ou dit pourquoi on n'a rien.
-async fn texte(url: &str) -> Result<String, AgroApiError> {
-    let reponse = Request::get(url).send().await.map_err(|_| AgroApiError::Unreachable)?;
+async fn texte(url: &str) -> Result<String, ApiError> {
+    let reponse = Request::get(url).send().await.map_err(|_| ApiError::Unreachable)?;
 
     if !(200..300).contains(&reponse.status()) {
-        return Err(AgroApiError::Status(reponse.status()));
+        return Err(ApiError::Status(reponse.status()));
     }
-    reponse.text().await.map_err(|_| AgroApiError::Malformed)
+    reponse.text().await.map_err(|_| ApiError::Malformed)
 }
 
-/// La prévision agricole d'une parcelle.
+/// La prévision d'une ville.
 pub async fn forecast(
     endpoints: &Endpoints,
     parcelle: &Parcelle,
     days: u32,
     maintenant: i64,
-) -> Result<AgroForecast, AgroApiError> {
+) -> Result<Forecast, ApiError> {
     let url = klima_api::open_meteo::forecast_url(endpoints, parcelle, days);
     decode_forecast(parcelle.clone(), &texte(&url).await?, maintenant)
+}
+
+/// L'air d'une ville : qualité et pollens. `None` en cas de panne : la tuile
+/// se tait plutôt que d'afficher un air pur qu'on n'a pas mesuré.
+pub async fn air(endpoints: &Endpoints, parcelle: &Parcelle) -> Option<klima_core::air::AirSample> {
+    let url = klima_api::air::air_url(endpoints, parcelle.latitude, parcelle.longitude);
+    klima_api::air::decode_air(&texte(&url).await.ok()?)
 }
 
 /// Ce que le relais répond sur cette adresse — ou le fait qu'il se taise.
@@ -51,7 +58,7 @@ pub async fn plan(url: &str) -> Verdict {
 
 /// Les communes qui répondent à une recherche. Une requête trop courte ne part
 /// pas : deux lettres au moins.
-pub async fn search(endpoints: &Endpoints, requete: &str) -> Result<Vec<Parcelle>, AgroApiError> {
+pub async fn search(endpoints: &Endpoints, requete: &str) -> Result<Vec<Parcelle>, ApiError> {
     let Some(url) = klima_api::open_meteo::search_url(endpoints, requete) else {
         return Ok(Vec::new());
     };

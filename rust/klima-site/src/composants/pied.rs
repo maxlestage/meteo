@@ -78,6 +78,11 @@ pub fn Pied() -> Html {
                                 { "Bright Sky / DWD" }
                             </a>
                         </li>
+                        <li>
+                            <a href="https://atmosphere.copernicus.eu/" rel="noreferrer noopener" target="_blank">
+                                { "Copernicus (CAMS)" }
+                            </a>
+                        </li>
                         <li>{ i18n.t("footer.models") }</li>
                         <li>{ i18n.t("footer.method") }</li>
                     </ul>

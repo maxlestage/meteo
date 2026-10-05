@@ -1,7 +1,7 @@
 {
-  "name": "Klima — météo agricole",
+  "name": "Klima — la météo de votre ville",
   "short_name": "Klima",
-  "description": "La météo qui parle agronomie.",
+  "description": "La pluie qui vient, ce qu’il faut emporter, l’air et le soleil.",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",

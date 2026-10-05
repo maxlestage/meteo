@@ -8,19 +8,19 @@
 //! qui garantit qu'une position tombe dans la même cellule quelle que soit la
 //! langue qui la calcule.
 
+pub mod air;
 pub mod alerts;
 pub mod calendar;
-pub mod cumuls;
 pub mod endpoints;
 pub mod format;
 pub mod grid;
 pub mod horizon;
 pub mod i18n;
-pub mod agro;
 pub mod consensus;
 pub mod messages;
+pub mod meteo;
 pub mod plan;
 pub mod position;
 pub mod providers;
-pub mod register;
+pub mod ville;
 pub mod weather;

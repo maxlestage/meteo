@@ -3,7 +3,8 @@
 //!
 
 use klima_api::today::DayDigest;
-use klima_core::agro::CurrentSample;
+use klima_core::meteo::CurrentSample;
+use klima_core::ville::Pluie;
 use klima_core::calendar::hour_of;
 use klima_core::position::Parcelle;
 use klima_core::weather::weather_condition;
@@ -88,21 +89,25 @@ pub fn Telephone(props: &Props) -> Html {
 
                 <div class="phone__tiles">
                     <div class="phone__tile">
-                        <p class="phone__label">{ i18n.t("phone.balance") }</p>
+                        <p class="phone__label">{ i18n.t("phone.rain") }</p>
                         <p class="phone__value">
-                            { match &props.digest {
-                                Some(digest) => f.signed_unit(digest.balance, "mm", 1),
+                            { match props.digest.as_ref().map(|d| &d.pluie) {
+                                Some(Pluie::Aucune { .. }) => i18n.t("phone.rain.none"),
+                                Some(Pluie::EnCours { .. }) => i18n.t("phone.rain.now"),
+                                Some(Pluie::Prevue { debut, .. }) => {
+                                    klima_ui::dates::heure(*debut, i18n.locale())
+                                }
                                 None => "—".to_owned(),
                             } }
                         </p>
                     </div>
                     <div class="phone__tile">
-                        <p class="phone__label">{ i18n.t("phone.spray") }</p>
+                        <p class="phone__label">{ i18n.t("phone.feels") }</p>
                         <p class="phone__value">
-                            { i18n.t(match &props.digest {
-                                Some(digest) if digest.spray.is_some() => "phone.spray.yes",
-                                _ => "phone.spray.no",
-                            }) }
+                            { match &props.current {
+                                Some(current) => f.temperature(current.apparent_temperature),
+                                None => "—".to_owned(),
+                            } }
                         </p>
                     </div>
                 </div>

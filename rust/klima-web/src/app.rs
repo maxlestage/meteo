@@ -1,8 +1,8 @@
 //! L'application web de Klima.
 //!
 
-use klima_core::agro::summarize;
-use klima_core::agro::thresholds::{GDD_BASE, SPRAY_WIND_MAX};
+use klima_core::air::{ATTRIBUTION as AIR_ATTRIBUTION, pollen_dominant, qualite_air};
+use klima_core::ville::{heure_de, niveau_uv};
 use klima_core::endpoints::Endpoints;
 use klima_core::i18n::params;
 use klima_core::position::Parcelle;
@@ -11,13 +11,12 @@ use yew::prelude::*;
 use crate::composants::bandeau::Bandeau;
 use crate::composants::entete::Entete;
 use crate::composants::jours::Jours;
+use crate::composants::pluie::CartePluie;
 use klima_ui::composants::langue::SelecteurDeLangue;
 use klima_ui::composants::marque::MarqueEtNom;
 use crate::composants::pro::NotePro;
 use crate::composants::recherche::Recherche;
-use crate::composants::registre::Registre;
 use crate::composants::sources::Sources;
-use crate::composants::traitement::Traitement;
 use crate::composants::tuile::{Jauge, Tuile};
 use klima_ui::crochets::palier::use_palier;
 use klima_ui::crochets::parcelle::use_parcelle;
@@ -26,13 +25,13 @@ use klima_ui::crochets::prevision::use_forecast;
 use klima_ui::dates;
 use klima_ui::i18n::use_i18n;
 
-/// Parcelle par défaut : plaine céréalière de Beauce.
+/// Ville par défaut, quand on ne sait pas où est la personne.
 fn defaut() -> Parcelle {
     Parcelle {
-        name: "Chartres".to_owned(),
-        latitude: 48.4468,
-        longitude: 1.4892,
-        admin: Some("Centre-Val de Loire".to_owned()),
+        name: "Paris".to_owned(),
+        latitude: 48.8566,
+        longitude: 2.3522,
+        admin: Some("Île-de-France".to_owned()),
         country: Some("France".to_owned()),
     }
 }
@@ -54,7 +53,7 @@ pub fn App(props: &Props) -> Html {
     let palier = use_palier(props.relais.clone());
 
     // Première visite, rien de choisi ni de partagé : on part de là où est la
-    // personne plutôt que de lui montrer la Beauce.
+    // personne plutôt que de lui montrer Paris.
     use_start_position(lieu.origine, i18n.t("search.myField"), lieu.select.clone());
 
     let prevision = {
@@ -64,11 +63,6 @@ pub fn App(props: &Props) -> Html {
         })
     };
     let etat = &prevision.etat;
-
-    // Les indicateurs se recalculent avec la prévision, pas à chaque rendu.
-    let summary = use_memo(etat.forecast.clone(), |forecast| {
-        forecast.as_ref().map(|f| summarize(&f.hourly, &f.daily))
-    });
 
     let recharger = {
         let reload = prevision.reload.clone();
@@ -113,7 +107,7 @@ pub fn App(props: &Props) -> Html {
                     </div>
                 }
 
-                if let (Some(forecast), Some(summary)) = (&etat.forecast, &*summary) {
+                if let Some(forecast) = &etat.forecast {
                     <>
                         <Entete forecast={forecast.clone()} />
                         <Bandeau
@@ -129,45 +123,25 @@ pub fn App(props: &Props) -> Html {
                         if let Some(consensus) = &etat.consensus {
                             <Sources consensus={consensus.clone()} />
                         }
-                        <Traitement
-                            hours={forecast.hourly.clone()}
-                            next_spray={summary.next_spray.clone()}
-                        />
+                        <CartePluie hours={forecast.hourly.clone()} />
 
                         <div class="tiles">
                             <Tuile
-                                label={i18n.t("tile.soil")}
-                                value={i18n.t(&format!("soil.{}", code_sol(summary.soil.state)))}
-                                caption={i18n.with("tile.soil.caption", &params([
-                                    ("moisture", f.percent(summary.soil.moisture * 100.0).as_str().into()),
-                                    ("temperature", f.unit(summary.soil.temperature, "°C", 1).as_str().into()),
-                                    ("state", i18n.t(if summary.soil.trafficable {
-                                        "soil.trafficable"
-                                    } else {
-                                        "soil.compaction"
-                                    }).as_str().into()),
+                                label={i18n.t("tile.feelsLike")}
+                                value={f.temperature(forecast.current.apparent_temperature)}
+                                caption={i18n.with("tile.feelsLike.caption", &params([
+                                    ("temperature", f.temperature(forecast.current.temperature).as_str().into()),
                                 ]))}
-                                jauge={Jauge {
-                                    position: summary.soil.moisture / 0.5,
-                                    gradient: "linear-gradient(to right, #d8b36a 0%, #8fc46a 30%, #4aa3d8 70%, #2b5f9e 100%)",
-                                }}
                             />
 
                             <Tuile
-                                label={i18n.t("tile.water")}
-                                value={f.signed_unit(summary.water.balance, "mm", 1)}
-                                caption={
-                                    if summary.water.irrigation_advice > 0.0 {
-                                        i18n.with("tile.water.irrigation", &params([
-                                            ("amount", f.unit(summary.water.irrigation_advice, "mm", 0).as_str().into()),
-                                        ]))
-                                    } else {
-                                        i18n.with("tile.water.caption", &params([
-                                            ("rain", f.unit(summary.water.precipitation, "mm", 1).as_str().into()),
-                                            ("et0", f.unit(summary.water.evapotranspiration, "mm", 1).as_str().into()),
-                                        ]))
-                                    }
-                                }
+                                label={i18n.t("tile.humidity")}
+                                value={f.percent(forecast.current.relative_humidity)}
+                                caption={heure_de(forecast.current.time, &forecast.hourly).map(|h| {
+                                    AttrValue::from(i18n.with("tile.humidity.caption", &params([
+                                        ("dewPoint", f.temperature(h.dew_point).as_str().into()),
+                                    ])))
+                                })}
                             />
 
                             <Tuile
@@ -175,37 +149,44 @@ pub fn App(props: &Props) -> Html {
                                 value={f.unit(forecast.current.wind_speed, "km/h", 0)}
                                 caption={i18n.with("tile.wind.caption", &params([
                                     ("gusts", f.unit(forecast.current.wind_gusts, "km/h", 0).as_str().into()),
-                                    ("limit", f.unit(SPRAY_WIND_MAX, "km/h", 0).as_str().into()),
                                 ]))}
                             />
 
-                            <Tuile
-                                label={i18n.t("tile.frost")}
-                                value={i18n.t(&format!("frost.{}", code_gel(summary.frost.severity)))}
-                                caption={i18n.with("tile.frost.caption", &params([
-                                    ("temperature", f.unit(summary.frost.min_temperature, "°C", 1).as_str().into()),
-                                    ("hoarFrost", if summary.frost.hoar_frost {
-                                        format!(", {}", i18n.t("frost.hoarFrost")).into()
-                                    } else {
-                                        "".into()
-                                    }),
-                                ]))}
-                            />
+                            {{
+                                let maintenant = heure_de(forecast.current.time, &forecast.hourly)
+                                    .map_or(0.0, |h| h.uv_index);
+                                let maximum = forecast.daily.first().map_or(maintenant, |d| d.uv_index_max);
+                                let niveau = |indice: f64| i18n.t(&niveau_uv(indice).key());
+                                html! {
+                                    <Tuile
+                                        label={i18n.t("tile.uv")}
+                                        value={format!("{} · {}", f.decimal(maintenant, 0), niveau(maintenant))}
+                                        caption={i18n.with("tile.uv.caption", &params([
+                                            ("max", f.decimal(maximum, 0).as_str().into()),
+                                            ("level", niveau(maximum).to_lowercase().as_str().into()),
+                                        ]))}
+                                        jauge={Jauge {
+                                            position: maintenant / 11.0,
+                                            gradient: "linear-gradient(to right, #7ed07a, #f0c14b, #ef8a5a, #d9534f, #9b59b6)",
+                                        }}
+                                    />
+                                }
+                            }}
+
+                            if let Some(today) = forecast.daily.first() {
+                                <Tuile
+                                    label={i18n.t("tile.rainToday")}
+                                    value={f.unit(today.precipitation_sum, "mm", 1)}
+                                    caption={i18n.with("tile.rainToday.caption", &params([
+                                        ("probability", f.percent(today.precipitation_probability_max).as_str().into()),
+                                    ]))}
+                                />
+                            }
 
                             <Tuile
-                                label={i18n.t("tile.disease")}
-                                value={i18n.t(&format!("disease.{}", code_maladie(summary.disease.level)))}
-                                caption={i18n.with("tile.disease.caption", &params([
-                                    ("hours", summary.disease.leaf_wetness_hours.into()),
-                                ]))}
-                            />
-
-                            <Tuile
-                                label={i18n.t("tile.gdd")}
-                                value={f.unit(summary.gdd, "°C·j", 1)}
-                                caption={i18n.with("tile.gdd.caption", &params([
-                                    ("base", f.unit(GDD_BASE, "°C", 0).as_str().into()),
-                                ]))}
+                                label={i18n.t("tile.pressure")}
+                                value={f.unit(forecast.current.pressure, "hPa", 0)}
+                                caption={i18n.t("tile.pressure.caption")}
                             />
 
                             <Tuile
@@ -218,6 +199,41 @@ pub fn App(props: &Props) -> Html {
                                     ).as_str().into()),
                                 ]))}
                             />
+
+                            if let Some(aqi) = etat.air.as_ref().and_then(|a| a.european_aqi) {
+                                <Tuile
+                                    label={i18n.t("tile.air")}
+                                    value={i18n.t(&qualite_air(aqi).key())}
+                                    caption={i18n.with("tile.air.caption", &params([
+                                        ("aqi", f.decimal(aqi, 0).as_str().into()),
+                                        ("pm25", etat.air.as_ref().and_then(|a| a.pm2_5)
+                                            .map_or("—".to_owned(), |v| f.unit(v, "µg/m³", 0)).as_str().into()),
+                                    ]))}
+                                    jauge={Jauge {
+                                        position: aqi / 100.0,
+                                        gradient: "linear-gradient(to right, #50f0e6, #50ccaa, #f0e641, #ff5050, #960032, #7d2181)",
+                                    }}
+                                />
+                            }
+
+                            if let Some(air) = etat.air.as_ref().filter(|a| !a.pollens.is_empty()) {
+                                if let Some((pollen, grains, niveau)) = pollen_dominant(air) {
+                                    <Tuile
+                                        label={i18n.t("tile.pollen")}
+                                        value={i18n.t(&pollen.key())}
+                                        caption={i18n.with("tile.pollen.caption", &params([
+                                            ("grains", f.decimal(grains, 0).as_str().into()),
+                                            ("level", i18n.t(&niveau.key()).to_lowercase().as_str().into()),
+                                        ]))}
+                                    />
+                                } else {
+                                    <Tuile
+                                        label={i18n.t("tile.pollen")}
+                                        value={i18n.t("tile.pollen.none")}
+                                        caption={i18n.t("tile.pollen.noneCaption")}
+                                    />
+                                }
+                            }
 
                             if let Some(consensus) = &etat.consensus {
                                 <Tuile
@@ -244,32 +260,15 @@ pub fn App(props: &Props) -> Html {
                                     }}
                                 />
                             }
-
-                            <Tuile
-                                label={i18n.t("tile.sowing")}
-                                value={i18n.t(if summary.soil.sowable {
-                                    "tile.sowing.yes"
-                                } else {
-                                    "tile.sowing.no"
-                                })}
-                                caption={i18n.with("tile.sowing.caption", &params([
-                                    ("temperature", f.unit(summary.soil.temperature, "°C", 1).as_str().into()),
-                                ]))}
-                            />
                         </div>
 
-                        <Registre
-                            hours={forecast.hourly.clone()}
-                            parcelle={lieu.parcelle.name.clone()}
-                            plan={palier.plan}
-                            maintenant={klima_ui::horloge::maintenant_a_la_parcelle(
-                                forecast.utc_offset_seconds,
-                            )}
-                        />
                         <NotePro palier={palier.clone()} />
 
                         <footer class="footer">
                             <p>{ format!("{}.", i18n.t("app.source")) }</p>
+                            if etat.air.is_some() {
+                                <p>{ format!("{AIR_ATTRIBUTION}.") }</p>
+                            }
                             <button type="button" class="button" onclick={recharger}>
                                 { i18n.t("app.refresh") }
                             </button>
@@ -293,34 +292,6 @@ fn heure(ms: Option<i64>, locale: &str) -> String {
     match ms {
         Some(ms) => dates::heure_minute(ms, locale),
         None => "—".to_owned(),
-    }
-}
-
-fn code_sol(etat: klima_core::agro::SoilState) -> &'static str {
-    use klima_core::agro::SoilState::*;
-    match etat {
-        Sature => "sature",
-        Ressuye => "ressuye",
-        Sec => "sec",
-    }
-}
-
-fn code_gel(severite: klima_core::agro::FrostSeverity) -> &'static str {
-    use klima_core::agro::FrostSeverity::*;
-    match severite {
-        Aucun => "aucun",
-        Faible => "faible",
-        Modere => "modere",
-        Severe => "severe",
-    }
-}
-
-fn code_maladie(niveau: klima_core::agro::DiseaseLevel) -> &'static str {
-    use klima_core::agro::DiseaseLevel::*;
-    match niveau {
-        Faible => "faible",
-        Moyenne => "moyenne",
-        Elevee => "elevee",
     }
 }
 
