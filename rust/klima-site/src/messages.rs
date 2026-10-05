@@ -17,7 +17,7 @@ fn catalog(entries: &[(&'static str, &'static str)]) -> Catalog {
     entries.iter().copied().collect()
 }
 
-const FR: [(&str, &str); 105] = [
+const FR: [(&str, &str); 106] = [
     ("nav.today", "Météo du jour"),
     ("nav.data", "Données"),
     ("app.open", "Ouvrir l’application"),
@@ -123,9 +123,10 @@ const FR: [(&str, &str); 105] = [
     ("feature.veille.title", "Le guetteur : 30 minutes, puis 2 heures"),
     ("feature.veille.rule", "Un quart d’heure est mouillé dès {amount} ; la pluie est forte dès {heavy} par heure."),
     ("feature.veille.detail", "Il lit la prévision au quart d’heure et la relit tous les quarts d’heure, tout seul : ce qui tombe dans la demi-heure en cours, puis ce qui vient d’ici deux heures, à la minute près."),
+    ("app.openShort", "L’app"),
 ];
 
-const EN: [(&str, &str); 105] = [
+const EN: [(&str, &str); 106] = [
     ("nav.today", "Today"),
     ("nav.data", "Data"),
     ("app.open", "Open the app"),
@@ -231,9 +232,10 @@ const EN: [(&str, &str); 105] = [
     ("feature.veille.title", "The lookout: 30 minutes, then 2 hours"),
     ("feature.veille.rule", "A quarter hour counts as wet from {amount}; rain is heavy from {heavy} an hour."),
     ("feature.veille.detail", "It reads the quarter-hourly forecast and rereads it every fifteen minutes on its own: what falls in the current half hour, then what is coming over the next two hours, to the minute."),
+    ("app.openShort", "App"),
 ];
 
-const ES: [(&str, &str); 105] = [
+const ES: [(&str, &str); 106] = [
     ("nav.today", "El tiempo de hoy"),
     ("nav.data", "Datos"),
     ("app.open", "Abrir la aplicación"),
@@ -339,6 +341,7 @@ const ES: [(&str, &str); 105] = [
     ("feature.veille.title", "El vigía: 30 minutos, luego 2 horas"),
     ("feature.veille.rule", "Un cuarto de hora es lluvioso desde {amount}; la lluvia es fuerte desde {heavy} por hora."),
     ("feature.veille.detail", "Lee la previsión por cuartos de hora y la relee cada cuarto de hora, solo: lo que cae en la media hora en curso, y lo que viene en las próximas dos horas, al minuto."),
+    ("app.openShort", "La app"),
 ];
 
 #[cfg(test)]

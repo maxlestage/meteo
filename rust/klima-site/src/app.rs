@@ -101,7 +101,12 @@ pub fn App(props: &Props) -> Html {
                         <a href="#sources">{ i18n.t("nav.sources") }</a>
                         <a href="#donnees">{ i18n.t("nav.data") }</a>
                     </nav>
-                    <a class="button button--compact" href="./app/">{ i18n.t("app.open") }</a>
+                    // Sur téléphone, le bouton dit « L'app » : la marque, le bouton
+                    // et les trois langues tiennent alors sur une ligne.
+                    <a class="button button--compact" href="./app/" aria-label={i18n.t("app.open")}>
+                        <span class="nav__app-long">{ i18n.t("app.open") }</span>
+                        <span class="nav__app-court" aria-hidden="true">{ i18n.t("app.openShort") }</span>
+                    </a>
                     <SelecteurDeLangue class="lang" label={i18n.t("language.label")} />
                 </div>
             </header>
