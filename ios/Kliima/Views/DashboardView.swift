@@ -68,6 +68,14 @@ struct DashboardView: View {
                                 timeZone: viewModel.timeZone
                             )
 
+                            // Chaque source, nommée : qui annonce quoi pour
+                            // la ville. Même palier que la tuile d'accord, qui
+                            // la résume — fermée, c'est elle qui le dit.
+                            if subscription.plan.allows(.recoupement),
+                               let consensus = viewModel.consensus {
+                                SourcesCardView(consensus: consensus)
+                            }
+
                             SprayCardView(
                                 hours: forecast.hourly,
                                 nextSpray: summary.nextSpray,

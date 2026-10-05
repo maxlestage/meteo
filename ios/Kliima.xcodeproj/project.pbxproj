@@ -112,6 +112,7 @@
 		D45B1BDA0C9B9713831FA3A2 /* AgroFormatTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E172A50C653860D0436BDA6 /* AgroFormatTests.swift */; };
 		D461CDD744E459C7FF88E76F /* WeatherProviders.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B02EF58B1456D6BD190EA69 /* WeatherProviders.swift */; };
 		D4E428A194F9BBE7D25648FD /* WatchDashboardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A5124FDFE368E7208E1385D /* WatchDashboardView.swift */; };
+		DAB162651C96B99719D6671C /* SourcesCardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B175D0A665599A8678363959 /* SourcesCardView.swift */; };
 		DAE9DB161E7BBD9D633D5D63 /* Position.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB8F1DD4A8E34FF10F2CCB10 /* Position.swift */; };
 		DB6E4FF76A92046B4033B5A3 /* WeatherLockScreenWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA60311A4E5C2F3FC49CD1A2 /* WeatherLockScreenWidget.swift */; };
 		DC984FA742F7D37DDC81E8C6 /* PositionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 56740BAA255A8BCAFBF38DA5 /* PositionTests.swift */; };
@@ -217,6 +218,7 @@
 		A5C4EEEC1517071A02768BFA /* KliimaWatchApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KliimaWatchApp.swift; sourceTree = "<group>"; };
 		ACDA8384F78BD3E95B72FB7A /* Plan.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Plan.swift; sourceTree = "<group>"; };
 		AD6AE031CC45EBED74B7A798 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		B175D0A665599A8678363959 /* SourcesCardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SourcesCardView.swift; sourceTree = "<group>"; };
 		B457BBEBEAB42296C88BBA73 /* AgroFormat.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AgroFormat.swift; sourceTree = "<group>"; };
 		B4F0E666C771746CB3FD57AF /* AgroWeatherService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AgroWeatherService.swift; sourceTree = "<group>"; };
 		B7DCA75C69B7079D7387BB77 /* ProvidersTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProvidersTests.swift; sourceTree = "<group>"; };
@@ -429,6 +431,7 @@
 				A37F792453EED1853EB12C4B /* SkyBackground.swift */,
 				759A50D03E2923056A2614D4 /* SprayCardView.swift */,
 				72250014395A5607AA9841A4 /* PaywallView.swift */,
+				B175D0A665599A8678363959 /* SourcesCardView.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -750,6 +753,7 @@
 				900176DFAC3BB33859BD5893 /* SkyBackground.swift in Sources */,
 				F495D15D8E0787A30075CF21 /* SprayCardView.swift in Sources */,
 				51EABAB1CB6EC84EC5CDA384 /* PaywallView.swift in Sources */,
+				DAB162651C96B99719D6671C /* SourcesCardView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -30,7 +30,7 @@ SERVICES = ["AgroWeatherService.swift", "WeatherProviders.swift", "LocationServi
 VIEWMODELS = ["DashboardViewModel.swift"]
 VIEWS = ["DashboardView.swift", "DailyListView.swift", "DetailTile.swift", "HeroView.swift",
          "HourlyStripView.swift", "SkyBackground.swift", "SprayCardView.swift",
-         "PaywallView.swift"]
+         "PaywallView.swift", "SourcesCardView.swift"]
 
 # (groupe, nom) ; le groupe est le chemin relatif au dépôt.
 def app(names, sub): return [(f"{APP}/{sub}", n) for n in names]

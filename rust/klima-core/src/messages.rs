@@ -24,7 +24,7 @@ fn catalog(entries: &[(&'static str, &'static str)]) -> Catalog {
     entries.iter().copied().collect()
 }
 
-const FR: [(&str, &str); 96] = [
+const FR: [(&str, &str); 98] = [
     ("wmo.clearSky", "Ciel dégagé"),
     ("wmo.mainlyClear", "Peu nuageux"),
     ("wmo.partlyCloudy", "Partiellement nuageux"),
@@ -92,6 +92,8 @@ const FR: [(&str, &str); 96] = [
     ("consensus.rainDisagreement", "désaccord sur la pluie"),
     ("consensus.unavailable", "Comparaison indisponible"),
     ("consensus.median", "Valeur retenue : {value}"),
+    ("sources.title", "Ce que dit chaque source"),
+    ("sources.dry", "sec"),
     ("alert.fenetre.title", "Fenêtre de traitement"),
     ("alert.fenetre.body", "Conditions réunies, score {score}/100 sur la plage."),
     ("alert.gel.title", "Gel cette nuit"),
@@ -123,7 +125,7 @@ const FR: [(&str, &str); 96] = [
     ("register.column.score", "Score"),
 ];
 
-const EN: [(&str, &str); 96] = [
+const EN: [(&str, &str); 98] = [
     ("wmo.clearSky", "Clear sky"),
     ("wmo.mainlyClear", "Mainly clear"),
     ("wmo.partlyCloudy", "Partly cloudy"),
@@ -191,6 +193,8 @@ const EN: [(&str, &str); 96] = [
     ("consensus.rainDisagreement", "they disagree on rain"),
     ("consensus.unavailable", "Comparison unavailable"),
     ("consensus.median", "Value used: {value}"),
+    ("sources.title", "What each source says"),
+    ("sources.dry", "dry"),
     ("alert.fenetre.title", "Spraying window"),
     ("alert.fenetre.body", "Conditions are right, {score}/100 over the window."),
     ("alert.gel.title", "Frost tonight"),
@@ -222,7 +226,7 @@ const EN: [(&str, &str); 96] = [
     ("register.column.score", "Score"),
 ];
 
-const ES: [(&str, &str); 96] = [
+const ES: [(&str, &str); 98] = [
     ("wmo.clearSky", "Cielo despejado"),
     ("wmo.mainlyClear", "Poco nuboso"),
     ("wmo.partlyCloudy", "Parcialmente nuboso"),
@@ -290,6 +294,8 @@ const ES: [(&str, &str); 96] = [
     ("consensus.rainDisagreement", "discrepan sobre la lluvia"),
     ("consensus.unavailable", "Comparación no disponible"),
     ("consensus.median", "Valor retenido: {value}"),
+    ("sources.title", "Lo que dice cada fuente"),
+    ("sources.dry", "seco"),
     ("alert.fenetre.title", "Ventana de tratamiento"),
     ("alert.fenetre.body", "Condiciones reunidas, {score}/100 en la franja."),
     ("alert.gel.title", "Helada esta noche"),
