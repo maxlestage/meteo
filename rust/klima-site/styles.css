@@ -108,6 +108,181 @@ body::before {
   background: linear-gradient(180deg, var(--sky-1) 0%, var(--sky-2) 42%, var(--sky-3) 100%);
 }
 
+/* Le ciel qui passe ------------------------------------------------------
+ *
+ * Au-dessus du dégradé, un calque fixe : le soleil, des nuages qui
+ * traversent, puis le crépuscule, la nuit et ses étoiles à mesure qu'on
+ * descend. Le défilement pose `--jour` (0 en haut, 1 en bas) et
+ * `--crepuscule` (au plus haut à mi-page) sur ce seul calque.
+ *
+ * Rien de net sous le texte : des taches de lumière et des nuages à 10 %,
+ * que le verre des cartes floute encore.
+ */
+
+.ciel {
+  --jour: 0;
+  --crepuscule: 0;
+  position: fixed;
+  z-index: -1;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100vh;
+  height: 100lvh;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.ciel > * {
+  position: absolute;
+}
+
+.ciel__nuit {
+  inset: 0;
+  background: linear-gradient(180deg, #070d18 0%, #0e1828 55%, #1a2739 100%);
+  opacity: var(--jour);
+}
+
+.ciel__crepuscule {
+  inset: 0;
+  background: linear-gradient(
+    180deg,
+    transparent 30%,
+    rgb(236 128 112 / 13%) 72%,
+    rgb(250 176 96 / 15%) 100%
+  );
+  opacity: var(--crepuscule);
+}
+
+/* Le soleil : une tache de lumière en haut à droite, qui descend et pâlit
+   à mesure qu'on lit. Il respire par `scale`, que la descente laisse libre. */
+.ciel__soleil {
+  top: 2vh;
+  right: -14vmin;
+  width: 70vmin;
+  height: 70vmin;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle,
+    rgb(255 214 102 / 42%) 0%,
+    rgb(247 201 72 / 16%) 28%,
+    rgb(247 201 72 / 5%) 50%,
+    transparent 68%
+  );
+  transform: translateY(calc(var(--jour) * 85vh));
+  opacity: calc(1 - var(--jour) * 1.5);
+  animation: respire 9s ease-in-out infinite alternate;
+}
+
+@keyframes respire {
+  from { scale: 0.92; }
+  to { scale: 1.08; }
+}
+
+.ciel__etoiles {
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  fill: #fff;
+  /* Jamais plus de 60 % : sous le texte, une étoile trop vive se lit comme
+     un point de ponctuation. */
+  opacity: min(0.6, calc(var(--jour) * 1.2 - 0.3));
+}
+
+.ciel__scintille {
+  animation: scintille 3.6s ease-in-out infinite alternate;
+}
+
+@keyframes scintille {
+  from { opacity: 1; }
+  to { opacity: 0.2; }
+}
+
+/* Une étoile filante, de temps en temps, la nuit seulement. */
+.ciel__filante {
+  top: 14vh;
+  left: 18vw;
+  width: 140px;
+  height: 2px;
+  rotate: -16deg;
+  opacity: calc(var(--jour) * 2 - 1);
+}
+
+.ciel__filante::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 2px;
+  background: linear-gradient(90deg, transparent, #fff);
+  opacity: 0;
+  animation: filante 11s ease-in 4s infinite;
+}
+
+@keyframes filante {
+  0%, 88% { opacity: 0; transform: translateX(0); }
+  90% { opacity: 1; }
+  96%, 100% { opacity: 0; transform: translateX(46vw); }
+}
+
+/* À droite, là où le texte s'arrête plus tôt : à gauche, la lune se posait
+   sur les mots. */
+.ciel__lune {
+  top: 7vh;
+  right: 8vw;
+  width: 34px;
+  height: 34px;
+  filter: drop-shadow(0 0 14px rgb(232 237 242 / 55%));
+  transform: translateY(calc((1 - var(--jour)) * 24vh));
+  opacity: calc(var(--jour) * 2.4 - 1.2);
+}
+
+.ciel__defs {
+  width: 0;
+  height: 0;
+}
+
+.ciel__nuage {
+  left: 0;
+  height: auto;
+  opacity: calc(0.12 - var(--jour) * 0.07);
+  animation: traverse linear infinite;
+  will-change: transform;
+}
+
+@keyframes traverse {
+  from { transform: translateX(-100%); }
+  to { transform: translateX(100vw); }
+}
+
+/* La ville au pied de la page, quand la nuit est tombée. */
+.horizon {
+  line-height: 0;
+  background: radial-gradient(ellipse 70% 90% at 50% 100%, rgb(247 201 72 / 9%), transparent 70%);
+}
+
+.horizon svg {
+  display: block;
+  width: 100%;
+  height: clamp(96px, 14vw, 180px);
+}
+
+.horizon__fenetres rect {
+  opacity: 0.85;
+}
+
+.horizon__vacille {
+  animation: flicker 9s ease-in-out infinite;
+}
+
+.horizon__feux circle {
+  animation: balise 2.4s ease-in-out infinite;
+}
+
+@keyframes balise {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.12; }
+}
+
 /* Navigation ------------------------------------------------------------- */
 
 .nav {
@@ -773,6 +948,16 @@ section {
   margin-bottom: 12px;
 }
 
+/* L'aiguille de l'horloge des « Données » fait le tour en une minute. */
+.feature__aiguille {
+  transform-origin: 32px 32px;
+  animation: tourne 60s linear infinite;
+}
+
+@keyframes tourne {
+  to { transform: rotate(360deg); }
+}
+
 .feature__rule {
   margin: 0 0 8px;
   font-size: 15px;
@@ -1200,7 +1385,7 @@ section {
 .footer {
   max-width: 1040px;
   margin: 0 auto;
-  padding: 44px 20px 56px;
+  padding: 44px 20px 24px;
   border-top: 1px solid var(--line);
   color: var(--ink-soft);
   font-size: 14px;
@@ -1333,7 +1518,23 @@ section {
   .scene__windows rect,
   .rain-scene__bar,
   .uv-scene__sun,
-  .models__dot {
+  .models__dot,
+  .ciel__soleil,
+  .ciel__scintille,
+  .ciel__filante::after,
+  .ciel__nuage,
+  .horizon__vacille,
+  .horizon__feux circle,
+  .feature__aiguille {
     animation: none;
+  }
+
+  /* Les nuages restent posés là où ils sont, sans traverser. */
+  .ciel__nuage:nth-of-type(odd) {
+    transform: translateX(8vw);
+  }
+
+  .ciel__nuage:nth-of-type(even) {
+    transform: translateX(48vw);
   }
 }

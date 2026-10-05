@@ -16,7 +16,8 @@ wasm-bindgen = "0.2"
 web-sys = { version = "0.3", features = [
   "Window", "Document", "Element", "HtmlElement", "HtmlInputElement",
   "IntersectionObserver", "IntersectionObserverInit", "IntersectionObserverEntry",
-  "MediaQueryList", "EventTarget", "Node",
+  "MediaQueryList", "EventTarget", "Node", "AddEventListenerOptions",
+  "CssStyleDeclaration",
 ] }
 wasm-bindgen-futures = "0.4.79"
 

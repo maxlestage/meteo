@@ -1,6 +1,7 @@
 //! Les composants propres à la vitrine.
 
 pub mod aujourdhui;
+pub mod ciel;
 pub mod commune;
 pub mod fonctions;
 pub mod galerie;
