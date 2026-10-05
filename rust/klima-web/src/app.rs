@@ -11,6 +11,7 @@ use yew::prelude::*;
 use crate::composants::bandeau::Bandeau;
 use crate::composants::entete::Entete;
 use crate::composants::jours::Jours;
+use crate::composants::ciel::CielVivant;
 use crate::composants::pluie::CartePluie;
 use klima_ui::composants::langue::SelecteurDeLangue;
 use klima_ui::composants::marque::MarqueEtNom;
@@ -74,13 +75,13 @@ pub fn App(props: &Props) -> Html {
         Callback::from(move |_| reload.emit(()))
     };
 
-    let ciel = match &etat.forecast {
-        Some(forecast) => ciel_pour(forecast.current.is_day, forecast.current.weather_code),
-        None => "night",
-    };
+    let conditions =
+        etat.forecast.as_ref().map(|f| (f.current.is_day, f.current.weather_code));
 
     html! {
-        <div class={format!("sky sky--{ciel}")}>
+        <div class="sky">
+            // Le temps qu'il fait, derrière tout le reste.
+            <CielVivant {conditions} />
             <div class="shell">
                 <header class="topbar">
                     // Le signe ramène à la vitrine. Sans lui l'application est
@@ -100,7 +101,14 @@ pub fn App(props: &Props) -> Html {
                 />
 
                 if etat.loading && etat.forecast.is_none() {
-                    <p class="state">{ i18n.t("app.loading") }</p>
+                    // Des cartes fantômes qui miroitent : la page a déjà sa
+                    // forme pendant que la prévision arrive.
+                    <div class="attente" role="status">
+                        <p class="attente__texte">{ i18n.t("app.loading") }</p>
+                        <div class="attente__carte attente__carte--hero" />
+                        <div class="attente__carte" />
+                        <div class="attente__carte" />
+                    </div>
                 }
 
                 if let Some(message) = &etat.error {
@@ -113,7 +121,12 @@ pub fn App(props: &Props) -> Html {
                 }
 
                 if let Some(forecast) = &etat.forecast {
-                    <>
+                    // La clé est la ville : quand elle change, les cartes
+                    // reviennent en cascade.
+                    <div
+                        class="contenu"
+                        key={format!("{}:{}", forecast.parcelle.latitude, forecast.parcelle.longitude)}
+                    >
                         <Entete forecast={forecast.clone()} />
                         // La demi-heure en cours et les deux heures qui
                         // viennent, au quart d'heure : la question qu'on pose
@@ -283,19 +296,11 @@ pub fn App(props: &Props) -> Html {
                                 { i18n.t("app.refresh") }
                             </button>
                         </footer>
-                    </>
+                    </div>
                 }
             </div>
         </div>
     }
-}
-
-/// Le fond suit le ciel : nuit, journée couverte ou journée dégagée.
-fn ciel_pour(is_day: bool, code: u16) -> &'static str {
-    if !is_day {
-        return "night";
-    }
-    if code >= 45 { "grey" } else { "day" }
 }
 
 fn heure(ms: Option<i64>, locale: &str) -> String {
