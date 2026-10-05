@@ -25,25 +25,17 @@ body {
 }
 
 .sky {
+  position: relative;
   min-height: 100vh;
   min-height: 100dvh;
   padding: 20px 0 56px;
-  background-attachment: fixed;
-}
-
-.sky--night {
-  background: linear-gradient(180deg, #3c556e 0%, #2b3d52 42%, #1d2836 100%);
-}
-
-.sky--grey {
-  background: linear-gradient(180deg, #6b849b 0%, #4d6379 45%, #33475c 100%);
-}
-
-.sky--day {
-  background: linear-gradient(180deg, #4a90d9 0%, #3a72b4 45%, #2b5183 100%);
+  /* Le fond vient du ciel vivant ; cette couleur ne se voit qu'avant lui. */
+  background: #1d2836;
 }
 
 .shell {
+  position: relative;
+  z-index: 1;
   max-width: 720px;
   margin: 0 auto;
   padding: 0 16px;
@@ -927,5 +919,495 @@ body {
   .guetteur__direct.is-reading,
   .guetteur__bulle {
     animation: none;
+  }
+}
+
+/* Le ciel vivant ----------------------------------------------------------
+ *
+ * Derrière l'application, le temps qu'il fait dans la ville affichée : soleil
+ * ou étoiles, nuages, pluie, neige, éclairs, brouillard
+ * (`composants/ciel.rs`). Un calque fixe, qui ne bouge que par `transform` et
+ * `opacity` ; les cartes floutent ce qui passe derrière elles.
+ */
+
+.vivant {
+  position: fixed;
+  z-index: 0;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100vh;
+  height: 100lvh;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.vivant > *,
+.vivant__chute > * {
+  position: absolute;
+}
+
+/* Trois fonds superposés : celui du moment apparaît en fondu. */
+.vivant__fond {
+  inset: 0;
+  opacity: 0;
+  transition: opacity 1.4s ease;
+}
+
+.vivant__fond.is-on {
+  opacity: 1;
+}
+
+.vivant__fond--jour {
+  background: linear-gradient(180deg, #4a90d9 0%, #3a72b4 45%, #2b5183 100%);
+}
+
+.vivant__fond--gris {
+  background: linear-gradient(180deg, #6b849b 0%, #4d6379 45%, #33475c 100%);
+}
+
+.vivant__fond--nuit {
+  background: linear-gradient(180deg, #3c556e 0%, #2b3d52 42%, #1d2836 100%);
+}
+
+.vivant__soleil {
+  top: -12vmin;
+  right: -16vmin;
+  width: 78vmin;
+  height: 78vmin;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle,
+    rgb(255 226 140 / 55%) 0%,
+    rgb(255 214 102 / 22%) 26%,
+    rgb(247 201 72 / 6%) 50%,
+    transparent 68%
+  );
+  animation: vivant-respire 8s ease-in-out infinite alternate;
+}
+
+@keyframes vivant-respire {
+  from { transform: scale(0.92); opacity: 0.85; }
+  to { transform: scale(1.06); opacity: 1; }
+}
+
+.vivant__etoiles {
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  fill: #fff;
+  opacity: 0.7;
+}
+
+.vivant__etoiles.is-voile {
+  opacity: 0.3;
+}
+
+.vivant__scintille {
+  animation: vivant-scintille 3.4s ease-in-out infinite alternate;
+}
+
+@keyframes vivant-scintille {
+  from { opacity: 1; }
+  to { opacity: 0.15; }
+}
+
+/* À hauteur du nom de la ville, côté droit : plus haut, elle passait sous le
+   choix de langue. */
+.vivant__lune {
+  top: 22vh;
+  right: 9vw;
+  width: 38px;
+  height: 38px;
+  filter: drop-shadow(0 0 16px rgb(232 237 242 / 55%));
+  animation: vivant-lune 12s ease-in-out infinite alternate;
+}
+
+@keyframes vivant-lune {
+  from { transform: translateY(0) rotate(-6deg); }
+  to { transform: translateY(6px) rotate(4deg); }
+}
+
+.vivant__defs {
+  width: 0;
+  height: 0;
+}
+
+.vivant__nuage {
+  left: 0;
+  height: auto;
+  opacity: 0.17;
+  animation: vivant-traverse linear infinite;
+  will-change: transform;
+}
+
+.vivant__nuage.is-sombre {
+  opacity: 0.32;
+  filter: brightness(0.45);
+}
+
+@keyframes vivant-traverse {
+  from { transform: translateX(-100%); }
+  to { transform: translateX(100vw); }
+}
+
+.vivant__banc {
+  left: -50%;
+  width: 200%;
+  height: 26vh;
+  background: radial-gradient(ellipse at center, rgb(255 255 255 / 16%), transparent 68%);
+  animation: vivant-derive ease-in-out infinite alternate;
+}
+
+@keyframes vivant-derive {
+  from { transform: translateX(-12%); }
+  to { transform: translateX(12%); }
+}
+
+.vivant__chute {
+  inset: 0;
+  overflow: hidden;
+}
+
+.vivant__goutte {
+  top: -12vh;
+  width: 1.5px;
+  height: calc(20px * var(--echelle, 1));
+  border-radius: 1px;
+  background: linear-gradient(to bottom, transparent, rgb(200 230 255 / 60%));
+  animation: vivant-tombe linear infinite;
+  will-change: transform;
+}
+
+.vivant__goutte--fine {
+  height: calc(10px * var(--echelle, 1));
+  opacity: 0.55;
+}
+
+.vivant__goutte--forte {
+  width: 2px;
+  height: calc(28px * var(--echelle, 1));
+}
+
+@keyframes vivant-tombe {
+  to { transform: translate3d(-3vh, 125vh, 0); }
+}
+
+.vivant__flocon {
+  top: -4vh;
+  width: calc(6px * var(--echelle, 1));
+  height: calc(6px * var(--echelle, 1));
+  border-radius: 50%;
+  background: rgb(255 255 255 / 85%);
+  animation: vivant-neige linear infinite;
+  will-change: transform;
+}
+
+@keyframes vivant-neige {
+  0% { transform: translate3d(0, 0, 0); }
+  25% { transform: translate3d(14px, 28vh, 0); }
+  50% { transform: translate3d(-10px, 55vh, 0); }
+  75% { transform: translate3d(12px, 82vh, 0); }
+  100% { transform: translate3d(0, 110vh, 0); }
+}
+
+.vivant__eclair {
+  inset: 0;
+  background: rgb(235 240 255);
+  opacity: 0;
+  animation: vivant-eclair 9s linear infinite 2s;
+}
+
+@keyframes vivant-eclair {
+  0%, 90% { opacity: 0; }
+  91% { opacity: 0.45; }
+  92% { opacity: 0.05; }
+  93.5% { opacity: 0.3; }
+  95%, 100% { opacity: 0; }
+}
+
+/* Le pictogramme de l'en-tête, animé ---------------------------------- */
+
+.hero .wicon {
+  display: block;
+  margin: 6px auto -4px;
+  overflow: visible;
+  filter: drop-shadow(0 6px 18px rgb(0 0 0 / 22%));
+}
+
+.wicon--anime .wicon__sun {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: wicon-pulse 3s ease-in-out infinite alternate;
+}
+
+.wicon--anime .wicon__ray {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: wicon-rayon 2.4s ease-in-out infinite alternate;
+}
+
+.wicon--anime .wicon__ray:nth-of-type(even) {
+  animation-delay: -1.2s;
+}
+
+.wicon--anime .wicon__cloud {
+  animation: wicon-flotte 5s ease-in-out infinite alternate;
+}
+
+.wicon--anime .wicon__moon {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: wicon-berce 6s ease-in-out infinite alternate;
+}
+
+.wicon--anime .wicon__drop {
+  animation: wicon-goutte 1.1s ease-in infinite;
+}
+
+.wicon--anime .wicon__drop:nth-of-type(2) { animation-delay: -0.35s; }
+.wicon--anime .wicon__drop:nth-of-type(3) { animation-delay: -0.7s; }
+
+.wicon--anime .wicon__flake {
+  animation: wicon-flocon 2.6s ease-in-out infinite;
+}
+
+.wicon--anime .wicon__flake:nth-of-type(2) { animation-delay: -1.3s; }
+
+.wicon--anime .wicon__bolt {
+  animation: wicon-eclair 2.8s steps(1) infinite;
+}
+
+.wicon--anime .wicon__fog {
+  animation: wicon-flotte 4s ease-in-out infinite alternate-reverse;
+}
+
+@keyframes wicon-pulse {
+  from { transform: scale(0.93); }
+  to { transform: scale(1.06); }
+}
+
+@keyframes wicon-rayon {
+  from { transform: scale(0.55); opacity: 0.6; }
+  to { transform: scale(1.1); opacity: 1; }
+}
+
+@keyframes wicon-flotte {
+  from { transform: translateX(-0.7px); }
+  to { transform: translateX(0.7px); }
+}
+
+@keyframes wicon-berce {
+  from { transform: rotate(-8deg); }
+  to { transform: rotate(6deg); }
+}
+
+@keyframes wicon-goutte {
+  0% { transform: translate(0.6px, -2.5px); opacity: 0; }
+  30% { opacity: 1; }
+  100% { transform: translate(-0.6px, 2px); opacity: 0; }
+}
+
+@keyframes wicon-flocon {
+  0% { transform: translate(0, -2px); opacity: 0; }
+  30% { opacity: 1; }
+  100% { transform: translate(0.8px, 2px); opacity: 0; }
+}
+
+@keyframes wicon-eclair {
+  0%, 100% { opacity: 1; }
+  8% { opacity: 0.2; }
+  12% { opacity: 1; }
+  16% { opacity: 0.3; }
+  20% { opacity: 1; }
+}
+
+/* Les cartes arrivent en cascade --------------------------------------- */
+
+/* Le conteneur ne compte pas dans la mise en page : ses enfants restent
+   ceux de la colonne. Sa clé est la ville, et ils rejouent leur entrée
+   quand elle change. */
+.contenu {
+  display: contents;
+}
+
+.contenu > * {
+  animation: entree 0.65s cubic-bezier(0.2, 0.7, 0.3, 1) backwards;
+}
+
+.contenu > :nth-child(2) { animation-delay: 0.07s; }
+.contenu > :nth-child(3) { animation-delay: 0.14s; }
+.contenu > :nth-child(4) { animation-delay: 0.21s; }
+.contenu > :nth-child(5) { animation-delay: 0.28s; }
+.contenu > :nth-child(6) { animation-delay: 0.35s; }
+.contenu > :nth-child(7) { animation-delay: 0.42s; }
+.contenu > :nth-child(n + 8) { animation-delay: 0.49s; }
+
+@keyframes entree {
+  from { opacity: 0; transform: translateY(22px) scale(0.985); }
+}
+
+.hero__temperature {
+  animation: entree 0.7s cubic-bezier(0.2, 0.7, 0.3, 1) backwards 0.1s;
+}
+
+/* Les barres se remplissent. */
+.rain__bar,
+.guetteur__barre {
+  transform-origin: bottom;
+  animation: pousse 0.7s cubic-bezier(0.2, 0.8, 0.3, 1.15) backwards;
+}
+
+@keyframes pousse {
+  from { transform: scaleY(0); }
+}
+
+.rain__bar:nth-child(2) { animation-delay: 0.03s; }
+.rain__bar:nth-child(3) { animation-delay: 0.06s; }
+.rain__bar:nth-child(4) { animation-delay: 0.09s; }
+.rain__bar:nth-child(5) { animation-delay: 0.12s; }
+.rain__bar:nth-child(6) { animation-delay: 0.15s; }
+.rain__bar:nth-child(7) { animation-delay: 0.18s; }
+.rain__bar:nth-child(8) { animation-delay: 0.21s; }
+.rain__bar:nth-child(9) { animation-delay: 0.24s; }
+.rain__bar:nth-child(10) { animation-delay: 0.27s; }
+.rain__bar:nth-child(11) { animation-delay: 0.3s; }
+.rain__bar:nth-child(12) { animation-delay: 0.33s; }
+
+.guetteur__quart:nth-child(2) .guetteur__barre { animation-delay: 0.04s; }
+.guetteur__quart:nth-child(3) .guetteur__barre { animation-delay: 0.08s; }
+.guetteur__quart:nth-child(4) .guetteur__barre { animation-delay: 0.12s; }
+.guetteur__quart:nth-child(5) .guetteur__barre { animation-delay: 0.16s; }
+.guetteur__quart:nth-child(6) .guetteur__barre { animation-delay: 0.2s; }
+.guetteur__quart:nth-child(7) .guetteur__barre { animation-delay: 0.24s; }
+.guetteur__quart:nth-child(8) .guetteur__barre { animation-delay: 0.28s; }
+
+/* Les heures du bandeau arrivent l'une après l'autre. */
+.strip__item {
+  animation: entree 0.5s ease-out backwards;
+}
+
+.strip__item:nth-child(2) { animation-delay: 0.03s; }
+.strip__item:nth-child(3) { animation-delay: 0.06s; }
+.strip__item:nth-child(4) { animation-delay: 0.09s; }
+.strip__item:nth-child(5) { animation-delay: 0.12s; }
+.strip__item:nth-child(6) { animation-delay: 0.15s; }
+.strip__item:nth-child(n + 7) { animation-delay: 0.18s; }
+
+/* Les amplitudes de la semaine s'étirent depuis le minimum. */
+.days__fill {
+  transform-origin: left;
+  animation: etire 0.9s cubic-bezier(0.2, 0.7, 0.3, 1) backwards 0.2s;
+}
+
+.days__row:nth-child(2) .days__fill { animation-delay: 0.26s; }
+.days__row:nth-child(3) .days__fill { animation-delay: 0.32s; }
+.days__row:nth-child(4) .days__fill { animation-delay: 0.38s; }
+.days__row:nth-child(5) .days__fill { animation-delay: 0.44s; }
+.days__row:nth-child(6) .days__fill { animation-delay: 0.5s; }
+.days__row:nth-child(7) .days__fill { animation-delay: 0.56s; }
+
+@keyframes etire {
+  from { transform: scaleX(0); }
+}
+
+.days__now,
+.gauge__cursor {
+  animation: apparait 0.5s cubic-bezier(0.2, 0.8, 0.3, 1.4) backwards 0.7s;
+}
+
+@keyframes apparait {
+  from { opacity: 0; scale: 0; }
+}
+
+/* Ce qui se touche répond. */
+.tile,
+.card {
+  transition: transform 0.25s ease, border-color 0.25s ease, background-color 0.25s ease;
+}
+
+@media (hover: hover) {
+  .tile:hover {
+    transform: translateY(-3px);
+    border-color: rgb(255 255 255 / 30%);
+  }
+}
+
+.button {
+  transition: transform 0.15s ease, filter 0.15s ease;
+}
+
+.button:active,
+.strip__toggle:active {
+  transform: scale(0.96);
+}
+
+.search__results {
+  animation: deroule 0.25s ease-out;
+}
+
+@keyframes deroule {
+  from { opacity: 0; transform: translateY(-6px); }
+}
+
+/* En attendant la prévision : des cartes fantômes qui miroitent. */
+.attente {
+  display: grid;
+  gap: 14px;
+}
+
+.attente__texte {
+  margin: 0;
+  color: var(--text-muted);
+  text-align: center;
+}
+
+.attente__carte {
+  height: 130px;
+  border-radius: var(--radius);
+  background: linear-gradient(
+    100deg,
+    rgb(255 255 255 / 6%) 30%,
+    rgb(255 255 255 / 16%) 50%,
+    rgb(255 255 255 / 6%) 70%
+  );
+  background-size: 250% 100%;
+  animation: miroite 1.5s linear infinite;
+}
+
+.attente__carte--hero {
+  height: 210px;
+  background-color: transparent;
+}
+
+@keyframes miroite {
+  from { background-position: 100% 0; }
+  to { background-position: -150% 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .vivant *,
+  .wicon--anime *,
+  .contenu > *,
+  .hero__temperature,
+  .rain__bar,
+  .guetteur__barre,
+  .strip__item,
+  .days__fill,
+  .days__now,
+  .gauge__cursor,
+  .search__results,
+  .attente__carte {
+    animation: none !important;
+  }
+
+  /* Ce qui tombe se fige à mi-chemin plutôt que de rester hors de l'écran. */
+  .vivant__goutte,
+  .vivant__flocon {
+    transform: translateY(45vh);
+  }
+
+  .vivant__eclair {
+    display: none;
   }
 }
