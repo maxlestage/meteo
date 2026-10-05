@@ -31,6 +31,8 @@ pub type Params = BTreeMap<String, String>;
 const OPEN_METEO_PUBLIC: &str = "https://api.open-meteo.com";
 const OPEN_METEO_CUSTOMER: &str = "https://customer-api.open-meteo.com";
 const OPEN_METEO_GEOCODING: &str = "https://geocoding-api.open-meteo.com";
+const OPEN_METEO_AIR_PUBLIC: &str = "https://air-quality-api.open-meteo.com";
+const OPEN_METEO_AIR_CUSTOMER: &str = "https://customer-air-quality-api.open-meteo.com";
 const MET_NORWAY: &str = "https://api.met.no";
 const BRIGHT_SKY: &str = "https://api.brightsky.dev";
 
@@ -97,6 +99,19 @@ pub fn open_meteo_forecast(
 ) -> Call {
     let base = Url::parse(open_meteo_host(key)).expect("hôte");
     let mut url = with_cell(base.join("/v1/forecast").expect("chemin"), params, latitude, longitude);
+    if let Some(key) = key {
+        url.query_pairs_mut().append_pair("apikey", key);
+    }
+    Call::plain(url)
+}
+
+/// La qualité de l'air et les pollens, à la maille. La clé commerciale, quand
+/// il y en a une, vaut aussi pour ce service — et passe donc par son hôte
+/// payant.
+pub fn open_meteo_air(key: Option<&str>, params: &Params, latitude: f64, longitude: f64) -> Call {
+    let hote = if key.is_some() { OPEN_METEO_AIR_CUSTOMER } else { OPEN_METEO_AIR_PUBLIC };
+    let base = Url::parse(hote).expect("hôte");
+    let mut url = with_cell(base.join("/v1/air-quality").expect("chemin"), params, latitude, longitude);
     if let Some(key) = key {
         url.query_pairs_mut().append_pair("apikey", key);
     }
@@ -218,6 +233,19 @@ mod tests {
         );
         assert!(call.url.contains("models=icon_seamless"), "{}", call.url);
         assert!(call.url.contains("hourly=temperature_2m%2Cprecipitation"), "{}", call.url);
+    }
+
+    #[test]
+    fn lair_passe_par_lhote_payant_quand_il_y_a_une_cle() {
+        let public = open_meteo_air(None, &params(&[("current", "european_aqi")]), 48.86, 2.34);
+        assert!(public.url.starts_with("https://air-quality-api.open-meteo.com/v1/air-quality?"));
+        assert!(public.url.contains("current=european_aqi"), "{}", public.url);
+        assert!(!public.url.contains("apikey"));
+
+        let payant = open_meteo_air(Some("k"), &Params::new(), 48.86, 2.34);
+        assert!(payant.url.starts_with("https://customer-air-quality-api.open-meteo.com/v1/air-quality?"));
+        assert!(payant.url.contains("apikey=k"));
+        assert_eq!(payant.user_agent, None);
     }
 
     #[test]

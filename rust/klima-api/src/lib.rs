@@ -10,6 +10,7 @@
 //! Le décodage est séparé de l'appel : il est pur, donc testable sur une
 //! réponse enregistrée, sans réseau ni horloge.
 
+pub mod air;
 pub mod open_meteo;
 pub mod parcelle_url;
 pub mod plan;

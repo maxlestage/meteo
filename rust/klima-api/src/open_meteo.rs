@@ -1,44 +1,43 @@
-//! Client de l'API agricole Open-Meteo : les adresses, et la lecture des
-//! réponses.
+//! Client de l'API de prévision d'Open-Meteo : les adresses, et la lecture
+//! des réponses.
 //!
-//! On n'interroge que les variables agronomiques : température et humidité du
-//! sol, évapotranspiration de référence FAO-56, déficit de pression de vapeur,
-//! en plus des paramètres nécessaires au calcul des fenêtres de traitement.
+//! On n'interroge que ce qu'une ville regarde avant de sortir : température
+//! et ressenti, pluie et son risque, vent et rafales, indice UV, pression.
 //!
-//! ## Les horodatages sont ceux de la parcelle
+//! ## Les horodatages sont ceux de la ville
 //!
 //! Open-Meteo renvoie des heures locales sans décalage (« 2026-05-12T21:00 »).
-//! On garde l'heure de la parcelle telle quelle plutôt que d'en faire un
-//! instant absolu : c'est la convention du cœur, celle qui fait que « 21 h »
-//! veut dire 21 h au champ dans `alerts` comme dans `cumuls`, quel que soit le
-//! fuseau du serveur.
+//! On garde l'heure de la ville telle quelle plutôt que d'en faire un instant
+//! absolu : c'est la convention du cœur, celle qui fait que « 21 h » veut dire
+//! 21 h là-bas dans `alerts` comme dans `ville`, quel que soit le fuseau du
+//! serveur.
 //!
-//! Le décalage n'est pas perdu pour autant : `AgroForecast` le porte, et
+//! Le décalage n'est pas perdu pour autant : `Forecast` le porte, et
 //! `instant()` rend l'instant absolu pour qui en a besoin — un minuteur
 //! d'écran verrouillé, par exemple, qui compte dans le temps du téléphone.
 
-use klima_core::agro::{CurrentSample, DailySample, HourlySample};
+use klima_core::meteo::{CurrentSample, DailySample, HourlySample};
 use klima_core::calendar::civil;
 use klima_core::endpoints::Endpoints;
 use klima_core::i18n::{Params, params};
 use serde_json::Value;
 
 const CURRENT_VARIABLES: &str = "temperature_2m,apparent_temperature,relative_humidity_2m,\
-weather_code,is_day,wind_speed_10m,wind_gusts_10m";
+weather_code,is_day,wind_speed_10m,wind_gusts_10m,pressure_msl";
 
-const HOURLY_VARIABLES: &str = "temperature_2m,weather_code,is_day,precipitation_probability,\
-relative_humidity_2m,dew_point_2m,precipitation,wind_speed_10m,wind_gusts_10m,\
-soil_temperature_6cm,soil_moisture_3_to_9cm,et0_fao_evapotranspiration,vapour_pressure_deficit";
+const HOURLY_VARIABLES: &str = "temperature_2m,apparent_temperature,weather_code,is_day,\
+precipitation_probability,relative_humidity_2m,dew_point_2m,precipitation,wind_speed_10m,\
+wind_gusts_10m,uv_index";
 
 const DAILY_VARIABLES: &str = "weather_code,sunrise,sunset,temperature_2m_min,temperature_2m_max,\
-precipitation_sum,precipitation_probability_max,et0_fao_evapotranspiration,wind_gusts_10m_max";
+precipitation_sum,precipitation_probability_max,wind_gusts_10m_max,uv_index_max";
 
 const HOUR_MS: i64 = 3_600_000;
 
 pub use klima_core::position::Parcelle;
 
 #[derive(Debug, Clone, PartialEq)]
-pub struct AgroForecast {
+pub struct Forecast {
     pub parcelle: Parcelle,
     /// Fuseau retenu par l'API pour cette parcelle.
     pub timezone: String,
@@ -52,7 +51,7 @@ pub struct AgroForecast {
     pub fetched_at: i64,
 }
 
-impl AgroForecast {
+impl Forecast {
     /// L'instant absolu d'un horodatage de parcelle.
     ///
     /// Les séries sont en heure locale du champ ; cette fonction rend l'instant
@@ -68,7 +67,7 @@ impl AgroForecast {
 /// L'erreur porte une clé de catalogue, pas une phrase : c'est l'interface qui
 /// la formule dans la langue de l'utilisateur.
 #[derive(Debug, Clone, PartialEq, Eq)]
-pub enum AgroApiError {
+pub enum ApiError {
     /// Le service n'a pas répondu — réseau coupé, DNS, délai dépassé.
     Unreachable,
     /// Le service a répondu, mais par un code d'erreur.
@@ -77,30 +76,30 @@ pub enum AgroApiError {
     Malformed,
 }
 
-impl AgroApiError {
+impl ApiError {
     pub fn message_key(&self) -> &'static str {
         match self {
-            AgroApiError::Unreachable => "api.unreachable",
-            AgroApiError::Status(_) => "api.status",
-            AgroApiError::Malformed => "api.malformed",
+            ApiError::Unreachable => "api.unreachable",
+            ApiError::Status(_) => "api.status",
+            ApiError::Malformed => "api.malformed",
         }
     }
 
     pub fn params(&self) -> Params {
         match self {
-            AgroApiError::Status(status) => params([("status", i32::from(*status).into())]),
+            ApiError::Status(status) => params([("status", i32::from(*status).into())]),
             _ => Params::new(),
         }
     }
 }
 
-impl std::fmt::Display for AgroApiError {
+impl std::fmt::Display for ApiError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.write_str(self.message_key())
     }
 }
 
-impl std::error::Error for AgroApiError {}
+impl std::error::Error for ApiError {}
 
 /* -------------------- les adresses -------------------- */
 
@@ -170,8 +169,8 @@ pub fn decode_forecast(
     parcelle: Parcelle,
     body: &str,
     fetched_at: i64,
-) -> Result<AgroForecast, AgroApiError> {
-    let payload: Value = serde_json::from_str(body).map_err(|_| AgroApiError::Malformed)?;
+) -> Result<Forecast, ApiError> {
+    let payload: Value = serde_json::from_str(body).map_err(|_| ApiError::Malformed)?;
 
     let timezone = payload["timezone"].as_str().unwrap_or("UTC").to_owned();
     let utc_offset_seconds = payload["utc_offset_seconds"].as_i64().unwrap_or(0);
@@ -181,7 +180,7 @@ pub fn decode_forecast(
     let hourly = decode_hourly(&payload["hourly"]);
     let daily = decode_daily(&payload["daily"]);
 
-    Ok(AgroForecast {
+    Ok(Forecast {
         parcelle,
         timezone,
         utc_offset_seconds,
@@ -196,8 +195,8 @@ pub fn decode_forecast(
 }
 
 /// Lit une réponse de géocodage.
-pub fn decode_search(body: &str) -> Result<Vec<Parcelle>, AgroApiError> {
-    let payload: Value = serde_json::from_str(body).map_err(|_| AgroApiError::Malformed)?;
+pub fn decode_search(body: &str) -> Result<Vec<Parcelle>, ApiError> {
+    let payload: Value = serde_json::from_str(body).map_err(|_| ApiError::Malformed)?;
 
     let Some(results) = payload["results"].as_array() else {
         // Aucun résultat : l'API omet la clé plutôt que d'envoyer un tableau
@@ -298,9 +297,9 @@ pub fn parse_stamp(stamp: &str) -> Option<i64> {
     Some(civil(year, month, day, hour, minute))
 }
 
-fn decode_current(block: &Value, fallback: i64) -> Result<CurrentSample, AgroApiError> {
+fn decode_current(block: &Value, fallback: i64) -> Result<CurrentSample, ApiError> {
     if !block.is_object() {
-        return Err(AgroApiError::Malformed);
+        return Err(ApiError::Malformed);
     }
 
     Ok(CurrentSample {
@@ -312,6 +311,7 @@ fn decode_current(block: &Value, fallback: i64) -> Result<CurrentSample, AgroApi
         relative_humidity: scalar(block, "relative_humidity_2m"),
         wind_speed: scalar(block, "wind_speed_10m"),
         wind_gusts: scalar(block, "wind_gusts_10m"),
+        pressure: scalar(block, "pressure_msl"),
     })
 }
 
@@ -323,6 +323,7 @@ fn decode_hourly(block: &Value) -> Vec<HourlySample> {
     let c = |key: &str| column(block, key, length);
 
     let temperature = c("temperature_2m");
+    let apparent = c("apparent_temperature");
     let weather_code = c("weather_code");
     let is_day = c("is_day");
     let rain_probability = c("precipitation_probability");
@@ -331,10 +332,7 @@ fn decode_hourly(block: &Value) -> Vec<HourlySample> {
     let precipitation = c("precipitation");
     let wind_speed = c("wind_speed_10m");
     let wind_gusts = c("wind_gusts_10m");
-    let soil_temperature = c("soil_temperature_6cm");
-    let soil_moisture = c("soil_moisture_3_to_9cm");
-    let et0 = c("et0_fao_evapotranspiration");
-    let vpd = c("vapour_pressure_deficit");
+    let uv = c("uv_index");
 
     times
         .iter()
@@ -347,15 +345,13 @@ fn decode_hourly(block: &Value) -> Vec<HourlySample> {
                 is_day: is_day[i] != 0.0,
                 precipitation_probability: rain_probability[i],
                 temperature: temperature[i],
+                apparent_temperature: apparent[i],
                 relative_humidity: humidity[i],
                 dew_point: dew_point[i],
                 precipitation: precipitation[i],
                 wind_speed: wind_speed[i],
                 wind_gusts: wind_gusts[i],
-                soil_temperature_6cm: soil_temperature[i],
-                soil_moisture_3to9cm: soil_moisture[i],
-                et0: et0[i],
-                vapour_pressure_deficit: vpd[i],
+                uv_index: uv[i],
             })
         })
         .collect()
@@ -375,8 +371,8 @@ fn decode_daily(block: &Value) -> Vec<DailySample> {
     let t_max = c("temperature_2m_max");
     let rain = c("precipitation_sum");
     let rain_probability = c("precipitation_probability_max");
-    let et0 = c("et0_fao_evapotranspiration");
     let gusts = c("wind_gusts_10m_max");
+    let uv = c("uv_index_max");
 
     times
         .iter()
@@ -390,8 +386,8 @@ fn decode_daily(block: &Value) -> Vec<DailySample> {
                 temperature_max: t_max[i],
                 precipitation_sum: rain[i],
                 precipitation_probability_max: rain_probability[i],
-                et0_sum: et0[i],
                 wind_gusts_max: gusts[i],
+                uv_index_max: uv[i],
                 sunrise: sunrise[i],
                 sunset: sunset[i],
             })
@@ -421,11 +417,13 @@ mod tests {
         "weather_code": 3,
         "is_day": 1,
         "wind_speed_10m": 11.2,
-        "wind_gusts_10m": 18.5
+        "wind_gusts_10m": 18.5,
+        "pressure_msl": 1016.2
       },
       "hourly": {
         "time": ["2026-05-12T08:00", "2026-05-12T09:00", "2026-05-12T10:00", "pas-une-date"],
         "temperature_2m": [15.0, 17.4, 19.1, 20.0],
+        "apparent_temperature": [14.0, 16.1, 18.0, 19.2],
         "weather_code": [3, 3, 61, 61],
         "is_day": [1, 1, 1, 1],
         "precipitation_probability": [10, 20, null, 40],
@@ -433,10 +431,7 @@ mod tests {
         "dew_point_2m": [9.0, 9.5, 10.0, 10.2],
         "precipitation": [0.0, 0.0, 1.4, 0.2],
         "wind_speed_10m": [9.0, 11.2, 13.0, 14.0],
-        "wind_gusts_10m": [15.0, 18.5, 22.0, 24.0],
-        "soil_temperature_6cm": [12.0, 12.4, 13.1, 13.5],
-        "soil_moisture_3_to_9cm": [0.22, 0.22, 0.24, 0.25],
-        "et0_fao_evapotranspiration": [0.1, 0.15, 0.2, 0.2]
+        "wind_gusts_10m": [15.0, 18.5, 22.0, 24.0]
       },
       "daily": {
         "time": ["2026-05-12", "2026-05-13"],
@@ -447,8 +442,8 @@ mod tests {
         "temperature_2m_max": [21.0, 22.3],
         "precipitation_sum": [3.4, 0.0],
         "precipitation_probability_max": [80, 10],
-        "et0_fao_evapotranspiration": [2.8, 3.4],
-        "wind_gusts_10m_max": [42.0, 31.0]
+        "wind_gusts_10m_max": [42.0, 31.0],
+        "uv_index_max": [5.2, 6.1]
       }
     }"#;
 
@@ -462,7 +457,7 @@ mod tests {
         }
     }
 
-    fn forecast() -> AgroForecast {
+    fn forecast() -> Forecast {
         decode_forecast(parcelle(), PAYLOAD, civil(2026, 5, 12, 9, 7)).unwrap()
     }
 
@@ -478,16 +473,13 @@ mod tests {
                 "https://api.open-meteo.com/v1/forecast",
                 "?latitude=43.4832&longitude=-1.5586",
                 "&current=temperature_2m%2Capparent_temperature%2Crelative_humidity_2m",
-                "%2Cweather_code%2Cis_day%2Cwind_speed_10m%2Cwind_gusts_10m",
-                "&hourly=temperature_2m%2Cweather_code%2Cis_day",
+                "%2Cweather_code%2Cis_day%2Cwind_speed_10m%2Cwind_gusts_10m%2Cpressure_msl",
+                "&hourly=temperature_2m%2Capparent_temperature%2Cweather_code%2Cis_day",
                 "%2Cprecipitation_probability%2Crelative_humidity_2m%2Cdew_point_2m",
-                "%2Cprecipitation%2Cwind_speed_10m%2Cwind_gusts_10m",
-                "%2Csoil_temperature_6cm%2Csoil_moisture_3_to_9cm",
-                "%2Cet0_fao_evapotranspiration%2Cvapour_pressure_deficit",
+                "%2Cprecipitation%2Cwind_speed_10m%2Cwind_gusts_10m%2Cuv_index",
                 "&daily=weather_code%2Csunrise%2Csunset%2Ctemperature_2m_min",
                 "%2Ctemperature_2m_max%2Cprecipitation_sum",
-                "%2Cprecipitation_probability_max%2Cet0_fao_evapotranspiration",
-                "%2Cwind_gusts_10m_max",
+                "%2Cprecipitation_probability_max%2Cwind_gusts_10m_max%2Cuv_index_max",
                 "&wind_speed_unit=kmh&timezone=auto&forecast_days=7",
             )
         );
@@ -590,12 +582,12 @@ mod tests {
 
     #[test]
     fn une_variable_absente_du_bloc_vaut_zero_sur_toute_la_colonne() {
-        // Le déficit de pression de vapeur manque à la réponse enregistrée.
+        // L'indice UV horaire manque à la réponse enregistrée.
         let f = forecast();
-        assert!(f.hourly.iter().all(|hour| hour.vapour_pressure_deficit == 0.0));
+        assert!(f.hourly.iter().all(|hour| hour.uv_index == 0.0));
         // Et les autres colonnes ne s'en trouvent pas décalées.
         assert_eq!(f.hourly[0].temperature, 17.4);
-        assert_eq!(f.hourly[0].soil_moisture_3to9cm, 0.22);
+        assert_eq!(f.hourly[0].apparent_temperature, 16.1);
     }
 
     #[test]
@@ -605,7 +597,7 @@ mod tests {
 
         assert_eq!(premier.date, civil(2026, 5, 12, 0, 0));
         assert_eq!(premier.precipitation_sum, 3.4);
-        assert_eq!(premier.et0_sum, 2.8);
+        assert_eq!(premier.uv_index_max, 5.2);
         assert_eq!(premier.wind_gusts_max, 42.0);
         assert_eq!(premier.temperature_min, 11.2);
         assert_eq!(premier.weather_code, 61);
@@ -615,7 +607,7 @@ mod tests {
     fn une_reponse_qui_nest_pas_du_json_est_une_panne_pas_un_plantage() {
         assert_eq!(
             decode_forecast(parcelle(), "<html>502 Bad Gateway</html>", 0),
-            Err(AgroApiError::Malformed)
+            Err(ApiError::Malformed)
         );
     }
 
@@ -623,19 +615,19 @@ mod tests {
     fn une_reponse_sans_bloc_courant_est_une_panne() {
         assert_eq!(
             decode_forecast(parcelle(), r#"{"timezone":"UTC"}"#, 0),
-            Err(AgroApiError::Malformed)
+            Err(ApiError::Malformed)
         );
     }
 
     #[test]
     fn lerreur_porte_une_cle_de_catalogue_jamais_une_phrase() {
-        assert_eq!(AgroApiError::Unreachable.message_key(), "api.unreachable");
-        assert_eq!(AgroApiError::Status(503).message_key(), "api.status");
+        assert_eq!(ApiError::Unreachable.message_key(), "api.unreachable");
+        assert_eq!(ApiError::Status(503).message_key(), "api.status");
         assert_eq!(
-            AgroApiError::Status(503).params(),
+            ApiError::Status(503).params(),
             params([("status", 503.into())])
         );
-        for erreur in [AgroApiError::Unreachable, AgroApiError::Status(503), AgroApiError::Malformed]
+        for erreur in [ApiError::Unreachable, ApiError::Status(503), ApiError::Malformed]
         {
             assert!(!erreur.message_key().contains(' '));
         }

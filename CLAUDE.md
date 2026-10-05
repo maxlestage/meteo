@@ -12,6 +12,13 @@ nouvelle pull request.
 
 ## Ce qui ne se négocie pas
 
+- **Klima est la météo d'une ville.** Plus rien d'agricole : ni sol, ni
+  traitement, ni registre. Ce que l'application dit, c'est ce qu'on regarde
+  avant de sortir — la pluie qui vient, ce qu'il faut emporter, le ressenti,
+  l'UV, l'air et les pollens, l'accord des sources. Les identifiants internes
+  gardent leur nom d'époque (`Parcelle`, `parcelle_url`, `AgroFormat`…) : ce
+  sont des noms de code, l'interface dit « ville ».
+
 - **Deux noms, et ce n'est pas une coquille.** Le nouveau nom ne dépasse pas
   de `ios/`. L'application iPhone s'appelle **Kliima ‣** — le triangle
   (U+2023) fait partie du nom, ce n'est pas de la décoration. Tout le reste —
@@ -26,10 +33,11 @@ nouvelle pull request.
   dans un nom de cible ou de dossier casserait les chemins de compilation. Les
   cibles, les dossiers et les identifiants restent donc `Kliima` tout court.
   Un test vérifie que le nom affiché n'a pas perdu son triangle.
-- **Une seule source pour les règles agronomiques.** Les seuils vivent dans
-  `rust/klima-core/src/agro.rs` (`thresholds`) et dans son miroir Swift
-  `ios/Kliima/Models/AgroIndicators.swift`. Toute règle ajoutée d'un côté se
-  porte de l'autre, avec les mêmes cas de test.
+- **Une seule source pour les règles de la ville.** Les seuils vivent dans
+  `rust/klima-core/src/ville.rs`, `air.rs` et `alerts.rs` (modules `seuils`)
+  et dans leurs miroirs Swift `ios/Kliima/Models/Ville.swift`, `Air.swift` et
+  `Alerts.swift`. Toute règle ajoutée d'un côté se porte de l'autre, avec les
+  mêmes cas de test.
 - **Le domaine ne fabrique pas de phrases.** Il renvoie des états et des motifs
   structurés ; l'interface les traduit. Trois langues : français, anglais,
   espagnol, avec des catalogues dont les clés sont vérifiées par les tests.
@@ -48,14 +56,14 @@ nouvelle pull request.
   Une carte ne prend pas tout l'écran.
 - **On part de là où est la personne.** Une application météo qui s'ouvre sur
   une ville qu'on n'a pas choisie demande un geste avant d'être utile. La
-  position n'est donc demandée qu'à défaut — jamais par-dessus une parcelle
+  position n'est donc demandée qu'à défaut — jamais par-dessus une ville
   déjà choisie ni par-dessus un lien partagé — elle ne bloque pas l'affichage,
   et un refus ne dit rien. Les coordonnées sont arrondies à la maille avant de
-  devenir une parcelle : une parcelle finit dans l'adresse et dans le groupe
-  partagé, elle n'a pas à dire à deux mètres près où se tient quelqu'un. La
+  devenir une ville : elle finit dans l'adresse et dans le groupe partagé,
+  elle n'a pas à dire à deux mètres près où se tient quelqu'un. La
   règle vit dans `rust/klima-core/src/position.rs` et dans son miroir
   `ios/Kliima/Models/Position.swift`.
-- **Les heures sont celles de la parcelle**, pas celles du lecteur. Les nombres
+- **Les heures sont celles de la ville**, pas celles du lecteur. Les nombres
   et les dates suivent en revanche la langue de l'utilisateur.
 - **Ne pas publier de lien vers le code source** sur le site de présentation.
 - **Respecter les conditions des fournisseurs météo.** MET Norway exige un
@@ -63,7 +71,8 @@ nouvelle pull request.
   **« seulement là où l'on peut se nommer »** : en appel direct, le natif ; par
   le relais, le serveur, qui pose l'en-tête pour tout le monde. Jamais depuis
   un navigateur en direct. Les mentions de licence s'affichent dès qu'une
-  source est utilisée.
+  source est utilisée — Copernicus compris, dès qu'une mesure d'air est
+  montrée.
 - **Ce que le déploiement accorde vit sur le serveur.** Le palier payant
   s'ouvre pendant l'essai par la variable `KLIMA_PRO` du relais, jamais par une
   valeur glissée dans l'application : une valeur distribuée est une valeur

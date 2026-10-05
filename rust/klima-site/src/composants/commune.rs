@@ -1,4 +1,4 @@
-//! Le petit sélecteur de commune, pour essayer la section sur sa parcelle.
+//! Le petit sélecteur de ville, pour essayer la section sur la sienne.
 //!
 
 use klima_core::endpoints::Endpoints;

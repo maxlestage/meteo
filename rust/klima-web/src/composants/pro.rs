@@ -10,9 +10,9 @@
 //!
 //! **L'accès de test.** Pendant l'essai, une adresse invitée fait reconnaître
 //! le palier payant par le relais. Ce que cela change ici est modeste et la
-//! section le dit : sur le web, seul le recoupement est à l'œuvre — les trois
-//! autres fonctions n'ont pas d'implémentation web, elles vivent dans
-//! l'application iPhone. Afficher « Pro actif » en laissant croire le contraire
+//! section le dit : sur le web, le recoupement et l'air sont déjà offerts — les
+//! alertes n'ont pas d'implémentation web, elles vivent dans l'application
+//! iPhone. Afficher « Pro actif » en laissant croire le contraire
 //! serait la seule chose à ne pas faire.
 
 use klima_core::i18n::params;
@@ -25,11 +25,11 @@ use klima_ui::i18n::use_i18n;
 
 /// Ce que le web donne malgré tout.
 ///
-/// Le recoupement des instituts se paie dans l'application, mais reste offert
-/// ici : c'est l'argument qui vend le produit, et le montrer à l'œuvre
-/// convainc mieux que le décrire. L'annoncer comme payant à quelqu'un qui l'a
-/// sous les yeux serait au mieux confus, au pire malhonnête.
-const OFFERT_SUR_LE_WEB: [Feature; 1] = [Feature::Recoupement];
+/// Le recoupement des sources et l'air se paient dans l'application, mais
+/// restent offerts ici : c'est ce qui vend le produit, et le montrer à
+/// l'œuvre convainc mieux que le décrire. L'annoncer comme payant à quelqu'un
+/// qui l'a sous les yeux serait au mieux confus, au pire malhonnête.
+const OFFERT_SUR_LE_WEB: [Feature; 2] = [Feature::Recoupement, Feature::Air];
 
 #[derive(Properties, PartialEq)]
 pub struct Props {

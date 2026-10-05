@@ -19,8 +19,7 @@
 //! `Math.round` (le demi monte), ce qui fait qu'un demi-degré sous zéro
 //! s'affiche « 0° » et jamais « -0° ».
 
-use crate::agro::SprayBlocker;
-use crate::i18n::{Language, Translator, params};
+use crate::i18n::Language;
 
 /// Espace insécable. Elle attache l'unité à son nombre : « 2,1 mm » ne se
 /// coupe pas en fin de ligne.
@@ -141,55 +140,16 @@ fn grouper(entier: &str, separateur: char, seuil: usize) -> String {
     out
 }
 
-/// Formule un motif de blocage dans la langue courante, unités comprises.
-pub fn describe_blocker(blocker: &SprayBlocker, t: &Translator, f: Formats) -> String {
-    match blocker {
-        SprayBlocker::WindTooStrong { wind, limit } => t.with(
-            "spray.windTooStrong",
-            &params([
-                ("wind", f.unit(*wind, "km/h", 0).into()),
-                ("limit", f.unit(*limit, "km/h", 0).into()),
-            ]),
-        ),
-        SprayBlocker::WindTooWeak => t.t("spray.windTooWeak"),
-        SprayBlocker::Gusts { gusts } => {
-            t.with("spray.gusts", &params([("gusts", f.unit(*gusts, "km/h", 0).into())]))
-        }
-        SprayBlocker::Rain { amount } => {
-            t.with("spray.rain", &params([("amount", f.unit(*amount, "mm", 1).into())]))
-        }
-        SprayBlocker::TooHot { temperature } => t.with(
-            "spray.tooHot",
-            &params([("temperature", f.unit(*temperature, "°C", 0).into())]),
-        ),
-        SprayBlocker::TooCold { temperature } => t.with(
-            "spray.tooCold",
-            &params([("temperature", f.unit(*temperature, "°C", 0).into())]),
-        ),
-        SprayBlocker::DryAir { humidity } => {
-            t.with("spray.dryAir", &params([("humidity", f.percent(*humidity).into())]))
-        }
-        SprayBlocker::VapourPressureDeficit { vpd } => t.with(
-            "spray.vapourPressureDeficit",
-            &params([("vpd", f.unit(*vpd, "kPa", 2).into())]),
-        ),
-    }
-}
-
 /* ---------------------------------------------------------------- */
 
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::messages::SHARED_MESSAGES;
 
     fn f(language: Language) -> Formats {
         Formats::new(language)
     }
 
-    fn t(language: Language) -> Translator<'static> {
-        Translator::new(language, &[&SHARED_MESSAGES])
-    }
 
     #[test]
     fn virgule_decimale_en_francais_et_en_espagnol_point_en_anglais() {
@@ -267,75 +227,4 @@ mod tests {
         assert_eq!(f(Language::En).decimal(100.0, 0), "100");
     }
 
-    /* ---- les motifs de blocage ---- */
-
-    #[test]
-    fn vent_hors_limite_dans_les_trois_langues() {
-        let blocker = SprayBlocker::WindTooStrong { wind: 24.0, limit: 19.0 };
-
-        assert_eq!(
-            describe_blocker(&blocker, &t(Language::Fr), f(Language::Fr)),
-            "Vent 24\u{00a0}km/h (max 19\u{00a0}km/h)"
-        );
-        assert_eq!(
-            describe_blocker(&blocker, &t(Language::En), f(Language::En)),
-            "Wind 24\u{00a0}km/h (limit 19\u{00a0}km/h)"
-        );
-        assert_eq!(
-            describe_blocker(&blocker, &t(Language::Es), f(Language::Es)),
-            "Viento 24\u{00a0}km/h (máx. 19\u{00a0}km/h)"
-        );
-    }
-
-    #[test]
-    fn motif_sans_valeur() {
-        assert_eq!(
-            describe_blocker(&SprayBlocker::WindTooWeak, &t(Language::En), f(Language::En)),
-            "Wind too light, risk of thermal inversion"
-        );
-    }
-
-    #[test]
-    fn pluie_et_vpd_portent_leurs_unites() {
-        assert_eq!(
-            describe_blocker(
-                &SprayBlocker::Rain { amount: 1.4 },
-                &t(Language::Fr),
-                f(Language::Fr)
-            ),
-            "Pluie 1,4\u{00a0}mm dans les 2 h"
-        );
-        assert_eq!(
-            describe_blocker(
-                &SprayBlocker::VapourPressureDeficit { vpd: 1.25 },
-                &t(Language::En),
-                f(Language::En)
-            ),
-            "VPD 1.25\u{00a0}kPa, droplets evaporate"
-        );
-    }
-
-    #[test]
-    fn chaque_motif_de_blocage_a_son_texte_dans_les_trois_langues() {
-        // Un motif sans texte s'afficherait comme sa clé, « spray.gusts »,
-        // au milieu d'une phrase.
-        let motifs = [
-            SprayBlocker::WindTooStrong { wind: 24.0, limit: 19.0 },
-            SprayBlocker::WindTooWeak,
-            SprayBlocker::Gusts { gusts: 31.0 },
-            SprayBlocker::Rain { amount: 1.4 },
-            SprayBlocker::TooHot { temperature: 28.0 },
-            SprayBlocker::TooCold { temperature: 3.0 },
-            SprayBlocker::DryAir { humidity: 32.0 },
-            SprayBlocker::VapourPressureDeficit { vpd: 1.4 },
-        ];
-
-        for language in crate::i18n::LANGUAGES {
-            for motif in &motifs {
-                let texte = describe_blocker(motif, &t(language), f(language));
-                assert!(!texte.starts_with("spray."), "{language} · {texte}");
-                assert!(!texte.contains('{'), "{language} · {texte}");
-            }
-        }
-    }
 }
