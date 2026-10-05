@@ -6,7 +6,7 @@
 //! défauts pour une seule cause — l'état n'était pas dans l'URL.
 //!
 //! Ce module n'a pas de miroir Swift, et c'est voulu : ce n'est pas une règle
-//! agronomique mais une convention de navigation propre au web. L'application
+//! de météo mais une convention de navigation propre au web. L'application
 //! iOS n'a pas d'adresse à porter.
 
 use url::Url;

@@ -92,20 +92,20 @@ enum Horizon {
 extension CurrentSample {
     /// Les conditions prévues pour une heure, présentées comme « maintenant ».
     ///
-    /// La prévision horaire ne porte pas de température ressentie : on y met la
-    /// température de l'air. Les widgets ne l'affichent pas ; qui voudrait
-    /// l'afficher devra aller la chercher ailleurs plutôt que de faire passer
-    /// l'une pour l'autre.
+    /// La prévision horaire porte le ressenti, mais pas la pression : elle
+    /// vaut 0 ici. Les widgets ne l'affichent pas ; qui voudrait l'afficher
+    /// devra la chercher dans le relevé plutôt que de montrer ce zéro.
     init(prevu heure: HourlySample) {
         self.init(
             time: heure.time,
             temperature: heure.temperature,
-            apparentTemperature: heure.temperature,
+            apparentTemperature: heure.apparentTemperature,
             weatherCode: heure.weatherCode,
             isDay: heure.isDay,
             relativeHumidity: heure.relativeHumidity,
             windSpeed: heure.windSpeed,
-            windGusts: heure.windGusts
+            windGusts: heure.windGusts,
+            pressure: 0
         )
     }
 }

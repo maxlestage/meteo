@@ -166,9 +166,9 @@ pub struct Contenu {
 ///
 /// Le relevé, s'il est de l'heure en cours ; sinon l'heure prévue — une
 /// prévision servie depuis le cache peut dater de l'heure d'avant, et un relevé
-/// de 13 h 45 n'a pas à se présenter comme celui de 14 h 05. Faute de
-/// ressenti dans la prévision horaire, il vaut la température : c'est ce que
-/// fait `CurrentSample(prevu:)` côté iPhone.
+/// de 13 h 45 n'a pas à se présenter comme celui de 14 h 05. Le ressenti est
+/// alors celui de la prévision horaire, comme `CurrentSample(prevu:)` côté
+/// iPhone.
 pub fn contenu(prevision: &Forecast, maintenant: i64) -> Option<Contenu> {
     let local = maintenant + prevision.utc_offset_seconds * 1000;
     let heure = horizon::heure_contenant(local, &prevision.hourly)?;
@@ -179,7 +179,7 @@ pub fn contenu(prevision: &Forecast, maintenant: i64) -> Option<Contenu> {
     let (temperature, ressenti, code, jour_ou_nuit, vent) = if releve.time >= heure.time {
         (releve.temperature, releve.apparent_temperature, releve.weather_code, releve.is_day, releve.wind_speed)
     } else {
-        (heure.temperature, heure.temperature, heure.weather_code, heure.is_day, heure.wind_speed)
+        (heure.temperature, heure.apparent_temperature, heure.weather_code, heure.is_day, heure.wind_speed)
     };
 
     let date_apple = |local_ms: i64| prevision.instant(local_ms) as f64 / 1000.0 - EPOQUE_APPLE_S;
@@ -267,6 +267,7 @@ pub(crate) mod tests {
             "hourly": {
                 "time": heures,
                 "temperature_2m": [21.0, 22.0, 23.0, 22.5, 20.0, 18.0],
+                "apparent_temperature": [20.0, 21.5, 22.0, 21.0, 19.0, 17.0],
                 "weather_code": [2, 3, 61, 61, 3, 1],
                 "is_day": [1, 1, 1, 1, 1, 0],
                 "precipitation_probability": [10, 20, 70, 60, 30, 5],
@@ -306,7 +307,7 @@ pub(crate) mod tests {
     fn lheure_passee_le_releve_cede_la_place_a_lheure_prevue() {
         let c = contenu(&prevision(), a(14, 5)).unwrap();
         assert_eq!(c.etat["temperature"], 22.0);
-        assert_eq!(c.etat["apparentTemperature"], 22.0);
+        assert_eq!(c.etat["apparentTemperature"], 21.5);
         assert_eq!(c.etat["weatherCode"], 3);
         // Et l'heure qui vient est calculée d'avance : la pluie de 15 h.
         assert_eq!(c.etat["next"]["weatherCode"], 61);

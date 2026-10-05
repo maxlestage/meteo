@@ -2,13 +2,13 @@ import Foundation
 
 /// Les paliers d'abonnement.
 ///
-/// Miroir de `core/src/plan.ts`. Toute règle ajoutée d'un côté se porte de
-/// l'autre, avec les mêmes cas de test — comme les seuils agronomiques.
+/// Miroir de `rust/klima-core/src/plan.rs`. Toute règle ajoutée d'un côté se
+/// porte de l'autre, avec les mêmes cas de test.
 ///
 /// Un principe gouverne le découpage : **on ne coupe jamais la réponse du
-/// jour.** Un agriculteur qui ouvre Kliima pour savoir s'il traite cet
+/// jour.** Qui ouvre Kliima ‣ pour savoir s'il prend un parapluie cet
 /// après-midi doit l'obtenir sans payer. Ce qui se facture, c'est l'échelle
-/// (plusieurs parcelles) et l'anticipation (alertes, cumuls, recoupement).
+/// (plusieurs villes) et l'anticipation (alertes, air, recoupement).
 ///
 /// Ce fichier ne connaît ni StoreKit, ni prix, ni boutique : il dit seulement
 /// ce qu'un palier ouvre. L'achat est affaire d'interface.
@@ -23,10 +23,8 @@ enum Feature: String, CaseIterable, Sendable {
     case recoupement
     /// Être prévenu sans ouvrir l'application.
     case alertes
-    /// Cumuls de pluie et de degrés-jours depuis une date choisie.
-    case cumuls
-    /// Export des conditions à l'heure d'un traitement.
-    case registre
+    /// Qualité de l'air et pollens.
+    case air
 
     /// Clé de catalogue expliquant pourquoi c'est fermé — une clé, pas une
     /// phrase : l'interface la traduit.

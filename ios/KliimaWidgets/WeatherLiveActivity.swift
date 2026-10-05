@@ -2,12 +2,11 @@ import ActivityKit
 import SwiftUI
 import WidgetKit
 
-/// Activité en direct de la météo : la température et le ciel de la parcelle,
+/// Activité en direct de la météo : la température et le ciel de la ville,
 /// sur l'écran verrouillé, dans l'île dynamique et dans la pile de la montre.
 ///
-/// Contrairement à la fenêtre de traitement, elle ne suit pas un événement
-/// borné. Elle ne porte donc ni compte à rebours ni verdict : ce qu'il fait,
-/// et ce qu'il fera dans une heure.
+/// Elle ne suit pas un événement borné. Elle ne porte donc ni compte à
+/// rebours ni verdict : ce qu'il fait, et ce qu'il fera dans une heure.
 ///
 /// **Elle bascule d'elle-même à l'heure pile.** Le contenu est périmé au début
 /// de l'heure suivante ; iOS le redessine alors avec `isStale`, et
@@ -99,7 +98,7 @@ private struct DansUneHeure: View {
     }
 }
 
-/// Écran verrouillé : la parcelle, la température, le ciel et les bornes du jour.
+/// Écran verrouillé : la ville, la température, le ciel et les bornes du jour.
 ///
 /// Nommée « activité » et non « écran verrouillé » : le widget d'écran
 /// verrouillé, lui, a une vue qui porte déjà ce nom. Deux types de même nom

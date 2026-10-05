@@ -10,9 +10,9 @@ import UserNotifications
 ///
 /// **Une limite à connaître.** Le réveil en arrière-plan est accordé par le
 /// système quand il le décide : une alerte de gel calculée à vingt heures peut
-/// n'être posée qu'au réveil suivant. C'est acceptable pour une fenêtre de
-/// traitement annoncée plusieurs heures à l'avance ; ça ne l'est pas pour une
-/// alerte qui devrait partir à la minute. La version poussée depuis le relais
+/// n'être posée qu'au réveil suivant. C'est acceptable pour un gel ou une
+/// chaleur annoncés plusieurs heures à l'avance ; ça l'est moins pour la pluie
+/// dans l'heure. La version poussée depuis le relais
 /// lèvera cette limite ; en attendant, l'application ne promet que ce qu'elle
 /// tient.
 ///
@@ -61,7 +61,6 @@ enum AlertScheduler {
     /// empêche la répétition au réveil suivant.
     @discardableResult
     static func schedule(
-        summary: AgroSummary,
         hours: [HourlySample],
         plan: Plan,
         state: AlertState,
@@ -70,10 +69,10 @@ enum AlertScheduler {
     ) async -> AlertState {
         // Le palier se vérifie ici, jamais dans le domaine : `Alerts` reste une
         // fonction de la météo, et rien d'autre.
-        guard plan.allows(.alertes) else { return Alerts.recordSoil(state, summary.soil.state) }
+        guard plan.allows(.alertes) else { return state }
 
         let options = AlertOptions(now: now)
-        let alerts = Alerts.evaluate(summary: summary, hours: hours, state: state, options: options)
+        let alerts = Alerts.evaluate(hours: hours, state: state, options: options)
 
         var sent: [Alert] = []
         for alert in alerts {
@@ -82,9 +81,7 @@ enum AlertScheduler {
             if await post(alert, at: at, now: now, center: center) { sent.append(alert) }
         }
 
-        var next = Alerts.recordSent(state, sent, at: now)
-        next = Alerts.recordSoil(next, summary.soil.state)
-        return next
+        return Alerts.recordSent(state, sent, at: now)
     }
 
     /// Traduit une alerte en notification et la programme.
@@ -121,14 +118,14 @@ enum AlertScheduler {
     /// Met le paramètre de l'alerte dans la langue et les unités du lecteur.
     private static func formatted(_ alert: Alert) -> String {
         switch alert.kind {
-        case .fenetre:
-            return AgroFormat.decimal(alert.params["score"] ?? 0, decimals: 0)
-        case .gel:
-            return AgroFormat.decimal(alert.params["temperature"] ?? 0, decimals: 1)
-        case .sol:
-            return AgroFormat.percent(alert.params["moisture"] ?? 0)
         case .pluie:
-            return AgroFormat.decimal(alert.params["rain"] ?? 0, decimals: 1)
+            return AgroFormat.percent(alert.params["probability"] ?? 0)
+        case .orage:
+            return ""
+        case .gel, .chaleur:
+            return AgroFormat.unit(alert.params["temperature"] ?? 0, "°C", decimals: 0)
+        case .vent:
+            return AgroFormat.unit(alert.params["gusts"] ?? 0, "km/h", decimals: 0)
         }
     }
 }

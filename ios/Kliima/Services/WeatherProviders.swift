@@ -10,7 +10,7 @@ import Foundation
 enum WeatherProviders {
 
     /// Identifie l'application auprès des services qui l'exigent.
-    static let userAgent = "Kliima/1.0 (météo agricole; https://maxlestage.github.io/meteo/)"
+    static let userAgent = "Kliima/1.0 (météo de ville; https://maxlestage.github.io/meteo/)"
 
     private static let openMeteoAttribution =
         "Open-Meteo — modèles Météo-France, ECMWF, DWD et NOAA"

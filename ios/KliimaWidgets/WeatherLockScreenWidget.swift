@@ -1,7 +1,7 @@
 import SwiftUI
 import WidgetKit
 
-/// Widget d'écran verrouillé : la température de la parcelle, sous l'heure.
+/// Widget d'écran verrouillé : la température de la ville, sous l'heure.
 ///
 /// C'est l'équivalent, sur le téléphone, de la complication de cadran de la
 /// montre : les mêmes formes réduites, le même besoin — savoir le temps qu'il

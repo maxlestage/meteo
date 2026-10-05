@@ -3,7 +3,7 @@
 //! Le domaine ne fabrique jamais de phrase : il renvoie des états et des
 //! motifs structurés, que l'interface traduit. C'est pour cela que ce module
 //! est ici et pas dans l'interface : un motif à trous — « il gèlera à
-//! {temperature} » — est produit par une règle agronomique, et la règle vit
+//! {temperature} » — est produit par une règle du domaine, et la règle vit
 //! dans le cœur. Seul le remplissage du trou dépend de la langue.
 //!
 //! Les catalogues partagés suivront dans `messages.rs` ; ce module ne connaît

@@ -18,15 +18,13 @@ final class HorizonTests: XCTestCase {
             isDay: true,
             precipitationProbability: 20,
             temperature: temperature,
+            apparentTemperature: temperature - 1,
             relativeHumidity: 65,
             dewPoint: 11,
             precipitation: 0,
             windSpeed: 8,
             windGusts: 14,
-            soilTemperature6cm: 15,
-            soilMoisture3to9cm: 0.24,
-            et0: 0.2,
-            vapourPressureDeficit: 0.7
+            uvIndex: 1
         )
     }
 
@@ -36,7 +34,8 @@ final class HorizonTests: XCTestCase {
 
     private func courant(_ temperature: Double = 17.5) -> CurrentSample {
         CurrentSample(time: quatorze, temperature: temperature, apparentTemperature: 16,
-                      weatherCode: 1, isDay: true, relativeHumidity: 60, windSpeed: 9, windGusts: 15)
+                      weatherCode: 1, isDay: true, relativeHumidity: 60, windSpeed: 9, windGusts: 15,
+                      pressure: 1015)
     }
 
     // MARK: L'heure qui court

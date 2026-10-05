@@ -2,9 +2,8 @@ import Foundation
 
 /// Données de l'activité en direct qui affiche le temps qu'il fait.
 ///
-/// Sa sœur, `SprayActivityAttributes`, suit un événement borné : une fenêtre
-/// de traitement a un début et une fin. La météo, elle, n'en a pas — et c'est
-/// la limite à connaître avant de s'en servir. iOS termine une activité en
+/// La météo ne suit pas un événement borné : elle n'a ni début ni fin — et
+/// c'est la limite à connaître avant de s'en servir. iOS termine une activité en
 /// direct au bout de huit heures environ ; celle-ci se relance donc chaque
 /// jour, à la main.
 ///

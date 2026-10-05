@@ -23,18 +23,26 @@ protocol AgroWeatherProviding {
     func forecast(for parcelle: Parcelle, days: Int) async throws -> AgroForecast
     func search(commune query: String) async throws -> [Parcelle]
     func modelConsensus(for parcelle: Parcelle) async throws -> Consensus?
+    func air(for parcelle: Parcelle) async throws -> AirSample?
 }
 
-/// Client de l'API agricole Open-Meteo.
+/// Client de l'API de prévision d'Open-Meteo, et de son service de qualité de
+/// l'air.
 ///
-/// On n'interroge que les variables agronomiques : température et humidité du
-/// sol, évapotranspiration de référence FAO-56, déficit de pression de vapeur,
-/// en plus des paramètres nécessaires au calcul des fenêtres de traitement.
-/// L'API est libre d'accès et ne demande aucune clé.
+/// On n'interroge que ce qu'une ville regarde avant de sortir : température
+/// et ressenti, pluie et son risque, vent et rafales, indice UV, pression —
+/// et, à part, l'air et les pollens. Les variables sont celles de
+/// `klima-api/src/open_meteo.rs` et `air.rs`.
 struct AgroWeatherService: AgroWeatherProviding {
 
     private static let forecastURL = URL(string: "https://api.open-meteo.com/v1/forecast")!
     private static let geocodingURL = URL(string: "https://geocoding-api.open-meteo.com/v1/search")!
+    private static let airURL = URL(string: "https://air-quality-api.open-meteo.com/v1/air-quality")!
+
+    /// L'indice européen, les polluants qu'on affiche, puis les six pollens —
+    /// dans l'ordre de `klima-api/src/air.rs`.
+    static let airVariables =
+        ["european_aqi", "pm2_5", "pm10", "nitrogen_dioxide", "ozone"] + Pollen.allCases.map(\.variable)
 
     private static let currentVariables = [
         "temperature_2m",
@@ -44,10 +52,12 @@ struct AgroWeatherService: AgroWeatherProviding {
         "is_day",
         "wind_speed_10m",
         "wind_gusts_10m",
+        "pressure_msl",
     ]
 
     private static let hourlyVariables = [
         "temperature_2m",
+        "apparent_temperature",
         "weather_code",
         "is_day",
         "precipitation_probability",
@@ -56,10 +66,7 @@ struct AgroWeatherService: AgroWeatherProviding {
         "precipitation",
         "wind_speed_10m",
         "wind_gusts_10m",
-        "soil_temperature_6cm",
-        "soil_moisture_3_to_9cm",
-        "et0_fao_evapotranspiration",
-        "vapour_pressure_deficit",
+        "uv_index",
     ]
 
     private static let dailyVariables = [
@@ -70,8 +77,8 @@ struct AgroWeatherService: AgroWeatherProviding {
         "temperature_2m_max",
         "precipitation_sum",
         "precipitation_probability_max",
-        "et0_fao_evapotranspiration",
         "wind_gusts_10m_max",
+        "uv_index_max",
     ]
 
     private let session: URLSession
@@ -80,7 +87,7 @@ struct AgroWeatherService: AgroWeatherProviding {
         self.session = session
     }
 
-    /// Récupère la prévision agricole d'une parcelle sur `days` jours.
+    /// Récupère la prévision d'une ville sur `days` jours.
     func forecast(for parcelle: Parcelle, days: Int = 7) async throws -> AgroForecast {
         var components = URLComponents(url: Self.forecastURL, resolvingAgainstBaseURL: false)!
         components.queryItems = [
@@ -126,6 +133,44 @@ struct AgroWeatherService: AgroWeatherProviding {
     /// l'application continue avec sa source habituelle.
     func modelConsensus(for parcelle: Parcelle) async throws -> Consensus? {
         await WeatherProviders.consensus(for: parcelle, session: session)
+    }
+
+    /// L'air de la ville : qualité et pollens. `nil` si la réponse n'a pas de
+    /// mesure — une réponse vide n'est pas un air pur.
+    func air(for parcelle: Parcelle) async throws -> AirSample? {
+        var components = URLComponents(url: Self.airURL, resolvingAgainstBaseURL: false)!
+        components.queryItems = [
+            URLQueryItem(name: "latitude", value: String(format: "%.4f", parcelle.latitude)),
+            URLQueryItem(name: "longitude", value: String(format: "%.4f", parcelle.longitude)),
+            URLQueryItem(name: "current", value: Self.airVariables.joined(separator: ",")),
+            URLQueryItem(name: "timezone", value: "auto"),
+        ]
+        let (data, response) = try await session.data(from: components.url!)
+        if let http = response as? HTTPURLResponse, !(200..<300).contains(http.statusCode) {
+            throw AgroWeatherError.badStatus(http.statusCode)
+        }
+        return Self.decodeAir(data)
+    }
+
+    /// Lit la réponse du service de l'air. Séparé de l'appel pour être testé.
+    static func decodeAir(_ data: Data) -> AirSample? {
+        guard
+            let objet = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
+            let current = objet["current"] as? [String: Any]
+        else { return nil }
+        let nombre = { (nom: String) -> Double? in
+            guard let valeur = (current[nom] as? NSNumber)?.doubleValue, valeur.isFinite else { return nil }
+            return valeur
+        }
+        return AirSample(
+            europeanAqi: nombre("european_aqi"),
+            pm25: nombre("pm2_5"),
+            pm10: nombre("pm10"),
+            nitrogenDioxide: nombre("nitrogen_dioxide"),
+            ozone: nombre("ozone"),
+            // Un pollen absent n'est pas un pollen à zéro : on l'écarte.
+            pollens: Pollen.allCases.compactMap { pollen in nombre(pollen.variable).map { (pollen, $0) } }
+        )
     }
 
     /// Recherche une commune par son nom (géocodage Open-Meteo).
@@ -200,6 +245,7 @@ struct ForecastPayload: Decodable {
         let isDay: Int?
         let windSpeed10m: Double?
         let windGusts10m: Double?
+        let pressureMsl: Double?
 
         enum CodingKeys: String, CodingKey {
             case time
@@ -210,6 +256,7 @@ struct ForecastPayload: Decodable {
             case isDay = "is_day"
             case windSpeed10m = "wind_speed_10m"
             case windGusts10m = "wind_gusts_10m"
+            case pressureMsl = "pressure_msl"
         }
 
         func decode(in zone: TimeZone) -> CurrentSample {
@@ -222,7 +269,8 @@ struct ForecastPayload: Decodable {
                 isDay: (isDay ?? 1) == 1,
                 relativeHumidity: relativeHumidity2m ?? 0,
                 windSpeed: windSpeed10m ?? 0,
-                windGusts: windGusts10m ?? 0
+                windGusts: windGusts10m ?? 0,
+                pressure: pressureMsl ?? 0
             )
         }
     }
@@ -233,15 +281,13 @@ struct ForecastPayload: Decodable {
         let isDay: [Int?]?
         let precipitationProbability: [Double?]?
         let temperature2m: [Double?]?
+        let apparentTemperature: [Double?]?
         let relativeHumidity2m: [Double?]?
         let dewPoint2m: [Double?]?
         let precipitation: [Double?]?
         let windSpeed10m: [Double?]?
         let windGusts10m: [Double?]?
-        let soilTemperature6cm: [Double?]?
-        let soilMoisture3to9cm: [Double?]?
-        let et0FaoEvapotranspiration: [Double?]?
-        let vapourPressureDeficit: [Double?]?
+        let uvIndex: [Double?]?
 
         enum CodingKeys: String, CodingKey {
             case time
@@ -249,15 +295,13 @@ struct ForecastPayload: Decodable {
             case isDay = "is_day"
             case precipitationProbability = "precipitation_probability"
             case temperature2m = "temperature_2m"
+            case apparentTemperature = "apparent_temperature"
             case relativeHumidity2m = "relative_humidity_2m"
             case dewPoint2m = "dew_point_2m"
             case precipitation
             case windSpeed10m = "wind_speed_10m"
             case windGusts10m = "wind_gusts_10m"
-            case soilTemperature6cm = "soil_temperature_6cm"
-            case soilMoisture3to9cm = "soil_moisture_3_to_9cm"
-            case et0FaoEvapotranspiration = "et0_fao_evapotranspiration"
-            case vapourPressureDeficit = "vapour_pressure_deficit"
+            case uvIndex = "uv_index"
         }
 
         func decode(in zone: TimeZone) -> [HourlySample] {
@@ -266,15 +310,13 @@ struct ForecastPayload: Decodable {
             let day = intColumn(isDay)
             let rainProbability = column(precipitationProbability)
             let temperature = column(temperature2m)
+            let apparent = column(apparentTemperature)
             let humidity = column(relativeHumidity2m)
             let dewPoint = column(dewPoint2m)
             let rain = column(precipitation)
             let wind = column(windSpeed10m)
             let gusts = column(windGusts10m)
-            let soilTemperature = column(soilTemperature6cm)
-            let soilMoisture = column(soilMoisture3to9cm)
-            let et0 = column(et0FaoEvapotranspiration)
-            let vpd = column(vapourPressureDeficit)
+            let uv = column(uvIndex)
 
             return time.enumerated().compactMap { index, stamp in
                 guard let date = formatter.date(from: stamp) else { return nil }
@@ -284,15 +326,13 @@ struct ForecastPayload: Decodable {
                     isDay: (day(index) ?? 1) == 1,
                     precipitationProbability: rainProbability(index),
                     temperature: temperature(index),
+                    apparentTemperature: apparent(index),
                     relativeHumidity: humidity(index),
                     dewPoint: dewPoint(index),
                     precipitation: rain(index),
                     windSpeed: wind(index),
                     windGusts: gusts(index),
-                    soilTemperature6cm: soilTemperature(index),
-                    soilMoisture3to9cm: soilMoisture(index),
-                    et0: et0(index),
-                    vapourPressureDeficit: vpd(index)
+                    uvIndex: uv(index)
                 )
             }
         }
@@ -307,8 +347,8 @@ struct ForecastPayload: Decodable {
         let temperature2mMax: [Double?]?
         let precipitationSum: [Double?]?
         let precipitationProbabilityMax: [Double?]?
-        let et0FaoEvapotranspiration: [Double?]?
         let windGusts10mMax: [Double?]?
+        let uvIndexMax: [Double?]?
 
         enum CodingKeys: String, CodingKey {
             case time
@@ -319,8 +359,8 @@ struct ForecastPayload: Decodable {
             case temperature2mMax = "temperature_2m_max"
             case precipitationSum = "precipitation_sum"
             case precipitationProbabilityMax = "precipitation_probability_max"
-            case et0FaoEvapotranspiration = "et0_fao_evapotranspiration"
             case windGusts10mMax = "wind_gusts_10m_max"
+            case uvIndexMax = "uv_index_max"
         }
 
         func decode(in zone: TimeZone) -> [DailySample] {
@@ -331,8 +371,8 @@ struct ForecastPayload: Decodable {
             let tMax = column(temperature2mMax)
             let rain = column(precipitationSum)
             let probability = column(precipitationProbabilityMax)
-            let et0 = column(et0FaoEvapotranspiration)
             let gusts = column(windGusts10mMax)
+            let uv = column(uvIndexMax)
 
             return time.enumerated().compactMap { index, stamp in
                 guard let date = formatter.date(from: stamp) else { return nil }
@@ -343,8 +383,8 @@ struct ForecastPayload: Decodable {
                     temperatureMax: tMax(index),
                     precipitationSum: rain(index),
                     precipitationProbabilityMax: probability(index),
-                    et0Sum: et0(index),
                     windGustsMax: gusts(index),
+                    uvIndexMax: uv(index),
                     sunrise: parseStamp(sunrise, index, stampFormatter),
                     sunset: parseStamp(sunset, index, stampFormatter)
                 )
