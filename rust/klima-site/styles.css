@@ -686,6 +686,60 @@ section {
   font-size: 13px;
 }
 
+/* Dans votre poche : la galerie ------------------------------------------ */
+
+/*
+ * Trois écrans de l'application dans des cadres de téléphone. Côte à côte
+ * sur un écran large, l'un sous l'autre sur un téléphone — jamais en
+ * défilement de côté. Les dimensions de l'image sont posées dans le HTML :
+ * la page ne saute pas quand elles arrivent.
+ */
+.gallery__grid {
+  display: grid;
+  gap: 28px;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  align-items: start;
+}
+
+.shot {
+  margin: 0;
+}
+
+.shot__device {
+  max-width: 280px;
+  margin: 0 auto;
+  padding: 10px;
+  border: 1px solid rgb(255 255 255 / 18%);
+  border-radius: 40px;
+  background: linear-gradient(160deg, #55606b, #2c343d);
+  box-shadow: 0 24px 60px rgb(0 0 0 / 35%);
+}
+
+.shot__device img {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: 31px;
+}
+
+.shot figcaption {
+  max-width: 300px;
+  margin: 18px auto 0;
+  text-align: center;
+}
+
+.shot h3 {
+  margin: 0 0 6px;
+  font-size: 20px;
+  font-weight: 700;
+}
+
+.shot p {
+  margin: 0;
+  color: var(--ink-soft);
+  font-size: 15px;
+}
+
 /* Indicateurs et données -------------------------------------------------- */
 
 .features__grid,
@@ -710,6 +764,13 @@ section {
   margin: 0 0 8px;
   font-size: 21px;
   font-weight: 700;
+}
+
+.feature__icon {
+  display: block;
+  width: 52px;
+  height: 52px;
+  margin-bottom: 12px;
 }
 
 .feature__rule {

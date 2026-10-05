@@ -235,3 +235,96 @@ pub fn EchelleUv() -> Html {
         </svg>
     }
 }
+
+#[derive(Properties, PartialEq)]
+pub struct IconeProps {
+    /// La fonction illustrée : rain, advice, uv, air, pollen, alerts.
+    pub cle: AttrValue,
+}
+
+/// L'illustration d'une fonction, en tête de sa carte : un dessin par
+/// question, aux couleurs de ce qu'elle annonce.
+#[function_component]
+pub fn IconeFonction(props: &IconeProps) -> Html {
+    let dessin = match props.cle.as_str() {
+        "rain" => html! {
+            <>
+                <path d="M18 40h28a10 10 0 0 0 0-20 14 14 0 0 0-27-3A9 9 0 0 0 18 40Z" fill="#c6d6e4" />
+                <g stroke="#7fd0f5" stroke-width="3.2" stroke-linecap="round">
+                    <line x1="24" y1="46" x2="21" y2="54" />
+                    <line x1="34" y1="46" x2="31" y2="54" />
+                    <line x1="44" y1="46" x2="41" y2="54" />
+                </g>
+            </>
+        },
+        "advice" => html! {
+            <>
+                <path d="M8 32a24 22 0 0 1 48 0q-6-5-12 0-6-5-12 0-6-5-12 0-6-5-12 0Z" fill="#4aa3d8" />
+                <path d="M32 10v2" stroke="#e8edf2" stroke-width="3" stroke-linecap="round" />
+                <path d="M32 32v18a5 5 0 0 1-10 0" fill="none" stroke="#e8edf2" stroke-width="3.2" stroke-linecap="round" />
+            </>
+        },
+        "uv" => html! {
+            <>
+                <circle cx="32" cy="32" r="11" fill="#f7c948" />
+                <g stroke="#f7c948" stroke-width="3.2" stroke-linecap="round">
+                    <line x1="32" y1="6" x2="32" y2="13" />
+                    <line x1="32" y1="51" x2="32" y2="58" />
+                    <line x1="6" y1="32" x2="13" y2="32" />
+                    <line x1="51" y1="32" x2="58" y2="32" />
+                    <line x1="13.6" y1="13.6" x2="18.5" y2="18.5" />
+                    <line x1="45.5" y1="45.5" x2="50.4" y2="50.4" />
+                    <line x1="13.6" y1="50.4" x2="18.5" y2="45.5" />
+                    <line x1="45.5" y1="18.5" x2="50.4" y2="13.6" />
+                </g>
+            </>
+        },
+        "air" => html! {
+            <>
+                <g fill="none" stroke="#8fd3c8" stroke-width="3.2" stroke-linecap="round">
+                    <path d="M8 24h30a7 7 0 1 0-7-7" />
+                    <path d="M8 34h40a7 7 0 1 1-7 7" />
+                    <path d="M8 44h18" />
+                </g>
+                <g fill="#c6d6e4">
+                    <circle cx="50" cy="20" r="2.4" />
+                    <circle cx="56" cy="30" r="1.8" />
+                    <circle cx="36" cy="50" r="2" />
+                </g>
+            </>
+        },
+        "pollen" => html! {
+            <>
+                <path d="M32 58V38" stroke="#7ed07a" stroke-width="3.2" stroke-linecap="round" />
+                <path d="M32 50c-8 0-12-4-13-10 7 0 12 3 13 10Z" fill="#7ed07a" />
+                <g fill="#f0c14b">
+                    <circle cx="32" cy="14" r="7" />
+                    <circle cx="43" cy="22" r="7" />
+                    <circle cx="39" cy="34" r="7" />
+                    <circle cx="25" cy="34" r="7" />
+                    <circle cx="21" cy="22" r="7" />
+                </g>
+                <circle cx="32" cy="25" r="6" fill="#ef8a5a" />
+                <g fill="#f7d77a" opacity="0.8">
+                    <circle cx="52" cy="10" r="1.6" />
+                    <circle cx="56" cy="18" r="1.2" />
+                    <circle cx="10" cy="12" r="1.4" />
+                </g>
+            </>
+        },
+        _ => html! {
+            <>
+                <path d="M32 8a4 4 0 0 1 4 4v1.5A15 15 0 0 1 47 28v10l5 7H12l5-7V28a15 15 0 0 1 11-14.5V12a4 4 0 0 1 4-4Z" fill="#f0c14b" />
+                <path d="M26 49a6 6 0 0 0 12 0Z" fill="#f0c14b" />
+                <g fill="none" stroke="#ef8a5a" stroke-width="3" stroke-linecap="round">
+                    <path d="M8 22a26 26 0 0 1 6-10" />
+                    <path d="M56 22a26 26 0 0 0-6-10" />
+                </g>
+            </>
+        },
+    };
+
+    html! {
+        <svg class="feature__icon" viewBox="0 0 64 64" aria-hidden="true">{ dessin }</svg>
+    }
+}
