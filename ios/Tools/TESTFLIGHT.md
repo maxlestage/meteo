@@ -94,9 +94,9 @@ en passant `CODE_SIGN_ENTITLEMENTS=` : plus d'habilitations, donc plus d'écart
 avec le profil, donc une archive qui part.
 
 Ce que ça coûte, et il faut le savoir avant d'installer la version : le widget
-d'écran d'accueil et la montre ne liront pas la parcelle choisie dans
+d'écran d'accueil et la montre ne liront pas la ville choisie dans
 l'application. `SharedStore` retombe sur les réglages locaux — c'est prévu, ça
-ne plante pas — et ils affichent donc la parcelle par défaut. Tout le reste de
+ne plante pas — et ils affichent donc la ville par défaut. Tout le reste de
 l'application fonctionne.
 
 Le jour où le groupe existe, cocher la case au lancement : les habilitations

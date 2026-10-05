@@ -1,11 +1,8 @@
 import SwiftUI
 import WidgetKit
 
-/// Widget d'écran d'accueil : le temps qu'il fait sur la parcelle.
-///
-/// Les autres widgets de Kliima parlent tous de la fenêtre de traitement. Il
-/// manquait le plus simple — la température et le ciel, d'un coup d'œil, sans
-/// ouvrir l'application.
+/// Widget d'écran d'accueil : le temps qu'il fait en ville — la température
+/// et le ciel, d'un coup d'œil, sans ouvrir l'application.
 struct WeatherWidget: Widget {
     var body: some WidgetConfiguration {
         StaticConfiguration(kind: "KliimaWeatherWidget", provider: WeatherTimelineProvider()) { entry in
@@ -29,12 +26,12 @@ struct WeatherEntry: TimelineEntry {
     let timeZone: TimeZone
 }
 
-/// Le widget interroge l'API lui-même, pour la parcelle enregistrée par
+/// Le widget interroge l'API lui-même, pour la ville enregistrée par
 /// l'application dans le groupe partagé.
 struct WeatherTimelineProvider: TimelineProvider {
 
     func placeholder(in context: Context) -> WeatherEntry {
-        WeatherEntry(date: Date(), parcelleName: Parcelle.chartres.name,
+        WeatherEntry(date: Date(), parcelleName: Parcelle.paris.name,
                      current: nil, today: nil, hours: [], timeZone: .current)
     }
 
@@ -63,7 +60,7 @@ struct WeatherTimelineProvider: TimelineProvider {
     }
 
     private func entries() async -> [WeatherEntry] {
-        let parcelle = SharedStore.loadParcelle() ?? .chartres
+        let parcelle = SharedStore.loadParcelle() ?? .paris
         let maintenant = Date()
 
         guard let forecast = try? await AgroWeatherService().forecast(for: parcelle, days: 2) else {

@@ -1,18 +1,20 @@
 # Klima
 
-Météo agricole : une application iOS en SwiftUI, une application web et un site
-de présentation, tous bâtis sur le même cœur agronomique. Les variables sont
-celles de l'**API agricole Open-Meteo** — humidité et température du sol,
-évapotranspiration de référence FAO-56, déficit de pression de vapeur — et trois
-fournisseurs indépendants sont recoupés pour la valeur affichée.
+La météo d'une ville : une application iOS en SwiftUI (avec sa montre et ses
+widgets), une application web et un site de présentation, tous bâtis sur le
+même cœur. Klima répond aux questions qu'on se pose avant de sortir — va-t-il
+pleuvoir, et quand ; que faut-il emporter ; le soleil tape-t-il ; l'air est-il
+bon — à partir des modèles des grands instituts, redistribués par
+**Open-Meteo**, des prévisions d'air de **Copernicus**, et de trois
+fournisseurs indépendants recoupés.
 
 **Deux noms, et c'est voulu.** Le projet, le site et l'application web
 s'appellent **Klima** ; l'application iPhone et sa montre s'appellent
-**Kliima**. Le signe, les couleurs et le cœur agronomique sont les mêmes.
+**Kliima ‣**. Le signe, les couleurs et le cœur sont les mêmes.
 
 ```
 rust/   Tout ce qui tourne hors iOS, en Rust
-  klima-core/   Cœur : règles agronomiques, codes météo, langues, paliers
+  klima-core/   Cœur : règles de la ville, air, alertes, codes météo, langues, paliers
   klima-api/    Formats de fil : adresses des fournisseurs, lecture des réponses
   klima-relay/  Le relais (Axum) : cache mutualisé, clé commerciale, site servi
   klima-ui/     Ce que les deux interfaces web partagent (Yew)
@@ -30,14 +32,15 @@ reste à faire pour que le relais Rust prenne la main en production est dans
 [`rust/DEPLOIEMENT.md`](rust/DEPLOIEMENT.md).
 
 L'application reprend la présentation de l'application Météo du système —
-commune, température, bandeau horaire, liste des sept jours — et range les
-indicateurs agronomiques dans les tuiles de détail.
+ville, température, bandeau horaire, liste des sept jours — et y ajoute ce
+qu'une ville regarde : la pluie qui vient, ce qu'il faut emporter, l'UV, l'air
+et les pollens, l'accord des sources.
 
 ## Langues
 
 Le domaine ne fabrique jamais de phrase : il renvoie des états et des motifs
-structurés — `SoilState.sature`, `SprayBlocker.windTooStrong(wind:limit:)` — que
-l'interface traduit. Les textes vivent donc dans des catalogues, jamais dans le
+structurés — `Pluie::Prevue { debut, probabilite, cumul }`, `Conseil::Parapluie`,
+`QualiteAir::Mediocre` — que l'interface traduit. Les textes vivent donc dans des catalogues, jamais dans le
 code de calcul.
 
 | Surface | Catalogue | Choix de la langue |
@@ -49,7 +52,7 @@ code de calcul.
 
 Les nombres et les dates suivent la langue : virgule décimale en français et en
 espagnol, point en anglais ; horloge sur 24 h en français, sur 12 h en anglais
-américain. Les heures restent en revanche celles du fuseau de la parcelle, pas
+américain. Les heures restent en revanche celles du fuseau de la ville, pas
 celui du lecteur.
 
 Les suites de tests vérifient que les trois langues portent exactement les mêmes
@@ -91,31 +94,28 @@ Le recoupement fait l'objet d'appels séparés de la prévision principale : s'i
 Les licences imposent des mentions : elles sont affichées sous la comparaison,
 une par licence effectivement utilisée.
 
-## Ce que l'application calcule
+## Ce que l'application dit
 
 iOS et web appliquent les mêmes règles, avec les mêmes seuils :
 
-| Indicateur | Règle |
+| Réponse | Règle |
 | --- | --- |
-| **Bilan hydrique** | Pluie − ET0 (FAO-56) sur 7 jours ; alerte d'irrigation sous −15 mm |
-| **État du sol** | Humidité volumique 3–9 cm : saturé ≥ 0,35, sec ≤ 0,12 ; portance et aptitude au semis (sol ≥ 8 °C) |
-| **Fenêtre de traitement** | Vent 3–19 km/h (limite réglementaire), rafales < 25 km/h, pas de pluie sous 2 h, 5–25 °C, HR ≥ 40 %, VPD ≤ 1,2 kPa |
-| **Pression maladie** | Heures d'humectation du feuillage (HR ≥ 90 % entre 8 et 30 °C), à la manière des tables de Mills |
-| **Risque de gel** | Mini nocturne : faible ≤ 1 °C, modéré ≤ −2 °C, sévère ≤ −4 °C ; gelée blanche si le point de rosée est négatif |
-| **Degrés-jours** | Moyenne plafonnée, base 10 °C, plafond 30 °C |
+| **Pluie à venir** | Sur 12 h : une heure est pluvieuse dès 0,1 mm ou 50 % de risque. Klima dit si rien n'est prévu, s'il pleut et quand ça cesse, ou quand la pluie arrive, avec son risque et son cumul |
+| **À emporter** | Parapluie s'il pleut ; manteau sous 10 °C ressentis ; lunettes dès l'indice UV 3, crème dès 6 ; eau au-delà de 30 °C ; prudence sous 0 °C ; gare au parapluie dès 50 km/h de rafales |
+| **Indice UV** | Échelle de l'OMS (faible, modéré, élevé, très élevé, extrême), arrondie avant d'être classée |
+| **Qualité de l'air** | Indice européen et ses six classes, de bonne à extrêmement médiocre ; particules fines |
+| **Pollens** | Six espèces (aulne, bouleau, graminées, armoise, olivier, ambroisie), le dominant nommé avec son intensité ; Europe seulement |
+| **Alertes** | Pluie dans les 2 h tant qu'il fait sec, orage, gel, chaleur dès 33 °C, rafales dès 70 km/h ; jamais entre 22 h et 7 h, six heures de garde par nature |
 
-Le vent, les rafales et la pluie imminente sont **rédhibitoires** : ils rendent
-l'heure inexploitable pour un traitement quel que soit le reste du score.
-
-S'y ajoutent les éléments d'une météo classique : conditions du moment, codes
-temps WMO traduits en pictogrammes, probabilité de pluie horaire, amplitude
-thermique de la semaine, lever et coucher du soleil.
+S'y ajoutent les éléments d'une météo classique : conditions du moment,
+ressenti, humidité et point de rosée, vent et rafales, pression, codes temps
+WMO traduits en pictogrammes, amplitude thermique de la semaine, lever et
+coucher du soleil.
 
 Les seuils sont définis une seule fois par plateforme et doivent rester
-synchronisés : `rust/klima-core/src/agro.rs` (`thresholds`), consommé par le web
-et le site, et `ios/Kliima/Models/AgroIndicators.swift` (`AgroThresholds`). Les deux
-suites de tests couvrent les mêmes cas, pour que le conseil rendu soit
-identique au champ.
+synchronisés : `rust/klima-core/src/ville.rs`, `air.rs` et `alerts.rs`
+(modules `seuils`), et leurs miroirs `ios/Kliima/Models/Ville.swift`,
+`Air.swift` et `Alerts.swift`. Les deux suites de tests couvrent les mêmes cas.
 
 ## iOS
 
@@ -159,7 +159,7 @@ Les cinq cibles se partagent le même noyau (`Kliima/Models`) :
 ```
 Kliima/           Application iPhone
   App/           Point d'entrée SwiftUI
-  Models/        Types de mesure, cœur agronomique, formats, textes
+  Models/        Types de mesure, règles de la ville et de l'air, formats, textes
   Services/      Client Open-Meteo, position, activité en direct
   ViewModels/    État du tableau de bord
   Views/         Tableau de bord, bandeau horaire, liste des jours, tuiles
@@ -170,42 +170,35 @@ KliimaWatchWidgets/ Extension watchOS : complications de cadran
 ```
 
 L'application, ses widgets et
-la complication lisent la même parcelle via un **groupe d'applications**
+la complication lisent la même ville via un **groupe d'applications**
 (`group.com.kliima.app`) : il doit être déclaré dans le compte développeur avant
 la première compilation signée.
 
-### Activité en direct
+### Activité en direct et île dynamique
 
-La fenêtre de traitement est le seul élément vraiment vivant de Kliima : elle a
-un début, une fin, et des conditions qui peuvent se dégrader entre-temps. Un
-bouton sur la carte de traitement ouvre son suivi ; l'écran verrouillé et l'île
-dynamique affichent alors le verdict courant, le vent et le motif de blocage
-s'il y en a un.
-
-Le suivi continue application fermée grâce à une tâche d'arrière-plan
-(`BGAppRefreshTask`) : le système réveille Kliima de temps à autre, qui recharge
-la prévision, met à jour l'activité et les widgets, puis redemande un réveil. Le
-rythme est décidé par iOS selon l'usage et la batterie — il n'est pas garanti.
-Un suivi à la minute demanderait des notifications poussées, donc un envoi
-depuis le relais (`server/`) — prévu, pas encore fait.
+Un bouton sous la température ouvre le suivi de la météo : l'écran verrouillé
+et l'île dynamique montrent la température, le ciel, le vent et l'heure qui
+vient, calculée d'avance. La péremption tombe au début de l'heure suivante :
+l'île bascule seule à l'heure pile, même sans réseau. Le relais, s'il a une clé
+APNs, pousse ce qui change en temps réel — voir
+[`rust/DEPLOIEMENT.md`](rust/DEPLOIEMENT.md).
 
 ### Widget d'écran d'accueil
 
-Deux tailles, petite et moyenne : la prochaine fenêtre de traitement et son
-score, complétés sur la taille moyenne du vent, de l'état du sol et du bilan.
-Le widget va chercher sa propre prévision, une fois par heure.
+La température et le ciel de la ville, avec une entrée par heure calculée
+d'avance ; et la météo sur l'écran verrouillé.
 
 ### Complication de cadran
 
 `KliimaWatchWidgets` fournit les quatre formes de watchOS — circulaire,
-rectangulaire, en ligne et d'angle — avec l'heure de la prochaine fenêtre.
+rectangulaire, en ligne et d'angle — avec la température de la ville.
 
 ### Application montre
 
 `KliimaWatch` est une application watchOS autonome : elle interroge l'API
 elle-même et se cale sur la position du poignet, sans passer par le téléphone.
-Elle montre la température, la prochaine fenêtre de traitement, le vent, l'état
-du sol, le gel et le bilan — les réponses qu'on vient chercher au champ.
+Elle montre la température, la pluie qui vient et ce qu'il faut emporter, le
+ressenti, le vent et l'UV.
 
 ```bash
 xcodebuild -project ios/Kliima.xcodeproj -scheme KliimaWatch \
@@ -214,7 +207,9 @@ xcodebuild -project ios/Kliima.xcodeproj -scheme KliimaWatch \
 
 ## Web
 
-L'application complète : bandeau horaire, semaine et tuiles agronomiques.
+L'application complète : la pluie et ce qu'il faut emporter, le bandeau
+horaire, la semaine, ce que dit chaque source, et les tuiles — ressenti,
+humidité, vent, UV, pression, qualité de l'air, pollens.
 
 ```bash
 cd rust/klima-web
@@ -227,14 +222,14 @@ montre douze heures — une demi-journée —, les autres se dépliant d'un bout
 Une carte ne prend pas tout l'écran.
 
 
-La parcelle est mémorisée dans le navigateur ; la recherche de commune passe par
+La ville vit dans l'adresse et dans le navigateur ; la recherche de ville passe par
 le géocodage Open-Meteo et le bouton « Me localiser » par la géolocalisation du
 navigateur. Le fond suit le ciel : nuit, journée couverte ou journée dégagée.
 
 ## Site de présentation
 
 La vitrine de Klima : ce que fait l'application, et une section « météo du jour »
-qui la fait essayer sur sa propre commune — la journée en cours uniquement, la
+qui la fait essayer sur sa propre ville — la journée en cours uniquement, la
 semaine et le détail horaire restant l'affaire de l'application.
 
 ```bash
@@ -244,8 +239,8 @@ trunk build --release
 ```
 
 
-Les seuils affichés dans la page sont lus dans `AgroThresholds` : la vitrine ne
-peut pas annoncer autre chose que ce que l'application applique.
+Les seuils affichés dans la page sont lus dans les modules `seuils` du cœur : la
+vitrine ne peut pas annoncer autre chose que ce que l'application applique.
 
 ### Marque et typographie
 
@@ -297,7 +292,7 @@ cargo clippy --all-targets
 n'est pas de l'ascétisme : c'est ce qui lui permet de compiler pour un serveur
 comme pour un navigateur, et de ne jamais dépendre d'une mise à jour qui change
 un arrondi. Les horodatages y sont des millisecondes depuis l'époque, et ce sont
-celles **de la parcelle** : une journée se découpe par division, pas en
+celles **de la ville** : une journée se découpe par division, pas en
 demandant à un fuseau.
 
 Lire du JSON demande une dépendance : c'est pourquoi `klima-api` existe à côté,
@@ -310,18 +305,20 @@ y laisser ferait compiler Yew à chaque `cargo test`.
 
 ## Données
 
-[Open-Meteo](https://open-meteo.com/) — API libre, sans clé. Variables
-interrogées : `soil_temperature_6cm`, `soil_moisture_3_to_9cm`,
-`et0_fao_evapotranspiration`, `vapour_pressure_deficit`, plus la température,
-l'hygrométrie, la pluie et le vent nécessaires aux fenêtres de traitement, et
-`weather_code`, `is_day`, `sunrise`, `sunset` pour la présentation.
+[Open-Meteo](https://open-meteo.com/) — API libre, sans clé pour un usage non
+commercial. Variables interrogées : température et ressenti, humidité et point
+de rosée, pluie et probabilité, vent et rafales, indice UV, pression, et
+`weather_code`, `is_day`, `sunrise`, `sunset` pour la présentation. La qualité
+de l'air et les pollens viennent du service d'air d'Open-Meteo, qui redistribue
+les prévisions européennes de [Copernicus](https://atmosphere.copernicus.eu/)
+(CC BY 4.0) ; la mention s'affiche dès qu'une mesure d'air est montrée.
 
-L'API renvoie les horodatages en heure locale de la parcelle et les séries
+L'API renvoie les horodatages en heure locale de la ville et les séries
 horaires depuis minuit. Les clients recoupent la série à l'heure en cours, pour
 que « maintenant » soit bien le premier élément affiché.
 
 Côté Rust, l'heure locale est **conservée telle quelle** plutôt que ramenée en
-instant absolu : « 21 h » veut alors dire 21 h au champ, quel que soit le fuseau
+instant absolu : « 21 h » veut alors dire 21 h là-bas, quel que soit le fuseau
 du serveur qui calcule. Le décalage n'est pas perdu pour autant — la prévision
 le porte, et `instant()` rend l'instant absolu pour qui en a besoin, un minuteur
 d'écran verrouillé par exemple.

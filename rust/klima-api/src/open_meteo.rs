@@ -130,7 +130,7 @@ fn query(pairs: &[(&str, String)]) -> String {
         .join("&")
 }
 
-/// L'adresse de la prévision agricole d'une parcelle sur `days` jours.
+/// L'adresse de la prévision d'une ville sur `days` jours.
 pub fn forecast_url(endpoints: &Endpoints, parcelle: &Parcelle, days: u32) -> String {
     let pairs = [
         ("latitude", format!("{:.4}", parcelle.latitude)),

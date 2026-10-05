@@ -1,11 +1,10 @@
 import SwiftUI
 import WidgetKit
 
-/// Complication de cadran : la température de la parcelle, dans les quatre
+/// Complication de cadran : la température de la ville, dans les quatre
 /// formes que watchOS propose.
 ///
-/// Au champ, la montre est souvent le seul écran qu'on sort — et jusqu'ici
-/// elle ne savait dire que la prochaine fenêtre de traitement.
+/// Dans la rue, la montre est souvent le seul écran qu'on sort.
 struct WeatherComplication: Widget {
     var body: some WidgetConfiguration {
         StaticConfiguration(kind: "KliimaWeatherComplication", provider: WeatherComplicationProvider()) { entry in
@@ -35,7 +34,7 @@ struct WeatherComplicationEntry: TimelineEntry {
 struct WeatherComplicationProvider: TimelineProvider {
 
     func placeholder(in context: Context) -> WeatherComplicationEntry {
-        WeatherComplicationEntry(date: Date(), parcelleName: Parcelle.chartres.name,
+        WeatherComplicationEntry(date: Date(), parcelleName: Parcelle.paris.name,
                                  current: nil, today: nil, loaded: false)
     }
 
@@ -55,7 +54,7 @@ struct WeatherComplicationProvider: TimelineProvider {
     }
 
     private func entries() async -> [WeatherComplicationEntry] {
-        let parcelle = SharedStore.loadParcelle() ?? .chartres
+        let parcelle = SharedStore.loadParcelle() ?? .paris
         let maintenant = Date()
 
         guard let forecast = try? await AgroWeatherService().forecast(for: parcelle, days: 2) else {

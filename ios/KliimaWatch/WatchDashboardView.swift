@@ -1,7 +1,8 @@
 import SwiftUI
 
-/// Écran unique de la montre : la température, puis les trois réponses qu'on
-/// vient chercher au champ — peut-on traiter, le sol porte-t-il, gèlera-t-il.
+/// Écran unique de la montre : la température, puis ce qu'on vient chercher
+/// au poignet en sortant — la pluie qui vient, ce qu'il faut emporter, le
+/// ressenti et le vent.
 struct WatchDashboardView: View {
     @StateObject private var viewModel = WatchViewModel()
 
@@ -21,29 +22,26 @@ struct WatchDashboardView: View {
                             .foregroundStyle(.secondary)
                     }
 
-                    if let forecast = viewModel.forecast, let summary = viewModel.summary {
+                    if let forecast = viewModel.forecast {
                         header(forecast)
-                        sprayRow(summary)
+                        pluieRow(forecast)
+                        WatchRow(
+                            title: Localized.text("tile.feelsLike"),
+                            value: AgroFormat.temperature(forecast.current.apparentTemperature),
+                            detail: AgroFormat.percent(forecast.current.relativeHumidity)
+                        )
                         WatchRow(
                             title: Localized.text("tile.wind"),
                             value: AgroFormat.unit(forecast.current.windSpeed, "km/h", decimals: 0),
                             detail: AgroFormat.unit(forecast.current.windGusts, "km/h", decimals: 0)
                         )
-                        WatchRow(
-                            title: Localized.text("tile.soil"),
-                            value: summary.soil.state.label,
-                            detail: AgroFormat.percent(summary.soil.moisture * 100)
-                        )
-                        WatchRow(
-                            title: Localized.text("tile.frost"),
-                            value: summary.frost.severity.label,
-                            detail: AgroFormat.unit(summary.frost.minTemperature, "°C")
-                        )
-                        WatchRow(
-                            title: Localized.text("tile.water"),
-                            value: AgroFormat.signedUnit(summary.water.balance, "mm"),
-                            detail: summary.water.status.label
-                        )
+                        if let today = forecast.daily.first {
+                            WatchRow(
+                                title: Localized.text("tile.uv"),
+                                value: Ville.niveauUv(today.uvIndexMax).label,
+                                detail: AgroFormat.decimal(today.uvIndexMax, decimals: 0)
+                            )
+                        }
                     }
                 }
                 .padding(.horizontal, 4)
@@ -85,29 +83,36 @@ struct WatchDashboardView: View {
         }
     }
 
-    /// La fenêtre de traitement mérite sa propre carte : c'est la question qui
-    /// fait sortir la montre.
-    private func sprayRow(_ summary: AgroSummary) -> some View {
+    /// La pluie mérite sa propre carte : c'est la question qui fait sortir
+    /// la montre. Puis ce qu'il faut emporter, en une ligne.
+    private func pluieRow(_ forecast: AgroForecast) -> some View {
         let zone = viewModel.timeZone
+        let pluie = Ville.prochainePluie(forecast.hourly)
+        let conseils = Ville.conseils(forecast.hourly)
+
+        let titre: String
+        switch pluie {
+        case .aucune(let heures): titre = Localized.text("rain.none", String(heures))
+        case .enCours(let fin?): titre = Localized.text("rain.now", AgroFormat.hour(fin, in: zone))
+        case .enCours(.none): titre = Localized.text("rain.nowLasting")
+        case .prevue(let debut, _, _): titre = Localized.text("rain.soon", AgroFormat.hour(debut, in: zone))
+        }
 
         return VStack(alignment: .leading, spacing: 2) {
-            Text(Localized.text("spray.title"))
+            Text(Localized.text("rain.title"))
                 .font(.system(size: 11, weight: .semibold))
                 .textCase(.uppercase)
                 .foregroundStyle(.secondary)
-
-            if let spray = summary.nextSpray {
-                Text("\(AgroFormat.hour(spray.start, in: zone)) → \(AgroFormat.hour(spray.end, in: zone))")
-                    .font(.title3)
-                    .foregroundStyle(spray.score >= 80 ? Color.green : Color.orange)
-                Text(Localized.text("spray.score", String(spray.score)))
-                    .font(.caption2)
-                    .foregroundStyle(.secondary)
-            } else {
-                Text(Localized.text("spray.none"))
-                    .font(.headline)
-                    .foregroundStyle(.orange)
-            }
+            Text(titre)
+                .font(.headline)
+                .foregroundStyle(pluie.code == "aucune" ? Color.primary : Color(red: 0.498, green: 0.816, blue: 0.961))
+                .fixedSize(horizontal: false, vertical: true)
+            Text(conseils.isEmpty
+                 ? Localized.text("advice.none")
+                 : conseils.map(\.label).joined(separator: " · "))
+                .font(.caption2)
+                .foregroundStyle(.secondary)
+                .fixedSize(horizontal: false, vertical: true)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(10)

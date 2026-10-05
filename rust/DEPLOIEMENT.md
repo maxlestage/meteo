@@ -274,7 +274,7 @@ signe des envois vers tous les appareils de l'équipe : elle vit ici et nulle
 part ailleurs, comme les autres.
 
 Ce que le relais garde de chaque île : le jeton qu'Apple lui a remis, la
-maille de la parcelle, et ce qu'il a poussé en dernier. En mémoire, douze
+maille de la ville, et ce qu'il a poussé en dernier. En mémoire, douze
 heures au plus — un redémarrage oublie tout, et l'iPhone réinscrit son île à
 la prochaine ouverture.
 

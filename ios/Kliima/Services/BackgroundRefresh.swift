@@ -32,13 +32,11 @@ enum BackgroundRefresh {
         // La suivante d'abord : même en cas d'échec, la chaîne continue.
         schedule()
 
-        let parcelle = SharedStore.loadParcelle() ?? .chartres
+        let parcelle = SharedStore.loadParcelle() ?? .paris
         guard let forecast = try? await AgroWeatherService().forecast(for: parcelle, days: 2) else {
             return
         }
 
-        let summary = AgroIndicators.summarize(hours: forecast.hourly, days: forecast.daily)
-        await updateActivities(hours: forecast.hourly, opportunity: summary.nextSpray)
         await updateWeatherActivities(forecast: forecast)
 
         // Le réveil est aussi le moment d'examiner ce qu'il y a à dire. Le
@@ -46,7 +44,6 @@ enum BackgroundRefresh {
         // la boutique depuis une tâche de fond serait lent et inutile, l'écran
         // d'achat s'en chargeant à chaque ouverture.
         let state = await AlertScheduler.schedule(
-            summary: summary,
             hours: forecast.hourly,
             plan: SharedStore.loadPlan(),
             state: SharedStore.loadAlertState()
@@ -62,37 +59,5 @@ enum BackgroundRefresh {
     /// calculée d'avance, pour qu'elle bascule seule à l'heure pile.
     private static func updateWeatherActivities(forecast: AgroForecast) async {
         await WeatherActivityController.update(forecast: forecast)
-    }
-
-    /// Met à jour les activités en cours, sans passer par le contrôleur :
-    /// l'application peut avoir été fermée depuis leur démarrage.
-    private static func updateActivities(hours: [HourlySample], opportunity: SprayOpportunity?) async {
-        #if canImport(ActivityKit)
-        guard #available(iOS 16.2, *) else { return }
-
-        for activity in Activity<SprayActivityAttributes>.activities {
-            // Sa propre fenêtre d'abord, et c'était le défaut : on regardait la
-            // prochaine occasion. Quand la fenêtre de ce matin était passée
-            // mais qu'une autre se présentait pour demain, l'activité de ce
-            // matin était mise à jour au lieu d'être fermée — et l'île
-            // dynamique se mettait à compter le temps écoulé depuis une heure
-            // révolue.
-            if activity.attributes.windowEnd <= Date() {
-                await activity.end(nil, dismissalPolicy: .default)
-                continue
-            }
-
-            guard let opportunity, opportunity.end > Date() else {
-                await activity.end(nil, dismissalPolicy: .default)
-                continue
-            }
-            await activity.update(
-                ActivityContent(
-                    state: await SprayActivityController.state(from: hours, at: max(opportunity.start, Date())),
-                    staleDate: opportunity.end
-                )
-            )
-        }
-        #endif
     }
 }
