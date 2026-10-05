@@ -359,16 +359,48 @@ body::before {
   color: #fff;
 }
 
-@media (max-width: 560px) {
+.nav__app-court {
+  display: none;
+}
+
+/* Les liens de section ne tiennent qu'en largeur de bureau : en dessous, ils
+   poussaient la langue hors de l'écran. Le pied de page les reprend tous. */
+@media (max-width: 920px) {
   .nav nav {
     display: none;
   }
+}
 
-  /* Sur téléphone, l'en-tête ne garde que la marque et l'appel à
-     l'application, sur une ligne : le choix de langue reste au pied de page.
-     Les trois côte à côte faisaient passer « Ouvrir l'application » sur deux
-     lignes, coincé entre la marque et la langue. */
-  .nav__end .lang {
+@media (max-width: 560px) {
+  /* Sur téléphone, l'en-tête garde la marque, l'appel à l'application et
+     les trois langues, sur une ligne. Le bouton se raccourcit en « L'app » :
+     en toutes lettres, il passait sur deux lignes, coincé entre la marque et
+     la langue — et c'est la langue qu'on avait sacrifiée. */
+  .nav {
+    gap: 10px;
+    padding: 16px;
+  }
+
+  .nav__end {
+    gap: 8px;
+  }
+
+  .nav__app-long {
+    display: none;
+  }
+
+  .nav__app-court {
+    display: inline;
+  }
+
+  .lang button {
+    padding: 5px 6px;
+    font-size: 12px;
+  }
+}
+
+@media (max-width: 340px) {
+  .nav .brand__name {
     display: none;
   }
 }
