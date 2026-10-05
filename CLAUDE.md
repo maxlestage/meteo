@@ -19,6 +19,14 @@ nouvelle pull request.
   gardent leur nom d'époque (`Parcelle`, `parcelle_url`, `AgroFormat`…) : ce
   sont des noms de code, l'interface dit « ville ».
 
+- **Le guetteur relit, il ne garde pas.** La demi-heure en cours et les deux
+  heures à venir viennent de la série au quart d'heure (`minutely_15`), dans
+  un appel à part de la prévision horaire : `klima-core/src/veille.rs` et son
+  miroir `ios/Kliima/Models/Veille.swift`. Les interfaces relisent une minute
+  après chaque quart (`prochaine_lecture`) ; le relais garde ces réponses dix
+  minutes, pas une heure. Sans série qui couvre le quart en cours, le
+  guetteur se tait : un « sec » dit sans avoir regardé est un mensonge.
+
 - **Deux noms, et ce n'est pas une coquille.** Le nouveau nom ne dépasse pas
   de `ios/`. L'application iPhone s'appelle **Kliima ‣** — le triangle
   (U+2023) fait partie du nom, ce n'est pas de la décoration. Tout le reste —

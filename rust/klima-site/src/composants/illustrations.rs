@@ -238,7 +238,7 @@ pub fn EchelleUv() -> Html {
 
 #[derive(Properties, PartialEq)]
 pub struct IconeProps {
-    /// La fonction illustrée : rain, advice, uv, air, pollen, alerts — et,
+    /// La fonction illustrée : veille, rain, advice, uv, air, pollen, alerts — et,
     /// pour les cartes « Données », model, rules, hours.
     pub cle: AttrValue,
 }
@@ -311,6 +311,16 @@ pub fn IconeFonction(props: &IconeProps) -> Html {
                     <circle cx="56" cy="18" r="1.2" />
                     <circle cx="10" cy="12" r="1.4" />
                 </g>
+            </>
+        },
+        // Le guetteur : un radar qui balaie, et une averse repérée.
+        "veille" => html! {
+            <>
+                <circle cx="32" cy="32" r="24" fill="none" stroke="#c6d6e4" stroke-width="2.4" opacity="0.5" />
+                <circle cx="32" cy="32" r="15" fill="none" stroke="#7fd0f5" stroke-width="2.4" opacity="0.6" />
+                <path class="feature__radar" d="M32 32 L32 8 A24 24 0 0 1 52.8 20 Z" fill="#7fd0f5" opacity="0.45" />
+                <circle cx="44" cy="18" r="4" fill="#7fd0f5" />
+                <circle cx="32" cy="32" r="3.4" fill="#e8edf2" />
             </>
         },
         // Les trois cartes « Données » : six modèles empilés, une règle

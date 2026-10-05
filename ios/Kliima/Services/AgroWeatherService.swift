@@ -24,6 +24,7 @@ protocol AgroWeatherProviding {
     func search(commune query: String) async throws -> [Parcelle]
     func modelConsensus(for parcelle: Parcelle) async throws -> Consensus?
     func air(for parcelle: Parcelle) async throws -> AirSample?
+    func quarts(for parcelle: Parcelle) async throws -> [QuartSample]?
 }
 
 /// Client de l'API de prévision d'Open-Meteo, et de son service de qualité de
@@ -43,6 +44,13 @@ struct AgroWeatherService: AgroWeatherProviding {
     /// dans l'ordre de `klima-api/src/air.rs`.
     static let airVariables =
         ["european_aqi", "pm2_5", "pm10", "nitrogen_dioxide", "ozone"] + Pollen.allCases.map(\.variable)
+
+    /// Les variables lues au quart d'heure, pour le guetteur — celles de
+    /// `klima-api/src/veille.rs`.
+    static let quartVariables = [
+        "precipitation", "weather_code", "temperature_2m",
+        "apparent_temperature", "wind_gusts_10m", "is_day",
+    ]
 
     private static let currentVariables = [
         "temperature_2m",
@@ -171,6 +179,40 @@ struct AgroWeatherService: AgroWeatherProviding {
             // Un pollen absent n'est pas un pollen à zéro : on l'écarte.
             pollens: Pollen.allCases.compactMap { pollen in nombre(pollen.variable).map { (pollen, $0) } }
         )
+    }
+
+    /// La prévision au quart d'heure, pour le guetteur : le quart entamé et
+    /// les dix suivants. Un appel à part de la prévision horaire : elle se
+    /// relit tous les quarts d'heure, celle-là non. `nil` si la réponse n'a pas
+    /// de série — le guetteur se tait plutôt que de dire « sec ».
+    func quarts(for parcelle: Parcelle) async throws -> [QuartSample]? {
+        var components = URLComponents(url: Self.forecastURL, resolvingAgainstBaseURL: false)!
+        components.queryItems = [
+            URLQueryItem(name: "latitude", value: String(format: "%.4f", parcelle.latitude)),
+            URLQueryItem(name: "longitude", value: String(format: "%.4f", parcelle.longitude)),
+            URLQueryItem(name: "minutely_15", value: Self.quartVariables.joined(separator: ",")),
+            URLQueryItem(name: "past_minutely_15", value: "1"),
+            URLQueryItem(name: "forecast_minutely_15", value: "10"),
+            URLQueryItem(name: "wind_speed_unit", value: "kmh"),
+            URLQueryItem(name: "timezone", value: "auto"),
+        ]
+        let (data, response) = try await session.data(from: components.url!)
+        if let http = response as? HTTPURLResponse, !(200..<300).contains(http.statusCode) {
+            throw AgroWeatherError.badStatus(http.statusCode)
+        }
+        return Self.decodeQuarts(data)
+    }
+
+    /// Lit la réponse au quart d'heure, dans le fuseau de la ville. Séparé de
+    /// l'appel pour être testé.
+    static func decodeQuarts(_ data: Data) -> [QuartSample]? {
+        guard
+            let payload = try? JSONDecoder().decode(QuartsPayload.self, from: data),
+            let block = payload.minutely15
+        else { return nil }
+        let zone = TimeZone(identifier: payload.timezone) ?? .current
+        let quarts = block.decode(in: zone)
+        return quarts.isEmpty ? nil : quarts
     }
 
     /// Recherche une commune par son nom (géocodage Open-Meteo).
@@ -395,6 +437,60 @@ struct ForecastPayload: Decodable {
 
 /// Réponse d'une requête multi-modèles : des colonnes suffixées, lues à la
 /// demande plutôt que déclarées une par une.
+/// La réponse au quart d'heure.
+struct QuartsPayload: Decodable {
+    let timezone: String
+    let minutely15: Block?
+
+    enum CodingKeys: String, CodingKey {
+        case timezone
+        case minutely15 = "minutely_15"
+    }
+
+    struct Block: Decodable {
+        let time: [String]
+        let precipitation: [Double?]?
+        let weatherCode: [Int?]?
+        let temperature2m: [Double?]?
+        let apparentTemperature: [Double?]?
+        let windGusts10m: [Double?]?
+        let isDay: [Int?]?
+
+        enum CodingKeys: String, CodingKey {
+            case time
+            case precipitation
+            case weatherCode = "weather_code"
+            case temperature2m = "temperature_2m"
+            case apparentTemperature = "apparent_temperature"
+            case windGusts10m = "wind_gusts_10m"
+            case isDay = "is_day"
+        }
+
+        func decode(in zone: TimeZone) -> [QuartSample] {
+            let formatter = DateFormatter.openMeteo(format: "yyyy-MM-dd'T'HH:mm", zone: zone)
+            let rain = column(precipitation)
+            let codes = intColumn(weatherCode)
+            let temperature = column(temperature2m)
+            let apparent = column(apparentTemperature)
+            let gusts = column(windGusts10m)
+            let day = intColumn(isDay)
+
+            return time.enumerated().compactMap { index, stamp in
+                guard let date = formatter.date(from: stamp) else { return nil }
+                return QuartSample(
+                    time: date,
+                    precipitation: rain(index),
+                    weatherCode: codes(index) ?? 3,
+                    temperature: temperature(index),
+                    apparentTemperature: apparent(index),
+                    windGusts: gusts(index),
+                    isDay: (day(index) ?? 1) == 1
+                )
+            }
+        }
+    }
+}
+
 struct ModelPayload: Decodable {
     let timezone: String?
     let hourly: Block

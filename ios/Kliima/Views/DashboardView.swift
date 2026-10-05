@@ -55,8 +55,18 @@ struct DashboardView: View {
                                 .frame(maxWidth: .infinity, alignment: .leading)
                             }
 
-                            // La première question : faut-il un parapluie,
-                            // et jusqu'à quand — puis ce qu'il faut emporter.
+                            // La demi-heure en cours et les deux heures qui
+                            // viennent, au quart d'heure : la question qu'on
+                            // pose la main sur la poignée.
+                            GuetteurCardView(
+                                quarts: viewModel.quartsDeLaVille,
+                                luA: viewModel.quartsLusA,
+                                enLecture: viewModel.veilleEnLecture,
+                                timeZone: viewModel.timeZone
+                            )
+
+                            // Puis la journée : faut-il un parapluie, et
+                            // jusqu'à quand — puis ce qu'il faut emporter.
                             PluieCardView(hours: forecast.hourly, timeZone: viewModel.timeZone)
 
                             HourlyStripView(
@@ -139,6 +149,9 @@ struct DashboardView: View {
             // À part du chargement, et pas avant lui : la prévision par défaut
             // s'affiche pendant que le système demande l'autorisation.
             .task { viewModel.locateIfUnchosen() }
+            // Le guetteur relit à chaque quart d'heure ; il repart de zéro
+            // quand la ville change.
+            .task(id: viewModel.parcelle) { await viewModel.veiller() }
             .sheet(item: $paywallFor) { feature in
                 PaywallView(subscription: subscription, reason: feature)
             }
