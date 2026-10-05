@@ -34,13 +34,14 @@ struct PluieCardView: View {
             }
 
             HStack(alignment: .bottom, spacing: 3) {
-                ForEach(douze) { heure in
+                ForEach(Array(douze.enumerated()), id: \.element.id) { rang, heure in
                     RoundedRectangle(cornerRadius: 3)
                         .fill(Ville.pluvieuse(heure)
-                              ? Color(red: 0.498, green: 0.816, blue: 0.961)
+                              ? Color.bleuPluie
                               : Color.filet)
                         .frame(height: max(4, hauteurBarres * min(heure.precipitationProbability, 100) / 100))
                         .frame(maxWidth: .infinity)
+                        .pousse(rang)
                 }
             }
             .frame(height: hauteurBarres, alignment: .bottom)
