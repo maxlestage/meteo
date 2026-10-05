@@ -238,7 +238,8 @@ pub fn EchelleUv() -> Html {
 
 #[derive(Properties, PartialEq)]
 pub struct IconeProps {
-    /// La fonction illustrée : rain, advice, uv, air, pollen, alerts.
+    /// La fonction illustrée : rain, advice, uv, air, pollen, alerts — et,
+    /// pour les cartes « Données », model, rules, hours.
     pub cle: AttrValue,
 }
 
@@ -310,6 +311,38 @@ pub fn IconeFonction(props: &IconeProps) -> Html {
                     <circle cx="56" cy="18" r="1.2" />
                     <circle cx="10" cy="12" r="1.4" />
                 </g>
+            </>
+        },
+        // Les trois cartes « Données » : six modèles empilés, une règle
+        // partagée, une horloge à l'heure de la ville.
+        "model" => html! {
+            <>
+                <path d="M32 10 56 22 32 34 8 22Z" fill="#7fd0f5" />
+                <path d="M8 32l24 12 24-12" fill="none" stroke="#c6d6e4" stroke-width="3.2" stroke-linejoin="round" stroke-linecap="round" />
+                <path d="M8 42l24 12 24-12" fill="none" stroke="#9ed073" stroke-width="3.2" stroke-linejoin="round" stroke-linecap="round" />
+            </>
+        },
+        "rules" => html! {
+            <>
+                <path d="M32 10v42M18 52h28" stroke="#c6d6e4" stroke-width="3.2" stroke-linecap="round" />
+                <path d="M12 18h40" stroke="#c6d6e4" stroke-width="3.2" stroke-linecap="round" />
+                <path d="M12 18 5 34h14Z M52 18l-7 16h14Z" fill="none" stroke="#f0c14b" stroke-width="2.6" stroke-linejoin="round" />
+                <path d="M5 34a7 5 0 0 0 14 0Z M45 34a7 5 0 0 0 14 0Z" fill="#f0c14b" />
+                <circle cx="32" cy="10" r="3.4" fill="#9ed073" />
+            </>
+        },
+        "hours" => html! {
+            <>
+                <circle cx="32" cy="32" r="23" fill="none" stroke="#c6d6e4" stroke-width="3.2" />
+                <g stroke="#c6d6e4" stroke-width="2.6" stroke-linecap="round">
+                    <line x1="32" y1="13" x2="32" y2="16" />
+                    <line x1="51" y1="32" x2="48" y2="32" />
+                    <line x1="32" y1="51" x2="32" y2="48" />
+                    <line x1="13" y1="32" x2="16" y2="32" />
+                </g>
+                <line x1="32" y1="32" x2="32" y2="22" stroke="#e8edf2" stroke-width="3.4" stroke-linecap="round" />
+                <line class="feature__aiguille" x1="32" y1="32" x2="44" y2="32" stroke="#9ed073" stroke-width="2.8" stroke-linecap="round" />
+                <circle cx="32" cy="32" r="2.6" fill="#9ed073" />
             </>
         },
         _ => html! {

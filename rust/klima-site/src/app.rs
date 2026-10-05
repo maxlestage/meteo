@@ -16,9 +16,10 @@ use klima_ui::i18n::use_i18n;
 use yew::prelude::*;
 
 use crate::composants::aujourdhui::SectionDuJour;
+use crate::composants::ciel::{Ciel, Horizon};
 use crate::composants::fonctions::Fonctions;
 use crate::composants::galerie::Galerie;
-use crate::composants::illustrations::{EchelleUv, SceneDeCiel, ScenePluie};
+use crate::composants::illustrations::{EchelleUv, IconeFonction, SceneDeCiel, ScenePluie};
 use crate::composants::pied::Pied;
 use crate::composants::sources::Sources;
 use crate::composants::telephone::Telephone;
@@ -82,6 +83,7 @@ pub fn App(props: &Props) -> Html {
 
     html! {
         <>
+            <Ciel />
             <header class="nav">
                 <a class="nav__brand" href="#top" aria-label="Klima">
                     <MarqueEtNom />
@@ -172,14 +174,17 @@ pub fn App(props: &Props) -> Html {
                     </div>
                     <div class={classes!("data__grid", donnees.class)}>
                         <article>
+                            <IconeFonction cle="model" />
                             <h3>{ i18n.t("data.model.title") }</h3>
                             <p>{ i18n.t("data.model.body") }</p>
                         </article>
                         <article>
+                            <IconeFonction cle="rules" />
                             <h3>{ i18n.t("data.rules.title") }</h3>
                             <p>{ i18n.t("data.rules.body") }</p>
                         </article>
                         <article>
+                            <IconeFonction cle="hours" />
                             <h3>{ i18n.t("data.hours.title") }</h3>
                             <p>{ i18n.t("data.hours.body") }</p>
                         </article>
@@ -188,6 +193,7 @@ pub fn App(props: &Props) -> Html {
             </main>
 
             <Pied />
+            <Horizon />
         </>
     }
 }
