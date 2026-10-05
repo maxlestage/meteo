@@ -52,6 +52,7 @@ pub fn Pied() -> Html {
                 <nav class="footer__column" aria-label={i18n.t("footer.product")}>
                     <h2>{ i18n.t("footer.product") }</h2>
                     <ul>
+                        <li><a href="#images">{ i18n.t("nav.images") }</a></li>
                         <li><a href="#aujourdhui">{ i18n.t("nav.today") }</a></li>
                         <li><a href="#indicateurs">{ i18n.t("nav.indicators") }</a></li>
                         <li><a href="#sources">{ i18n.t("nav.sources") }</a></li>
