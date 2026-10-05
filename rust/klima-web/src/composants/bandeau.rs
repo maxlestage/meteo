@@ -6,7 +6,7 @@
 //! de côté** : c'est la règle du web, et seule l'application iOS a un bandeau
 //! qui glisse.
 
-use klima_core::agro::{CurrentSample, HourlySample};
+use klima_core::meteo::{CurrentSample, HourlySample};
 use klima_core::weather::weather_condition;
 use yew::prelude::*;
 

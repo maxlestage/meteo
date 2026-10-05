@@ -4,7 +4,7 @@
 //! sinon une journée douce et une journée froide auraient la même barre à deux
 //! endroits différents, et la comparaison d'un coup d'œil serait fausse.
 
-use klima_core::agro::DailySample;
+use klima_core::meteo::DailySample;
 use klima_core::weather::weather_condition;
 use yew::prelude::*;
 

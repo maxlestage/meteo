@@ -2,9 +2,9 @@
 //!
 
 use klima_api::today::day_digest;
-use klima_core::agro::thresholds::{SPRAY_GUST_MAX, SPRAY_WIND_MAX, SPRAY_WIND_MIN};
 use klima_core::endpoints::Endpoints;
 use klima_core::i18n::params;
+use klima_core::ville::seuils::{PLUIE_MM, PLUIE_PROBABILITE, UV_CREME};
 use klima_core::position::Parcelle;
 use klima_core::weather::{ConditionIcon, weather_condition};
 use klima_ui::composants::langue::SelecteurDeLangue;
@@ -17,19 +17,19 @@ use yew::prelude::*;
 
 use crate::composants::aujourdhui::SectionDuJour;
 use crate::composants::fonctions::Fonctions;
-use crate::composants::illustrations::{CoupeDeSol, SceneDeCiel, SceneDeTraitement};
+use crate::composants::illustrations::{EchelleUv, SceneDeCiel, ScenePluie};
 use crate::composants::pied::Pied;
 use crate::composants::sources::Sources;
 use crate::composants::telephone::Telephone;
 use crate::crochets::apparition::use_apparition;
 
-/// Plaine céréalière de Beauce, au premier chargement.
+/// Paris, au premier chargement, quand on ne sait pas où est le visiteur.
 fn defaut() -> Parcelle {
     Parcelle {
-        name: "Chartres".to_owned(),
-        latitude: 48.4468,
-        longitude: 1.4892,
-        admin: Some("Eure-et-Loir".to_owned()),
+        name: "Paris".to_owned(),
+        latitude: 48.8566,
+        longitude: 2.3522,
+        admin: Some("Île-de-France".to_owned()),
         country: Some("France".to_owned()),
     }
 }
@@ -44,16 +44,17 @@ pub fn App(props: &Props) -> Html {
     let i18n = use_i18n();
     let f = i18n.f();
 
-    // La commune consultée vit dans l'adresse : le bouton retour la défait, et
-    // l'adresse envoyée à quelqu'un lui montre bien la parcelle qu'on a
+    // La ville consultée vit dans l'adresse : le bouton retour la défait, et
+    // l'adresse envoyée à quelqu'un lui montre bien la ville qu'on a
     // regardée.
     let lieu = use_parcelle(defaut());
 
     // La vitrine montre une vraie prévision : autant que ce soit celle du
-    // visiteur. Un refus laisse la parcelle par défaut.
+    // visiteur. Un refus laisse la ville par défaut.
     use_start_position(lieu.origine, i18n.t("search.myField"), lieu.select.clone());
 
-    // Deux jours suffisent : aujourd'hui, et la nuit qui déborde sur demain.
+    // Deux jours suffisent : aujourd'hui, et les douze heures qui débordent
+    // sur demain pour la pluie et les conseils.
     let prevision = {
         let i18n = i18n.clone();
         use_forecast(lieu.parcelle.clone(), props.endpoints.clone(), 2, move |erreur| {
@@ -142,16 +143,19 @@ pub fn App(props: &Props) -> Html {
                     <Fonctions />
                     <div class="figures">
                         <figure>
-                            <CoupeDeSol />
-                            <figcaption>{ i18n.t("feature.soil.rule") }</figcaption>
+                            <ScenePluie />
+                            <figcaption>
+                                { i18n.with("feature.rain.rule", &params([
+                                    ("amount", f.unit(PLUIE_MM, "mm", 1).as_str().into()),
+                                    ("probability", f.percent(PLUIE_PROBABILITE).as_str().into()),
+                                ])) }
+                            </figcaption>
                         </figure>
                         <figure>
-                            <SceneDeTraitement />
+                            <EchelleUv />
                             <figcaption>
-                                { i18n.with("feature.spray.rule", &params([
-                                    ("min", f.unit(SPRAY_WIND_MIN, "km/h", 0).as_str().into()),
-                                    ("max", f.unit(SPRAY_WIND_MAX, "km/h", 0).as_str().into()),
-                                    ("gusts", f.unit(SPRAY_GUST_MAX, "km/h", 0).as_str().into()),
+                                { i18n.with("figure.uv", &params([
+                                    ("sunscreen", f.decimal(UV_CREME, 0).as_str().into()),
                                 ])) }
                             </figcaption>
                         </figure>
@@ -172,10 +176,8 @@ pub fn App(props: &Props) -> Html {
                             <p>{ i18n.t("data.rules.body") }</p>
                         </article>
                         <article>
-                            <h3>{ i18n.t("data.wind.title") }</h3>
-                            <p>{ i18n.with("data.wind.body", &params([
-                                ("limit", f.unit(SPRAY_WIND_MAX, "km/h", 0).as_str().into()),
-                            ])) }</p>
+                            <h3>{ i18n.t("data.hours.title") }</h3>
+                            <p>{ i18n.t("data.hours.body") }</p>
                         </article>
                     </div>
                 </section>

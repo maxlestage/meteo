@@ -1,15 +1,17 @@
-//! Charger la prévision d'une parcelle.
+//! Charger la prévision d'une ville.
 //!
 //! L'application et la vitrine faisaient le même appel pour en tirer deux
 //! choses différentes — l'une la semaine, l'autre la journée. Ce qui est
 //! commun est ici ; ce qu'on en tire reste chez chaque interface.
 //!
-//! Deux appels, et le second ne peut pas faire échouer le premier : le
-//! recoupement des modèles est un plus, son absence ne prive de rien. C'est
+//! Trois appels, et les deux derniers ne peuvent pas faire échouer le
+//! premier : le recoupement des sources et l'air sont des plus, leur absence
+//! ne prive de rien. C'est
 //! aussi ce qui permet à un fournisseur d'être en panne sans que la météo
 //! disparaisse.
 
-use klima_api::open_meteo::{AgroApiError, AgroForecast};
+use klima_api::open_meteo::{ApiError, Forecast};
+use klima_core::air::AirSample;
 use klima_core::consensus::{Consensus, consensus_from_outcomes};
 use klima_core::endpoints::Endpoints;
 use klima_core::position::Parcelle;
@@ -20,9 +22,11 @@ use crate::reseau;
 
 #[derive(Clone, PartialEq)]
 pub struct EtatPrevision {
-    pub forecast: Option<AgroForecast>,
+    pub forecast: Option<Forecast>,
     /// Recoupement des modèles ; absent si la comparaison a échoué.
     pub consensus: Option<Consensus>,
+    /// Qualité de l'air et pollens ; absente si le service n'a pas répondu.
+    pub air: Option<AirSample>,
     pub loading: bool,
     /// Message déjà traduit : le domaine rend une clé, le crochet la traduit.
     pub error: Option<String>,
@@ -31,7 +35,7 @@ pub struct EtatPrevision {
 impl Default for EtatPrevision {
     fn default() -> Self {
         // On part en chargement : la première prévision est toujours en route.
-        EtatPrevision { forecast: None, consensus: None, loading: true, error: None }
+        EtatPrevision { forecast: None, consensus: None, air: None, loading: true, error: None }
     }
 }
 
@@ -46,7 +50,7 @@ pub fn use_forecast(
     parcelle: Parcelle,
     endpoints: Endpoints,
     days: u32,
-    traduire: impl Fn(&AgroApiError) -> String + 'static,
+    traduire: impl Fn(&ApiError) -> String + 'static,
 ) -> Prevision {
     let etat = use_state(EtatPrevision::default);
     let nonce = use_state(|| 0_u32);
@@ -65,6 +69,7 @@ pub fn use_forecast(
                         etat.set(EtatPrevision {
                             forecast: Some(forecast.clone()),
                             consensus: (*etat).consensus.clone(),
+                            air: (*etat).air.clone(),
                             loading: false,
                             error: None,
                         });
@@ -73,16 +78,22 @@ pub fn use_forecast(
                         // doit pas effacer une prévision déjà affichée.
                         let a_la_parcelle =
                             horloge::maintenant_a_la_parcelle(forecast.utc_offset_seconds);
-                        let outcomes =
-                            reseau::readings(&endpoints, &parcelle, a_la_parcelle).await;
+                        let (outcomes, air) = futures::join!(
+                            reseau::readings(&endpoints, &parcelle, a_la_parcelle),
+                            reseau::air(&endpoints, &parcelle),
+                        );
                         etat.set(EtatPrevision {
+                            forecast: Some(forecast),
                             consensus: consensus_from_outcomes(&outcomes),
-                            ..(*etat).clone()
+                            air,
+                            loading: false,
+                            error: None,
                         });
                     }
                     Err(erreur) => etat.set(EtatPrevision {
                         forecast: None,
                         consensus: None,
+                        air: None,
                         loading: false,
                         error: Some(traduire(&erreur)),
                     }),

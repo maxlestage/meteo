@@ -135,7 +135,7 @@ fn median(sorted: &[f64]) -> f64 {
     }
 }
 
-/// Arrondi à la manière de JavaScript — voir `agro::round`.
+/// Arrondi à la manière de JavaScript — comme dans `ville`.
 fn round(value: f64, decimals: u32) -> f64 {
     let factor = 10f64.powi(decimals as i32);
     (value * factor + 0.5).floor() / factor

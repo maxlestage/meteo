@@ -272,6 +272,10 @@ async fn handle(State(etat): State<Etat>, request: Request) -> Response {
                 ),
             )
         }
+        "/v1/open-meteo/air-quality" => (
+            cell_key(&format!("air:{}", empreinte(&params)), &cell),
+            upstream::open_meteo_air(etat.open_meteo_key.as_deref(), &params, cell.latitude, cell.longitude),
+        ),
         "/v1/met-norway/compact" => (
             cell_key("met", &cell),
             upstream::met_norway_compact(cell.latitude, cell.longitude),
@@ -732,6 +736,25 @@ mod tests {
         )
         .await;
 
+        assert_eq!(faux.appels(), 2);
+    }
+
+    #[tokio::test]
+    async fn lair_se_relaie_a_la_maille_et_se_met_en_cache_a_part() {
+        let faux = Faux::new().repond(r#"{"current":{"european_aqi":30}}"#);
+        let etat = relais(&faux);
+        let (status, _, corps) =
+            get(etat.clone(), "/v1/open-meteo/air-quality?latitude=48.8566&longitude=2.3522&current=european_aqi").await;
+        assert_eq!(status, StatusCode::OK);
+        assert!(corps.contains("european_aqi"));
+        assert!(faux.premiere_url().starts_with("https://air-quality-api.open-meteo.com/v1/air-quality?"));
+        assert!(faux.premiere_url().contains("latitude=48.860"), "{}", faux.premiere_url());
+
+        // La même maille, une seconde fois : le cache répond.
+        get(etat.clone(), "/v1/open-meteo/air-quality?latitude=48.8567&longitude=2.3521&current=european_aqi").await;
+        assert_eq!(faux.appels(), 1);
+        // La prévision du même point n'est pas l'air : une entrée à part.
+        get(etat, "/v1/open-meteo/forecast?latitude=48.8566&longitude=2.3522&current=european_aqi").await;
         assert_eq!(faux.appels(), 2);
     }
 
