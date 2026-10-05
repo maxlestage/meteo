@@ -20,6 +20,11 @@ pub struct Props {
     pub size: u32,
     #[prop_or_default]
     pub title: Option<AttrValue>,
+    /// Anime le dessin — rayons qui tournent, nuage qui flotte, gouttes qui
+    /// tombent. Réservé au grand pictogramme d'en-tête : vingt-quatre icônes
+    /// animées dans un bandeau feraient une page qui s'agite.
+    #[prop_or(false)]
+    pub anime: bool,
 }
 
 #[function_component]
@@ -32,7 +37,7 @@ pub fn Pictogramme(props: &Props) -> Html {
 
     html! {
         <svg
-            class="wicon"
+            class={classes!("wicon", props.anime.then_some("wicon--anime"))}
             viewBox="0 0 24 24"
             width={size.clone()}
             height={size}
