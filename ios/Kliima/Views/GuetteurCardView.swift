@@ -18,7 +18,7 @@ struct GuetteurCardView: View {
 
     /// Le débit qui remplit une barre (mm/h).
     private let debitPlein = 8.0
-    private let bleuPluie = Color(red: 0.498, green: 0.816, blue: 0.961)
+    private let bleuPluie = Color.bleuPluie
 
     var body: some View {
         TimelineView(.periodic(from: .now, by: 30)) { contexte in
@@ -119,6 +119,7 @@ struct GuetteurCardView: View {
                         RoundedRectangle(cornerRadius: 4)
                             .fill(Veille.mouille(quart) ? bleuPluie : Color.filet)
                             .frame(height: max(4, hauteurBarres * min(quart.precipitation * 4 / debitPlein, 1)))
+                            .pousse(index)
                     }
                     .frame(height: hauteurBarres)
                     .overlay {
