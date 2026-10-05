@@ -12,6 +12,7 @@ enum SharedStore {
     static let appGroup = "group.com.kliima.app"
 
     private static let parcelleKey = "kliima.parcelle"
+    private static let villesKey = "kliima.villes"
     private static let planKey = "kliima.plan"
     private static let alertStateKey = "kliima.alertState"
 
@@ -31,6 +32,26 @@ enum SharedStore {
         // Enregistrée du temps où Kliima ‣ parlait de parcelles : le nom
         // d'aujourd'hui remplace « Ma parcelle ».
         return Position.renommee(parcelle, nomActuel: Localized.text("search.myField"))
+    }
+
+    // MARK: Villes enregistrées
+
+    /// La liste des villes enregistrées, dans l'ordre choisi.
+    static func save(villes: [Parcelle]) {
+        guard let data = try? JSONEncoder().encode(villes) else { return }
+        defaults.set(data, forKey: villesKey)
+    }
+
+    /// Les villes enregistrées. Jamais enregistrées : la ville déjà choisie
+    /// avant que la liste existe, pour qu'elle ne disparaisse pas à la mise à
+    /// jour — ou rien, au premier lancement.
+    static func loadVilles() -> [Parcelle] {
+        if let data = defaults.data(forKey: villesKey),
+           let villes = try? JSONDecoder().decode([Parcelle].self, from: data) {
+            let nom = Localized.text("search.myField")
+            return villes.map { Position.renommee($0, nomActuel: nom) }
+        }
+        return loadParcelle().map { [$0] } ?? []
     }
 
     // MARK: Palier

@@ -1542,6 +1542,29 @@
         }
       }
     },
+    "plan.feature.villes": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Several saved cities, one tap from each other"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Varias ciudades guardadas, a un toque una de otra"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Plusieurs villes enregistrées, de l’une à l’autre d’un geste"
+          }
+        }
+      }
+    },
     "plan.libre": {
       "extractionState": "manual",
       "localizations": {
@@ -1653,6 +1676,29 @@
           "stringUnit": {
             "state": "translated",
             "value": "Comparer plusieurs sources demande l’abonnement."
+          }
+        }
+      }
+    },
+    "plan.reason.villes": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Saving several cities needs Kliima ‣ Pro."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Guardar varias ciudades requiere Kliima ‣ Pro."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Enregistrer plusieurs villes demande Kliima ‣ Pro."
           }
         }
       }
@@ -3309,6 +3355,213 @@
           "stringUnit": {
             "state": "translated",
             "value": "Pas de prévision au quart d’heure pour cette ville en ce moment."
+          }
+        }
+      }
+    },
+    "villes.current": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Showing now"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ciudad mostrada"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ville affichée"
+          }
+        }
+      }
+    },
+    "villes.done": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Done"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Listo"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "OK"
+          }
+        }
+      }
+    },
+    "villes.empty": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No saved cities yet. Search for one, then save it here."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ninguna ciudad guardada. Busque una y guárdela aquí."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aucune ville enregistrée. Cherchez-en une, puis enregistrez-la ici."
+          }
+        }
+      }
+    },
+    "villes.free": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The free tier keeps one city. Kliima ‣ Pro keeps as many as you like, each one tap away."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "El nivel gratuito guarda una ciudad. Kliima ‣ Pro guarda tantas como quiera, cada una a un toque."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Le palier libre garde une ville. Kliima ‣ Pro en garde autant que vous voulez, chacune à un geste."
+          }
+        }
+      }
+    },
+    "villes.locked": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Locked — back with Kliima ‣ Pro"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cerrada — vuelve con Kliima ‣ Pro"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fermée — elle revient avec Kliima ‣ Pro"
+          }
+        }
+      }
+    },
+    "villes.pro": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kliima ‣ Pro: as many cities as you like. Swipe to remove, “Edit” to reorder."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kliima ‣ Pro: tantas ciudades como quiera. Deslice para quitar, «Editar» para reordenar."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kliima ‣ Pro : autant de villes que vous voulez. Glissez pour retirer, « Modifier » pour réordonner."
+          }
+        }
+      }
+    },
+    "villes.save": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Save"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Guardar"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Enregistrer"
+          }
+        }
+      }
+    },
+    "villes.saved": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Saved"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Guardada"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Enregistrée"
+          }
+        }
+      }
+    },
+    "villes.title": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "My cities"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mis ciudades"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mes villes"
           }
         }
       }

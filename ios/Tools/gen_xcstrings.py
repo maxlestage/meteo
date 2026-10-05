@@ -94,6 +94,8 @@ STRINGS = {
     # --- Écran d'abonnement ---
     "paywall.title": ("Kliima ‣ Pro", "Kliima ‣ Pro", "Kliima ‣ Pro"),
     "plan.feature.recoupement": ("Six sources recoupées, et leur niveau d’accord", "Six sources cross-checked, and how far they agree", "Seis fuentes contrastadas, y su grado de acuerdo"),
+    "plan.reason.villes": ("Enregistrer plusieurs villes demande Kliima ‣ Pro.", "Saving several cities needs Kliima ‣ Pro.", "Guardar varias ciudades requiere Kliima ‣ Pro."),
+    "plan.feature.villes": ("Plusieurs villes enregistrées, de l’une à l’autre d’un geste", "Several saved cities, one tap from each other", "Varias ciudades guardadas, a un toque una de otra"),
     "plan.feature.alertes": ("Prévenu de la pluie, de l’orage, du gel et de la chaleur", "Warned of rain, storms, frost and heat", "Avisos de lluvia, tormenta, helada y calor"),
     "paywall.free": ("Une ville et la journée entière restent gratuites, sans compte ni publicité.", "One city and the whole day stay free, no account and no adverts.", "Una ciudad y el día entero siguen siendo gratis, sin cuenta ni publicidad."),
     "paywall.buy": ("S'abonner — %1$@ par mois", "Subscribe — %1$@ a month", "Suscribirse — %1$@ al mes"),
@@ -212,6 +214,17 @@ STRINGS = {
     "alert.vent.body": ("Rafales jusqu’à %1$@.", "Gusts up to %1$@.", "Rachas de hasta %1$@."),
     "plan.reason.air": ("La qualité de l’air et les pollens demandent l’abonnement.", "Air quality and pollen need the subscription.", "La calidad del aire y el polen requieren la suscripción."),
     "plan.feature.air": ("Qualité de l’air et pollens", "Air quality and pollen", "Calidad del aire y polen"),
+
+    # --- Mes villes : une au palier libre, autant qu'on veut avec Kliima ‣ Pro ---
+    "villes.title": ("Mes villes", "My cities", "Mis ciudades"),
+    "villes.current": ("Ville affichée", "Showing now", "Ciudad mostrada"),
+    "villes.save": ("Enregistrer", "Save", "Guardar"),
+    "villes.saved": ("Enregistrée", "Saved", "Guardada"),
+    "villes.empty": ("Aucune ville enregistrée. Cherchez-en une, puis enregistrez-la ici.", "No saved cities yet. Search for one, then save it here.", "Ninguna ciudad guardada. Busque una y guárdela aquí."),
+    "villes.locked": ("Fermée — elle revient avec Kliima ‣ Pro", "Locked — back with Kliima ‣ Pro", "Cerrada — vuelve con Kliima ‣ Pro"),
+    "villes.free": ("Le palier libre garde une ville. Kliima ‣ Pro en garde autant que vous voulez, chacune à un geste.", "The free tier keeps one city. Kliima ‣ Pro keeps as many as you like, each one tap away.", "El nivel gratuito guarda una ciudad. Kliima ‣ Pro guarda tantas como quiera, cada una a un toque."),
+    "villes.pro": ("Kliima ‣ Pro : autant de villes que vous voulez. Glissez pour retirer, « Modifier » pour réordonner.", "Kliima ‣ Pro: as many cities as you like. Swipe to remove, “Edit” to reorder.", "Kliima ‣ Pro: tantas ciudades como quiera. Deslice para quitar, «Editar» para reordenar."),
+    "villes.done": ("OK", "Done", "Listo"),
 
     # --- Le guetteur : la demi-heure en cours et les deux heures à venir ---
     "veille.title": ("Le guetteur", "The lookout", "El vigía"),

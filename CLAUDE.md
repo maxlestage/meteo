@@ -44,7 +44,8 @@ nouvelle pull request.
 - **Une seule source pour les règles de la ville.** Les seuils vivent dans
   `rust/klima-core/src/ville.rs`, `air.rs` et `alerts.rs` (modules `seuils`)
   et dans leurs miroirs Swift `ios/Kliima/Models/Ville.swift`, `Air.swift` et
-  `Alerts.swift`. Toute règle ajoutée d'un côté se porte de l'autre, avec les
+  `Alerts.swift` ; les villes enregistrées dans `villes.rs` et `Villes.swift`
+  (une au palier libre, autant qu'on veut en Pro, une par maille). Toute règle ajoutée d'un côté se porte de l'autre, avec les
   mêmes cas de test.
 - **Le domaine ne fabrique pas de phrases.** Il renvoie des états et des motifs
   structurés ; l'interface les traduit. Trois langues : français, anglais,

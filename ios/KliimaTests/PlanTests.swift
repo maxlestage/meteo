@@ -23,6 +23,13 @@ final class PlanTests: XCTestCase {
         }
     }
 
+    /// Deux écritures d'une même règle : elles ne doivent pas diverger.
+    func testLaFonctionVillesDitLaMemeChoseQueLaLimite() {
+        for plan in Plan.allCases {
+            XCTAssertEqual(plan.allows(.villes), plan.canAddParcelle(current: 1), plan.rawValue)
+        }
+    }
+
     func testDeuxiemeParcelleEstLaLimiteDuLibre() {
         XCTAssertTrue(Plan.libre.canAddParcelle(current: 0))
         XCTAssertFalse(Plan.libre.canAddParcelle(current: 1))
