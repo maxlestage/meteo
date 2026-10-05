@@ -25,6 +25,9 @@ enum Feature: String, CaseIterable, Sendable {
     case alertes
     /// Qualité de l'air et pollens.
     case air
+    /// Plusieurs villes enregistrées. Le nombre vit dans `PlanLimits` ; la
+    /// fonction le nomme, pour l'écran d'abonnement et le motif de blocage.
+    case villes
 
     /// Clé de catalogue expliquant pourquoi c'est fermé — une clé, pas une
     /// phrase : l'interface la traduit.
