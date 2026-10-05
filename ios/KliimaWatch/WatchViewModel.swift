@@ -3,14 +3,13 @@ import Foundation
 /// État de l'application montre.
 ///
 /// La montre est autonome : elle interroge l'API elle-même et se cale sur la
-/// position du poignet, sans passer par le téléphone. Au champ, c'est souvent
-/// le seul écran qu'on sort.
+/// position du poignet, sans passer par le téléphone. Dans la rue, c'est
+/// souvent le seul écran qu'on sort.
 @MainActor
 final class WatchViewModel: ObservableObject {
 
-    @Published private(set) var parcelle: Parcelle = .chartres
+    @Published private(set) var parcelle: Parcelle = .paris
     @Published private(set) var forecast: AgroForecast?
-    @Published private(set) var summary: AgroSummary?
     @Published private(set) var isLoading = false
     @Published private(set) var errorMessage: String?
 
@@ -25,7 +24,7 @@ final class WatchViewModel: ObservableObject {
         self.location = location
     }
 
-    /// Fuseau de la parcelle, pour dater les créneaux affichés.
+    /// Fuseau de la ville, pour dater les créneaux affichés.
     var timeZone: TimeZone {
         guard let identifier = forecast?.timezone, let zone = TimeZone(identifier: identifier) else {
             return .current
@@ -40,25 +39,24 @@ final class WatchViewModel: ObservableObject {
         isLoading = true
         errorMessage = nil
 
-        // La position est un confort : sans elle, on garde la parcelle par défaut.
+        // La position est un confort : sans elle, on garde la ville par défaut.
         if let coordinate = try? await location.currentCoordinate() {
             parcelle = Position.parcelle(
                 named: Localized.text("search.myField"),
                 latitude: coordinate.latitude,
                 longitude: coordinate.longitude
             )
-            // La complication de cadran lira la même parcelle.
+            // La complication de cadran lira la même ville.
             SharedStore.save(parcelle)
         }
 
         do {
-            // Deux jours suffisent au poignet : aujourd'hui et la nuit qui suit.
+            // Deux jours suffisent au poignet : les douze heures qui viennent
+            // débordent parfois sur demain.
             let forecast = try await service.forecast(for: parcelle, days: 2)
             self.forecast = forecast
-            self.summary = AgroIndicators.summarize(hours: forecast.hourly, days: forecast.daily)
         } catch {
             self.forecast = nil
-            self.summary = nil
             self.errorMessage = (error as? LocalizedError)?.errorDescription
                 ?? Localized.text("app.error")
         }

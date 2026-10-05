@@ -43,7 +43,7 @@
 	<key>NSSupportsLiveActivitiesFrequentUpdates</key>
 	<false/>
 	<key>NSLocationWhenInUseUsageDescription</key>
-	<string>Votre position sert à caler la prévision agricole sur votre parcelle.</string>
+	<string>Votre position sert à afficher la météo de la ville où vous êtes.</string>
 	<key>UIBackgroundModes</key>
 	<array>
 		<string>fetch</string>

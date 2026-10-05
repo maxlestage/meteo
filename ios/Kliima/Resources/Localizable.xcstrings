@@ -231,163 +231,393 @@
         }
       }
     },
-    "activity.allClear": {
+    "advice.cremeSolaire": {
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Conditions are right"
+            "value": "Sunscreen"
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Condiciones favorables"
+            "value": "Crema solar"
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Conditions réunies"
+            "value": "De la crème solaire"
           }
         }
       }
     },
-    "activity.follow": {
+    "advice.gel": {
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Follow this window"
+            "value": "Careful: icy pavements possible"
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Seguir esta ventana"
+            "value": "Cuidado: aceras heladas posibles"
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Suivre cette fenêtre"
+            "value": "Prudence : trottoirs gelés possibles"
           }
         }
       }
     },
-    "activity.score": {
+    "advice.hydratation": {
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "%1$@/100"
+            "value": "Water: it will be hot"
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "%1$@/100"
+            "value": "Agua: va a hacer calor"
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "%1$@/100"
+            "value": "De l’eau : il va faire chaud"
           }
         }
       }
     },
-    "activity.stop": {
+    "advice.lunettes": {
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Stop following"
+            "value": "Sunglasses"
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Dejar de seguir"
+            "value": "Gafas de sol"
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Arrêter le suivi"
+            "value": "Des lunettes de soleil"
           }
         }
       }
     },
-    "activity.window": {
+    "advice.manteau": {
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Window"
+            "value": "A coat"
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Ventana"
+            "value": "Un abrigo"
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Fenêtre"
+            "value": "Un manteau"
           }
         }
       }
     },
-    "alert.fenetre.body": {
+    "advice.none": {
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Conditions are right, %1$@/100 over the window."
+            "value": "Nothing special: enjoy it."
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Condiciones reunidas, %1$@/100 en la franja."
+            "value": "Nada especial: aprovéchelo."
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Conditions réunies, score %1$@/100 sur la plage."
+            "value": "Rien de particulier : profitez-en."
           }
         }
       }
     },
-    "alert.fenetre.title": {
+    "advice.parapluie": {
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Spraying window"
+            "value": "An umbrella"
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Ventana de tratamiento"
+            "value": "Un paraguas"
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Fenêtre de traitement"
+            "value": "Un parapluie"
+          }
+        }
+      }
+    },
+    "advice.title": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Take with you"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Para llevar"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "À emporter"
+          }
+        }
+      }
+    },
+    "advice.vent": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gusts: mind your umbrella"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rachas: cuidado con el paraguas"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rafales : gare au parapluie"
+          }
+        }
+      }
+    },
+    "air.bonne": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Good"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Buena"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bonne"
+          }
+        }
+      }
+    },
+    "air.correcte": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fair"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Razonable"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Correcte"
+          }
+        }
+      }
+    },
+    "air.extremementMediocre": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Extremely poor"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Extremadamente mala"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Extrêmement médiocre"
+          }
+        }
+      }
+    },
+    "air.mediocre": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Poor"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mala"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Médiocre"
+          }
+        }
+      }
+    },
+    "air.moyenne": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Moderate"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Regular"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Moyenne"
+          }
+        }
+      }
+    },
+    "air.tresMediocre": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Very poor"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Muy mala"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Très médiocre"
+          }
+        }
+      }
+    },
+    "alert.chaleur.body": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Up to %1$@: drink, find shade."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hasta %1$@: beba agua, busque la sombra."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Jusqu’à %1$@ : buvez, cherchez l’ombre."
+          }
+        }
+      }
+    },
+    "alert.chaleur.title": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Intense heat"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Calor intenso"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Forte chaleur"
           }
         }
       }
@@ -398,19 +628,19 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Down to %1$@ °C expected."
+            "value": "Down to %1$@: icy pavements and windscreens."
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Hasta %1$@ °C previstos."
+            "value": "Hasta %1$@: aceras y parabrisas helados."
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Jusqu'à %1$@ °C attendus."
+            "value": "Jusqu’à %1$@ : trottoirs et pare-brise gelés."
           }
         }
       }
@@ -421,19 +651,65 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Frost tonight"
+            "value": "Frost ahead"
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Helada esta noche"
+            "value": "Helada prevista"
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Gel cette nuit"
+            "value": "Gel annoncé"
+          }
+        }
+      }
+    },
+    "alert.orage.body": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A thunderstorm is expected in the coming hours."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Se espera una tormenta en las próximas horas."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Un orage est prévu dans les prochaines heures."
+          }
+        }
+      }
+    },
+    "alert.orage.title": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Thunderstorm approaching"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tormenta en camino"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Orage en approche"
           }
         }
       }
@@ -444,19 +720,19 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "%1$@ mm expected: a treatment could be washed off."
+            "value": "Arriving shortly: %1$@ chance."
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "%1$@ mm previstos: un tratamiento podría lavarse."
+            "value": "Llega en breve: %1$@ de probabilidad."
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "%1$@ mm attendus : un traitement risque d'être lavé."
+            "value": "Elle arrive d’ici peu : %1$@ de risque."
           }
         }
       }
@@ -467,65 +743,65 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Rain after the window"
+            "value": "Rain on its way"
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Lluvia tras la ventana"
+            "value": "Lluvia inminente"
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Pluie après la fenêtre"
+            "value": "Pluie imminente"
           }
         }
       }
     },
-    "alert.sol.body": {
+    "alert.vent.body": {
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Moisture back to %1$@: the field bears machinery."
+            "value": "Gusts up to %1$@."
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Humedad de nuevo en %1$@: la parcela soporta la maquinaria."
+            "value": "Rachas de hasta %1$@."
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Humidité retombée à %1$@ : la parcelle porte."
+            "value": "Rafales jusqu’à %1$@."
           }
         }
       }
     },
-    "alert.sol.title": {
+    "alert.vent.title": {
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Soil drained"
+            "value": "Strong wind"
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Suelo oreado"
+            "value": "Viento fuerte"
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Sol ressuyé"
+            "value": "Vent violent"
           }
         }
       }
@@ -605,19 +881,19 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Could not load the agricultural forecast."
+            "value": "Could not load the forecast."
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "No se ha podido cargar la previsión agrícola."
+            "value": "No se ha podido cargar la previsión."
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Impossible de charger la prévision agricole."
+            "value": "Impossible de charger la prévision."
           }
         }
       }
@@ -628,19 +904,19 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Loading agronomic data…"
+            "value": "Loading the weather…"
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Cargando los datos agronómicos…"
+            "value": "Cargando el tiempo…"
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Chargement des données agronomiques…"
+            "value": "Chargement de la météo…"
           }
         }
       }
@@ -697,19 +973,19 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Search for a town"
+            "value": "Search for a city"
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Buscar un municipio"
+            "value": "Buscar una ciudad"
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Rechercher une commune"
+            "value": "Rechercher une ville"
           }
         }
       }
@@ -720,19 +996,19 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Open-Meteo data — agricultural model: soil moisture and temperature, FAO-56 ET0, vapour pressure deficit. Field at %1$@."
+            "value": "Open-Meteo data — Météo-France, ECMWF, DWD and NOAA models. City at %1$@ elevation."
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Datos de Open-Meteo — modelo agrícola: humedad y temperatura del suelo, ET0 FAO-56, déficit de presión de vapor. Parcela a %1$@."
+            "value": "Datos de Open-Meteo — modelos de Météo-France, ECMWF, DWD y NOAA. Ciudad a %1$@ de altitud."
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Données Open-Meteo — modèle agricole : humidité et température du sol, ET0 FAO-56, déficit de pression de vapeur. Parcelle à %1$@."
+            "value": "Données Open-Meteo — modèles Météo-France, ECMWF, DWD et NOAA. Ville à %1$@ d’altitude."
           }
         }
       }
@@ -743,19 +1019,19 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "%1$@ models · %2$@ apart"
+            "value": "%1$@ sources · %2$@ apart"
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "%1$@ modelos · diferencia de %2$@"
+            "value": "%1$@ fuentes · diferencia de %2$@"
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "%1$@ modèles · écart %2$@"
+            "value": "%1$@ sources · écart %2$@"
           }
         }
       }
@@ -881,19 +1157,19 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Model agreement"
+            "value": "Source agreement"
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Acuerdo de los modelos"
+            "value": "Acuerdo de las fuentes"
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Accord des modèles"
+            "value": "Accord des sources"
           }
         }
       }
@@ -940,190 +1216,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Auj."
-          }
-        }
-      }
-    },
-    "disease.elevee": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "High"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Alta"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Élevée"
-          }
-        }
-      }
-    },
-    "disease.faible": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Low"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Baja"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Faible"
-          }
-        }
-      }
-    },
-    "disease.moyenne": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Moderate"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Media"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Moyenne"
-          }
-        }
-      }
-    },
-    "frost.aucun": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "None"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Ninguna"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Aucun"
-          }
-        }
-      }
-    },
-    "frost.faible": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Slight"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Leve"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Faible"
-          }
-        }
-      }
-    },
-    "frost.hoarFrost": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "hoar frost likely"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "escarcha probable"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "gelée blanche probable"
-          }
-        }
-      }
-    },
-    "frost.modere": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Moderate"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Moderada"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Modéré"
-          }
-        }
-      }
-    },
-    "frost.severe": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Severe"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Severa"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Sévère"
           }
         }
       }
@@ -1180,19 +1272,19 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Location denied. Search for the town instead."
+            "value": "Location denied. Search for the city instead."
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Ubicación denegada. Busque el municipio a mano."
+            "value": "Ubicación denegada. Busque la ciudad a mano."
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Localisation refusée. Recherchez la commune à la main."
+            "value": "Localisation refusée. Recherchez la ville à la main."
           }
         }
       }
@@ -1272,19 +1364,19 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "One field and the whole day stay free, no account and no adverts."
+            "value": "One city and the whole day stay free, no account and no adverts."
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Una parcela y el día entero siguen siendo gratis, sin cuenta ni publicidad."
+            "value": "Una ciudad y el día entero siguen siendo gratis, sin cuenta ni publicidad."
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Une parcelle et la journée entière restent gratuites, sans compte ni publicité."
+            "value": "Une ville et la journée entière restent gratuites, sans compte ni publicité."
           }
         }
       }
@@ -1381,48 +1473,48 @@
         }
       }
     },
+    "plan.feature.air": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Air quality and pollen"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Calidad del aire y polen"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Qualité de l’air et pollens"
+          }
+        }
+      }
+    },
     "plan.feature.alertes": {
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Warned without opening the app"
+            "value": "Warned of rain, storms, frost and heat"
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Avisado sin abrir la aplicación"
+            "value": "Avisos de lluvia, tormenta, helada y calor"
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Prévenu sans ouvrir l'application"
-          }
-        }
-      }
-    },
-    "plan.feature.cumuls": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Totals since sowing or the last treatment"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Acumulados desde la siembra o el último tratamiento"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Cumuls depuis le semis ou le dernier traitement"
+            "value": "Prévenu de la pluie, de l’orage, du gel et de la chaleur"
           }
         }
       }
@@ -1433,42 +1525,19 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Five institutes cross-checked, and how far they agree"
+            "value": "Six sources cross-checked, and how far they agree"
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Cinco institutos contrastados y su nivel de acuerdo"
+            "value": "Seis fuentes contrastadas, y su grado de acuerdo"
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Cinq instituts recoupés, et leur niveau d'accord"
-          }
-        }
-      }
-    },
-    "plan.feature.registre": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Export of the conditions at the hour of treatment"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Exportación de las condiciones a la hora del tratamiento"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Export des conditions à l'heure du traitement"
+            "value": "Six sources recoupées, et leur niveau d’accord"
           }
         }
       }
@@ -1519,6 +1588,29 @@
         }
       }
     },
+    "plan.reason.air": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Air quality and pollen need the subscription."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "La calidad del aire y el polen requieren la suscripción."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "La qualité de l’air et les pollens demandent l’abonnement."
+          }
+        }
+      }
+    },
     "plan.reason.alertes": {
       "extractionState": "manual",
       "localizations": {
@@ -1542,71 +1634,393 @@
         }
       }
     },
-    "plan.reason.cumuls": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Totals since a chosen date need the subscription."
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Los acumulados desde una fecha requieren la suscripción."
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Les cumuls depuis une date demandent l'abonnement."
-          }
-        }
-      }
-    },
     "plan.reason.recoupement": {
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Comparing several institutes needs the subscription."
+            "value": "Comparing several sources needs the subscription."
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Comparar varios institutos requiere la suscripción."
+            "value": "Comparar varias fuentes requiere la suscripción."
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Comparer plusieurs instituts demande l'abonnement."
+            "value": "Comparer plusieurs sources demande l’abonnement."
           }
         }
       }
     },
-    "plan.reason.registre": {
+    "pollen.ambroisie": {
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Exporting treatment conditions needs the subscription."
+            "value": "Ragweed"
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Exportar las condiciones de tratamiento requiere la suscripción."
+            "value": "Ambrosía"
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "L'export des conditions de traitement demande l'abonnement."
+            "value": "Ambroisie"
+          }
+        }
+      }
+    },
+    "pollen.armoise": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mugwort"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Artemisa"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Armoise"
+          }
+        }
+      }
+    },
+    "pollen.aulne": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Alder"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aliso"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aulne"
+          }
+        }
+      }
+    },
+    "pollen.bouleau": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Birch"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Abedul"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bouleau"
+          }
+        }
+      }
+    },
+    "pollen.graminees": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Grass"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gramíneas"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Graminées"
+          }
+        }
+      }
+    },
+    "pollen.olivier": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Olive"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Olivo"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Olivier"
+          }
+        }
+      }
+    },
+    "pollenLevel.eleve": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "High"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Alto"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Élevé"
+          }
+        }
+      }
+    },
+    "pollenLevel.faible": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Low"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bajo"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Faible"
+          }
+        }
+      }
+    },
+    "pollenLevel.modere": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Moderate"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Moderado"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Modéré"
+          }
+        }
+      }
+    },
+    "pollenLevel.tresEleve": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Very high"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Muy alto"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Très élevé"
+          }
+        }
+      }
+    },
+    "rain.detail": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@ chance · %2$@"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@ de probabilidad · %2$@"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@ de risque · %2$@"
+          }
+        }
+      }
+    },
+    "rain.none": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No rain expected for %1$@ h"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sin lluvia prevista en %1$@ h"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pas de pluie prévue d’ici %1$@ h"
+          }
+        }
+      }
+    },
+    "rain.now": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Raining — easing around %1$@"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Llueve — amaina hacia las %1$@"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Il pleut — accalmie vers %1$@"
+          }
+        }
+      }
+    },
+    "rain.nowLasting": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Raining, and set to last"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Llueve, y para rato"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Il pleut, et pour un moment"
+          }
+        }
+      }
+    },
+    "rain.soon": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rain around %1$@"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lluvia hacia las %1$@"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pluie vers %1$@"
+          }
+        }
+      }
+    },
+    "rain.title": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rain"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lluvia"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pluie"
           }
         }
       }
@@ -1617,134 +2031,19 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "My field"
+            "value": "My city"
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Mi parcela"
+            "value": "Mi ciudad"
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Ma parcelle"
-          }
-        }
-      }
-    },
-    "soil.compaction": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Compaction risk"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Riesgo de compactación"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Risque de tassement"
-          }
-        }
-      }
-    },
-    "soil.ressuye": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Drained"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Oreado"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Ressuyé"
-          }
-        }
-      }
-    },
-    "soil.sature": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Waterlogged"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Encharcado"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Saturé"
-          }
-        }
-      }
-    },
-    "soil.sec": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Dry"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Seco"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Sec"
-          }
-        }
-      }
-    },
-    "soil.trafficable": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Bears machinery"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Soporta la maquinaria"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Portance correcte"
+            "value": "Ma ville"
           }
         }
       }
@@ -1795,577 +2094,140 @@
         }
       }
     },
-    "spray.acceptable": {
+    "tile.air": {
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Acceptable"
+            "value": "Air quality"
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Aceptable"
+            "value": "Calidad del aire"
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Acceptable"
+            "value": "Qualité de l’air"
           }
         }
       }
     },
-    "spray.defavorable": {
+    "tile.air.caption": {
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Unsuitable"
+            "value": "European index %1$@ · fine particles %2$@."
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Desfavorable"
+            "value": "Índice europeo %1$@ · partículas finas %2$@."
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Défavorable"
+            "value": "Indice européen %1$@ · particules fines %2$@."
           }
         }
       }
     },
-    "spray.dryAir": {
+    "tile.feelsLike": {
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Humidity %1$@, air too dry"
+            "value": "Feels like"
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Humedad %1$@, aire demasiado seco"
+            "value": "Sensación"
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Hygrométrie %1$@, air trop sec"
+            "value": "Ressenti"
           }
         }
       }
     },
-    "spray.favorable": {
+    "tile.feelsLike.caption": {
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Favourable"
+            "value": "The thermometer reads %1$@."
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Favorable"
+            "value": "El termómetro marca %1$@."
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Favorable"
+            "value": "Il fait %1$@ au thermomètre."
           }
         }
       }
     },
-    "spray.gusts": {
+    "tile.humidity": {
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Gusts %1$@"
+            "value": "Humidity"
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Rachas %1$@"
+            "value": "Humedad"
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Rafales %1$@"
+            "value": "Humidité"
           }
         }
       }
     },
-    "spray.mainBlocker": {
+    "tile.humidity.caption": {
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Main obstacle: %1$@"
+            "value": "Dew point %1$@."
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Principal impedimento: %1$@"
+            "value": "Punto de rocío %1$@."
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Blocage principal : %1$@"
-          }
-        }
-      }
-    },
-    "spray.none": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "No window in the next 7 days"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Ninguna ventana en 7 días"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Aucune fenêtre sur 7 jours"
-          }
-        }
-      }
-    },
-    "spray.now": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Now"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Ahora"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Maintenant"
-          }
-        }
-      }
-    },
-    "spray.plus12": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "+12 h"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "+12 h"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "+12 h"
-          }
-        }
-      }
-    },
-    "spray.plus24": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "+24 h"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "+24 h"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "+24 h"
-          }
-        }
-      }
-    },
-    "spray.rain": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Rain %1$@ within 2 h"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Lluvia %1$@ en 2 h"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Pluie %1$@ dans les 2 h"
-          }
-        }
-      }
-    },
-    "spray.score": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Score %1$@/100 over the window"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Puntuación %1$@/100 en la franja"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Score %1$@/100 sur la plage"
-          }
-        }
-      }
-    },
-    "spray.title": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Spraying window"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Ventana de tratamiento"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Fenêtre de traitement"
-          }
-        }
-      }
-    },
-    "spray.tooCold": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Temperature %1$@, too cold"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Temperatura %1$@, demasiado frío"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Température %1$@, trop froid"
-          }
-        }
-      }
-    },
-    "spray.tooHot": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Temperature %1$@, too warm"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Temperatura %1$@, demasiado calor"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Température %1$@, trop chaud"
-          }
-        }
-      }
-    },
-    "spray.unsuitable": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Conditions unsuitable"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Condiciones desfavorables"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Conditions défavorables"
-          }
-        }
-      }
-    },
-    "spray.vapourPressureDeficit": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "VPD %1$@, droplets evaporate"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "DPV %1$@, las gotas se evaporan"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "VPD %1$@, évaporation des gouttelettes"
-          }
-        }
-      }
-    },
-    "spray.windTooStrong": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Wind %1$@ (limit %2$@)"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Viento %1$@ (máx. %2$@)"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Vent %1$@ (max %2$@)"
-          }
-        }
-      }
-    },
-    "spray.windTooWeak": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Wind too light, risk of thermal inversion"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Viento demasiado flojo, riesgo de inversión térmica"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Vent trop faible, risque d’inversion thermique"
-          }
-        }
-      }
-    },
-    "tile.disease": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Disease pressure"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Presión de enfermedad"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Pression maladie"
-          }
-        }
-      }
-    },
-    "tile.disease.caption": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%1$@ h of leaf wetness over 24 h."
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%1$@ h de humectación foliar en 24 h."
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%1$@ h d’humectation du feuillage sur 24 h."
-          }
-        }
-      }
-    },
-    "tile.frost": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Frost risk"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Riesgo de helada"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Risque de gel"
-          }
-        }
-      }
-    },
-    "tile.frost.caption": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Low of %1$@ tonight%2$@."
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Mínima de %1$@ esta noche%2$@."
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Mini %1$@ cette nuit%2$@."
-          }
-        }
-      }
-    },
-    "tile.gdd": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Growing degree days"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Grados-día"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Degrés-jours"
-          }
-        }
-      }
-    },
-    "tile.gdd.caption": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Cumulated over 7 days, base %1$@."
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Acumulado en 7 días, base %1$@."
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Cumul sur 7 jours, base %1$@."
+            "value": "Point de rosée %1$@."
           }
         }
       }
@@ -2393,140 +2255,186 @@
         }
       }
     },
-    "tile.soil": {
+    "tile.pollen": {
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Soil moisture"
+            "value": "Pollen"
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Humedad del suelo"
+            "value": "Polen"
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Humidité du sol"
+            "value": "Pollens"
           }
         }
       }
     },
-    "tile.soil.caption": {
+    "tile.pollen.caption": {
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "%1$@ vol. · %2$@ at 6 cm. %3$@"
+            "value": "%1$@ grains/m³ — %2$@."
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "%1$@ vol. · %2$@ a 6 cm. %3$@"
+            "value": "%1$@ granos/m³ — %2$@."
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "%1$@ vol. · %2$@ à 6 cm. %3$@"
+            "value": "%1$@ grains/m³ — %2$@."
           }
         }
       }
     },
-    "tile.sowing": {
+    "tile.pollen.none": {
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Drilling"
+            "value": "None"
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Siembra"
+            "value": "Ninguno"
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Semis"
+            "value": "Aucun"
           }
         }
       }
     },
-    "tile.sowing.caption": {
+    "tile.pollen.noneCaption": {
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Soil at %1$@ at 6 cm; it needs 8 °C and drained soil."
+            "value": "Nothing notable in the air."
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Suelo a %1$@ a 6 cm; hacen falta 8 °C y suelo oreado."
+            "value": "Nada destacable en el aire."
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Sol à %1$@ à 6 cm ; il faut 8 °C et un sol ressuyé."
+            "value": "Rien de notable dans l’air."
           }
         }
       }
     },
-    "tile.sowing.no": {
+    "tile.pressure": {
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Not advised"
+            "value": "Pressure"
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Desaconsejada"
+            "value": "Presión"
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Déconseillé"
+            "value": "Pression"
           }
         }
       }
     },
-    "tile.sowing.yes": {
+    "tile.pressure.caption": {
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Possible"
+            "value": "At sea level."
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Posible"
+            "value": "Reducida al nivel del mar."
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Possible"
+            "value": "Ramenée au niveau de la mer."
+          }
+        }
+      }
+    },
+    "tile.rainToday": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rain today"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lluvia de hoy"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pluie du jour"
+          }
+        }
+      }
+    },
+    "tile.rainToday.caption": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Highest chance %1$@."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Probabilidad máxima %1$@."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Risque maximal %1$@."
           }
         }
       }
@@ -2577,71 +2485,48 @@
         }
       }
     },
-    "tile.water": {
+    "tile.uv": {
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Water balance"
+            "value": "UV index"
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Balance hídrico"
+            "value": "Índice UV"
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Bilan hydrique"
+            "value": "Indice UV"
           }
         }
       }
     },
-    "tile.water.caption": {
+    "tile.uv.caption": {
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Rain %1$@, ET0 %2$@ over 7 days."
+            "value": "Up to %1$@ today (%2$@)."
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Lluvia %1$@, ET0 %2$@ en 7 días."
+            "value": "Hasta %1$@ hoy (%2$@)."
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Pluie %1$@, ET0 %2$@ sur 7 jours."
-          }
-        }
-      }
-    },
-    "tile.water.irrigation": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Irrigation advised: %1$@ over 7 days."
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Riego aconsejado: %1$@ en 7 días."
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Irrigation conseillée : %1$@ sur 7 jours."
+            "value": "Jusqu’à %1$@ aujourd’hui (%2$@)."
           }
         }
       }
@@ -2675,88 +2560,134 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Gusts %1$@. Spraying limit: %2$@."
+            "value": "Gusts %1$@."
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Rachas %1$@. Límite de pulverización: %2$@."
+            "value": "Rachas %1$@."
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Rafales %1$@. Limite de pulvérisation : %2$@."
+            "value": "Rafales %1$@."
           }
         }
       }
     },
-    "water.deficit": {
+    "uv.eleve": {
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Deficit"
+            "value": "High"
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Déficit"
+            "value": "Alto"
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Déficit"
+            "value": "Élevé"
           }
         }
       }
     },
-    "water.equilibre": {
+    "uv.extreme": {
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Balanced"
+            "value": "Extreme"
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Equilibrio"
+            "value": "Extremo"
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Équilibre"
+            "value": "Extrême"
           }
         }
       }
     },
-    "water.excedent": {
+    "uv.faible": {
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Surplus"
+            "value": "Low"
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Excedente"
+            "value": "Bajo"
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Excédent"
+            "value": "Faible"
+          }
+        }
+      }
+    },
+    "uv.modere": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Moderate"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Moderado"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Modéré"
+          }
+        }
+      }
+    },
+    "uv.tresEleve": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Very high"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Muy alto"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Très élevé"
           }
         }
       }
@@ -2859,42 +2790,19 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "The weather on your field."
+            "value": "The weather in your city."
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "El tiempo en su parcela."
+            "value": "El tiempo en su ciudad."
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Le temps qu'il fait sur votre parcelle."
-          }
-        }
-      }
-    },
-    "widget.description": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "The next spraying window on your field."
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "La próxima ventana de tratamiento en su parcela."
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "La prochaine fenêtre de traitement sur votre parcelle."
+            "value": "Le temps qu’il fait dans votre ville."
           }
         }
       }

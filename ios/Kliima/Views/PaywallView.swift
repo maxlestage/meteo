@@ -5,7 +5,7 @@ import SwiftUI
 /// L'écran d'abonnement.
 ///
 /// Il ne dit pas ce qu'il retire, il dit ce qu'il ajoute — parce que le palier
-/// libre ne retire rien : la journée du jour et sa parcelle restent entières
+/// libre ne retire rien : la journée du jour et sa ville restent entières
 /// sans payer. Ce qui s'achète est l'échelle et l'anticipation.
 ///
 /// Le prix n'est jamais écrit en dur : il vient d'App Store Connect, dans la
