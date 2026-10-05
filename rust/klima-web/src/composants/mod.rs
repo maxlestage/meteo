@@ -6,5 +6,6 @@ pub mod jours;
 pub mod pro;
 pub mod recherche;
 pub mod registre;
+pub mod sources;
 pub mod traitement;
 pub mod tuile;
