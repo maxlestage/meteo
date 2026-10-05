@@ -44,6 +44,12 @@ pub const TTL_MS: i64 = 3_600_000;
 /// Au-delà, une prévision périmée dépanne encore pendant deux heures.
 pub const STALE_MS: i64 = 7_200_000;
 
+/// La prévision au quart d'heure du guetteur ne vaut que pour la demi-heure :
+/// dix minutes de fraîcheur, et elle ne dépanne plus au-delà d'un quart
+/// d'heure de retard. Un « sec » vieux d'une heure serait un mensonge.
+pub const QUARTS_TTL_MS: i64 = 600_000;
+pub const QUARTS_STALE_MS: i64 = 900_000;
+
 /// Le géocodage ne bouge pas d'un jour à l'autre.
 pub const SEARCH_TTL_MS: i64 = 86_400_000;
 
@@ -53,6 +59,8 @@ pub const DEFAULT_ORIGIN: &str = "https://maxlestage.github.io";
 #[derive(Clone)]
 pub struct Etat {
     pub forecasts: Arc<ForecastCache<String>>,
+    /// Les prévisions au quart d'heure : un cache à part, plus court.
+    pub quarts: Arc<ForecastCache<String>>,
     pub searches: Arc<ForecastCache<String>>,
     pub open_meteo_key: Option<String>,
     /// Ce que ce déploiement accorde comme palier, en plus de la boutique.
@@ -287,7 +295,10 @@ async fn handle(State(etat): State<Etat>, request: Request) -> Response {
         _ => return texte(StatusCode::NOT_FOUND, "inconnu", &cors),
     };
 
-    let lu = etat.forecasts.serve(&cle, || (etat.fetch)(appel)).await;
+    // Le guetteur demande le quart d'heure : sa réponse vieillit dix fois
+    // plus vite que la prévision horaire, et ne se garde pas aussi longtemps.
+    let cache = if params.contains_key("minutely_15") { &etat.quarts } else { &etat.forecasts };
+    let lu = cache.serve(&cle, || (etat.fetch)(appel)).await;
     servir(lu, &cors)
 }
 
@@ -297,7 +308,7 @@ fn sante(etat: &Etat) -> String {
     format!(
         r#"{{"statut":"ok","cellules":{},"interrogations":{},"cleOpenMeteo":"{}","pro":"{}","comptes":"{}","poussee":"{}","iles":{}}}"#,
         etat.forecasts.size(),
-        etat.forecasts.calls() + etat.searches.calls(),
+        etat.forecasts.calls() + etat.quarts.calls() + etat.searches.calls(),
         if etat.open_meteo_key.is_some() { "configurée" } else { "absente" },
         etat.accord_pro.etiquette(),
         // L'état, jamais le secret.
@@ -549,6 +560,11 @@ pub fn etat(fetch: Fetch, now: crate::cache::Clock) -> Etat {
             stale_ms: STALE_MS,
             now: now.clone(),
         })),
+        quarts: Arc::new(ForecastCache::new(CacheOptions {
+            ttl_ms: QUARTS_TTL_MS,
+            stale_ms: QUARTS_STALE_MS,
+            now: now.clone(),
+        })),
         searches: Arc::new(ForecastCache::new(CacheOptions {
             ttl_ms: SEARCH_TTL_MS,
             stale_ms: SEARCH_TTL_MS,
@@ -662,6 +678,31 @@ mod tests {
         assert_eq!(corps, r#"{"timezone":"Europe/Paris"}"#);
         assert_eq!(entetes["x-klima-cache"], "frais");
         assert_eq!(faux.appels(), 1);
+    }
+
+    #[tokio::test]
+    async fn le_quart_d_heure_se_garde_dix_minutes_pas_une_heure() {
+        let faux = Faux::new();
+        let instant = Arc::new(Mutex::new(0_i64));
+        let horloge = {
+            let instant = instant.clone();
+            Arc::new(move || *instant.lock().unwrap()) as crate::cache::Clock
+        };
+        let etat = etat(faux.fetch(), horloge);
+        let quarts = "/v1/open-meteo/forecast?latitude=48.44&longitude=1.48&minutely_15=precipitation";
+        let heures = "/v1/open-meteo/forecast?latitude=48.44&longitude=1.48&hourly=precipitation";
+
+        let _ = get(etat.clone(), quarts).await;
+        let _ = get(etat.clone(), heures).await;
+        assert_eq!(faux.appels(), 2);
+
+        // Onze minutes plus tard : le quart d'heure est à refaire, l'heure non.
+        *instant.lock().unwrap() = 11 * 60_000;
+        let (_, entetes, _) = get(etat.clone(), quarts).await;
+        assert_eq!(entetes["x-klima-cache"], "frais");
+        let (_, entetes, _) = get(etat, heures).await;
+        assert_eq!(entetes["x-klima-cache"], "cache");
+        assert_eq!(faux.appels(), 3);
     }
 
     #[tokio::test]

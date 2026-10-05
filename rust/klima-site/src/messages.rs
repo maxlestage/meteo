@@ -17,7 +17,7 @@ fn catalog(entries: &[(&'static str, &'static str)]) -> Catalog {
     entries.iter().copied().collect()
 }
 
-const FR: [(&str, &str); 102] = [
+const FR: [(&str, &str); 105] = [
     ("nav.today", "Météo du jour"),
     ("nav.data", "Données"),
     ("app.open", "Ouvrir l’application"),
@@ -69,7 +69,7 @@ const FR: [(&str, &str); 102] = [
     ("today.sun", "Soleil"),
     ("today.sun.detail", "Indice {index} au plus fort de la journée"),
     ("search.placeholder", "{commune} — changer de ville"),
-    ("features.title", "Six réponses avant de sortir"),
+    ("features.title", "Sept réponses avant de sortir"),
     ("features.lead", "Ni carte radar à déchiffrer, ni tableau de chiffres : Klima part de la prévision et rend des réponses — à quelle heure, quoi emporter, faut-il se méfier."),
     ("feature.rain.title", "Pluie à venir"),
     ("feature.rain.rule", "Une heure est pluvieuse dès {amount} ou {probability} de risque."),
@@ -120,9 +120,12 @@ const FR: [(&str, &str); 102] = [
     ("gallery.sources.title", "Six sources, nommées"),
     ("gallery.sources.body", "Météo-France, ECMWF, DWD, NOAA, MET Norway et une station : chacune dit sa température, et celle qui s’écarte se voit en orange."),
     ("gallery.sources.alt", "La carte des sources : Météo-France, ECMWF, Deutscher Wetterdienst, NOAA en orange, MET Norway et une station du DWD, avec leur température, leur pluie et leur vent."),
+    ("feature.veille.title", "Le guetteur : 30 minutes, puis 2 heures"),
+    ("feature.veille.rule", "Un quart d’heure est mouillé dès {amount} ; la pluie est forte dès {heavy} par heure."),
+    ("feature.veille.detail", "Il lit la prévision au quart d’heure et la relit tous les quarts d’heure, tout seul : ce qui tombe dans la demi-heure en cours, puis ce qui vient d’ici deux heures, à la minute près."),
 ];
 
-const EN: [(&str, &str); 102] = [
+const EN: [(&str, &str); 105] = [
     ("nav.today", "Today"),
     ("nav.data", "Data"),
     ("app.open", "Open the app"),
@@ -174,7 +177,7 @@ const EN: [(&str, &str); 102] = [
     ("today.sun", "Sun"),
     ("today.sun.detail", "Index {index} at its strongest today"),
     ("search.placeholder", "{commune} — change city"),
-    ("features.title", "Six answers before you head out"),
+    ("features.title", "Seven answers before you head out"),
     ("features.lead", "No radar map to decode, no table of numbers: Klima starts from the forecast and gives answers — what time, what to take, what to watch for."),
     ("feature.rain.title", "Rain ahead"),
     ("feature.rain.rule", "An hour counts as rainy from {amount} or a {probability} chance."),
@@ -225,9 +228,12 @@ const EN: [(&str, &str); 102] = [
     ("gallery.sources.title", "Six sources, by name"),
     ("gallery.sources.body", "Météo-France, ECMWF, DWD, NOAA, MET Norway and a station: each gives its temperature, and the one that strays shows in orange."),
     ("gallery.sources.alt", "The sources card: Météo-France, ECMWF, Deutscher Wetterdienst, NOAA in orange, MET Norway and a DWD station, with their temperature, rain and wind."),
+    ("feature.veille.title", "The lookout: 30 minutes, then 2 hours"),
+    ("feature.veille.rule", "A quarter hour counts as wet from {amount}; rain is heavy from {heavy} an hour."),
+    ("feature.veille.detail", "It reads the quarter-hourly forecast and rereads it every fifteen minutes on its own: what falls in the current half hour, then what is coming over the next two hours, to the minute."),
 ];
 
-const ES: [(&str, &str); 102] = [
+const ES: [(&str, &str); 105] = [
     ("nav.today", "El tiempo de hoy"),
     ("nav.data", "Datos"),
     ("app.open", "Abrir la aplicación"),
@@ -279,7 +285,7 @@ const ES: [(&str, &str); 102] = [
     ("today.sun", "Sol"),
     ("today.sun.detail", "Índice {index} en el momento más fuerte del día"),
     ("search.placeholder", "{commune} — cambiar de ciudad"),
-    ("features.title", "Seis respuestas antes de salir"),
+    ("features.title", "Siete respuestas antes de salir"),
     ("features.lead", "Ni mapa de radar que descifrar, ni tabla de cifras: Klima parte de la previsión y da respuestas — a qué hora, qué llevar, de qué cuidarse."),
     ("feature.rain.title", "Lluvia por venir"),
     ("feature.rain.rule", "Una hora es lluviosa a partir de {amount} o de un {probability} de probabilidad."),
@@ -330,6 +336,9 @@ const ES: [(&str, &str); 102] = [
     ("gallery.sources.title", "Seis fuentes, con nombre"),
     ("gallery.sources.body", "Météo-France, ECMWF, DWD, NOAA, MET Norway y una estación: cada una da su temperatura, y la que se aparta se ve en naranja."),
     ("gallery.sources.alt", "La tarjeta de fuentes: Météo-France, ECMWF, Deutscher Wetterdienst, NOAA en naranja, MET Norway y una estación del DWD, con su temperatura, lluvia y viento."),
+    ("feature.veille.title", "El vigía: 30 minutos, luego 2 horas"),
+    ("feature.veille.rule", "Un cuarto de hora es lluvioso desde {amount}; la lluvia es fuerte desde {heavy} por hora."),
+    ("feature.veille.detail", "Lee la previsión por cuartos de hora y la relee cada cuarto de hora, solo: lo que cae en la media hora en curso, y lo que viene en las próximas dos horas, al minuto."),
 ];
 
 #[cfg(test)]

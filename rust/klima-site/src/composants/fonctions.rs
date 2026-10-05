@@ -6,6 +6,7 @@
 
 use klima_core::alerts::seuils::{CHALEUR, RAFALES};
 use klima_core::i18n::{Params, params};
+use klima_core::veille::seuils::{FORTE_MM_H, PLUIE_QUART_MM};
 use klima_core::ville::seuils::{
     HORIZON_PLUIE, MANTEAU_RESSENTI, PLUIE_MM, PLUIE_PROBABILITE, UV_CREME, UV_LUNETTES,
 };
@@ -21,6 +22,16 @@ pub fn Fonctions() -> Html {
     let celsius = |valeur: f64| f.unit(valeur, "°C", 0);
 
     let fonctions: Vec<(&str, Params, Params)> = vec![
+        // Le guetteur ouvre la liste, sur toute la largeur : c'est lui qui
+        // répond à la question la plus pressée.
+        (
+            "veille",
+            params([
+                ("amount", f.unit(PLUIE_QUART_MM, "mm", 1).as_str().into()),
+                ("heavy", f.unit(FORTE_MM_H, "mm", 1).as_str().into()),
+            ]),
+            Params::new(),
+        ),
         (
             "rain",
             params([
@@ -55,7 +66,7 @@ pub fn Fonctions() -> Html {
         .into_iter()
         .map(|(cle, regle, detail)| {
             html! {
-                <article class="feature" key={cle}>
+                <article class={classes!("feature", (cle == "veille").then_some("feature--large"))} key={cle}>
                     <IconeFonction cle={cle} />
                     <h3>{ i18n.t(&format!("feature.{cle}.title")) }</h3>
                     <p class="feature__rule">
