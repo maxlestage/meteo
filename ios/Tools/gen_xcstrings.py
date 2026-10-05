@@ -124,6 +124,8 @@ STRINGS = {
     "consensus.rainDisagreement": ("désaccord sur la pluie", "they disagree on rain",
                                    "discrepan sobre la lluvia"),
     "consensus.median": ("Valeur retenue : %1$@", "Value used: %1$@", "Valor retenido: %1$@"),
+    "sources.title": ("Ce que dit chaque source", "What each source says", "Lo que dice cada fuente"),
+    "sources.dry": ("sec", "dry", "seco"),
 
     # --- Alertes : ce que Kliima dit sans qu'on ouvre l'application ---
     "alert.fenetre.title": ("Fenêtre de traitement", "Spraying window", "Ventana de tratamiento"),

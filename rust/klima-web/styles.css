@@ -481,6 +481,60 @@ body {
   transform: translate(-50%, -50%);
 }
 
+/* Ce que dit chaque source ----------------------------------------------- */
+
+/*
+ * Deux lignes par source : l'institut et sa température, puis le modèle, la
+ * pluie et le vent. Une rangée de cinq colonnes ne tenait pas sur un
+ * téléphone, et rien ici ne défile de côté.
+ */
+.sources {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.sources__row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  column-gap: 12px;
+  align-items: baseline;
+  padding: 8px 0;
+  border-top: 1px solid rgb(255 255 255 / 12%);
+}
+
+.sources__row:first-child {
+  border-top: 0;
+}
+
+.sources__institution {
+  overflow-wrap: anywhere;
+  font-size: 17px;
+  font-weight: 500;
+}
+
+.sources__temperature {
+  font-size: 20px;
+  font-variant-numeric: tabular-nums;
+}
+
+.sources__temperature--ecart {
+  color: #ef8a5a;
+}
+
+.sources__detail {
+  grid-column: 1 / -1;
+  overflow-wrap: anywhere;
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+.sources__resume {
+  margin: 8px 0 0;
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
 /* Fenêtre de traitement -------------------------------------------------- */
 
 .spray__headline {
