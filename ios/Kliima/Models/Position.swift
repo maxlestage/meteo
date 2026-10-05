@@ -59,4 +59,18 @@ enum Position {
     static func parcelle(named name: String, latitude: Double, longitude: Double) -> Parcelle {
         Parcelle(name: name, latitude: snap(latitude), longitude: snap(longitude))
     }
+
+    /// Les noms que l'époque agricole donnait à la position de la personne,
+    /// dans les trois langues. Miroir de `NOMS_HERITES` dans `position.rs`.
+    static let nomsHerites: Set<String> = ["Ma parcelle", "My field", "Mi parcela"]
+
+    /// La même ville, renommée si elle porte un nom hérité : une météo de
+    /// ville n'affiche pas « Ma parcelle ».
+    static func renommee(_ parcelle: Parcelle, nomActuel: String) -> Parcelle {
+        guard nomsHerites.contains(parcelle.name.trimmingCharacters(in: .whitespaces)) else {
+            return parcelle
+        }
+        return Parcelle(name: nomActuel, latitude: parcelle.latitude, longitude: parcelle.longitude,
+                        admin: parcelle.admin, country: parcelle.country)
+    }
 }

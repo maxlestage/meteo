@@ -49,7 +49,7 @@ pub struct Props {
 pub fn App(props: &Props) -> Html {
     let i18n = use_i18n();
     let f = i18n.f();
-    let lieu = use_parcelle(defaut());
+    let lieu = use_parcelle(defaut(), i18n.t("search.myField"));
     let palier = use_palier(props.relais.clone());
 
     // Première visite, rien de choisi ni de partagé : on part de là où est la
