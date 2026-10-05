@@ -16,3 +16,4 @@ pub mod parcelle_url;
 pub mod plan;
 pub mod readings;
 pub mod today;
+pub mod veille;

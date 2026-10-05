@@ -13,6 +13,12 @@ final class DashboardViewModel: ObservableObject {
     @Published private(set) var consensus: Consensus?
     /// Qualité de l'air et pollens ; absente si le service n'a pas répondu.
     @Published private(set) var air: AirSample?
+    /// Le guetteur : la série au quart d'heure, et quand elle a été lue.
+    @Published private(set) var quarts: [QuartSample]?
+    @Published private(set) var quartsLusA: Date?
+    @Published private(set) var veilleEnLecture = false
+    /// La ville de la série : celle d'une autre ville ne s'affiche pas.
+    private var quartsDe: Parcelle?
     @Published private(set) var isLoading = false
     @Published var errorMessage: String?
 
@@ -114,6 +120,45 @@ final class DashboardViewModel: ObservableObject {
         }
         loadTask = task
         await task.value
+    }
+
+    /// La série au quart d'heure de la ville affichée, ou rien.
+    var quartsDeLaVille: [QuartSample]? { quartsDe == parcelle ? quarts : nil }
+
+    /// Le guetteur veille : il lit, puis relit à chaque quart d'heure, tant
+    /// que la tâche qui l'appelle vit (`.task(id:)` de la vue, relancée au
+    /// changement de ville).
+    ///
+    /// L'attente se fait par pas de trente secondes plutôt qu'en un long
+    /// sommeil : une application mise en arrière-plan ne voit pas passer le
+    /// temps, et doit relire dès qu'elle revient si l'heure est passée.
+    func veiller() async {
+        while !Task.isCancelled {
+            await relireQuarts()
+            let echeance = Veille.prochaineLecture(quartsLusA ?? Date())
+            while !Task.isCancelled, Date() < echeance {
+                try? await Task.sleep(nanoseconds: 30_000_000_000)
+            }
+        }
+    }
+
+    /// Une lecture du guetteur. Un échec garde la série d'avant, qui reste
+    /// vraie pour les quarts qu'elle couvre encore — sauf si elle est d'une
+    /// autre ville.
+    func relireQuarts() async {
+        let parcelle = parcelle
+        veilleEnLecture = true
+        let lus = try? await service.quarts(for: parcelle)
+        defer { veilleEnLecture = false }
+        // La ville a changé pendant la lecture : la tâche suivante relira.
+        guard parcelle == self.parcelle else { return }
+        if let lus {
+            quarts = lus
+            quartsDe = parcelle
+        } else if quartsDe != parcelle {
+            quarts = nil
+        }
+        quartsLusA = Date()
     }
 
     func select(_ parcelle: Parcelle) {

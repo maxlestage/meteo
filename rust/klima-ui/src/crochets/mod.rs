@@ -4,3 +4,4 @@ pub mod palier;
 pub mod parcelle;
 pub mod position;
 pub mod prevision;
+pub mod veille;
