@@ -16,6 +16,7 @@ use klima_ui::composants::marque::MarqueEtNom;
 use crate::composants::pro::NotePro;
 use crate::composants::recherche::Recherche;
 use crate::composants::registre::Registre;
+use crate::composants::sources::Sources;
 use crate::composants::traitement::Traitement;
 use crate::composants::tuile::{Jauge, Tuile};
 use klima_ui::crochets::palier::use_palier;
@@ -123,6 +124,11 @@ pub fn App(props: &Props) -> Html {
                             days={forecast.daily.clone()}
                             current_temperature={forecast.current.temperature}
                         />
+                        // Qui annonce quoi pour la ville : la tuile d'accord
+                        // le résume, cette carte le détaille.
+                        if let Some(consensus) = &etat.consensus {
+                            <Sources consensus={consensus.clone()} />
+                        }
                         <Traitement
                             hours={forecast.hourly.clone()}
                             next_spray={summary.next_spray.clone()}
