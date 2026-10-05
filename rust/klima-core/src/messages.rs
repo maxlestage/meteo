@@ -24,7 +24,7 @@ fn catalog(entries: &[(&'static str, &'static str)]) -> Catalog {
     entries.iter().copied().collect()
 }
 
-const FR: [(&str, &str); 123] = [
+const FR: [(&str, &str); 125] = [
     ("wmo.clearSky", "Ciel dégagé"),
     ("wmo.mainlyClear", "Peu nuageux"),
     ("wmo.partlyCloudy", "Partiellement nuageux"),
@@ -148,9 +148,11 @@ const FR: [(&str, &str); 123] = [
     ("veille.kind.neige.moderee", "neige modérée"),
     ("veille.kind.neige.forte", "forte neige"),
     ("veille.kind.orage", "orage"),
+    ("plan.reason.villes", "Enregistrer plusieurs villes demande l’abonnement."),
+    ("plan.feature.villes", "Plusieurs villes enregistrées, de l’une à l’autre d’un geste"),
 ];
 
-const EN: [(&str, &str); 123] = [
+const EN: [(&str, &str); 125] = [
     ("wmo.clearSky", "Clear sky"),
     ("wmo.mainlyClear", "Mainly clear"),
     ("wmo.partlyCloudy", "Partly cloudy"),
@@ -274,9 +276,11 @@ const EN: [(&str, &str); 123] = [
     ("veille.kind.neige.moderee", "moderate snow"),
     ("veille.kind.neige.forte", "heavy snow"),
     ("veille.kind.orage", "thunderstorm"),
+    ("plan.reason.villes", "Saving several cities needs the subscription."),
+    ("plan.feature.villes", "Several saved cities, one tap from each other"),
 ];
 
-const ES: [(&str, &str); 123] = [
+const ES: [(&str, &str); 125] = [
     ("wmo.clearSky", "Cielo despejado"),
     ("wmo.mainlyClear", "Poco nuboso"),
     ("wmo.partlyCloudy", "Parcialmente nuboso"),
@@ -400,6 +404,8 @@ const ES: [(&str, &str); 123] = [
     ("veille.kind.neige.moderee", "nieve moderada"),
     ("veille.kind.neige.forte", "nevada fuerte"),
     ("veille.kind.orage", "tormenta"),
+    ("plan.reason.villes", "Guardar varias ciudades requiere la suscripción."),
+    ("plan.feature.villes", "Varias ciudades guardadas, a un toque una de otra"),
 ];
 
 /* ---------------------------------------------------------------- */

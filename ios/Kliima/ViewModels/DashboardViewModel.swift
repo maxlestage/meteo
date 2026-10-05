@@ -1,4 +1,5 @@
 import Foundation
+import SwiftUI
 #if canImport(WidgetKit)
 import WidgetKit
 #endif
@@ -21,6 +22,12 @@ final class DashboardViewModel: ObservableObject {
     private var quartsDe: Parcelle?
     @Published private(set) var isLoading = false
     @Published var errorMessage: String?
+
+    /// Les villes enregistrées, dans l'ordre choisi — fermées comprises :
+    /// c'est la vue qui sépare ce que le palier ouvre.
+    @Published private(set) var villes: [Parcelle] = SharedStore.loadVilles()
+    /// Les conditions du moment de chaque ville enregistrée, par identifiant.
+    @Published private(set) var apercus: [String: CurrentSample] = [:]
 
     /// Résultats de la recherche de commune.
     @Published private(set) var searchResults: [Parcelle] = []
@@ -120,6 +127,48 @@ final class DashboardViewModel: ObservableObject {
         }
         loadTask = task
         await task.value
+    }
+
+    // MARK: Villes enregistrées
+
+    /// Vrai si la ville affichée est déjà dans la liste.
+    var villeAfficheeEnregistree: Bool { Villes.position(villes, parcelle) != nil }
+
+    /// Enregistre la ville affichée, si le palier le permet.
+    @discardableResult
+    func enregistrerVilleAffichee(plan: Plan) -> Villes.Ajout {
+        var liste = villes
+        let ajout = Villes.ajouter(&liste, parcelle, plan: plan)
+        if ajout == .ajoutee {
+            villes = liste
+            SharedStore.save(villes: liste)
+            Task { await chargerApercu(parcelle) }
+        }
+        return ajout
+    }
+
+    func retirer(_ ville: Parcelle) {
+        Villes.retirer(&villes, ville)
+        SharedStore.save(villes: villes)
+    }
+
+    func deplacer(depuis: IndexSet, vers: Int) {
+        villes.move(fromOffsets: depuis, toOffset: vers)
+        SharedStore.save(villes: villes)
+    }
+
+    /// Les conditions du moment de chaque ville, une à une : la liste se
+    /// remplit à mesure, et une ville muette n'empêche pas les autres.
+    func chargerApercus(_ liste: [Parcelle]) async {
+        for ville in liste {
+            guard !Task.isCancelled else { return }
+            await chargerApercu(ville)
+        }
+    }
+
+    private func chargerApercu(_ ville: Parcelle) async {
+        guard let prevision = try? await service.forecast(for: ville, days: 1) else { return }
+        apercus[ville.id] = prevision.current
     }
 
     /// La série au quart d'heure de la ville affichée, ou rien.

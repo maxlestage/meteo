@@ -101,6 +101,7 @@ iOS et web appliquent les mêmes règles, avec les mêmes seuils :
 | Réponse | Règle |
 | --- | --- |
 | **Le guetteur** | Au quart d'heure, relu tous les quarts d'heure : la demi-heure en cours (le quart entamé et le suivant) — sec, ça commence, ça dure, ça cesse —, puis les deux heures — sec, une averse entre deux heures avec son cumul, une pluie qui ne s'arrête pas, une accalmie et sa reprise. Un quart est mouillé dès 0,1 mm ; faible sous 2,5 mm/h, forte dès 7,6 mm/h ; neige et orage d'après le code météo ; rafales signalées dès 50 km/h |
+| **Mes villes** (iPhone) | Le palier libre garde une ville ; Kliima ‣ Pro autant qu'on veut, chacune avec sa température du moment, à un geste. Deux villes de la même maille de prévision (0,02°) sont la même. Après une résiliation, rien n'est effacé : les villes au-delà de la limite restent, fermées d'un cadenas, et reviennent avec l'abonnement |
 | **Pluie à venir** | Sur 12 h : une heure est pluvieuse dès 0,1 mm ou 50 % de risque. Klima dit si rien n'est prévu, s'il pleut et quand ça cesse, ou quand la pluie arrive, avec son risque et son cumul |
 | **À emporter** | Parapluie s'il pleut ; manteau sous 10 °C ressentis ; lunettes dès l'indice UV 3, crème dès 6 ; eau au-delà de 30 °C ; prudence sous 0 °C ; gare au parapluie dès 50 km/h de rafales |
 | **Indice UV** | Échelle de l'OMS (faible, modéré, élevé, très élevé, extrême), arrondie avant d'être classée |

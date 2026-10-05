@@ -23,5 +23,6 @@ pub mod plan;
 pub mod position;
 pub mod providers;
 pub mod veille;
+pub mod villes;
 pub mod ville;
 pub mod weather;
