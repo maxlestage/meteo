@@ -27,6 +27,9 @@ pub struct Props {
     pub endpoints: Endpoints,
     pub on_select: Callback<Parcelle>,
     pub on_retry: Callback<()>,
+    /// Ce qui suit la carte du jour : le guetteur, sur la même ville.
+    #[prop_or_default]
+    pub children: Html,
 }
 
 #[function_component]
@@ -76,6 +79,8 @@ pub fn SectionDuJour(props: &Props) -> Html {
                     />
                 }
             </div>
+
+            { props.children.clone() }
         </section>
     }
 }

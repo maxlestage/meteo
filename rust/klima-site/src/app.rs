@@ -12,6 +12,8 @@ use klima_ui::composants::marque::MarqueEtNom;
 use klima_ui::crochets::parcelle::use_parcelle;
 use klima_ui::crochets::position::use_start_position;
 use klima_ui::crochets::prevision::use_forecast;
+use klima_ui::crochets::veille::use_veille;
+use klima_ui::composants::guetteur::Guetteur;
 use klima_ui::i18n::use_i18n;
 use yew::prelude::*;
 
@@ -63,6 +65,9 @@ pub fn App(props: &Props) -> Html {
             i18n.with(erreur.message_key(), &erreur.params())
         })
     };
+    // Le guetteur : la demi-heure en cours et les deux heures, au quart
+    // d'heure, relus tout seuls.
+    let veille = use_veille(lieu.parcelle.clone(), props.endpoints.clone());
     let etat = &prevision.etat;
 
     let digest = use_memo(etat.forecast.clone(), |forecast| {
@@ -141,7 +146,9 @@ pub fn App(props: &Props) -> Html {
                     endpoints={props.endpoints.clone()}
                     on_select={lieu.select.clone()}
                     on_retry={prevision.reload.clone()}
-                />
+                >
+                    <Guetteur etat={veille} class={classes!("today__guetteur")} />
+                </SectionDuJour>
 
                 <Sources consensus={etat.consensus.clone()} loading={etat.loading} />
 

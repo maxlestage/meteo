@@ -22,6 +22,8 @@ use klima_ui::crochets::palier::use_palier;
 use klima_ui::crochets::parcelle::use_parcelle;
 use klima_ui::crochets::position::use_start_position;
 use klima_ui::crochets::prevision::use_forecast;
+use klima_ui::crochets::veille::use_veille;
+use klima_ui::composants::guetteur::Guetteur;
 use klima_ui::dates;
 use klima_ui::i18n::use_i18n;
 
@@ -55,6 +57,9 @@ pub fn App(props: &Props) -> Html {
     // Première visite, rien de choisi ni de partagé : on part de là où est la
     // personne plutôt que de lui montrer Paris.
     use_start_position(lieu.origine, i18n.t("search.myField"), lieu.select.clone());
+
+    // Le guetteur lit à part, au quart d'heure, et relit tout seul.
+    let veille = use_veille(lieu.parcelle.clone(), props.endpoints.clone());
 
     let prevision = {
         let i18n = i18n.clone();
@@ -110,6 +115,10 @@ pub fn App(props: &Props) -> Html {
                 if let Some(forecast) = &etat.forecast {
                     <>
                         <Entete forecast={forecast.clone()} />
+                        // La demi-heure en cours et les deux heures qui
+                        // viennent, au quart d'heure : la question qu'on pose
+                        // la main sur la poignée.
+                        <Guetteur etat={veille.clone()} class={classes!("card")} />
                         // La première question : faut-il un parapluie, et
                         // jusqu'à quand — puis ce qu'il faut emporter.
                         <CartePluie hours={forecast.hourly.clone()} />

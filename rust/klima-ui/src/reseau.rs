@@ -44,6 +44,13 @@ pub async fn air(endpoints: &Endpoints, parcelle: &Parcelle) -> Option<klima_cor
     klima_api::air::decode_air(&texte(&url).await.ok()?)
 }
 
+/// La prévision au quart d'heure d'une ville, pour le guetteur. `None` en cas
+/// de panne : il se tait plutôt que de dire « sec » sans avoir regardé.
+pub async fn quarts(endpoints: &Endpoints, parcelle: &Parcelle) -> Option<klima_api::veille::Quarts> {
+    let url = klima_api::veille::quarts_url(endpoints, parcelle);
+    klima_api::veille::decode_quarts(&texte(&url).await.ok()?)
+}
+
 /// Ce que le relais répond sur cette adresse — ou le fait qu'il se taise.
 ///
 /// Un relais injoignable n'ouvre rien et ne retire rien : seul un « libre »

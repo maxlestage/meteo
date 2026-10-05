@@ -948,6 +948,16 @@ section {
   margin-bottom: 12px;
 }
 
+/* Le guetteur ouvre la liste des fonctions, sur toute la largeur. */
+.feature--large {
+  grid-column: 1 / -1;
+}
+
+.feature__radar {
+  transform-origin: 32px 32px;
+  animation: tourne 4s linear infinite;
+}
+
 /* L'aiguille de l'horloge des « Données » fait le tour en une minute. */
 .feature__aiguille {
   transform-origin: 32px 32px;
@@ -1525,6 +1535,7 @@ section {
   .ciel__nuage,
   .horizon__vacille,
   .horizon__feux circle,
+  .feature__radar,
   .feature__aiguille {
     animation: none;
   }
@@ -1537,4 +1548,180 @@ section {
   .ciel__nuage:nth-of-type(even) {
     transform: translateX(48vw);
   }
+}
+
+/* Le guetteur ------------------------------------------------------------
+ *
+ * La demi-heure en cours et les deux heures à venir, au quart d'heure, dites
+ * en deux bulles. La grille des huit quarts tient dans la largeur : rien ne
+ * défile de côté. Composant partagé (`klima-ui/src/composants/guetteur.rs`) :
+ * ce bloc est le même dans l'application et sur la vitrine.
+ */
+
+.guetteur {
+  --guetteur-muted: rgb(255 255 255 / 64%);
+  --guetteur-pluie: #7fd0f5;
+}
+
+.guetteur__tete {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.guetteur__avatar {
+  flex: none;
+  width: 44px;
+  height: 44px;
+}
+
+.guetteur__balayage {
+  transform-origin: 24px 24px;
+  animation: guetteur-balaie 4s linear infinite;
+}
+
+@keyframes guetteur-balaie {
+  to { transform: rotate(360deg); }
+}
+
+.guetteur__nom {
+  margin: 0;
+  font-size: 17px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+.guetteur__devise {
+  margin: 2px 0 0;
+  color: var(--guetteur-muted);
+  font-size: 13px;
+  line-height: 1.35;
+}
+
+/* Le voyant : vert quand le guetteur veille, il pulse pendant une lecture. */
+.guetteur__direct {
+  flex: none;
+  width: 9px;
+  height: 9px;
+  margin-left: auto;
+  border-radius: 50%;
+  background: #7ed07a;
+  box-shadow: 0 0 0 0 rgb(126 208 122 / 60%);
+}
+
+.guetteur__direct.is-reading {
+  animation: guetteur-pulse 1.2s ease-out infinite;
+}
+
+@keyframes guetteur-pulse {
+  to { box-shadow: 0 0 0 9px rgb(126 208 122 / 0%); }
+}
+
+.guetteur__fil {
+  display: grid;
+  gap: 8px;
+}
+
+.guetteur__bulle {
+  margin: 0;
+  padding: 10px 13px;
+  border-radius: 4px 16px 16px 16px;
+  background: rgb(255 255 255 / 10%);
+  font-size: 15px;
+  line-height: 1.45;
+  animation: guetteur-arrive 0.45s cubic-bezier(0.2, 0.7, 0.3, 1) both;
+}
+
+.guetteur__bulle + .guetteur__bulle {
+  animation-delay: 0.12s;
+}
+
+.guetteur__bulle--attente {
+  color: var(--guetteur-muted);
+}
+
+@keyframes guetteur-arrive {
+  from { opacity: 0; transform: translateY(6px); }
+}
+
+.guetteur__quand {
+  display: block;
+  margin-bottom: 2px;
+  color: var(--guetteur-pluie);
+  font-size: 11px;
+  font-weight: 650;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.guetteur__grille {
+  display: grid;
+  grid-template-columns: repeat(8, minmax(0, 1fr));
+  gap: 4px;
+  margin: 14px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.guetteur__quart {
+  display: grid;
+  gap: 5px;
+  min-width: 0;
+}
+
+.guetteur__colonne {
+  display: flex;
+  align-items: flex-end;
+  height: 48px;
+  border-radius: 4px;
+  background: rgb(255 255 255 / 5%);
+}
+
+.guetteur__barre {
+  width: 100%;
+  border-radius: 4px 4px 2px 2px;
+  background: rgb(255 255 255 / 22%);
+  transition: height 0.6s ease;
+}
+
+.guetteur__barre.is-wet {
+  background: var(--guetteur-pluie);
+}
+
+.guetteur__quart.is-now .guetteur__colonne {
+  outline: 1.5px solid rgb(255 255 255 / 55%);
+  outline-offset: 1px;
+}
+
+.guetteur__heure {
+  overflow: hidden;
+  color: var(--guetteur-muted);
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.guetteur__releve {
+  margin: 10px 0 0;
+  color: var(--guetteur-muted);
+  font-size: 12px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .guetteur__balayage,
+  .guetteur__direct.is-reading,
+  .guetteur__bulle {
+    animation: none;
+  }
+}
+
+/* Sur la vitrine, le guetteur suit la carte du jour, dans la même matière. */
+.today__guetteur {
+  margin-top: 16px;
+  padding: 20px;
+  border: 1px solid rgb(255 255 255 / 14%);
+  border-radius: var(--radius);
+  background: linear-gradient(160deg, rgb(20 32 45 / 92%), rgb(13 22 32 / 94%));
+  box-shadow: var(--shadow);
 }

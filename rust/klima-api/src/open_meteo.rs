@@ -122,7 +122,7 @@ fn encode(value: &str) -> String {
     out
 }
 
-fn query(pairs: &[(&str, String)]) -> String {
+pub(crate) fn query(pairs: &[(&str, String)]) -> String {
     pairs
         .iter()
         .map(|(name, value)| format!("{}={}", encode(name), encode(value)))
@@ -236,7 +236,7 @@ fn scalar(block: &Value, key: &str) -> f64 {
 /// Open-Meteo renvoie des tableaux parallèles indexés par `time`, avec des
 /// `null` quand une variable manque sur le point de grille : on les ramène à 0
 /// pour garder des séries de longueur homogène.
-fn column(block: &Value, key: &str, length: usize) -> Vec<f64> {
+pub(crate) fn column(block: &Value, key: &str, length: usize) -> Vec<f64> {
     let raw = block[key].as_array();
     (0..length)
         .map(|index| {
