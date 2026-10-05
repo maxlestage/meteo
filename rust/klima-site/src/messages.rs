@@ -17,7 +17,7 @@ fn catalog(entries: &[(&'static str, &'static str)]) -> Catalog {
     entries.iter().copied().collect()
 }
 
-const FR: [(&str, &str); 90] = [
+const FR: [(&str, &str); 102] = [
     ("nav.today", "Météo du jour"),
     ("nav.data", "Données"),
     ("app.open", "Ouvrir l’application"),
@@ -108,9 +108,21 @@ const FR: [(&str, &str); 90] = [
     ("footer.legal", "Klima donne des prévisions, pas des consignes. En cas de vigilance météo, suivez les avis des autorités."),
     ("footer.models", "Six sources recoupées"),
     ("footer.method", "Indice européen de l’air, échelle UV de l’OMS"),
+    ("nav.images", "En images"),
+    ("gallery.title", "Dans votre poche"),
+    ("gallery.lead", "Trois écrans de l’application, tels qu’un téléphone les montre — ici un après-midi parisien, avec une averse vers 17 h."),
+    ("gallery.home.title", "La pluie d’abord"),
+    ("gallery.home.body", "Dès l’ouverture : la température, puis la pluie qui vient — à quelle heure, combien, et ce qu’il faut emporter."),
+    ("gallery.home.alt", "L’écran d’accueil : Paris, 19 °C, pluie vers 17 h avec 84 % de risque, douze barres de pluie heure par heure, et à emporter un parapluie, un manteau et des lunettes de soleil."),
+    ("gallery.tiles.title", "Tout ce qu’on regarde"),
+    ("gallery.tiles.body", "Ressenti, humidité, vent, UV, pression, qualité de l’air et pollens — une tuile chacun, avec sa jauge quand elle aide."),
+    ("gallery.tiles.alt", "Les tuiles : ressenti 19 °C, humidité 58 %, vent 13 km/h, indice UV 5 modéré, 3,8 mm de pluie dans la journée, pression 1 016 hPa, qualité de l’air correcte, pollens de graminées."),
+    ("gallery.sources.title", "Six sources, nommées"),
+    ("gallery.sources.body", "Météo-France, ECMWF, DWD, NOAA, MET Norway et une station : chacune dit sa température, et celle qui s’écarte se voit en orange."),
+    ("gallery.sources.alt", "La carte des sources : Météo-France, ECMWF, Deutscher Wetterdienst, NOAA en orange, MET Norway et une station du DWD, avec leur température, leur pluie et leur vent."),
 ];
 
-const EN: [(&str, &str); 90] = [
+const EN: [(&str, &str); 102] = [
     ("nav.today", "Today"),
     ("nav.data", "Data"),
     ("app.open", "Open the app"),
@@ -201,9 +213,21 @@ const EN: [(&str, &str); 90] = [
     ("footer.legal", "Klima gives forecasts, not instructions. In a weather warning, follow the authorities’ advice."),
     ("footer.models", "Six cross-checked sources"),
     ("footer.method", "European air index, WHO UV scale"),
+    ("nav.images", "In pictures"),
+    ("gallery.title", "In your pocket"),
+    ("gallery.lead", "Three screens from the app, as a phone shows them — here a Paris afternoon with a shower around 5 pm."),
+    ("gallery.home.title", "Rain first"),
+    ("gallery.home.body", "As soon as it opens: the temperature, then the rain ahead — what time, how much, and what to take with you."),
+    ("gallery.home.alt", "The home screen: Paris, 19 °C, rain around 5 pm with an 84% chance, twelve hourly rain bars, and to take: an umbrella, a coat and sunglasses."),
+    ("gallery.tiles.title", "Everything you look at"),
+    ("gallery.tiles.body", "Feels-like, humidity, wind, UV, pressure, air quality and pollen — one tile each, with a gauge where it helps."),
+    ("gallery.tiles.alt", "The tiles: feels like 19 °C, humidity 58%, wind 13 km/h, UV index 5 moderate, 3.8 mm of rain today, pressure 1,016 hPa, fair air quality, grass pollen."),
+    ("gallery.sources.title", "Six sources, by name"),
+    ("gallery.sources.body", "Météo-France, ECMWF, DWD, NOAA, MET Norway and a station: each gives its temperature, and the one that strays shows in orange."),
+    ("gallery.sources.alt", "The sources card: Météo-France, ECMWF, Deutscher Wetterdienst, NOAA in orange, MET Norway and a DWD station, with their temperature, rain and wind."),
 ];
 
-const ES: [(&str, &str); 90] = [
+const ES: [(&str, &str); 102] = [
     ("nav.today", "El tiempo de hoy"),
     ("nav.data", "Datos"),
     ("app.open", "Abrir la aplicación"),
@@ -294,6 +318,18 @@ const ES: [(&str, &str); 90] = [
     ("footer.legal", "Klima da previsiones, no instrucciones. En caso de aviso meteorológico, siga las indicaciones de las autoridades."),
     ("footer.models", "Seis fuentes contrastadas"),
     ("footer.method", "Índice europeo del aire, escala UV de la OMS"),
+    ("nav.images", "En imágenes"),
+    ("gallery.title", "En su bolsillo"),
+    ("gallery.lead", "Tres pantallas de la aplicación, tal como las muestra un teléfono — aquí una tarde en París con un chubasco hacia las 17 h."),
+    ("gallery.home.title", "Primero, la lluvia"),
+    ("gallery.home.body", "Nada más abrirla: la temperatura y luego la lluvia que viene — a qué hora, cuánta y qué hay que llevar."),
+    ("gallery.home.alt", "La pantalla de inicio: París, 19 °C, lluvia hacia las 17 h con un 84 % de probabilidad, doce barras de lluvia hora a hora y, para llevar, un paraguas, un abrigo y gafas de sol."),
+    ("gallery.tiles.title", "Todo lo que se mira"),
+    ("gallery.tiles.body", "Sensación, humedad, viento, UV, presión, calidad del aire y polen — una tarjeta para cada uno, con su indicador cuando ayuda."),
+    ("gallery.tiles.alt", "Las tarjetas: sensación 19 °C, humedad 58 %, viento 13 km/h, índice UV 5 moderado, 3,8 mm de lluvia en el día, presión 1016 hPa, calidad del aire razonable, polen de gramíneas."),
+    ("gallery.sources.title", "Seis fuentes, con nombre"),
+    ("gallery.sources.body", "Météo-France, ECMWF, DWD, NOAA, MET Norway y una estación: cada una da su temperatura, y la que se aparta se ve en naranja."),
+    ("gallery.sources.alt", "La tarjeta de fuentes: Météo-France, ECMWF, Deutscher Wetterdienst, NOAA en naranja, MET Norway y una estación del DWD, con su temperatura, lluvia y viento."),
 ];
 
 #[cfg(test)]

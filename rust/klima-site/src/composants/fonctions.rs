@@ -10,6 +10,8 @@ use klima_core::ville::seuils::{
     HORIZON_PLUIE, MANTEAU_RESSENTI, PLUIE_MM, PLUIE_PROBABILITE, UV_CREME, UV_LUNETTES,
 };
 use klima_ui::i18n::use_i18n;
+
+use crate::composants::illustrations::IconeFonction;
 use yew::prelude::*;
 
 #[function_component]
@@ -54,6 +56,7 @@ pub fn Fonctions() -> Html {
         .map(|(cle, regle, detail)| {
             html! {
                 <article class="feature" key={cle}>
+                    <IconeFonction cle={cle} />
                     <h3>{ i18n.t(&format!("feature.{cle}.title")) }</h3>
                     <p class="feature__rule">
                         { i18n.with(&format!("feature.{cle}.rule"), &regle) }
