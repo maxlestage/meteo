@@ -48,10 +48,13 @@ pub enum Feature {
     Alertes,
     /// Qualité de l'air et pollens.
     Air,
+    /// Plusieurs villes enregistrées. Le nombre vit dans `PlanLimits` ; la
+    /// fonction le nomme, pour l'écran d'abonnement et le motif de blocage.
+    Villes,
 }
 
-pub const FEATURES: [Feature; 3] =
-    [Feature::Recoupement, Feature::Alertes, Feature::Air];
+pub const FEATURES: [Feature; 4] =
+    [Feature::Recoupement, Feature::Alertes, Feature::Air, Feature::Villes];
 
 impl Feature {
     pub fn code(self) -> &'static str {
@@ -59,6 +62,7 @@ impl Feature {
             Feature::Recoupement => "recoupement",
             Feature::Alertes => "alertes",
             Feature::Air => "air",
+            Feature::Villes => "villes",
         }
     }
 
@@ -69,6 +73,7 @@ impl Feature {
             Feature::Recoupement => "plan.reason.recoupement",
             Feature::Alertes => "plan.reason.alertes",
             Feature::Air => "plan.reason.air",
+            Feature::Villes => "plan.reason.villes",
         }
     }
 
@@ -78,6 +83,7 @@ impl Feature {
             Feature::Recoupement => "plan.feature.recoupement",
             Feature::Alertes => "plan.feature.alertes",
             Feature::Air => "plan.feature.air",
+            Feature::Villes => "plan.feature.villes",
         }
     }
 }
@@ -171,6 +177,14 @@ mod tests {
     fn le_palier_pro_les_ouvre_toutes() {
         for feature in FEATURES {
             assert!(allows(Plan::Pro, feature), "{}", feature.code());
+        }
+    }
+
+    #[test]
+    fn la_fonction_villes_dit_la_meme_chose_que_la_limite() {
+        // Deux écritures d'une même règle : elles ne doivent pas diverger.
+        for plan in PLANS {
+            assert_eq!(allows(plan, Feature::Villes), can_add_parcelle(plan, 1), "{}", plan.code());
         }
     }
 

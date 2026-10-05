@@ -10,6 +10,8 @@ struct DashboardView: View {
     /// Renseigné quand on ouvre l'écran d'abonnement : on sait alors sur quelle
     /// fonction l'utilisateur a buté.
     @State private var paywallFor: Feature?
+    /// La liste des villes enregistrées est ouverte.
+    @State private var villesOuvertes = false
 
     private let tiles = [GridItem(.adaptive(minimum: 150), spacing: 12)]
 
@@ -111,6 +113,17 @@ struct DashboardView: View {
             }
             .foregroundStyle(Color.encre)
             .toolbar {
+                // Mes villes : une au palier libre, autant qu'on veut avec
+                // Kliima ‣ Pro.
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button {
+                        villesOuvertes = true
+                    } label: {
+                        Label(Localized.text("villes.title"), systemImage: "list.star")
+                    }
+                    .tint(Color.encre)
+                }
+
                 ToolbarItem(placement: .topBarTrailing) {
                     Button {
                         viewModel.useCurrentLocation()
@@ -152,6 +165,9 @@ struct DashboardView: View {
             // Le guetteur relit à chaque quart d'heure ; il repart de zéro
             // quand la ville change.
             .task(id: viewModel.parcelle) { await viewModel.veiller() }
+            .sheet(isPresented: $villesOuvertes) {
+                VillesView(viewModel: viewModel, subscription: subscription)
+            }
             .sheet(item: $paywallFor) { feature in
                 PaywallView(subscription: subscription, reason: feature)
             }

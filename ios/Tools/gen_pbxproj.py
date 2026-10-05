@@ -21,7 +21,7 @@ EMBEDS = [
 MODELS = ["AgroSamples.swift", "Ville.swift", "Air.swift", "WeatherCondition.swift",
           "AgroFormat.swift", "Localized.swift", "SharedStore.swift", "Consensus.swift",
           "Plan.swift", "Alerts.swift", "Position.swift", "WeatherActivityAttributes.swift",
-          "Horizon.swift", "Veille.swift"]
+          "Horizon.swift", "Veille.swift", "Villes.swift"]
 SERVICES = ["AgroWeatherService.swift", "WeatherProviders.swift", "LocationService.swift",
             "BackgroundRefresh.swift", "Subscription.swift",
             "AlertScheduler.swift", "WeatherActivityController.swift", "PlanGrant.swift",
@@ -29,7 +29,7 @@ SERVICES = ["AgroWeatherService.swift", "WeatherProviders.swift", "LocationServi
 VIEWMODELS = ["DashboardViewModel.swift"]
 VIEWS = ["DashboardView.swift", "DailyListView.swift", "DetailTile.swift", "HeroView.swift",
          "HourlyStripView.swift", "SkyBackground.swift", "PluieCardView.swift",
-         "GuetteurCardView.swift",
+         "GuetteurCardView.swift", "VillesView.swift",
          "PaywallView.swift", "SourcesCardView.swift"]
 
 # (groupe, nom) ; le groupe est le chemin relatif au dépôt.
@@ -65,7 +65,7 @@ WATCH_FILES = [(WATCH, "KliimaWatchApp.swift"), (WATCH, "WatchDashboardView.swif
 WATCH_ASSETS = (f"{WATCH}/Resources", "Assets.xcassets")
 WATCH_PLIST = (f"{WATCH}/Resources", "Info.plist")
 
-TEST_FILES = [(TESTS, n) for n in ["VilleTests.swift", "AirTests.swift", "VeilleTests.swift",
+TEST_FILES = [(TESTS, n) for n in ["VilleTests.swift", "AirTests.swift", "VeilleTests.swift", "VillesTests.swift",
                                    "AgroWeatherDecodingTests.swift",
                                    "WeatherConditionTests.swift", "AgroFormatTests.swift",
                                    "LocalizationTests.swift", "SharedStoreTests.swift",
