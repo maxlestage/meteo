@@ -144,7 +144,7 @@ STRINGS = {
 
     # --- La ville : pluie, conseils, soleil, air ---
     "rain.title": ("Pluie", "Rain", "Lluvia"),
-    "rain.none": ("Pas de pluie prévue d’ici %1$@\u00a0h", "No rain expected for %1$@\u00a0h", "Sin lluvia prevista en %1$@\u00a0h"),
+    "rain.none": ("Pas de pluie d’ici %1$@\u00a0h", "No rain for %1$@\u00a0h", "Sin lluvia en %1$@\u00a0h"),
     "rain.now": ("Il pleut — accalmie vers %1$@", "Raining — easing around %1$@", "Llueve — amaina hacia las %1$@"),
     "rain.nowLasting": ("Il pleut, et pour un moment", "Raining, and set to last", "Llueve, y para rato"),
     "rain.soon": ("Pluie vers %1$@", "Rain around %1$@", "Lluvia hacia las %1$@"),

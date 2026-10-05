@@ -1916,19 +1916,19 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "No rain expected for %1$@ h"
+            "value": "No rain for %1$@ h"
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Sin lluvia prevista en %1$@ h"
+            "value": "Sin lluvia en %1$@ h"
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Pas de pluie prévue d’ici %1$@ h"
+            "value": "Pas de pluie d’ici %1$@ h"
           }
         }
       }
