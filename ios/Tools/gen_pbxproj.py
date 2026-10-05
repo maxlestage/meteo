@@ -18,18 +18,17 @@ EMBEDS = [
 ]
 
 # Fichiers, par groupe de rangement. Un même fichier peut alimenter plusieurs cibles.
-MODELS = ["AgroSamples.swift", "AgroIndicators.swift", "WeatherCondition.swift",
+MODELS = ["AgroSamples.swift", "Ville.swift", "Air.swift", "WeatherCondition.swift",
           "AgroFormat.swift", "Localized.swift", "SharedStore.swift", "Consensus.swift",
-          "SprayActivityAttributes.swift", "Plan.swift", "Alerts.swift", "Cumuls.swift",
-          "Register.swift", "Position.swift", "WeatherActivityAttributes.swift",
+          "Plan.swift", "Alerts.swift", "Position.swift", "WeatherActivityAttributes.swift",
           "Horizon.swift"]
 SERVICES = ["AgroWeatherService.swift", "WeatherProviders.swift", "LocationService.swift",
-            "SprayActivityController.swift", "BackgroundRefresh.swift", "Subscription.swift",
+            "BackgroundRefresh.swift", "Subscription.swift",
             "AlertScheduler.swift", "WeatherActivityController.swift", "PlanGrant.swift",
             "Session.swift", "IlesRelais.swift"]
 VIEWMODELS = ["DashboardViewModel.swift"]
 VIEWS = ["DashboardView.swift", "DailyListView.swift", "DetailTile.swift", "HeroView.swift",
-         "HourlyStripView.swift", "SkyBackground.swift", "SprayCardView.swift",
+         "HourlyStripView.swift", "SkyBackground.swift", "PluieCardView.swift",
          "PaywallView.swift", "SourcesCardView.swift"]
 
 # (groupe, nom) ; le groupe est le chemin relatif au dépôt.
@@ -47,8 +46,7 @@ STRINGS = (f"{APP}/Resources", "Localizable.xcstrings")
 INFO_STRINGS = (f"{APP}/Resources", "InfoPlist.xcstrings")
 APP_PLIST = (f"{APP}/Resources", "Info.plist")
 
-WIDGET_FILES = [(WIDGETS, "KliimaWidgetsBundle.swift"), (WIDGETS, "SprayLiveActivity.swift"),
-                (WIDGETS, "SprayWidget.swift"), (WIDGETS, "WeatherLiveActivity.swift"),
+WIDGET_FILES = [(WIDGETS, "KliimaWidgetsBundle.swift"), (WIDGETS, "WeatherLiveActivity.swift"),
                 (WIDGETS, "WeatherWidget.swift"),
                 (WIDGETS, "WeatherLockScreenWidget.swift")]
 WIDGET_PLIST = (WIDGETS, "Info.plist")
@@ -56,7 +54,6 @@ WIDGET_ENTITLEMENTS = (WIDGETS, "KliimaWidgets.entitlements")
 APP_ENTITLEMENTS = (APP, "Kliima.entitlements")
 
 WATCH_WIDGET_FILES = [(WATCH_WIDGETS, "KliimaWatchWidgetsBundle.swift"),
-                      (WATCH_WIDGETS, "SprayComplication.swift"),
                       (WATCH_WIDGETS, "WeatherComplication.swift")]
 WATCH_WIDGET_PLIST = (WATCH_WIDGETS, "Info.plist")
 WATCH_WIDGET_ENTITLEMENTS = (WATCH_WIDGETS, "KliimaWatchWidgets.entitlements")
@@ -67,12 +64,12 @@ WATCH_FILES = [(WATCH, "KliimaWatchApp.swift"), (WATCH, "WatchDashboardView.swif
 WATCH_ASSETS = (f"{WATCH}/Resources", "Assets.xcassets")
 WATCH_PLIST = (f"{WATCH}/Resources", "Info.plist")
 
-TEST_FILES = [(TESTS, n) for n in ["AgroIndicatorsTests.swift", "AgroWeatherDecodingTests.swift",
+TEST_FILES = [(TESTS, n) for n in ["VilleTests.swift", "AirTests.swift",
+                                   "AgroWeatherDecodingTests.swift",
                                    "WeatherConditionTests.swift", "AgroFormatTests.swift",
-                                   "LocalizationTests.swift", "SprayActivityTests.swift",
+                                   "LocalizationTests.swift", "SharedStoreTests.swift",
                                    "ConsensusTests.swift", "ProvidersTests.swift",
                                    "PlanTests.swift", "AlertsTests.swift",
-                                   "CumulsTests.swift", "RegisterTests.swift",
                                    "PositionTests.swift", "PlanGrantTests.swift",
                                    "SessionTests.swift", "HorizonTests.swift",
                                    "IlesRelaisTests.swift"]]
@@ -82,8 +79,7 @@ TEST_FILES = [(TESTS, n) for n in ["AgroIndicatorsTests.swift", "AgroWeatherDeco
 def models(*names): return [(f"{APP}/Models", n) for n in names]
 def services(*names): return [(f"{APP}/Services", n) for n in names]
 
-WATCH_MODELS = [n for n in MODELS
-                if n not in ("SprayActivityAttributes.swift", "WeatherActivityAttributes.swift")]
+WATCH_MODELS = [n for n in MODELS if n != "WeatherActivityAttributes.swift"]
 
 TARGET_SOURCES = {
     APP: sum(APP_FILES.values(), []),

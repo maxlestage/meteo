@@ -60,7 +60,7 @@ const OPEN_METEO_ATTRIBUTION: &str = "Open-Meteo — modèles Météo-France, EC
 /// le droit de poser cet en-tête, d'où la règle du dépôt — « seulement là où
 /// l'on peut se nommer » : en direct le natif, sinon le relais, qui le pose
 /// pour tout le monde.
-pub const USER_AGENT: &str = "Klima/1.0 (météo agricole; https://maxlestage.github.io/meteo/)";
+pub const USER_AGENT: &str = "Klima/1.0 (météo de ville; https://maxlestage.github.io/meteo/)";
 
 pub const OPEN_METEO_SOURCES: [WeatherSource; 4] = [
     WeatherSource {

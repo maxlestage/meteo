@@ -2,7 +2,7 @@ import XCTest
 @testable import Kliima
 
 /// Vérifie le contrat avec Open-Meteo : noms de champs, valeurs nulles et
-/// interprétation des horodatages dans le fuseau de la parcelle.
+/// interprétation des horodatages dans le fuseau de la ville.
 final class AgroWeatherDecodingTests: XCTestCase {
     func testDecodesOpenMeteoPayload() throws {
         let json = """
@@ -17,20 +17,19 @@ final class AgroWeatherDecodingTests: XCTestCase {
             "weather_code": 53,
             "is_day": 0,
             "wind_speed_10m": 12.0,
-            "wind_gusts_10m": 25.0
+            "wind_gusts_10m": 25.0,
+            "pressure_msl": 1012.4
           },
           "hourly": {
             "time": ["2026-05-12T00:00", "2026-05-12T01:00"],
             "temperature_2m": [11.4, null],
+            "apparent_temperature": [10.2, 9.8],
             "relative_humidity_2m": [92, 94],
             "dew_point_2m": [10.1, 10.4],
             "precipitation": [0.0, 1.8],
             "wind_speed_10m": [7.2, 24.0],
             "wind_gusts_10m": [15.1, 33.0],
-            "soil_temperature_6cm": [13.9, 13.6],
-            "soil_moisture_3_to_9cm": [0.238, 0.239],
-            "et0_fao_evapotranspiration": [0.01, 0.0],
-            "vapour_pressure_deficit": [0.11, 0.09],
+            "uv_index": [0.0, 0.4],
             "weather_code": [51, 61],
             "is_day": [0, 0],
             "precipitation_probability": [35, 80]
@@ -41,8 +40,8 @@ final class AgroWeatherDecodingTests: XCTestCase {
             "temperature_2m_max": [19.0, 21.4],
             "precipitation_sum": [1.8, 0.0],
             "precipitation_probability_max": [40, null],
-            "et0_fao_evapotranspiration": [3.4, 3.9],
             "wind_gusts_10m_max": [34.0, 28.0],
+            "uv_index_max": [5.6, 6.2],
             "weather_code": [61, 3],
             "sunrise": ["2026-05-12T06:32", "2026-05-13T06:31"],
             "sunset": ["2026-05-12T21:24", null]
@@ -60,14 +59,15 @@ final class AgroWeatherDecodingTests: XCTestCase {
         XCTAssertEqual(current.weatherCode, 53)
         XCTAssertFalse(current.isDay)
         XCTAssertEqual(current.windGusts, 25.0)
+        XCTAssertEqual(current.pressure, 1012.4)
 
         let zone = try XCTUnwrap(TimeZone(identifier: payload.timezone))
         let hours = payload.hourly.decode(in: zone)
         XCTAssertEqual(hours.count, 2)
         XCTAssertEqual(hours[0].temperature, 11.4)
         XCTAssertEqual(hours[0].relativeHumidity, 92)
-        XCTAssertEqual(hours[0].soilMoisture3to9cm, 0.238)
-        XCTAssertEqual(hours[0].vapourPressureDeficit, 0.11)
+        XCTAssertEqual(hours[0].apparentTemperature, 10.2)
+        XCTAssertEqual(hours[1].uvIndex, 0.4)
         XCTAssertEqual(hours[0].weatherCode, 51)
         XCTAssertFalse(hours[0].isDay)
         XCTAssertEqual(hours[0].precipitationProbability, 35)
@@ -75,7 +75,7 @@ final class AgroWeatherDecodingTests: XCTestCase {
         XCTAssertEqual(hours[1].temperature, 0)
         XCTAssertEqual(hours[1].windSpeed, 24.0)
 
-        // L'horodatage est interprété dans le fuseau de la parcelle, pas en UTC.
+        // L'horodatage est interprété dans le fuseau de la ville, pas en UTC.
         var calendar = Calendar(identifier: .gregorian)
         calendar.timeZone = zone
         XCTAssertEqual(calendar.component(.hour, from: hours[0].time), 0)
@@ -85,7 +85,7 @@ final class AgroWeatherDecodingTests: XCTestCase {
         XCTAssertEqual(days.count, 2)
         XCTAssertEqual(days[0].temperatureMin, 3.0)
         XCTAssertEqual(days[0].precipitationSum, 1.8)
-        XCTAssertEqual(days[0].et0Sum, 3.4)
+        XCTAssertEqual(days[0].uvIndexMax, 5.6)
         XCTAssertEqual(days[1].precipitationProbabilityMax, 0)
         XCTAssertEqual(days[0].weatherCode, 61)
         XCTAssertEqual(calendar.component(.hour, from: try XCTUnwrap(days[0].sunrise)), 6)
@@ -113,15 +113,13 @@ final class AgroWeatherDecodingTests: XCTestCase {
                 isDay: true,
                 precipitationProbability: 10,
                 temperature: 15,
+                apparentTemperature: 14,
                 relativeHumidity: 70,
                 dewPoint: 9,
                 precipitation: 0,
                 windSpeed: 8,
                 windGusts: 14,
-                soilTemperature6cm: 14,
-                soilMoisture3to9cm: 0.22,
-                et0: 0.1,
-                vapourPressureDeficit: 0.6
+                uvIndex: 1
             )
         }
 
@@ -134,5 +132,43 @@ final class AgroWeatherDecodingTests: XCTestCase {
         // Si l'heure courante sort de la série, on ne renvoie pas du vide.
         let later = midnight.addingTimeInterval(48 * 3600)
         XCTAssertEqual(AgroWeatherService.fromCurrentHour(hours, now: later).count, hours.count)
+    }
+}
+
+/// Le contrat avec le service de qualité de l'air : mêmes cas que
+/// `klima-api/src/air.rs`.
+final class AirDecodingTests: XCTestCase {
+
+    func testLitLIndiceLesPolluantsEtLesPollensPresents() throws {
+        let reponse = Data("""
+        {"current":{"time":"2026-05-12T09:00","european_aqi":38,"pm2_5":9.4,"pm10":17.2,
+         "nitrogen_dioxide":21.0,"ozone":64.0,"alder_pollen":0.0,"birch_pollen":12.5,
+         "grass_pollen":41.0,"mugwort_pollen":null,"olive_pollen":0.2,"ragweed_pollen":0.0}}
+        """.utf8)
+        let air = try XCTUnwrap(AgroWeatherService.decodeAir(reponse))
+        XCTAssertEqual(air.europeanAqi, 38)
+        XCTAssertEqual(air.pm25, 9.4)
+        XCTAssertEqual(air.ozone, 64)
+        XCTAssertEqual(air.pollens.count, 5, "l'armoise à null est écartée")
+        XCTAssertTrue(air.pollens.contains { $0.0 == .graminees && $0.1 == 41 })
+    }
+
+    func testHorsDEuropePasDePollensMaisUnIndice() throws {
+        let air = try XCTUnwrap(AgroWeatherService.decodeAir(Data(#"{"current":{"european_aqi":12,"pm2_5":3.1}}"#.utf8)))
+        XCTAssertEqual(air.europeanAqi, 12)
+        XCTAssertTrue(air.pollens.isEmpty)
+    }
+
+    func testUneReponseSansMesureNEstPasUnAirPur() {
+        XCTAssertNil(AgroWeatherService.decodeAir(Data(#"{"latitude":1}"#.utf8)))
+        XCTAssertNil(AgroWeatherService.decodeAir(Data("pas du json".utf8)))
+    }
+
+    func testLesVariablesSontCellesDuCoeur() {
+        XCTAssertEqual(AgroWeatherService.airVariables, [
+            "european_aqi", "pm2_5", "pm10", "nitrogen_dioxide", "ozone",
+            "alder_pollen", "birch_pollen", "grass_pollen", "mugwort_pollen",
+            "olive_pollen", "ragweed_pollen",
+        ])
     }
 }

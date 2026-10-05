@@ -72,11 +72,13 @@ final class LocalizationTests: XCTestCase {
     /// Les états du domaine s'affichent tous.
     func testDomainStatesHaveLabels() throws {
         let strings = try catalog("Localizable")
-        let keys = [SoilState.sature, .ressuye, .sec].map(\.labelKey)
-            + [WaterStatus.deficit, .equilibre, .excedent].map(\.labelKey)
-            + [FrostSeverity.aucun, .faible, .modere, .severe].map(\.labelKey)
-            + [DiseaseLevel.faible, .moyenne, .elevee].map(\.labelKey)
-            + [SprayVerdict.favorable, .acceptable, .defavorable].map(\.labelKey)
+        let keys = Conseil.allCases.map(\.key)
+            + NiveauUv.allCases.map(\.key)
+            + QualiteAir.allCases.map(\.key)
+            + Pollen.allCases.map(\.key)
+            + NiveauPollen.allCases.map(\.key)
+            + ["rain.title", "rain.none", "rain.now", "rain.nowLasting", "rain.soon", "rain.detail",
+               "advice.title", "advice.none"]
         for key in keys {
             XCTAssertNotNil(strings[key], "« \(key) » absent du catalogue")
         }
@@ -114,10 +116,11 @@ final class LocalizationTests: XCTestCase {
     }
 
     /// Un corps d'alerte porte un paramètre : il doit être positionnel, sinon
-    /// il s'affiche tel quel au lieu d'être remplacé.
+    /// il s'affiche tel quel au lieu d'être remplacé. L'orage seul n'en porte
+    /// pas : il n'a rien à chiffrer.
     func testAlertBodiesUsePositionalPlaceholders() throws {
         let strings = try catalog("Localizable")
-        for kind in AlertKind.allCases {
+        for kind in AlertKind.allCases where kind != .orage {
             let translations = try values(try XCTUnwrap(strings["alert.\(kind.rawValue).body"]))
             for (language, value) in translations {
                 XCTAssertTrue(

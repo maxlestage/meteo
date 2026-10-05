@@ -1,10 +1,9 @@
 import SwiftUI
 
-/// Écran unique de l'application : la météo agricole de la parcelle, présentée
-/// comme l'application Météo du système.
+/// Écran unique de l'application : la météo de la ville, présentée comme
+/// l'application Météo du système.
 struct DashboardView: View {
     @StateObject private var viewModel = DashboardViewModel()
-    @StateObject private var activity = SprayActivityController()
     @StateObject private var weather = WeatherActivityController()
     @StateObject private var subscription = Subscription()
     @State private var query = ""
@@ -34,7 +33,7 @@ struct DashboardView: View {
                             errorBanner(message)
                         }
 
-                        if let forecast = viewModel.forecast, let summary = viewModel.summary {
+                        if let forecast = viewModel.forecast {
                             HeroView(forecast: forecast)
 
                             // L'activité en direct de la météo s'ouvre et se
@@ -56,6 +55,10 @@ struct DashboardView: View {
                                 .frame(maxWidth: .infinity, alignment: .leading)
                             }
 
+                            // La première question : faut-il un parapluie,
+                            // et jusqu'à quand — puis ce qu'il faut emporter.
+                            PluieCardView(hours: forecast.hourly, timeZone: viewModel.timeZone)
+
                             HourlyStripView(
                                 hours: forecast.hourly,
                                 current: forecast.current,
@@ -76,17 +79,8 @@ struct DashboardView: View {
                                 SourcesCardView(consensus: consensus)
                             }
 
-                            SprayCardView(
-                                hours: forecast.hourly,
-                                nextSpray: summary.nextSpray,
-                                timeZone: viewModel.timeZone,
-                                isFollowing: activity.isRunning,
-                                canFollow: activity.isAvailable,
-                                onFollow: { toggleFollow(forecast, summary) }
-                            )
-
                             LazyVGrid(columns: tiles, spacing: 12) {
-                                ForEach(detailTiles(forecast, summary), id: \.label) { tile in
+                                ForEach(detailTiles(forecast), id: \.label) { tile in
                                     DetailTile(
                                         label: tile.label,
                                         value: tile.value,
@@ -157,11 +151,8 @@ struct DashboardView: View {
                 // Le palier vient de s'ouvrir — achat ou compte d'essai : c'est
                 // le moment de demander la permission des alertes et de les
                 // poser, plutôt qu'au prochain chargement.
-                guard plan.allows(.alertes),
-                      let forecast = viewModel.forecast,
-                      let summary = viewModel.summary
-                else { return }
-                Task { await scheduleAlerts(forecast: forecast, summary: summary) }
+                guard plan.allows(.alertes), let forecast = viewModel.forecast else { return }
+                Task { await scheduleAlerts(forecast: forecast) }
             }
         }
     }
@@ -172,10 +163,9 @@ struct DashboardView: View {
     /// l'activité en direct si elle est en cours.
     private func reload() async {
         await viewModel.load()
-        guard let forecast = viewModel.forecast, let summary = viewModel.summary else { return }
-        await activity.refresh(hours: forecast.hourly, opportunity: summary.nextSpray)
+        guard let forecast = viewModel.forecast else { return }
         await weather.refresh(forecast: forecast)
-        await scheduleAlerts(forecast: forecast, summary: summary)
+        await scheduleAlerts(forecast: forecast)
     }
 
     /// Demande la permission, puis pose les alertes — à chaque chargement.
@@ -191,11 +181,10 @@ struct DashboardView: View {
     /// réclamer à quelqu'un qui n'en recevra aucune serait gâcher l'unique
     /// question que le système accepte de poser. Après un refus, il ne la
     /// repose pas, et on n'insiste pas.
-    private func scheduleAlerts(forecast: AgroForecast, summary: AgroSummary) async {
+    private func scheduleAlerts(forecast: AgroForecast) async {
         let plan = subscription.plan
         guard plan.allows(.alertes), await AlertScheduler.requestAuthorization() else { return }
         let state = await AlertScheduler.schedule(
-            summary: summary,
             hours: forecast.hourly,
             plan: plan,
             state: SharedStore.loadAlertState()
@@ -208,20 +197,6 @@ struct DashboardView: View {
             Task { await weather.stop() }
         } else {
             weather.start(parcelle: viewModel.parcelle, forecast: forecast)
-        }
-    }
-
-    private func toggleFollow(_ forecast: AgroForecast, _ summary: AgroSummary) {
-        guard let opportunity = summary.nextSpray else { return }
-        if activity.isRunning {
-            Task { await activity.stop() }
-        } else {
-            activity.start(
-                parcelle: forecast.parcelle,
-                opportunity: opportunity,
-                timeZone: viewModel.timeZone,
-                hours: forecast.hourly
-            )
         }
     }
 
@@ -265,11 +240,18 @@ struct DashboardView: View {
     }
 
     private func source(_ forecast: AgroForecast) -> some View {
-        Text(Localized.text("app.source", AgroFormat.unit(forecast.elevation, "m", decimals: 0)))
-            .font(.caption2)
-            .foregroundStyle(Color.encreDouce)
-            .multilineTextAlignment(.center)
-            .padding(.top, 6)
+        VStack(spacing: 4) {
+            Text(Localized.text("app.source", AgroFormat.unit(forecast.elevation, "m", decimals: 0)))
+            // La licence de Copernicus demande la mention dès qu'une mesure
+            // d'air est montrée.
+            if subscription.plan.allows(.air), viewModel.air != nil {
+                Text(Air.attribution)
+            }
+        }
+        .font(.caption2)
+        .foregroundStyle(Color.encreDouce)
+        .multilineTextAlignment(.center)
+        .padding(.top, 6)
     }
 
     // MARK: Tuiles de détail
@@ -281,88 +263,75 @@ struct DashboardView: View {
         var gauge: (position: Double, colors: [Color])?
     }
 
-    private func detailTiles(_ forecast: AgroForecast, _ summary: AgroSummary) -> [TileModel] {
-        let soil = summary.soil
-        let water = summary.water
+    private func detailTiles(_ forecast: AgroForecast) -> [TileModel] {
         let zone = viewModel.timeZone
         let today = forecast.daily.first
+        let current = forecast.current
+        let maintenant = Ville.heure(contenant: current.time, dans: forecast.hourly)
+        let uv = maintenant?.uvIndex ?? 0
+        let uvMax = today?.uvIndexMax ?? uv
 
         var tiles: [TileModel] = [
             TileModel(
-                label: Localized.text("tile.soil"),
-                value: soil.state.label,
+                label: Localized.text("tile.feelsLike"),
+                value: AgroFormat.temperature(current.apparentTemperature),
+                caption: Localized.text("tile.feelsLike.caption", AgroFormat.temperature(current.temperature))
+            ),
+            TileModel(
+                label: Localized.text("tile.humidity"),
+                value: AgroFormat.percent(current.relativeHumidity),
+                caption: maintenant.map {
+                    Localized.text("tile.humidity.caption", AgroFormat.temperature($0.dewPoint))
+                }
+            ),
+            TileModel(
+                label: Localized.text("tile.wind"),
+                value: AgroFormat.unit(current.windSpeed, "km/h", decimals: 0),
                 caption: Localized.text(
-                    "tile.soil.caption",
-                    AgroFormat.percent(soil.moisture * 100),
-                    AgroFormat.unit(soil.temperature, "°C"),
-                    Localized.text(soil.trafficable ? "soil.trafficable" : "soil.compaction")
+                    "tile.wind.caption",
+                    AgroFormat.unit(current.windGusts, "km/h", decimals: 0)
+                )
+            ),
+            TileModel(
+                label: Localized.text("tile.uv"),
+                value: "\(AgroFormat.decimal(uv, decimals: 0)) · \(Ville.niveauUv(uv).label)",
+                caption: Localized.text(
+                    "tile.uv.caption",
+                    AgroFormat.decimal(uvMax, decimals: 0),
+                    Ville.niveauUv(uvMax).label.lowercased()
                 ),
                 gauge: (
-                    position: soil.moisture / 0.5,
+                    position: uv / 11,
                     colors: [
-                        Color(red: 0.847, green: 0.702, blue: 0.416),
-                        Color(red: 0.561, green: 0.769, blue: 0.416),
-                        Color(red: 0.290, green: 0.639, blue: 0.847),
-                        Color(red: 0.169, green: 0.373, blue: 0.620),
+                        Color(red: 0.494, green: 0.816, blue: 0.478),
+                        Color(red: 0.941, green: 0.757, blue: 0.294),
+                        Color(red: 0.937, green: 0.541, blue: 0.353),
+                        Color(red: 0.851, green: 0.325, blue: 0.310),
+                        Color(red: 0.608, green: 0.349, blue: 0.714),
                     ]
                 )
             ),
             TileModel(
-                label: Localized.text("tile.water"),
-                value: AgroFormat.signedUnit(water.balance, "mm"),
-                caption: water.irrigationAdvice > 0
-                    ? Localized.text(
-                        "tile.water.irrigation",
-                        AgroFormat.unit(water.irrigationAdvice, "mm", decimals: 0)
-                    )
-                    : Localized.text(
-                        "tile.water.caption",
-                        AgroFormat.unit(water.precipitation, "mm"),
-                        AgroFormat.unit(water.evapotranspiration, "mm")
-                    )
-            ),
-            TileModel(
-                label: Localized.text("tile.wind"),
-                value: AgroFormat.unit(forecast.current.windSpeed, "km/h", decimals: 0),
+                label: Localized.text("tile.rainToday"),
+                value: AgroFormat.unit(today?.precipitationSum ?? 0, "mm"),
                 caption: Localized.text(
-                    "tile.wind.caption",
-                    AgroFormat.unit(forecast.current.windGusts, "km/h", decimals: 0),
-                    AgroFormat.unit(AgroThresholds.sprayWindMax, "km/h", decimals: 0)
+                    "tile.rainToday.caption",
+                    AgroFormat.percent(today?.precipitationProbabilityMax ?? 0)
                 )
             ),
             TileModel(
-                label: Localized.text("tile.frost"),
-                value: summary.frost.severity.label,
-                caption: Localized.text(
-                    "tile.frost.caption",
-                    AgroFormat.unit(summary.frost.minTemperature, "°C"),
-                    summary.frost.hoarFrost ? ", " + Localized.text("frost.hoarFrost") : ""
-                )
-            ),
-            TileModel(
-                label: Localized.text("tile.disease"),
-                value: summary.disease.level.label,
-                caption: Localized.text("tile.disease.caption", String(summary.disease.leafWetnessHours))
-            ),
-            TileModel(
-                label: Localized.text("tile.gdd"),
-                value: AgroFormat.unit(summary.gdd, "°C·j"),
-                caption: Localized.text(
-                    "tile.gdd.caption",
-                    AgroFormat.unit(AgroThresholds.gddBase, "°C", decimals: 0)
-                )
+                label: Localized.text("tile.pressure"),
+                value: AgroFormat.unit(current.pressure, "hPa", decimals: 0),
+                caption: Localized.text("tile.pressure.caption")
             ),
             TileModel(
                 label: Localized.text("tile.sunrise"),
                 value: AgroFormat.time(today?.sunrise, in: zone),
                 caption: Localized.text("tile.sunrise.caption", AgroFormat.time(today?.sunset, in: zone))
             ),
-            TileModel(
-                label: Localized.text("tile.sowing"),
-                value: Localized.text(soil.sowable ? "tile.sowing.yes" : "tile.sowing.no"),
-                caption: Localized.text("tile.sowing.caption", AgroFormat.unit(soil.temperature, "°C"))
-            ),
         ]
+
+        tiles += airTiles()
 
         // Le recoupement est une fonction du palier payant. On ne le cache
         // pas : on montre la tuile fermée, avec ce qu'elle contiendrait. Une
@@ -408,6 +377,65 @@ struct DashboardView: View {
             )
         }
 
+        return tiles
+    }
+
+    /// L'air et les pollens : fermés au palier libre, montrés avec ce qu'ils
+    /// contiendraient — comme le recoupement.
+    private func airTiles() -> [TileModel] {
+        guard subscription.plan.allows(.air) else {
+            return [TileModel(
+                label: Localized.text("tile.air"),
+                value: Localized.text("tile.locked"),
+                caption: Localized.text(Feature.air.upgradeReasonKey)
+            )]
+        }
+        guard let air = viewModel.air else { return [] }
+
+        var tiles: [TileModel] = []
+        if let aqi = air.europeanAqi {
+            tiles.append(TileModel(
+                label: Localized.text("tile.air"),
+                value: Air.qualite(aqi).label,
+                caption: Localized.text(
+                    "tile.air.caption",
+                    AgroFormat.decimal(aqi, decimals: 0),
+                    air.pm25.map { AgroFormat.unit($0, "µg/m³", decimals: 0) } ?? "—"
+                ),
+                gauge: (
+                    position: aqi / 100,
+                    colors: [
+                        Color(red: 0.314, green: 0.941, blue: 0.902),
+                        Color(red: 0.314, green: 0.800, blue: 0.667),
+                        Color(red: 0.941, green: 0.902, blue: 0.255),
+                        Color(red: 1.000, green: 0.314, blue: 0.314),
+                        Color(red: 0.588, green: 0.000, blue: 0.196),
+                        Color(red: 0.490, green: 0.129, blue: 0.506),
+                    ]
+                )
+            ))
+        }
+        // Hors d'Europe, pas de pollens prévus : la tuile ne dit rien plutôt
+        // que « aucun », qui serait faux.
+        if !air.pollens.isEmpty {
+            if let dominant = Air.pollenDominant(air) {
+                tiles.append(TileModel(
+                    label: Localized.text("tile.pollen"),
+                    value: dominant.pollen.label,
+                    caption: Localized.text(
+                        "tile.pollen.caption",
+                        AgroFormat.decimal(dominant.grains, decimals: 0),
+                        dominant.niveau.label.lowercased()
+                    )
+                ))
+            } else {
+                tiles.append(TileModel(
+                    label: Localized.text("tile.pollen"),
+                    value: Localized.text("tile.pollen.none"),
+                    caption: Localized.text("tile.pollen.noneCaption")
+                ))
+            }
+        }
         return tiles
     }
 }

@@ -3,15 +3,16 @@ import Foundation
 import WidgetKit
 #endif
 
-/// État du tableau de bord : parcelle courante, prévision et indicateurs.
+/// État du tableau de bord : ville courante, prévision, sources et air.
 @MainActor
 final class DashboardViewModel: ObservableObject {
 
     @Published private(set) var parcelle: Parcelle
     @Published private(set) var forecast: AgroForecast?
-    @Published private(set) var summary: AgroSummary?
-    /// Recoupement des modèles ; absent si la comparaison a échoué.
+    /// Recoupement des sources ; absent si la comparaison a échoué.
     @Published private(set) var consensus: Consensus?
+    /// Qualité de l'air et pollens ; absente si le service n'a pas répondu.
+    @Published private(set) var air: AirSample?
     @Published private(set) var isLoading = false
     @Published var errorMessage: String?
 
@@ -38,7 +39,7 @@ final class DashboardViewModel: ObservableObject {
             self.parcelle = memorisee
             self.origin = .memoire
         } else {
-            self.parcelle = .chartres
+            self.parcelle = .paris
             self.origin = .defaut
         }
     }
@@ -91,16 +92,21 @@ final class DashboardViewModel: ObservableObject {
                 let forecast = try await service.forecast(for: parcelle, days: 7)
                 guard !Task.isCancelled else { return }
                 self.forecast = forecast
-                self.summary = AgroIndicators.summarize(hours: forecast.hourly, days: forecast.daily)
-                // Le recoupement est un plus : son échec ne prive de rien.
-                self.consensus = try? await service.modelConsensus(for: parcelle)
+                // Le recoupement et l'air sont des plus : leur échec ne prive
+                // de rien. Ils partent ensemble.
+                async let consensus = try? await service.modelConsensus(for: parcelle)
+                async let air = try? await service.air(for: parcelle)
+                let (c, a) = await (consensus, air)
+                guard !Task.isCancelled else { return }
+                self.consensus = c ?? nil
+                self.air = a ?? nil
             } catch is CancellationError {
                 return
             } catch {
                 guard !Task.isCancelled else { return }
                 self.forecast = nil
-                self.summary = nil
                 self.consensus = nil
+                self.air = nil
                 self.errorMessage = (error as? LocalizedError)?.errorDescription
                     ?? Localized.text("app.error")
             }

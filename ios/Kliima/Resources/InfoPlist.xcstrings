@@ -30,19 +30,19 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Your location is used to centre the agricultural forecast on your field."
+            "value": "Your location is used to show the weather where you are."
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Su ubicación sirve para centrar la previsión agrícola en su parcela."
+            "value": "Su ubicación sirve para mostrar el tiempo de la ciudad donde está."
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Votre position sert à caler la prévision agricole sur votre parcelle."
+            "value": "Votre position sert à afficher la météo de la ville où vous êtes."
           }
         }
       }
