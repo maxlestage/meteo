@@ -63,4 +63,22 @@ final class PositionTests: XCTestCase {
         XCTAssertEqual(a.latitude, b.latitude, accuracy: 1e-9)
         XCTAssertEqual(a.longitude, b.longitude, accuracy: 1e-9)
     }
+
+    // MARK: Les noms de l'époque agricole
+
+    func testUnNomHeriteDeLEpoqueAgricolePrendLeNomDAujourdhui() {
+        for ancien in Position.nomsHerites {
+            XCTAssertEqual(Position.renommee(Parcelle(name: ancien, latitude: 48.86, longitude: 2.34),
+                                             nomActuel: "Ma ville").name, "Ma ville")
+        }
+        let p = Position.renommee(Parcelle(name: " Ma parcelle ", latitude: 48.86, longitude: 2.34),
+                                  nomActuel: "My city")
+        XCTAssertEqual(p.name, "My city")
+        XCTAssertEqual(p.latitude, 48.86)
+    }
+
+    func testUneVraieVilleGardeSonNom() {
+        XCTAssertEqual(Position.renommee(Parcelle(name: "Lyon", latitude: 45.76, longitude: 4.84),
+                                         nomActuel: "Ma ville").name, "Lyon")
+    }
 }
