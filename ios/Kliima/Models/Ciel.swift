@@ -58,22 +58,24 @@ enum Ciel {
 
     /// Distance à vol d'oiseau (km), sur une Terre ronde.
     static func distanceKm(_ lat1: Double, _ lon1: Double, _ lat2: Double, _ lon2: Double) -> Double {
-        let rayonTerre = 6371.0
-        let radians = { (degres: Double) in degres * .pi / 180 }
-        let (p1, p2) = (radians(lat1), radians(lat2))
-        let dp = radians(lat2 - lat1)
-        let dl = radians(lon2 - lon1)
-        let a = pow(sin(dp / 2), 2) + cos(p1) * cos(p2) * pow(sin(dl / 2), 2)
+        let rayonTerre: Double = 6371
+        let parDegre: Double = Double.pi / 180
+        let p1: Double = lat1 * parDegre
+        let p2: Double = lat2 * parDegre
+        let sinLat: Double = sin((lat2 - lat1) * parDegre / 2)
+        let sinLon: Double = sin((lon2 - lon1) * parDegre / 2)
+        let a: Double = sinLat * sinLat + cos(p1) * cos(p2) * sinLon * sinLon
         return 2 * rayonTerre * asin(a.squareRoot())
     }
 
     /// Le cadre où chercher les aéroports : sud, ouest, nord, est, arrondis au
     /// centième, un peu plus large que le rayon.
     static func cadre(_ latitude: Double, _ longitude: Double) -> (Double, Double, Double, Double) {
-        let margeKm = CielSeuils.rayonKm + 10
-        let dlat = margeKm / 111.32
-        let dlon = min(margeKm / (111.32 * max(cos(latitude * .pi / 180), 0.05)), 180)
-        let c = { (x: Double) in (x * 100).rounded() / 100 }
+        let margeKm: Double = CielSeuils.rayonKm + 10
+        let dlat: Double = margeKm / 111.32
+        let cosLat: Double = max(cos(latitude * Double.pi / 180), 0.05)
+        let dlon: Double = min(margeKm / (111.32 * cosLat), 180)
+        let c: (Double) -> Double = { x in (x * 100).rounded() / 100 }
         return (
             c(max(latitude - dlat, -90)),
             c(max(longitude - dlon, -180)),
@@ -99,8 +101,8 @@ enum Ciel {
         }
         // Chasse-neige, sable soulevé : ça vole, ça ne tombe pas.
         if reste.hasPrefix("BL") || reste.hasPrefix("DR") { return nil }
-        let a = { (motif: String) in reste.contains(motif) }
-        let selon = { (codes: [Int]) in codes[force] }
+        let a: (String) -> Bool = { motif in reste.contains(motif) }
+        let selon: ([Int]) -> Int = { codes in codes[force] }
 
         if a("TS") {
             if a("GR") || a("GS") { return force == 2 ? 99 : 96 }
@@ -150,20 +152,26 @@ enum Ciel {
     /// Le bulletin qui parle de la ville : le plus proche dans le rayon, parmi
     /// ceux qui parlent de maintenant.
     static func plusProche(_ metars: [Metar], latitude: Double, longitude: Double, maintenant: Date) -> CielObserve? {
-        metars
-            .filter { $0.time <= maintenant.addingTimeInterval(CielSeuils.avanceMax)
-                && maintenant.timeIntervalSince($0.time) <= CielSeuils.ageMax }
-            .map { (distanceKm(latitude, longitude, $0.latitude, $0.longitude), $0) }
-            .filter { $0.0 <= CielSeuils.rayonKm }
+        var retenu: Metar?
+        var distanceRetenue = Double.infinity
+        for metar in metars {
+            let age = maintenant.timeIntervalSince(metar.time)
+            guard age <= CielSeuils.ageMax, -age <= CielSeuils.avanceMax else { continue }
+            let distance: Double = distanceKm(latitude, longitude, metar.latitude, metar.longitude)
+            guard distance <= CielSeuils.rayonKm else { continue }
             // À distance égale, le plus récent.
-            .min { a, b in a.0 != b.0 ? a.0 < b.0 : a.1.time > b.1.time }
-            .map { paire in
-                let (d, m) = paire
-                return CielObserve(
-                    station: m.station, nom: m.nom, distanceKm: d.rounded(),
-                    time: m.time, tombe: codeDuMetar(m.tempsPresent)
-                )
+            let plusPres = distance < distanceRetenue
+            let aussiPresPlusRecent = distance == distanceRetenue && metar.time > (retenu?.time ?? .distantPast)
+            if plusPres || aussiPresPlusRecent {
+                retenu = metar
+                distanceRetenue = distance
             }
+        }
+        guard let retenu else { return nil }
+        return CielObserve(
+            station: retenu.station, nom: retenu.nom, distanceKm: distanceRetenue.rounded(),
+            time: retenu.time, tombe: codeDuMetar(retenu.tempsPresent)
+        )
     }
 
     /// Le nom lisible d'un aéroport : `Paris/Le Bourge Arpt, ID, FR` →
