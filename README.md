@@ -206,7 +206,7 @@ open ios/Kliima.xcodeproj
 
 Le projet est un `project.pbxproj` classique, versionné et modifiable
 directement — pas de Fastlane, pas de CocoaPods, pas d'étape de résolution.
-Cible iOS 17, cinq cibles : `Kliima` (application), `KliimaWidgets`,
+Cible iOS 18, cinq cibles : `Kliima` (application), `KliimaWidgets`,
 `KliimaWatch`, `KliimaWatchWidgets` et `KliimaTests`, avec deux schémas
 partagés.
 
