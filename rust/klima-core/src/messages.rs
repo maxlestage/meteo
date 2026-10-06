@@ -24,7 +24,7 @@ fn catalog(entries: &[(&'static str, &'static str)]) -> Catalog {
     entries.iter().copied().collect()
 }
 
-const FR: [(&str, &str); 125] = [
+const FR: [(&str, &str); 126] = [
     ("wmo.clearSky", "Ciel dégagé"),
     ("wmo.mainlyClear", "Peu nuageux"),
     ("wmo.partlyCloudy", "Partiellement nuageux"),
@@ -118,7 +118,7 @@ const FR: [(&str, &str); 125] = [
     ("alert.vent.title", "Vent violent"),
     ("alert.vent.body", "Rafales jusqu’à {gusts} km/h."),
     ("plan.reason.air", "La qualité de l’air et les pollens demandent l’abonnement."),
-    ("plan.feature.recoupement", "Six sources recoupées, et leur niveau d’accord"),
+    ("plan.feature.recoupement", "Neuf sources recoupées, et leur niveau d’accord"),
     ("plan.feature.alertes", "Prévenu de la pluie, de l’orage, du gel et de la chaleur"),
     ("plan.feature.air", "Qualité de l’air et pollens"),
     ("veille.title", "Le guetteur"),
@@ -150,9 +150,10 @@ const FR: [(&str, &str); 125] = [
     ("veille.kind.orage", "orage"),
     ("plan.reason.villes", "Enregistrer plusieurs villes demande l’abonnement."),
     ("plan.feature.villes", "Plusieurs villes enregistrées, de l’une à l’autre d’un geste"),
+    ("forecast.blended", "Recoupée de {count} sources"),
 ];
 
-const EN: [(&str, &str); 125] = [
+const EN: [(&str, &str); 126] = [
     ("wmo.clearSky", "Clear sky"),
     ("wmo.mainlyClear", "Mainly clear"),
     ("wmo.partlyCloudy", "Partly cloudy"),
@@ -246,7 +247,7 @@ const EN: [(&str, &str); 125] = [
     ("alert.vent.title", "Strong wind"),
     ("alert.vent.body", "Gusts up to {gusts} km/h."),
     ("plan.reason.air", "Air quality and pollen require a subscription."),
-    ("plan.feature.recoupement", "Six sources cross-checked, and how far they agree"),
+    ("plan.feature.recoupement", "Neuf sources cross-checked, and how far they agree"),
     ("plan.feature.alertes", "Warned of rain, storms, frost and heat"),
     ("plan.feature.air", "Air quality and pollen"),
     ("veille.title", "The lookout"),
@@ -278,9 +279,10 @@ const EN: [(&str, &str); 125] = [
     ("veille.kind.orage", "thunderstorm"),
     ("plan.reason.villes", "Saving several cities needs the subscription."),
     ("plan.feature.villes", "Several saved cities, one tap from each other"),
+    ("forecast.blended", "Blended from {count} sources"),
 ];
 
-const ES: [(&str, &str); 125] = [
+const ES: [(&str, &str); 126] = [
     ("wmo.clearSky", "Cielo despejado"),
     ("wmo.mainlyClear", "Poco nuboso"),
     ("wmo.partlyCloudy", "Parcialmente nuboso"),
@@ -374,7 +376,7 @@ const ES: [(&str, &str); 125] = [
     ("alert.vent.title", "Viento fuerte"),
     ("alert.vent.body", "Rachas de hasta {gusts} km/h."),
     ("plan.reason.air", "La calidad del aire y el polen requieren la suscripción."),
-    ("plan.feature.recoupement", "Seis fuentes contrastadas, y su grado de acuerdo"),
+    ("plan.feature.recoupement", "Nueve fuentes contrastadas, y su grado de acuerdo"),
     ("plan.feature.alertes", "Avisos de lluvia, tormenta, helada y calor"),
     ("plan.feature.air", "Calidad del aire y polen"),
     ("veille.title", "El vigía"),
@@ -406,6 +408,7 @@ const ES: [(&str, &str); 125] = [
     ("veille.kind.orage", "tormenta"),
     ("plan.reason.villes", "Guardar varias ciudades requiere la suscripción."),
     ("plan.feature.villes", "Varias ciudades guardadas, a un toque una de otra"),
+    ("forecast.blended", "Combinada de {count} fuentes"),
 ];
 
 /* ---------------------------------------------------------------- */

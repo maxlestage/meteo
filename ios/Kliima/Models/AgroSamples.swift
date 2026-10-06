@@ -112,4 +112,9 @@ struct AgroForecast: Equatable {
     let hourly: [HourlySample]
     let daily: [DailySample]
     let fetchedAt: Date
+    /// Les sources qui ont fait cette prévision, quand elle est recoupée ;
+    /// vide pour la prévision de base, d'un seul modèle.
+    var sources: [String] = []
+    /// L'accord des sources pour l'heure en cours, quand elles ont répondu.
+    var consensus: Consensus?
 }

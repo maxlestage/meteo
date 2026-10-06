@@ -19,6 +19,14 @@ nouvelle pull request.
   gardent leur nom d'époque (`Parcelle`, `parcelle_url`, `AgroFormat`…) : ce
   sont des noms de code, l'interface dit « ville ».
 
+- **Toutes les sources font la prévision.** Elle n'est pas celle d'un modèle :
+  sept modèles d'Open-Meteo, MET Norway et une station votent heure par heure
+  (`klima-core/src/fusion.rs` et son miroir `ios/Kliima/Models/Fusion.swift`) —
+  médiane pour ce qui se mesure, part des sources qui mouillent pour le risque,
+  majorité pour le temps qu'il fait. Un modèle régional « sans couture » n'y
+  entre pas : hors de son domaine il retombe sur l'ECMWF, qui voterait deux
+  fois. Une source muette est écartée, jamais comptée pour zéro.
+
 - **Le guetteur relit, il ne garde pas.** La demi-heure en cours et les deux
   heures à venir viennent de la série au quart d'heure (`minutely_15`), dans
   un appel à part de la prévision horaire : `klima-core/src/veille.rs` et son
