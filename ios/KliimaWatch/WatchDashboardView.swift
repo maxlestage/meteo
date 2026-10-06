@@ -33,7 +33,7 @@ struct WatchDashboardView: View {
                             quarts: viewModel.quarts,
                             enLecture: viewModel.veilleEnLecture,
                             timeZone: viewModel.timeZone,
-                            tombe: forecast.ciel?.tombe
+                            ciel: forecast.ciel
                         )
                         .apparition(1)
                         WatchPluie(forecast: forecast, timeZone: viewModel.timeZone)
@@ -254,8 +254,8 @@ private struct WatchGuetteur: View {
     let quarts: [QuartSample]?
     let enLecture: Bool
     let timeZone: TimeZone
-    /// Ce que l'aéroport le plus proche voit tomber.
-    let tombe: Int?
+    /// Le ciel de l'aéroport le plus proche.
+    let ciel: CielObserve?
 
     /// Le débit qui remplit une barre (mm/h), comme sur l'iPhone.
     private let debitPlein = 8.0
@@ -273,14 +273,18 @@ private struct WatchGuetteur: View {
                 .font(.system(size: 11, weight: .semibold))
                 .foregroundStyle(bleuPluie)
 
-                if let lecture = quarts.flatMap({
-                    Veille.veille(Veille.observer($0, maintenant: contexte.date, tombe: tombe), maintenant: contexte.date)
-                }) {
+                if let quarts, let lecture = Veille.veille(
+                    Veille.observer(quarts, maintenant: contexte.date, ciel: ciel), maintenant: contexte.date
+                ) {
+                    let aveugle = Veille.aveugle(quarts, maintenant: contexte.date, ciel: ciel)
                     Text(VeilleTextes.immediat(lecture, in: timeZone))
                         .font(.footnote)
                         .fixedSize(horizontal: false, vertical: true)
                     barres(lecture)
-                    if let suite = VeilleTextes.suite(lecture, in: timeZone).first {
+                    // La pluie des deux heures, et ce que l'aéroport annonce.
+                    let suite: String = VeilleTextes.suite(lecture, in: timeZone, ciel: ciel, aveugle: aveugle)
+                        .prefix(2).joined(separator: " ")
+                    if !suite.isEmpty {
                         Text(suite)
                             .font(.caption2)
                             .foregroundStyle(.secondary)

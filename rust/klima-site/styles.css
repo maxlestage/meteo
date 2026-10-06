@@ -1828,3 +1828,10 @@ section {
 @media (prefers-reduced-motion: reduce) {
   .vu__goutte { animation: none; }
 }
+
+/* Ce que les prévisionnistes de l'aéroport annoncent, dans le fil du
+   guetteur. */
+.guetteur__annonce {
+  color: #7fd0f5;
+  font-weight: 600;
+}

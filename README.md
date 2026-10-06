@@ -146,6 +146,16 @@ l'appelle en direct avec son `User-Agent`, le web par le relais
 (`/v1/aviation/metar`, gardé dix minutes, et poussé par le direct sous le
 sujet `ciel`).
 
+Le bulletin dit plus que l'instant : sa **tendance** vaut deux heures, la
+fenêtre exacte du guetteur. `NOSIG` (rien ne changera) fait durer ce qu'on
+voit tomber deux heures ; `TEMPO TSRA` (des orages par moments) s'ajoute aux
+phrases du guetteur — « Prévision de l'aéroport de Bordeaux/Mérignac : orage
+par moments d'ici 19:30 » ; `BECMG NSW` en annonce la fin. La force vient du
+signe : `+TSRA` est un orage fort, pas un orage tout court. Et quand les
+modèles n'ont pas vu ce qui tombe — ce jour-là, à Bordeaux, tous donnaient
+zéro sous un `+TSRA` —, le guetteur ne donne pas de fin : « Les modèles ne
+voient pas ce qui tombe : sa fin ne se prévoit pas. »
+
 Ce qu'une seule source fournit — humidité, point de rosée, UV, jour ou nuit,
 lever et coucher — reste celui de la prévision de base (le « meilleur » modèle
 d'Open-Meteo pour le point). Une heure qu'aucune source ne couvre garde ses
@@ -268,6 +278,11 @@ rectangulaire, en ligne et d'angle — avec la température de la ville.
 
 `KliimaWatch` est une application watchOS autonome : elle interroge l'API
 elle-même et se cale sur la position du poignet, sans passer par le téléphone.
+Sur iOS 18, l'activité en direct déclare aussi la famille `.small` : dans
+la pile intelligente de la montre, elle a sa propre vue (ville, température,
+ciel, bornes du jour, ressenti, l'heure qui vient) au lieu du seul compact de
+l'île dynamique.
+
 Elle s'habille comme l'iPhone : le ciel sombre et animé derrière
 (`CielVivant`, partagé), la température en grand et le nombre de sources
 recoupées, le guetteur — la demi-heure en une phrase et les huit quarts en

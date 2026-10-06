@@ -84,7 +84,7 @@ impl Forecast {
         if series.is_empty() && observation.is_none() && ciel.is_none() {
             return self;
         }
-        let vue = Observation { temperature: observation, tombe: ciel.as_ref().and_then(|c| c.tombe) };
+        let vue = Observation { temperature: observation, tombe: ciel.as_ref().and_then(|c| c.tombe).map(|t| t.code) };
         let r = recouper(&self.hourly, &self.daily, &self.current, series, vue);
         let mut sources = r.sources;
         if observation.is_some() {

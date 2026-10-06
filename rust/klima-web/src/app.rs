@@ -138,7 +138,7 @@ pub fn App(props: &Props) -> Html {
                         // la main sur la poignée.
                         <Guetteur
                             etat={veille.clone()}
-                            tombe={forecast.ciel.as_ref().and_then(|c| c.tombe)}
+                            ciel={forecast.ciel.clone()}
                             class={classes!("card")}
                         />
                         // La première question : faut-il un parapluie, et

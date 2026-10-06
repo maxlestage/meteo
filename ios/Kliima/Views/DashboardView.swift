@@ -69,7 +69,7 @@ struct DashboardView: View {
                                     luA: viewModel.quartsLusA,
                                     enLecture: viewModel.veilleEnLecture,
                                     timeZone: viewModel.timeZone,
-                                    tombe: forecast.ciel?.tombe
+                                    ciel: forecast.ciel
                                 )
                                 .entreeEnCascade(1)
 

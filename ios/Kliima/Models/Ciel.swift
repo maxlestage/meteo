@@ -24,6 +24,10 @@ enum CielSeuils {
     static let quartFaibleMm = 0.2
     static let quartModereMm = 1.0
     static let quartFortMm = 2.5
+    /// Ce qu'un bulletin dit voir vaut jusqu'au suivant : une demi-heure.
+    static let validite: TimeInterval = 30 * 60
+    /// La tendance d'un METAR (`NOSIG`, `TEMPO`, `BECMG`) vaut deux heures.
+    static let tendance: TimeInterval = 2 * 3600
 }
 
 /// Un bulletin d'aéroport, déjà lu.
@@ -38,6 +42,41 @@ struct Metar: Equatable, Sendable {
     let time: Date
     /// Le temps présent, brut : `-RA BR`, `+TSRA`… Vide si rien à signaler.
     let tempsPresent: String
+    /// La tendance des prévisionnistes pour les deux heures qui viennent.
+    var tendance: CielTendance = .inconnue
+}
+
+/// Ce qui tombe, vu ou annoncé : un code de l'OMM et sa force telle que le
+/// bulletin la donne (`-` faible, rien modérée, `+` forte). `Tombe` côté Rust.
+struct CielTombe: Equatable, Comparable, Sendable {
+    let code: Int
+    let intensite: VeilleIntensite
+
+    /// Nature d'après le code, force d'après le bulletin.
+    var precipitation: VeillePrecipitation {
+        VeillePrecipitation(nature: Ciel.precipitationDuCode(code).nature, intensite: intensite)
+    }
+
+    static func < (a: CielTombe, b: CielTombe) -> Bool {
+        a.code != b.code ? a.code < b.code : a.intensite < b.intensite
+    }
+}
+
+/// Ce que les prévisionnistes de l'aéroport annoncent pour deux heures.
+enum CielTendance: Equatable, Sendable {
+    /// Le bulletin n'en dit rien.
+    case inconnue
+    /// `NOSIG` : rien de notable ne changera.
+    case stable
+    /// `TEMPO` (passager) ou `BECMG` ; `sec` : le groupe dit `NSW`.
+    case changement(passager: Bool, tombe: CielTombe?, sec: Bool)
+}
+
+/// Ce que l'aéroport annonce de tomber d'ici la fin de sa tendance.
+struct CielAnnonce: Equatable, Sendable {
+    let passagere: Bool
+    let precipitation: VeillePrecipitation
+    let jusquA: Date
 }
 
 /// Le ciel observé près de la ville.
@@ -47,11 +86,38 @@ struct CielObserve: Equatable, Sendable {
     /// Distance à la ville, arrondie au kilomètre.
     let distanceKm: Double
     let time: Date
-    /// Ce qui tombe, en code météo de l'OMM ; `nil` si rien ne tombe.
-    let tombe: Int?
+    /// Ce qui tombe ; `nil` si rien ne tombe.
+    let tombe: CielTombe?
+    var tendance: CielTendance = .inconnue
 
     /// Ce qui tombe, pour le dire.
-    var precipitation: VeillePrecipitation? { tombe.map(Ciel.precipitationDuCode) }
+    var precipitation: VeillePrecipitation? { tombe?.precipitation }
+
+    /// Jusqu'à quand ce qu'on voit tombera encore, d'après le bulletin :
+    /// deux heures sous `NOSIG` ou un `BECMG` qui fait tomber, le quart en
+    /// cours seulement sous `BECMG NSW`, sinon jusqu'au bulletin suivant.
+    var tombeJusquA: Date? {
+        guard tombe != nil else { return nil }
+        switch tendance {
+        case .stable:
+            return time.addingTimeInterval(CielSeuils.tendance)
+        case .changement(passager: false, tombe: _, sec: true):
+            return time
+        case .changement(passager: false, tombe: .some(_), sec: _):
+            return time.addingTimeInterval(CielSeuils.tendance)
+        default:
+            return time.addingTimeInterval(CielSeuils.validite)
+        }
+    }
+
+    /// Ce que l'aéroport annonce de tomber d'ici deux heures, s'il l'annonce.
+    var annonce: CielAnnonce? {
+        guard case let .changement(passager, tombe?, _) = tendance else { return nil }
+        return CielAnnonce(
+            passagere: passager, precipitation: tombe.precipitation,
+            jusquA: time.addingTimeInterval(CielSeuils.tendance)
+        )
+    }
 }
 
 enum Ciel {
@@ -87,11 +153,15 @@ enum Ciel {
     /// Le code météo de l'OMM d'un temps présent METAR, `nil` si rien ne tombe.
     /// Chaque groupe se lit à part ; on garde le plus marqué.
     static func codeDuMetar(_ tempsPresent: String) -> Int? {
-        tempsPresent.split(separator: " ").compactMap { codeDuGroupe(String($0)) }.max()
+        tombeDuMetar(tempsPresent)?.code
     }
 
-    private static func codeDuGroupe(_ groupe: String) -> Int? {
-        if groupe.hasPrefix("VC") || groupe.hasPrefix("RE") { return nil }
+    /// Ce qui tombe d'après un temps présent METAR, avec sa force.
+    static func tombeDuMetar(_ tempsPresent: String) -> CielTombe? {
+        tempsPresent.split(separator: " ").compactMap { tombeDuGroupe(String($0)) }.max()
+    }
+
+    private static func tombeDuGroupe(_ groupe: String) -> CielTombe? {
         let force: Int
         let reste: Substring
         switch groupe.first {
@@ -99,6 +169,29 @@ enum Ciel {
         case "+": force = 2; reste = groupe.dropFirst()
         default: force = 1; reste = Substring(groupe)
         }
+        guard let code = codeDuGroupe(reste, force: force) else { return nil }
+        let intensites: [VeilleIntensite] = [.faible, .moderee, .forte]
+        return CielTombe(code: code, intensite: intensites[force])
+    }
+
+    /// La tendance d'un bulletin brut : `NOSIG`, ou le premier groupe `TEMPO`
+    /// ou `BECMG` et ce qu'il fait tomber. Les remarques (`RMK`) ne comptent
+    /// pas.
+    static func tendanceDuMetar(_ brut: String) -> CielTendance {
+        var groupes: [String] = []
+        for morceau in brut.split(separator: " ") {
+            if morceau == "RMK" { break }
+            groupes.append(String(morceau))
+        }
+        if groupes.contains("NOSIG") { return .stable }
+        guard let debut = groupes.firstIndex(where: { $0 == "TEMPO" || $0 == "BECMG" }) else { return .inconnue }
+        let suite: [String] = Array(groupes[(debut + 1)...].prefix { $0 != "TEMPO" && $0 != "BECMG" })
+        let tombe: CielTombe? = suite.compactMap { tombeDuGroupe($0) }.max()
+        return .changement(passager: groupes[debut] == "TEMPO", tombe: tombe, sec: suite.contains("NSW"))
+    }
+
+    private static func codeDuGroupe(_ reste: Substring, force: Int) -> Int? {
+        if reste.hasPrefix("VC") || reste.hasPrefix("RE") { return nil }
         // Chasse-neige, sable soulevé : ça vole, ça ne tombe pas.
         if reste.hasPrefix("BL") || reste.hasPrefix("DR") { return nil }
         let a: (String) -> Bool = { motif in reste.contains(motif) }
@@ -140,9 +233,9 @@ enum Ciel {
         return VeillePrecipitation(nature: nature, intensite: intensite)
     }
 
-    /// Ce qu'un quart observé mouillé compte (mm), selon le code.
-    static func quartObserveMm(_ code: Int) -> Double {
-        switch precipitationDuCode(code).intensite {
+    /// Ce qu'un quart observé mouillé compte (mm), selon la force observée.
+    static func quartObserveMm(_ intensite: VeilleIntensite) -> Double {
+        switch intensite {
         case .faible: return CielSeuils.quartFaibleMm
         case .moderee: return CielSeuils.quartModereMm
         case .forte: return CielSeuils.quartFortMm
@@ -170,7 +263,7 @@ enum Ciel {
         guard let retenu else { return nil }
         return CielObserve(
             station: retenu.station, nom: retenu.nom, distanceKm: distanceRetenue.rounded(),
-            time: retenu.time, tombe: codeDuMetar(retenu.tempsPresent)
+            time: retenu.time, tombe: tombeDuMetar(retenu.tempsPresent), tendance: retenu.tendance
         )
     }
 
@@ -203,7 +296,8 @@ enum Ciel {
                 latitude: latitude,
                 longitude: longitude,
                 time: Date(timeIntervalSince1970: heure),
-                tempsPresent: b["wxString"] as? String ?? ""
+                tempsPresent: b["wxString"] as? String ?? "",
+                tendance: tendanceDuMetar(b["rawOb"] as? String ?? "")
             )
         }
     }
