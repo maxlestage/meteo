@@ -1,5 +1,6 @@
 //! Les crochets partagés : ce qui a un cycle de vie et vaut des deux côtés.
 
+pub mod direct;
 pub mod palier;
 pub mod parcelle;
 pub mod position;
