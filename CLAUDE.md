@@ -57,6 +57,18 @@ nouvelle pull request.
   modèles n'ont pas vu ce qui tombe (`veille::aveugle`), il ne donne pas de
   fin — une heure inventée est un mensonge — et dit ce que l'aéroport annonce.
 
+- **Le radar voit ce que les modèles ratent.** La mosaïque européenne OPERA
+  d'EUMETNET (radars de Météo-France et voisins, au kilomètre, toutes les
+  cinq minutes, seau public sans clé, CC BY 4.0) est lue par le relais et
+  nulle part ailleurs (`klima-relay/src/radar.rs`, 3 Mo l'image) ; la partie
+  pure — projection, dBZ → mm/h, déplacement, extrapolation — vit dans
+  `klima-core/src/radar.rs`. Les interfaces reçoivent `/v1/radar` (et le
+  sujet `radar` du direct) et refont l'heure qui vient du guetteur
+  (`veille::radariser`, miroir `Veille.radariser`) : le premier quart est au
+  radar, le huitième pour un huitième. Quand le radar voit la ville, il fait
+  foi pour ce qui tombe maintenant, avant l'aéroport. La mention de la source
+  s'affiche dès qu'il sert. La montre, sans relais, ne l'a pas.
+
 - **Deux noms, et ce n'est pas une coquille.** Le nouveau nom ne dépasse pas
   de `ios/`. L'application iPhone s'appelle **Kliima ‣** — le triangle
   (U+2023) fait partie du nom, ce n'est pas de la décoration. Tout le reste —

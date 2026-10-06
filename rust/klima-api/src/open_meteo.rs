@@ -75,16 +75,26 @@ impl Forecast {
     /// l'aéroport le plus proche — ce qu'il voit tomber s'impose à l'instant
     /// et à l'heure en cours. Sans rien de tout cela, la prévision revient
     /// telle quelle.
+    ///
+    /// `radar` : le débit que le radar voit au-dessus de la ville (mm/h),
+    /// `None` s'il ne la voit pas. Quand il la voit, c'est lui qui dit ce qui
+    /// tombe — il regarde la ville même, l'aéroport regarde à quelques
+    /// kilomètres ; sinon, l'aéroport.
     pub fn recoupee(
         self,
         series: &[SerieSource],
         observation: Option<f64>,
         ciel: Option<CielObserve>,
+        radar: Option<f64>,
     ) -> Forecast {
-        if series.is_empty() && observation.is_none() && ciel.is_none() {
-            return self;
+        let tombe = match radar {
+            Some(_) => klima_core::radar::tombe(radar),
+            None => ciel.as_ref().and_then(|c| c.tombe).map(|t| t.code),
+        };
+        if series.is_empty() && observation.is_none() && tombe.is_none() {
+            return Forecast { ciel, ..self };
         }
-        let vue = Observation { temperature: observation, tombe: ciel.as_ref().and_then(|c| c.tombe).map(|t| t.code) };
+        let vue = Observation { temperature: observation, tombe };
         let r = recouper(&self.hourly, &self.daily, &self.current, series, vue);
         let mut sources = r.sources;
         if observation.is_some() {
@@ -699,6 +709,34 @@ mod tests {
 
         assert_eq!(parcelles.len(), 1);
         assert_eq!(parcelles[0].name, "Luz");
+    }
+
+    /* ---- ce qui tombe maintenant ---- */
+
+    #[test]
+    fn le_radar_fait_foi_pour_ce_qui_tombe_quand_il_voit_la_ville() {
+        use klima_core::ciel::{CielObserve, Tendance, Tombe};
+        use klima_core::veille::Intensite;
+        let sec = forecast();
+        assert!(sec.current.weather_code < 51, "la base est sèche");
+        let aeroport = CielObserve {
+            station: "LFBZ".into(),
+            nom: "Biarritz".into(),
+            distance_km: 4.0,
+            time: sec.current.time,
+            tombe: Some(Tombe { code: 61, intensite: Intensite::Faible }),
+            tendance: Tendance::Inconnue,
+        };
+        // Sans radar, l'aéroport dit qu'il pleut.
+        let f = forecast().recoupee(&[], None, Some(aeroport.clone()), None);
+        assert_eq!(f.current.weather_code, 61);
+        assert_eq!(f.ciel.as_ref().map(|c| c.station.as_str()), Some("LFBZ"));
+        // Le radar voit la ville au sec : il fait foi.
+        let f = forecast().recoupee(&[], None, Some(aeroport), Some(0.0));
+        assert_eq!(f.current.weather_code, sec.current.weather_code);
+        // Le radar voit 5 mm/h sur la ville : pluie modérée.
+        let f = forecast().recoupee(&[], None, None, Some(5.0));
+        assert_eq!(f.current.weather_code, 63);
     }
 
     /* ---- les horodatages ---- */

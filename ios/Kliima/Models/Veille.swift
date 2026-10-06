@@ -262,6 +262,31 @@ enum Veille {
         }
     }
 
+    /// La série, refaite avec le radar (`Radar`) : le premier quart prévu par
+    /// le radar compte entièrement, le huitième pour un huitième, la prévision
+    /// fait le reste. Un quart que le radar ne couvre pas garde sa prévision ;
+    /// un quart qui devient mouillé prend un code de pluie, sauf si la
+    /// prévision y mettait déjà neige ou orage. Miroir de `veille::radariser`.
+    static func radariser(_ serie: [QuartSample], radar: [(debut: Date, debit: Double)]) -> [QuartSample] {
+        guard let premier = radar.first?.debut else { return serie }
+        return serie.map { q in
+            guard let vu = radar.first(where: { $0.debut == q.time }) else { return q }
+            let rang = max(0, (q.time.timeIntervalSince(premier) / VeilleSeuils.quart).rounded(.down))
+            let poids = max(0, 1 - rang / Double(VeilleSeuils.horizonQuarts))
+            let brut = poids * vu.debit / 4 + (1 - poids) * q.precipitation
+            let precipitation = (brut * 100).rounded() / 100
+            var code = q.weatherCode
+            if precipitation >= VeilleSeuils.pluieQuartMm && code < FusionSeuils.codeMouille {
+                code = Radar.codeDuDebit(precipitation * 4)
+            }
+            return QuartSample(
+                time: q.time, precipitation: precipitation, weatherCode: code,
+                temperature: q.temperature, apparentTemperature: q.apparentTemperature,
+                windGusts: q.windGusts, isDay: q.isDay
+            )
+        }
+    }
+
     /// Vrai quand l'aéroport voit tomber ce que la prévision du quart en cours
     /// ne voit pas : la fin que donneraient les modèles n'en est pas une.
     static func aveugle(_ serie: [QuartSample], maintenant: Date, ciel: CielObserve?) -> Bool {

@@ -166,6 +166,7 @@ pub fn App(props: &Props) -> Html {
                     <Guetteur
                         etat={veille}
                         ciel={etat.forecast.as_ref().and_then(|f| f.ciel.clone())}
+                        radar={etat.radar.clone()}
                         class={classes!("today__guetteur")}
                     />
                 </SectionDuJour>

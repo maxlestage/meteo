@@ -6,7 +6,7 @@
 //! {"latitude": 48.8566, "longitude": 2.3522, "jours": 7}
 //! ```
 //!
-//! Le relais pousse alors sept sujets, chacun dans la forme exacte que le
+//! Le relais pousse alors huit sujets, chacun dans la forme exacte que le
 //! fournisseur renvoie — les clients ont déjà de quoi les lire :
 //!
 //! ```json
@@ -26,6 +26,7 @@
 //! | `station`  | l'observation de Bright Sky                         |
 //! | `air`      | qualité de l'air et pollens                         |
 //! | `ciel`     | les bulletins des aéroports proches (METAR)         |
+//! | `radar`    | la mosaïque radar : maintenant et les deux heures   |
 //!
 //! Toutes les trente secondes, le relais relit chaque sujet **par les mêmes
 //! caches que les requêtes HTTP** (`routes::lire`), et ne pousse que ce qui a
@@ -47,7 +48,7 @@ use std::time::Duration;
 use axum::extract::State;
 use axum::extract::ws::{Message, WebSocket, WebSocketUpgrade};
 use axum::response::Response;
-use klima_api::{air, ciel, ensemble, open_meteo, readings, veille};
+use klima_api::{air, ciel, ensemble, open_meteo, radar, readings, veille};
 use klima_core::endpoints::Endpoints;
 use klima_core::position::Parcelle;
 use reqwest::Url;
@@ -85,7 +86,7 @@ pub(crate) struct Sujet {
     pub params: Params,
 }
 
-/// Les sept sujets d'une ville.
+/// Les huit sujets d'une ville.
 ///
 /// Les adresses viennent des mêmes fonctions que celles des clients
 /// (`klima-api`) : ce sont donc les mêmes paramètres, donc les mêmes entrées de
@@ -102,6 +103,7 @@ pub(crate) fn sujets(latitude: f64, longitude: f64, jours: u32) -> Vec<Sujet> {
         ("station", readings::bright_sky_call(&relais, latitude, longitude).url),
         ("air", air::air_url(&relais, latitude, longitude)),
         ("ciel", ciel::metar_call(&relais, latitude, longitude).url),
+        ("radar", radar::radar_url(&relais, latitude, longitude).unwrap_or_default()),
     ]
     .into_iter()
     .filter_map(|(nom, adresse)| {
@@ -228,10 +230,10 @@ mod tests {
     use super::*;
 
     #[test]
-    fn sept_sujets_par_les_routes_du_relais() {
+    fn huit_sujets_par_les_routes_du_relais() {
         let s = sujets(48.8566, 2.3522, 7);
         let noms: Vec<&str> = s.iter().map(|s| s.nom).collect();
-        assert_eq!(noms, ["base", "ensemble", "quarts", "met", "station", "air", "ciel"]);
+        assert_eq!(noms, ["base", "ensemble", "quarts", "met", "station", "air", "ciel", "radar"]);
         assert_eq!(s[0].chemin, "/v1/open-meteo/forecast");
         assert!(s[0].params.contains_key("current"));
         assert_eq!(s[1].params["models"].split(',').count(), 7);
@@ -240,6 +242,7 @@ mod tests {
         assert_eq!(s[4].chemin, "/v1/bright-sky/current");
         assert_eq!(s[5].chemin, "/v1/open-meteo/air-quality");
         assert_eq!(s[6].chemin, "/v1/aviation/metar");
+        assert_eq!(s[7].chemin, "/v1/radar");
         // Le point voyage tel quel : c'est le relais qui l'arrondit à sa maille.
         assert_eq!(s[0].params["latitude"], "48.8566");
         assert_eq!(s[3].params["lat"], "48.8566");
