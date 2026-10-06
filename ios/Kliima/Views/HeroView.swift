@@ -7,6 +7,9 @@ import SwiftUI
 struct HeroView: View {
     let forecast: AgroForecast
 
+    /// Le fuseau de la ville : les heures sont les siennes.
+    private var zone: TimeZone { TimeZone(identifier: forecast.timezone) ?? .current }
+
     @State private var flotte = false
     @Environment(\.accessibilityReduceMotion) private var moinsDeMouvement
 
@@ -64,6 +67,27 @@ struct HeroView: View {
                 .overlay(Capsule().strokeBorder(Color.filet, lineWidth: 1))
                 .padding(.top, 8)
                 .transition(.opacity.combined(with: .scale(scale: 0.9)))
+            }
+
+            // Ce qu'on voit tomber à l'aéroport le plus proche : une
+            // observation, pas une prévision — et sa source.
+            if let vu = VeilleTextes.vu(forecast.ciel, in: zone) {
+                VStack(spacing: 3) {
+                    Label(vu, systemImage: "drop.fill")
+                        .font(.subheadline.weight(.semibold))
+                        .symbolEffect(.pulse, options: .repeating, isActive: !moinsDeMouvement)
+                        .multilineTextAlignment(.center)
+                    Text(Localized.text("ciel.credit"))
+                        .font(.caption2)
+                        .foregroundStyle(Color.encreDouce)
+                }
+                .padding(.horizontal, 14)
+                .padding(.vertical, 9)
+                .background(Color.bleuPluie.opacity(0.16), in: RoundedRectangle(cornerRadius: 16))
+                .overlay(RoundedRectangle(cornerRadius: 16).strokeBorder(Color.bleuPluie.opacity(0.45), lineWidth: 1))
+                .padding(.top, 10)
+                .padding(.horizontal, 8)
+                .transition(.opacity.combined(with: .scale(scale: 0.95)))
             }
         }
         .frame(maxWidth: .infinity)

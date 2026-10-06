@@ -61,4 +61,17 @@ enum VeilleTextes {
         }
         return phrases
     }
+
+    /// Ce qu'on voit tomber à l'aéroport le plus proche, en une phrase ; `nil`
+    /// quand rien n'y tombe — un ciel sec observé n'ajoute rien à la prévision.
+    static func vu(_ ciel: CielObserve?, in zone: TimeZone) -> String? {
+        guard let ciel, let precipitation = ciel.precipitation else { return nil }
+        return Localized.text(
+            "ciel.observed",
+            ciel.nom,
+            String(Int(ciel.distanceKm)),
+            AgroFormat.time(ciel.time, in: zone),
+            precipitation.label
+        )
+    }
 }

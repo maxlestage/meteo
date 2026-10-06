@@ -90,15 +90,21 @@ extension WeatherProviders {
         let series: [SerieSource]
         /// La température d'une station proche, s'il y en a une.
         let observation: Double?
+        /// Le ciel de l'aéroport le plus proche, s'il y en a un assez près.
+        var ciel: CielObserve?
     }
 
-    /// Interroge les trois fournisseurs en parallèle, puis lit ce qu'ils ont
-    /// dit (`ensemble(openMeteo:met:station:)`).
+    /// Interroge les quatre fournisseurs en parallèle, puis lit ce qu'ils ont
+    /// dit (`ensemble(openMeteo:met:station:aviation:point:)`).
     static func ensemble(for parcelle: Parcelle, days: Int, session: URLSession = .shared) async -> Ensemble {
         async let openMeteo = try? openMeteoEnsemble(parcelle, days: days, session)
         async let met = try? metNorwayData(parcelle, session)
         async let station = try? brightSkyData(parcelle, session)
-        return await ensemble(openMeteo: openMeteo ?? nil, met: met ?? nil, station: station ?? nil)
+        async let aviation = try? aviationData(parcelle, session)
+        return await ensemble(
+            openMeteo: openMeteo ?? nil, met: met ?? nil, station: station ?? nil,
+            aviation: aviation ?? nil, point: parcelle
+        )
     }
 
     /// Lit ce que les trois fournisseurs ont répondu — par requête ou par le
@@ -107,8 +113,12 @@ extension WeatherProviders {
     ///
     /// Open-Meteo répond pour sept modèles d'un coup : la même réponse fait
     /// leurs séries et leur relevé de l'heure. MET Norway sert deux fois aussi.
-    /// Bright Sky, une station, ne vote que pour l'instant présent.
-    static func ensemble(openMeteo: Data?, met: Data?, station: Data?) -> Ensemble {
+    /// Bright Sky, une station, ne vote que pour l'instant présent ; les
+    /// aéroports disent ce qui tombe près de `point`.
+    static func ensemble(
+        openMeteo: Data?, met: Data?, station: Data?,
+        aviation: Data? = nil, point: Parcelle? = nil, maintenant: Date = Date()
+    ) -> Ensemble {
         let modeles = openMeteo.map(decodeEnsemble) ?? []
         let releves = openMeteo
             .flatMap { try? JSONDecoder().decode(ModelPayload.self, from: $0) }
@@ -134,7 +144,12 @@ extension WeatherProviders {
                 queried: outcomes.count
             ),
             series: modeles + (metSerie.map { [$0] } ?? []),
-            observation: stationReleves.first?.temperature
+            observation: stationReleves.first?.temperature,
+            ciel: aviation.flatMap { corps in
+                point.flatMap {
+                    Ciel.plusProche(Ciel.decodeMetars(corps), latitude: $0.latitude, longitude: $0.longitude, maintenant: maintenant)
+                }
+            }
         )
     }
 
@@ -423,6 +438,22 @@ extension WeatherProviders {
             guard (200..<300).contains(http.statusCode) else { throw AgroWeatherError.badStatus(http.statusCode) }
         }
         return data
+    }
+
+    // MARK: Les aéroports
+
+    /// Les bulletins des aéroports autour de la ville, à l'Aviation Weather
+    /// Center. Il demande qu'on se nomme ; `URLSession` le permet. Un cadre
+    /// sans aéroport répond « 204, rien » : une liste vide.
+    static func aviationData(_ parcelle: Parcelle, _ session: URLSession) async throws -> Data? {
+        let (sud, ouest, nord, est) = Ciel.cadre(parcelle.latitude, parcelle.longitude)
+        var components = URLComponents(string: "https://aviationweather.gov/api/data/metar")!
+        components.queryItems = [
+            URLQueryItem(name: "bbox", value: "\(sud),\(ouest),\(nord),\(est)"),
+            URLQueryItem(name: "format", value: "json"),
+        ]
+        let data = try await json(components.url!, session, userAgent: true)
+        return data.isEmpty ? Data("[]".utf8) : data
     }
 
     static func brightSkyReadings(from payload: BrightSkyPayload) -> [SourceReading] {

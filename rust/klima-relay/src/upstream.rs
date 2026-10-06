@@ -35,6 +35,7 @@ const OPEN_METEO_AIR_PUBLIC: &str = "https://air-quality-api.open-meteo.com";
 const OPEN_METEO_AIR_CUSTOMER: &str = "https://customer-air-quality-api.open-meteo.com";
 const MET_NORWAY: &str = "https://api.met.no";
 const BRIGHT_SKY: &str = "https://api.brightsky.dev";
+const AVIATION_WEATHER: &str = "https://aviationweather.gov";
 
 /// Le fournisseur n'a pas donné ce qu'on lui demandait.
 ///
@@ -152,6 +153,17 @@ pub fn bright_sky_current(latitude: f64, longitude: f64) -> Call {
     Call::plain(url)
 }
 
+/// Les bulletins des aéroports autour de la maille. L'Aviation Weather Center
+/// demande qu'on se nomme : le relais pose l'en-tête pour tout le monde.
+pub fn aviation_metar(latitude: f64, longitude: f64) -> Call {
+    let (sud, ouest, nord, est) = klima_core::ciel::cadre(latitude, longitude);
+    let mut url = Url::parse(AVIATION_WEATHER).expect("hôte").join("/api/data/metar").expect("chemin");
+    url.query_pairs_mut()
+        .append_pair("bbox", &format!("{sud},{ouest},{nord},{est}"))
+        .append_pair("format", "json");
+    Call { url: url.into(), user_agent: Some(USER_AGENT) }
+}
+
 /// Le `Fetch` qui parle vraiment au réseau.
 pub fn http_fetch(client: reqwest::Client) -> Fetch {
     Arc::new(move |call: Call| {
@@ -261,6 +273,16 @@ mod tests {
     fn les_autres_fournisseurs_ne_se_nomment_pas() {
         // On ne pose un en-tête d'identification que là où il est exigé.
         assert_eq!(bright_sky_current(48.44, 1.48).user_agent, None);
+    }
+
+    #[test]
+    fn les_aeroports_par_leur_cadre_en_se_nommant() {
+        let call = aviation_metar(48.39, -4.49);
+        assert_eq!(
+            call.url,
+            "https://aviationweather.gov/api/data/metar?bbox=48.03%2C-5.03%2C48.75%2C-3.95&format=json"
+        );
+        assert_eq!(call.user_agent, Some(USER_AGENT));
         assert_eq!(open_meteo_search(&Params::new()).user_agent, None);
     }
 

@@ -43,6 +43,15 @@ nouvelle pull request.
   minutes, pas une heure. Sans série qui couvre le quart en cours, le
   guetteur se tait : un « sec » dit sans avoir regardé est un mensonge.
 
+- **Ce qui tombe se voit, ça ne se vote pas.** Quelqu'un sous la pluie a lu
+  « sec » : la majorité des modèles avait effacé l'averse. Pour l'instant
+  présent, ce qu'un aéroport proche voit tomber (METAR de la NOAA, domaine
+  public : `klima-core/src/ciel.rs`, miroir `ios/Kliima/Models/Ciel.swift`)
+  l'emporte, puis ce que la prévision de base fait tomber ; le vote ne fait
+  que peindre le ciel (`fusion::code_present`). Quand quelque chose tombe,
+  l'heure en cours et le quart en cours du guetteur le disent aussi. La règle
+  est à sens unique : un ciel sec observé ne retire jamais une pluie prévue.
+
 - **Deux noms, et ce n'est pas une coquille.** Le nouveau nom ne dépasse pas
   de `ios/`. L'application iPhone s'appelle **Kliima ‣** — le triangle
   (U+2023) fait partie du nom, ce n'est pas de la décoration. Tout le reste —

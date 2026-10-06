@@ -1780,3 +1780,51 @@ section {
   border-radius: 50%;
   background: #7ed07a;
 }
+
+/* Ce qu'on voit tomber à l'aéroport le plus proche — au-dessus du
+   guetteur, dans la section du jour. */
+.vu {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  text-align: left;
+  gap: 4px 8px;
+  margin: 0 0 12px;
+  padding: 9px 14px;
+  border: 1px solid rgb(127 208 245 / 40%);
+  border-radius: 14px;
+  background: rgb(127 208 245 / 12%);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.vu__goutte {
+  flex: none;
+  width: 10px;
+  height: 10px;
+  border-radius: 50% 0 50% 50%;
+  background: #7fd0f5;
+  transform: rotate(-45deg);
+  animation: goutte-vue 1.6s ease-in-out infinite;
+}
+
+.vu__texte {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.vu__source {
+  grid-column: 2;
+  opacity: 0.7;
+  font-size: 11px;
+  font-weight: 500;
+}
+
+@keyframes goutte-vue {
+  0%, 100% { transform: rotate(-45deg) translate(0, 0); opacity: 1; }
+  50% { transform: rotate(-45deg) translate(2px, 2px); opacity: 0.6; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .vu__goutte { animation: none; }
+}

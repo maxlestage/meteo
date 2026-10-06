@@ -98,8 +98,11 @@ pub fn use_forecast(
                             ),
                             reseau::air(&endpoints, &parcelle),
                         );
-                        let forecast =
-                            forecast.recoupee(&recoupement.series, recoupement.observation);
+                        let forecast = forecast.recoupee(
+                            &recoupement.series,
+                            recoupement.observation,
+                            recoupement.ciel,
+                        );
                         if *par_le_direct.borrow() {
                             return;
                         }
@@ -125,7 +128,7 @@ pub fn use_forecast(
 
     // Le direct : à chaque corps poussé par le relais, la prévision est refaite
     // avec ce qu'il a envoyé — la base et les sept modèles d'abord, puis MET
-    // Norway, la station et l'air quand ils sont là.
+    // Norway, la station, les aéroports et l'air quand ils sont là.
     {
         let etat = etat.clone();
         let par_le_direct = par_le_direct.clone();
@@ -143,9 +146,13 @@ pub fn use_forecast(
             };
             let (met, station) = (texte(&direct.met), texte(&direct.station));
             let recoupement = reseau::lire_recoupement(
-                Some(modeles.as_str()),
-                Some(&met),
-                Some(&station),
+                reseau::Corps {
+                    open_meteo: Some(modeles.as_str()),
+                    met: Some(&met),
+                    bright_sky: Some(&station),
+                    aviation: direct.ciel.as_deref().map(String::as_str),
+                },
+                (parcelle.latitude, parcelle.longitude),
                 forecast.utc_offset_seconds,
                 a_la_parcelle,
             );
@@ -156,7 +163,11 @@ pub fn use_forecast(
                 .or_else(|| (*etat).air.clone());
             *par_le_direct.borrow_mut() = true;
             etat.set(EtatPrevision {
-                forecast: Some(forecast.recoupee(&recoupement.series, recoupement.observation)),
+                forecast: Some(forecast.recoupee(
+                    &recoupement.series,
+                    recoupement.observation,
+                    recoupement.ciel,
+                )),
                 consensus: consensus_from_outcomes(&recoupement.outcomes),
                 air,
                 loading: false,
