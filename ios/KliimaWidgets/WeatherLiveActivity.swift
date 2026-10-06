@@ -102,7 +102,13 @@ private struct ActiviteSelonFamille: View {
     }
 }
 
-/// La montre : trois lignes qui disent l'essentiel d'un coup d'œil.
+/// La montre : un bloc de la hauteur de la température.
+///
+/// La pile intelligente ne donne à la famille `.small` que la hauteur d'une
+/// grande ligne : la première version, en trois rangées (ville et bornes, la
+/// température, l'heure qui vient), y était coupée en haut et en bas. Tout
+/// tient maintenant à côté de la température : le ciel, le ressenti, l'heure
+/// qui vient, chacun sur une ligne qui rétrécit plutôt que de déborder.
 private struct ActiviteSurLaMontre: View {
     let context: ActivityViewContext<WeatherActivityAttributes>
 
@@ -110,52 +116,69 @@ private struct ActiviteSurLaMontre: View {
         let maintenant = context.state.now(stale: context.isStale)
         let suivante = context.state.upcoming(stale: context.isStale)
 
-        VStack(alignment: .leading, spacing: 3) {
-            HStack(spacing: 4) {
-                Text(context.attributes.parcelleName)
-                    .font(.caption2.weight(.semibold))
-                    .foregroundStyle(.secondary)
-                    .lineLimit(1)
-                Spacer(minLength: 2)
-                Text("↓\(AgroFormat.temperature(context.state.temperatureMin)) ↑\(AgroFormat.temperature(context.state.temperatureMax))")
-                    .font(.caption2)
-                    .foregroundStyle(.secondary)
-                    .monospacedDigit()
-                    .lineLimit(1)
-                    .fixedSize(horizontal: true, vertical: false)
-            }
+        HStack(alignment: .center, spacing: 6) {
+            Image(systemName: maintenant.condition.icon.symbolName(isDay: maintenant.isDay))
+                .symbolRenderingMode(.multicolor)
+                .font(.title3)
 
-            HStack(alignment: .center, spacing: 6) {
-                Image(systemName: maintenant.condition.icon.symbolName(isDay: maintenant.isDay))
-                    .symbolRenderingMode(.multicolor)
-                    .font(.title2)
-                Text(AgroFormat.temperature(maintenant.temperature))
-                    .font(.system(.title, design: .rounded).weight(.medium))
-                    .monospacedDigit()
-                    .lineLimit(1)
-                VStack(alignment: .leading, spacing: 0) {
-                    Text(maintenant.condition.label)
-                        .font(.caption)
-                        .lineLimit(1)
-                        .minimumScaleFactor(0.8)
-                    if let ressenti = maintenant.apparentTemperature {
-                        Text(Localized.text("weather.feelsLike", AgroFormat.temperature(ressenti)))
-                            .font(.caption2)
-                            .foregroundStyle(.secondary)
-                            .lineLimit(1)
-                            .minimumScaleFactor(0.8)
-                    }
+            Text(AgroFormat.temperature(maintenant.temperature))
+                .font(.system(size: 32, weight: .medium, design: .rounded))
+                .monospacedDigit()
+                .lineLimit(1)
+                .minimumScaleFactor(0.7)
+                .fixedSize(horizontal: true, vertical: false)
+
+            VStack(alignment: .leading, spacing: 0) {
+                Text(maintenant.condition.label)
+                    .font(.caption2.weight(.semibold))
+                if let ressenti = maintenant.apparentTemperature {
+                    Text(Localized.text("weather.feelsLike", AgroFormat.temperature(ressenti)))
+                        .font(.caption2)
+                        .foregroundStyle(.secondary)
+                } else {
+                    Text("↓\(AgroFormat.temperature(context.state.temperatureMin)) ↑\(AgroFormat.temperature(context.state.temperatureMax))")
+                        .font(.caption2)
+                        .foregroundStyle(.secondary)
+                        .monospacedDigit()
+                }
+                if let suivante {
+                    HeureCompacte(heure: suivante, timeZone: context.attributes.timeZone)
+                        .font(.caption2)
+                        .foregroundStyle(.secondary)
                 }
             }
+            .lineLimit(1)
+            .minimumScaleFactor(0.6)
 
-            if let suivante {
-                DansUneHeure(heure: suivante, timeZone: context.attributes.timeZone)
-                    .font(.caption2)
-                    .foregroundStyle(.secondary)
-            }
+            Spacer(minLength: 0)
         }
-        .padding(.horizontal, 8)
-        .padding(.vertical, 6)
+        .padding(.horizontal, 4)
+    }
+}
+
+/// L'heure qui vient, dans la place qu'il reste : avec son ciel et son risque
+/// de pluie si ça tient, sinon sans le ciel, sinon l'heure et la température.
+private struct HeureCompacte: View {
+    let heure: WeatherActivityAttributes.NextHour
+    let timeZone: TimeZone
+
+    var body: some View {
+        let quand = AgroFormat.hour(heure.start, in: timeZone)
+        let temperature = AgroFormat.temperature(heure.temperature)
+        let risque = heure.precipitationProbability >= 20 ? AgroFormat.percent(heure.precipitationProbability) : nil
+
+        ViewThatFits(in: .horizontal) {
+            HStack(spacing: 2) {
+                Text(quand)
+                Image(systemName: heure.condition.icon.symbolName(isDay: heure.isDay))
+                    .symbolRenderingMode(.multicolor)
+                Text(temperature)
+                if let risque { Text(risque) }
+            }
+            Text([quand, temperature, risque].compactMap { $0 }.joined(separator: " · "))
+            Text("\(quand) · \(temperature)")
+        }
+        .monospacedDigit()
     }
 }
 
