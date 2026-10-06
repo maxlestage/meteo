@@ -80,11 +80,13 @@ final class ConsensusTests: XCTestCase {
         XCTAssertEqual(result.agreement, .forte)
     }
 
-    func testFourIndependentModelsAtOpenMeteo() {
+    /// Sept modèles, tous d'instituts différents : les mêmes que
+    /// `OPEN_METEO_SOURCES` côté Rust.
+    func testSevenIndependentModelsAtOpenMeteo() {
         let sources = WeatherProviders.openMeteoSources
-        XCTAssertEqual(sources.count, 4)
-        XCTAssertEqual(Set(sources.map(\.institution)).count, 4)
-        XCTAssertEqual(Set(sources.map(\.id)).count, 4)
+        XCTAssertEqual(sources.count, 7)
+        XCTAssertEqual(Set(sources.map(\.institution)).count, 7)
+        XCTAssertEqual(Set(sources.map(\.id)).count, 7)
         XCTAssertEqual(WeatherProviders.source("meteofrance_seamless")?.institution, "Météo-France")
     }
 

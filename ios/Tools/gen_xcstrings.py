@@ -229,6 +229,12 @@ STRINGS = {
     # --- La prévision recoupée de toutes les sources ---
     "forecast.blended": ("Recoupée de %1$@ sources", "Blended from %1$@ sources", "Combinada de %1$@ fuentes"),
 
+    # --- Apparence : celle du téléphone, claire ou sombre ---
+    "theme.title": ("Apparence", "Appearance", "Apariencia"),
+    "theme.auto": ("Automatique", "Automatic", "Automática"),
+    "theme.light": ("Clair", "Light", "Clara"),
+    "theme.dark": ("Sombre", "Dark", "Oscura"),
+
     # --- Le guetteur : la demi-heure en cours et les deux heures à venir ---
     "veille.title": ("Le guetteur", "The lookout", "El vigía"),
     "veille.subtitle": ("Il relit le ciel tous les quarts d’heure.", "It rereads the sky every fifteen minutes.", "Relee el cielo cada cuarto de hora."),
