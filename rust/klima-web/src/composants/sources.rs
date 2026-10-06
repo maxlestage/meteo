@@ -66,7 +66,7 @@ pub fn Sources(props: &Props) -> Html {
     );
 
     html! {
-        <section class="card" aria-label={i18n.t("sources.title")}>
+        <section class="card" id="sources" aria-label={i18n.t("sources.title")}>
             <h2 class="card__label">{ i18n.t("sources.title") }</h2>
             <ul class="sources">{ lignes }</ul>
             <p class="sources__resume">{ resume }</p>

@@ -55,7 +55,7 @@ STRINGS = {
     "app.locate": ("Me localiser", "Locate me", "Ubicarme"),
     "app.search": ("Rechercher une ville", "Search for a city", "Buscar una ciudad"),
     "app.error": ("Impossible de charger la prévision.", "Could not load the forecast.", "No se ha podido cargar la previsión."),
-    "app.source": ("Données Open-Meteo — modèles Météo-France, ECMWF, DWD et NOAA. Ville à %1$@ d’altitude.", "Open-Meteo data — Météo-France, ECMWF, DWD and NOAA models. City at %1$@ elevation.", "Datos de Open-Meteo — modelos de Météo-France, ECMWF, DWD y NOAA. Ciudad a %1$@ de altitud."),
+    "app.source": ("Données Open-Meteo — modèles Météo-France, ECMWF, DWD, NOAA, Met Office, ECCC et JMA. Ville à %1$@ d’altitude.", "Open-Meteo data — Météo-France, ECMWF, DWD, NOAA, Met Office, ECCC and JMA models. City at %1$@ elevation.", "Datos de Open-Meteo — modelos de Météo-France, ECMWF, DWD, NOAA, Met Office, ECCC y JMA. Ciudad a %1$@ de altitud."),
     "search.myField": ("Ma ville", "My city", "Mi ciudad"),
 
     "hourly.title": ("Conditions météo", "Conditions", "Condiciones"),
@@ -93,7 +93,7 @@ STRINGS = {
 
     # --- Écran d'abonnement ---
     "paywall.title": ("Kliima ‣ Pro", "Kliima ‣ Pro", "Kliima ‣ Pro"),
-    "plan.feature.recoupement": ("Six sources recoupées, et leur niveau d’accord", "Six sources cross-checked, and how far they agree", "Seis fuentes contrastadas, y su grado de acuerdo"),
+    "plan.feature.recoupement": ("Neuf sources recoupées, et leur niveau d’accord", "Neuf sources cross-checked, and how far they agree", "Nueve fuentes contrastadas, y su grado de acuerdo"),
     "plan.reason.villes": ("Enregistrer plusieurs villes demande Kliima ‣ Pro.", "Saving several cities needs Kliima ‣ Pro.", "Guardar varias ciudades requiere Kliima ‣ Pro."),
     "plan.feature.villes": ("Plusieurs villes enregistrées, de l’une à l’autre d’un geste", "Several saved cities, one tap from each other", "Varias ciudades guardadas, a un toque una de otra"),
     "plan.feature.alertes": ("Prévenu de la pluie, de l’orage, du gel et de la chaleur", "Warned of rain, storms, frost and heat", "Avisos de lluvia, tormenta, helada y calor"),
@@ -225,6 +225,9 @@ STRINGS = {
     "villes.free": ("Le palier libre garde une ville. Kliima ‣ Pro en garde autant que vous voulez, chacune à un geste.", "The free tier keeps one city. Kliima ‣ Pro keeps as many as you like, each one tap away.", "El nivel gratuito guarda una ciudad. Kliima ‣ Pro guarda tantas como quiera, cada una a un toque."),
     "villes.pro": ("Kliima ‣ Pro : autant de villes que vous voulez. Glissez pour retirer, « Modifier » pour réordonner.", "Kliima ‣ Pro: as many cities as you like. Swipe to remove, “Edit” to reorder.", "Kliima ‣ Pro: tantas ciudades como quiera. Deslice para quitar, «Editar» para reordenar."),
     "villes.done": ("OK", "Done", "Listo"),
+
+    # --- La prévision recoupée de toutes les sources ---
+    "forecast.blended": ("Recoupée de %1$@ sources", "Blended from %1$@ sources", "Combinada de %1$@ fuentes"),
 
     # --- Le guetteur : la demi-heure en cours et les deux heures à venir ---
     "veille.title": ("Le guetteur", "The lookout", "El vigía"),

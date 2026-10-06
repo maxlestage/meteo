@@ -1757,3 +1757,26 @@ section {
   background: linear-gradient(160deg, rgb(20 32 45 / 92%), rgb(13 22 32 / 94%));
   box-shadow: var(--shadow);
 }
+
+/* « Recoupée de 9 sources » : la prévision du jour n'est pas celle d'un seul
+   modèle. */
+.today__recoupe {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin: 8px 0 0;
+  padding: 4px 11px;
+  border: 1px solid rgb(255 255 255 / 16%);
+  border-radius: 999px;
+  background: rgb(255 255 255 / 8%);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.today__recoupe::before {
+  content: '';
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #7ed07a;
+}

@@ -13,7 +13,7 @@ enum WeatherProviders {
     static let userAgent = "Kliima/1.0 (météo de ville; https://maxlestage.github.io/meteo/)"
 
     private static let openMeteoAttribution =
-        "Open-Meteo — modèles Météo-France, ECMWF, DWD et NOAA"
+        "Open-Meteo — modèles Météo-France, ECMWF, DWD, NOAA, Met Office, ECCC et JMA"
 
     static let openMeteoSources: [WeatherSource] = [
         WeatherSource(id: "meteofrance_seamless", name: "AROME / ARPEGE",
@@ -25,6 +25,12 @@ enum WeatherProviders {
                       institution: "Deutscher Wetterdienst", country: "DE",
                       provider: "open-meteo", attribution: openMeteoAttribution),
         WeatherSource(id: "gfs_seamless", name: "GFS", institution: "NOAA", country: "US",
+                      provider: "open-meteo", attribution: openMeteoAttribution),
+        WeatherSource(id: "ukmo_seamless", name: "UM", institution: "Met Office", country: "GB",
+                      provider: "open-meteo", attribution: openMeteoAttribution),
+        WeatherSource(id: "gem_seamless", name: "GEM", institution: "ECCC", country: "CA",
+                      provider: "open-meteo", attribution: openMeteoAttribution),
+        WeatherSource(id: "jma_seamless", name: "GSM", institution: "JMA", country: "JP",
                       provider: "open-meteo", attribution: openMeteoAttribution),
     ]
 
@@ -75,23 +81,86 @@ extension WeatherProviders {
         let failed: Bool
     }
 
-    /// Interroge les trois fournisseurs en parallèle et recoupe leurs réponses.
-    static func consensus(for parcelle: Parcelle, session: URLSession = .shared) async -> Consensus? {
-        let outcomes = await withTaskGroup(of: Outcome.self) { group -> [Outcome] in
-            group.addTask { await run("open-meteo") { try await openMeteo(parcelle, session) } }
-            group.addTask { await run("met-norway") { try await metNorway(parcelle, session) } }
-            group.addTask { await run("bright-sky") { try await brightSky(parcelle, session) } }
+    /// Ce que tous les fournisseurs ont dit : de quoi recouper la prévision,
+    /// et de quoi dire leur accord.
+    struct Ensemble {
+        /// L'accord des sources pour l'heure en cours.
+        let consensus: Consensus?
+        /// Les séries de chaque source, pour la prévision recoupée.
+        let series: [SerieSource]
+        /// La température d'une station proche, s'il y en a une.
+        let observation: Double?
+    }
 
-            var collected: [Outcome] = []
-            for await outcome in group { collected.append(outcome) }
+    /// Ce qu'un appel a rapporté : des relevés pour l'accord, des séries pour
+    /// la prévision, une mesure de station.
+    private struct Apport {
+        let outcome: Outcome
+        var series: [SerieSource] = []
+        var observation: Double?
+    }
+
+    /// Interroge les trois fournisseurs en parallèle.
+    ///
+    /// Open-Meteo répond pour sept modèles d'un coup, sur toute la période : la
+    /// même réponse fait leurs séries et leur relevé de l'heure. MET Norway sert
+    /// deux fois aussi. Bright Sky, une station, ne vote que pour l'instant.
+    static func ensemble(for parcelle: Parcelle, days: Int, session: URLSession = .shared) async -> Ensemble {
+        let apports = await withTaskGroup(of: Apport.self) { group -> [Apport] in
+            group.addTask {
+                do {
+                    let data = try await openMeteoEnsemble(parcelle, days: days, session)
+                    let readings = (try? JSONDecoder().decode(ModelPayload.self, from: data))
+                        .map(openMeteoReadings(from:)) ?? []
+                    return Apport(
+                        outcome: Outcome(provider: "open-meteo", readings: readings, failed: false),
+                        series: decodeEnsemble(data)
+                    )
+                } catch {
+                    return Apport(outcome: Outcome(provider: "open-meteo", readings: [], failed: true))
+                }
+            }
+            group.addTask {
+                do {
+                    let payload = try await metNorwayPayload(parcelle, session)
+                    return Apport(
+                        outcome: Outcome(provider: "met-norway", readings: metNorwayReadings(from: payload), failed: false),
+                        series: metNorwaySerie(from: payload).map { [$0] } ?? []
+                    )
+                } catch {
+                    return Apport(outcome: Outcome(provider: "met-norway", readings: [], failed: true))
+                }
+            }
+            group.addTask {
+                let outcome = await run("bright-sky") { try await brightSky(parcelle, session) }
+                return Apport(outcome: outcome, observation: outcome.readings.first?.temperature)
+            }
+
+            var collected: [Apport] = []
+            for await apport in group { collected.append(apport) }
             return collected
         }
 
-        return ModelConsensus.consensus(
-            outcomes.flatMap(\.readings),
-            answered: outcomes.filter { !$0.readings.isEmpty }.count,
-            queried: outcomes.count
+        // Toujours dans le même ordre, quel que soit celui des réponses.
+        let ordre = ["open-meteo", "met-norway", "bright-sky"]
+        let tries = apports.sorted {
+            (ordre.firstIndex(of: $0.outcome.provider) ?? 9) < (ordre.firstIndex(of: $1.outcome.provider) ?? 9)
+        }
+        let outcomes = tries.map(\.outcome)
+        return Ensemble(
+            consensus: ModelConsensus.consensus(
+                outcomes.flatMap(\.readings),
+                answered: outcomes.filter { !$0.readings.isEmpty }.count,
+                queried: outcomes.count
+            ),
+            series: tries.flatMap(\.series),
+            observation: tries.compactMap(\.observation).first
         )
+    }
+
+    /// Le seul accord des sources, pour l'heure en cours.
+    static func consensus(for parcelle: Parcelle, session: URLSession = .shared) async -> Consensus? {
+        await ensemble(for: parcelle, days: 1, session: session).consensus
     }
 
     private static func run(
@@ -165,7 +234,136 @@ extension WeatherProviders {
         return payload.hourly.time.isEmpty ? nil : payload.hourly.time.count - 1
     }
 
+    /// Les sept modèles, heure par heure et jour par jour, sur `days` jours :
+    /// les variables de `klima-api/src/ensemble.rs`.
+    static let ensembleHeures = [
+        "temperature_2m", "apparent_temperature", "precipitation",
+        "precipitation_probability", "weather_code", "wind_speed_10m", "wind_gusts_10m",
+    ]
+    static let ensembleJours = [
+        "temperature_2m_max", "temperature_2m_min", "precipitation_sum",
+        "precipitation_probability_max", "wind_gusts_10m_max", "weather_code",
+    ]
+
+    static func openMeteoEnsemble(_ parcelle: Parcelle, days: Int, _ session: URLSession) async throws -> Data {
+        var components = URLComponents(string: "https://api.open-meteo.com/v1/forecast")!
+        components.queryItems = [
+            URLQueryItem(name: "latitude", value: String(format: "%.4f", parcelle.latitude)),
+            URLQueryItem(name: "longitude", value: String(format: "%.4f", parcelle.longitude)),
+            URLQueryItem(name: "hourly", value: ensembleHeures.joined(separator: ",")),
+            URLQueryItem(name: "daily", value: ensembleJours.joined(separator: ",")),
+            URLQueryItem(name: "models", value: openMeteoSources.map(\.id).joined(separator: ",")),
+            URLQueryItem(name: "wind_speed_unit", value: "kmh"),
+            URLQueryItem(name: "timezone", value: "auto"),
+            URLQueryItem(name: "forecast_days", value: String(days)),
+        ]
+        return try await json(components.url!, session)
+    }
+
+    /// Une série par modèle qui couvre le point : un modèle dont toutes les
+    /// températures sont nulles est écarté, pas compté pour zéro.
+    static func decodeEnsemble(_ data: Data) -> [SerieSource] {
+        guard let payload = try? JSONDecoder().decode(EnsemblePayload.self, from: data) else { return [] }
+        let zone = TimeZone(identifier: payload.timezone ?? "") ?? .current
+        let heureFormat = DateFormatter.openMeteo(format: "yyyy-MM-dd'T'HH:mm", zone: zone)
+        let jourFormat = DateFormatter.openMeteo(format: "yyyy-MM-dd", zone: zone)
+        let heures = payload.hourly
+        let jours = payload.daily
+
+        return openMeteoSources.compactMap { source in
+            let m = source.id
+            func h(_ variable: String, _ i: Int) -> Double? { heures?.columns["\(variable)_\(m)"].flatMap { i < $0.count ? $0[i] : nil } }
+            func j(_ variable: String, _ i: Int) -> Double? { jours?.columns["\(variable)_\(m)"].flatMap { i < $0.count ? $0[i] : nil } }
+
+            let serieHeures: [HeureSource] = (heures?.time ?? []).enumerated().compactMap { i, stamp in
+                guard let time = heureFormat.date(from: stamp) else { return nil }
+                return HeureSource(
+                    time: time,
+                    temperature: h("temperature_2m", i),
+                    ressenti: h("apparent_temperature", i),
+                    precipitation: h("precipitation", i),
+                    probabilite: h("precipitation_probability", i),
+                    vent: h("wind_speed_10m", i),
+                    rafales: h("wind_gusts_10m", i),
+                    code: h("weather_code", i).map { Int($0) }
+                )
+            }
+            guard serieHeures.contains(where: { $0.temperature != nil }) else { return nil }
+
+            let serieJours: [JourSource] = (jours?.time ?? []).enumerated().compactMap { i, stamp in
+                guard let date = jourFormat.date(from: stamp) else { return nil }
+                return JourSource(
+                    date: date,
+                    minimum: j("temperature_2m_min", i),
+                    maximum: j("temperature_2m_max", i),
+                    cumul: j("precipitation_sum", i),
+                    probabilite: j("precipitation_probability_max", i),
+                    rafales: j("wind_gusts_10m_max", i),
+                    code: j("weather_code", i).map { Int($0) }
+                )
+            }
+            return SerieSource(sourceId: m, heures: serieHeures, jours: serieJours)
+        }
+    }
+
     // MARK: MET Norway
+
+    static func metNorwayPayload(_ parcelle: Parcelle, _ session: URLSession) async throws -> MetPayload {
+        var components = URLComponents(string: "https://api.met.no/weatherapi/locationforecast/2.0/compact")!
+        components.queryItems = [
+            URLQueryItem(name: "lat", value: String(format: "%.4f", parcelle.latitude)),
+            URLQueryItem(name: "lon", value: String(format: "%.4f", parcelle.longitude)),
+        ]
+        // Leurs conditions imposent de s'identifier ; `URLSession` le permet.
+        return try MetPayload.decode(try await json(components.url!, session, userAgent: true))
+    }
+
+    /// La série de MET Norway : seuls les pas qui portent une pluie sur l'heure
+    /// entrent — plus loin, la série passe à six heures. Le vent passe en km/h.
+    static func metNorwaySerie(from payload: MetPayload) -> SerieSource? {
+        let heures: [HeureSource] = (payload.properties?.timeseries ?? []).compactMap { entree in
+            guard
+                let time = entree.time,
+                let pluie = entree.data?.next_1_hours?.details?["precipitation_amount"]
+            else { return nil }
+            let instant = entree.data?.instant?.details
+            return HeureSource(
+                time: time,
+                temperature: instant?["air_temperature"].flatMap { $0.isFinite ? $0 : nil },
+                precipitation: pluie,
+                vent: instant?["wind_speed"].map { $0 * 3.6 },
+                code: entree.data?.next_1_hours?.summary?.symbol_code.flatMap(codeDuSymbole)
+            )
+        }
+        guard heures.contains(where: { $0.temperature != nil }) else { return nil }
+        return SerieSource(sourceId: metNorwaySource.id, heures: heures)
+    }
+
+    /// Le code météo d'un symbole de MET Norway — la table de `klima-api`.
+    static func codeDuSymbole(_ symbole: String) -> Int? {
+        guard let nom = symbole.split(separator: "_").first.map(String.init) else { return nil }
+        if nom.contains("thunder") { return 95 }
+        switch nom {
+        case "clearsky": return 0
+        case "fair": return 1
+        case "partlycloudy": return 2
+        case "cloudy": return 3
+        case "fog": return 45
+        case "lightrain": return 61
+        case "rain": return 63
+        case "heavyrain": return 65
+        case "lightrainshowers": return 80
+        case "rainshowers": return 81
+        case "heavyrainshowers": return 82
+        case "lightsleet", "sleet", "heavysleet", "lightsleetshowers", "sleetshowers", "heavysleetshowers": return 66
+        case "lightsnow": return 71
+        case "snow": return 73
+        case "heavysnow": return 75
+        case "lightsnowshowers", "snowshowers": return 85
+        case "heavysnowshowers": return 86
+        default: return nil
+        }
+    }
 
     static func metNorway(_ parcelle: Parcelle, _ session: URLSession) async throws -> [SourceReading] {
         var components = URLComponents(string: "https://api.met.no/weatherapi/locationforecast/2.0/compact")!
@@ -248,7 +446,11 @@ struct MetPayload: Decodable {
 
     struct Entry: Decodable {
         struct Data: Decodable {
-            struct Details: Decodable { let details: [String: Double]? }
+            struct Summary: Decodable { let symbol_code: String? }
+            struct Details: Decodable {
+                let details: [String: Double]?
+                let summary: Summary?
+            }
             let instant: Details?
             let next_1_hours: Details?
         }
@@ -265,6 +467,14 @@ struct MetPayload: Decodable {
             .filter { $0.time != nil }
             .min { abs($0.time!.timeIntervalSince(date)) < abs($1.time!.timeIntervalSince(date)) }
     }
+}
+
+/// Réponse d'Open-Meteo pour plusieurs modèles : des colonnes suffixées, heure
+/// par heure et jour par jour.
+struct EnsemblePayload: Decodable {
+    let timezone: String?
+    let hourly: ModelPayload.Block?
+    let daily: ModelPayload.Block?
 }
 
 /// Réponse de Bright Sky : une observation de station.

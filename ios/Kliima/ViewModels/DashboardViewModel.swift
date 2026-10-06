@@ -105,13 +105,11 @@ final class DashboardViewModel: ObservableObject {
                 let forecast = try await service.forecast(for: parcelle, days: 7)
                 guard !Task.isCancelled else { return }
                 self.forecast = forecast
-                // Le recoupement et l'air sont des plus : leur échec ne prive
-                // de rien. Ils partent ensemble.
-                async let consensus = try? await service.modelConsensus(for: parcelle)
-                async let air = try? await service.air(for: parcelle)
-                let (c, a) = await (consensus, air)
+                // L'accord des sources vient avec la prévision recoupée ;
+                // l'air est un plus, son échec ne prive de rien.
+                self.consensus = forecast.consensus
+                let a = try? await service.air(for: parcelle)
                 guard !Task.isCancelled else { return }
-                self.consensus = c ?? nil
                 self.air = a ?? nil
             } catch is CancellationError {
                 return
