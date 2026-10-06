@@ -35,19 +35,55 @@ final class VeilleTests: XCTestCase {
 
     private let faible = VeillePrecipitation(nature: .pluie, intensite: .faible)
 
-    func testUnePluieObserveeMouilleLeQuartEnCours() throws {
+    private func vu(_ tombe: CielTombe?, _ tendance: CielTendance) -> CielObserve {
+        CielObserve(
+            station: "LFBD", nom: "Bordeaux/Merignac", distanceKm: 8, time: seizeH,
+            tombe: tombe, tendance: tendance
+        )
+    }
+
+    func testUnePluieObserveeMouilleLesQuartsQueLeBulletinCouvre() throws {
+        let pluie = CielTombe(code: 63, intensite: .moderee)
         let sec = serie(Array(repeating: 0, count: 10))
-        let vu = Veille.observer(sec, maintenant: maintenant, tombe: 63)
-        XCTAssertEqual(vu[0].precipitation, 1.0)
-        XCTAssertEqual(vu[0].weatherCode, 63)
-        XCTAssertEqual(vu[1], sec[1], "la suite reste à la prévision")
-        let v = try XCTUnwrap(Veille.veille(vu, maintenant: maintenant))
-        XCTAssertEqual(v.immediat, .cesse(fin: seizeH.addingTimeInterval(quart)))
+
+        var lu = Veille.observer(sec, maintenant: maintenant, ciel: vu(pluie, .inconnue))
+        XCTAssertEqual(lu[0].precipitation, 1.0)
+        XCTAssertEqual(lu[0].weatherCode, 63)
+        XCTAssertEqual(lu[1].precipitation, 1.0)
+        XCTAssertEqual(lu[2], sec[2], "au-delà du bulletin, la prévision")
+        let v = try XCTUnwrap(Veille.veille(lu, maintenant: maintenant))
+        XCTAssertEqual(v.immediat, .dure(precipitation: VeillePrecipitation(nature: .pluie, intensite: .moderee)))
+
+        lu = Veille.observer(sec, maintenant: maintenant, ciel: vu(pluie, .stable))
+        XCTAssertTrue(lu[..<8].allSatisfy(Veille.mouille))
+        XCTAssertFalse(Veille.mouille(lu[8]))
+
+        let orage = CielTombe(code: 95, intensite: .forte)
+        lu = Veille.observer(sec, maintenant: maintenant, ciel: vu(orage, .inconnue))
+        XCTAssertEqual(Veille.intensite(lu[0]), .forte)
+        XCTAssertEqual(Veille.nature(lu[0]), .orage)
+
+        let ancien = CielObserve(
+            station: "LFBD", nom: "Bordeaux/Merignac", distanceKm: 8, time: seizeH.addingTimeInterval(-quart),
+            tombe: pluie, tendance: .inconnue
+        )
+        lu = Veille.observer(sec, maintenant: maintenant, ciel: ancien)
+        XCTAssertTrue(Veille.mouille(lu[0]) && Veille.mouille(lu[1]) && !Veille.mouille(lu[2]))
+        XCTAssertTrue(Veille.aveugle(sec, maintenant: maintenant, ciel: ancien), "les modèles n'ont rien vu")
+        XCTAssertFalse(Veille.aveugle(serie([0.6]), maintenant: maintenant, ciel: ancien))
+        XCTAssertFalse(Veille.aveugle(sec, maintenant: maintenant, ciel: nil))
+
+        lu = Veille.observer(sec, maintenant: maintenant, ciel: vu(pluie, .changement(passager: false, tombe: nil, sec: true)))
+        XCTAssertTrue(Veille.mouille(lu[0]))
+        XCTAssertFalse(Veille.mouille(lu[1]))
 
         let mouillee = serie([0.6, 0.6])
-        XCTAssertEqual(Veille.observer(mouillee, maintenant: maintenant, tombe: 65), mouillee)
-        XCTAssertEqual(Veille.observer(sec, maintenant: maintenant, tombe: nil), sec)
-        XCTAssertEqual(Veille.observer(sec, maintenant: maintenant, tombe: 45), sec, "le brouillard ne mouille pas")
+        XCTAssertEqual(Veille.observer(mouillee, maintenant: maintenant, ciel: vu(orage, .inconnue))[0], mouillee[0])
+        XCTAssertEqual(Veille.observer(sec, maintenant: maintenant, ciel: nil), sec)
+        XCTAssertEqual(Veille.observer(sec, maintenant: maintenant, ciel: vu(nil, .stable)), sec)
+        XCTAssertEqual(
+            Veille.observer(sec, maintenant: maintenant, ciel: vu(CielTombe(code: 45, intensite: .moderee), .stable)), sec
+        )
     }
 
     func testRienNeTombe() throws {

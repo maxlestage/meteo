@@ -6,7 +6,12 @@ import WidgetKit
 @main
 struct KliimaWidgetsBundle: WidgetBundle {
     var body: some Widget {
-        WeatherLiveActivity()
+        // Sur iOS 18, l'activité sait aussi se montrer sur la montre.
+        if #available(iOS 18.0, *) {
+            WeatherLiveActivityMontre()
+        } else {
+            WeatherLiveActivity()
+        }
         WeatherWidget()
         WeatherLockScreenWidget()
     }

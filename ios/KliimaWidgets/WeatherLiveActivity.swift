@@ -21,59 +21,157 @@ struct WeatherLiveActivity: Widget {
         ActivityConfiguration(for: WeatherActivityAttributes.self) { context in
             WeatherActivityView(context: context)
         } dynamicIsland: { context in
-            let maintenant = context.state.now(stale: context.isStale)
-            let suivante = context.state.upcoming(stale: context.isStale)
+            Self.ile(context)
+        }
+    }
 
-            return DynamicIsland {
-                DynamicIslandExpandedRegion(.leading) {
-                    VStack(alignment: .leading, spacing: 2) {
-                        Text(AgroFormat.temperature(maintenant.temperature))
-                            .font(.title2.weight(.semibold))
-                            .lineLimit(1)
-                        Text(context.attributes.parcelleName)
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
-                            .lineLimit(1)
+    /// L'île dynamique, partagée avec la version qui sait aussi parler à la
+    /// montre.
+    static func ile(_ context: ActivityViewContext<WeatherActivityAttributes>) -> DynamicIsland {
+        let maintenant = context.state.now(stale: context.isStale)
+        let suivante = context.state.upcoming(stale: context.isStale)
+
+        return DynamicIsland {
+            DynamicIslandExpandedRegion(.leading) {
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(AgroFormat.temperature(maintenant.temperature))
+                        .font(.title2.weight(.semibold))
+                        .lineLimit(1)
+                    Text(context.attributes.parcelleName)
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                        .lineLimit(1)
+                }
+            }
+
+            DynamicIslandExpandedRegion(.trailing) {
+                VStack(alignment: .trailing, spacing: 2) {
+                    Image(systemName: maintenant.condition.icon.symbolName(isDay: maintenant.isDay))
+                        .symbolRenderingMode(.multicolor)
+                        .font(.title3)
+                    Text(AgroFormat.unit(maintenant.windSpeed, "km/h", decimals: 0))
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                        .lineLimit(1)
+                        .fixedSize(horizontal: true, vertical: false)
+                }
+            }
+
+            DynamicIslandExpandedRegion(.bottom) {
+                HStack(spacing: 6) {
+                    Text(maintenant.condition.label)
+                        .lineLimit(1)
+                    if let suivante {
+                        Spacer(minLength: 4)
+                        DansUneHeure(heure: suivante, timeZone: context.attributes.timeZone)
                     }
                 }
+                .font(.caption)
+                .foregroundStyle(.secondary)
+            }
+        } compactLeading: {
+            Image(systemName: maintenant.condition.icon.symbolName(isDay: maintenant.isDay))
+                .symbolRenderingMode(.multicolor)
+        } compactTrailing: {
+            Text(AgroFormat.temperature(maintenant.temperature))
+                .monospacedDigit()
+                .lineLimit(1)
+        } minimal: {
+            Image(systemName: maintenant.condition.icon.symbolName(isDay: maintenant.isDay))
+                .symbolRenderingMode(.multicolor)
+        }
+    }
+}
 
-                DynamicIslandExpandedRegion(.trailing) {
-                    VStack(alignment: .trailing, spacing: 2) {
-                        Image(systemName: maintenant.condition.icon.symbolName(isDay: maintenant.isDay))
-                            .symbolRenderingMode(.multicolor)
-                            .font(.title3)
-                        Text(AgroFormat.unit(maintenant.windSpeed, "km/h", decimals: 0))
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
-                            .lineLimit(1)
-                            .fixedSize(horizontal: true, vertical: false)
-                    }
-                }
+/// La même activité, qui se montre aussi sur la montre (iOS 18).
+///
+/// Sans famille supplémentaire, la montre n'en recevait que le compact de
+/// l'île : une icône et une température, sur un écran noir. Avec `.small`,
+/// elle a sa propre vue, pensée pour la pile intelligente : la ville, la
+/// température, le ciel, les bornes du jour, l'heure qui vient et le ressenti.
+@available(iOS 18.0, *)
+struct WeatherLiveActivityMontre: Widget {
+    var body: some WidgetConfiguration {
+        ActivityConfiguration(for: WeatherActivityAttributes.self) { context in
+            ActiviteSelonFamille(context: context)
+        } dynamicIsland: { context in
+            WeatherLiveActivity.ile(context)
+        }
+        .supplementalActivityFamilies([.small, .medium])
+    }
+}
 
-                DynamicIslandExpandedRegion(.bottom) {
-                    HStack(spacing: 6) {
-                        Text(maintenant.condition.label)
-                            .lineLimit(1)
-                        if let suivante {
-                            Spacer(minLength: 4)
-                            DansUneHeure(heure: suivante, timeZone: context.attributes.timeZone)
-                        }
-                    }
-                    .font(.caption)
+/// L'écran verrouillé de l'iPhone en `.medium`, la montre en `.small`.
+@available(iOS 18.0, *)
+private struct ActiviteSelonFamille: View {
+    let context: ActivityViewContext<WeatherActivityAttributes>
+
+    @Environment(\.activityFamily) private var famille
+
+    var body: some View {
+        switch famille {
+        case .small:
+            ActiviteSurLaMontre(context: context)
+        default:
+            WeatherActivityView(context: context)
+        }
+    }
+}
+
+/// La montre : trois lignes qui disent l'essentiel d'un coup d'œil.
+private struct ActiviteSurLaMontre: View {
+    let context: ActivityViewContext<WeatherActivityAttributes>
+
+    var body: some View {
+        let maintenant = context.state.now(stale: context.isStale)
+        let suivante = context.state.upcoming(stale: context.isStale)
+
+        VStack(alignment: .leading, spacing: 3) {
+            HStack(spacing: 4) {
+                Text(context.attributes.parcelleName)
+                    .font(.caption2.weight(.semibold))
                     .foregroundStyle(.secondary)
-                }
-            } compactLeading: {
-                Image(systemName: maintenant.condition.icon.symbolName(isDay: maintenant.isDay))
-                    .symbolRenderingMode(.multicolor)
-            } compactTrailing: {
-                Text(AgroFormat.temperature(maintenant.temperature))
+                    .lineLimit(1)
+                Spacer(minLength: 2)
+                Text("↓\(AgroFormat.temperature(context.state.temperatureMin)) ↑\(AgroFormat.temperature(context.state.temperatureMax))")
+                    .font(.caption2)
+                    .foregroundStyle(.secondary)
                     .monospacedDigit()
                     .lineLimit(1)
-            } minimal: {
+                    .fixedSize(horizontal: true, vertical: false)
+            }
+
+            HStack(alignment: .center, spacing: 6) {
                 Image(systemName: maintenant.condition.icon.symbolName(isDay: maintenant.isDay))
                     .symbolRenderingMode(.multicolor)
+                    .font(.title2)
+                Text(AgroFormat.temperature(maintenant.temperature))
+                    .font(.system(.title, design: .rounded).weight(.medium))
+                    .monospacedDigit()
+                    .lineLimit(1)
+                VStack(alignment: .leading, spacing: 0) {
+                    Text(maintenant.condition.label)
+                        .font(.caption)
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.8)
+                    if let ressenti = maintenant.apparentTemperature {
+                        Text(Localized.text("weather.feelsLike", AgroFormat.temperature(ressenti)))
+                            .font(.caption2)
+                            .foregroundStyle(.secondary)
+                            .lineLimit(1)
+                            .minimumScaleFactor(0.8)
+                    }
+                }
+            }
+
+            if let suivante {
+                DansUneHeure(heure: suivante, timeZone: context.attributes.timeZone)
+                    .font(.caption2)
+                    .foregroundStyle(.secondary)
             }
         }
+        .padding(.horizontal, 8)
+        .padding(.vertical, 6)
     }
 }
 

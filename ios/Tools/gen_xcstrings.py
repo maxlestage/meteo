@@ -233,6 +233,22 @@ STRINGS = {
         "Seen at %1$@ airport (%2$@\u00a0km) at %3$@: %4$@.",
         "Visto en el aeropuerto de %1$@ (%2$@\u00a0km) a las %3$@: %4$@.",
     ),
+    "veille.airport.tempo": (
+        "Prévision de l’aéroport de %1$@ : %2$@ par moments d’ici %3$@.",
+        "%1$@ airport forecast: %2$@ at times until %3$@.",
+        "Previsión del aeropuerto de %1$@: %2$@ a ratos hasta las %3$@.",
+    ),
+    "veille.airport.becmg": (
+        "Prévision de l’aéroport de %1$@ : %2$@ d’ici %3$@.",
+        "%1$@ airport forecast: %2$@ by %3$@.",
+        "Previsión del aeropuerto de %1$@: %2$@ antes de las %3$@.",
+    ),
+    "veille.next.stop": ("Fin vers %1$@.", "Ending around %1$@.", "Termina hacia las %1$@."),
+    "veille.next.unseen": (
+        "Les modèles ne voient pas ce qui tombe : sa fin ne se prévoit pas.",
+        "The models don’t see what’s falling: its end can’t be forecast.",
+        "Los modelos no ven lo que cae: su final no se puede prever.",
+    ),
     "ciel.credit": (
         "Relevé d’aéroport (METAR) — NOAA, domaine public",
         "Airport report (METAR) — NOAA, public domain",

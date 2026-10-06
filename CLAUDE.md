@@ -51,6 +51,11 @@ nouvelle pull request.
   que peindre le ciel (`fusion::code_present`). Quand quelque chose tombe,
   l'heure en cours et le quart en cours du guetteur le disent aussi. La règle
   est à sens unique : un ciel sec observé ne retire jamais une pluie prévue.
+  Le guetteur lit aussi la **tendance** du bulletin (`NOSIG`, `TEMPO`,
+  `BECMG`, deux heures) et la force du signe (`+TSRA` est un orage fort) :
+  ce qu'on voit tombe la demi-heure, deux heures sous `NOSIG`. Quand les
+  modèles n'ont pas vu ce qui tombe (`veille::aveugle`), il ne donne pas de
+  fin — une heure inventée est un mensonge — et dit ce que l'aéroport annonce.
 
 - **Deux noms, et ce n'est pas une coquille.** Le nouveau nom ne dépasse pas
   de `ios/`. L'application iPhone s'appelle **Kliima ‣** — le triangle

@@ -278,22 +278,50 @@ pub fn veille(serie: &[QuartSample], maintenant: i64) -> Option<Veille> {
 
 /// La série, corrigée de ce qu'un aéroport proche voit tomber (`ciel`).
 ///
-/// Le quart en cours, s'il était sec, prend la pluie observée : le guetteur
-/// ne dit pas « pas une goutte » à qui la reçoit. Les quarts suivants restent
-/// ceux de la prévision — une observation dit maintenant, pas ensuite. Un ciel
-/// sec observé ne retire rien.
-pub fn observer(serie: &[QuartSample], maintenant: i64, tombe: Option<u16>) -> Vec<QuartSample> {
+/// Les modèles ratent les cellules d'orage : à Bordeaux, Mérignac voyait un
+/// `+TSRA` pendant que tous annonçaient zéro. Ce qu'on voit tomber mouille
+/// donc les quarts secs, à la force observée, aussi longtemps que le bulletin
+/// le permet (`CielObserve::tombe_jusqu_a`) : le quart en cours toujours, la
+/// demi-heure jusqu'au bulletin suivant, deux heures si les prévisionnistes
+/// ne prévoient pas de changement. Au-delà, la prévision reprend la parole —
+/// et la fin n'est jamais inventée plus tôt que le bulletin. Un ciel sec
+/// observé ne retire rien.
+pub fn observer(serie: &[QuartSample], maintenant: i64, ciel: Option<&crate::ciel::CielObserve>) -> Vec<QuartSample> {
     let mut serie = serie.to_vec();
-    let Some(code) = tombe.filter(|c| *c >= crate::fusion::seuils::CODE_MOUILLE) else {
+    let Some(ciel) = ciel else { return serie };
+    let (Some(tombe), Some(jusqu_a)) = (ciel.tombe, ciel.tombe_jusqu_a()) else {
         return serie;
     };
-    if let Some(quart) = serie.iter_mut().find(|q| q.time <= maintenant && maintenant < q.time + QUART_MS) {
-        if !mouille(quart) {
-            quart.precipitation = crate::ciel::quart_observe_mm(code);
-            quart.weather_code = code;
+    if tombe.code < crate::fusion::seuils::CODE_MOUILLE {
+        return serie;
+    }
+    // Ce qu'on voit couvre au moins la demi-heure en cours — on relit à
+    // chaque quart, et un bulletin part toutes les demi-heures —, sauf si
+    // les prévisionnistes en annoncent la fin.
+    let fin_annoncee = matches!(ciel.tendance, crate::ciel::Tendance::Changement { passager: false, sec: true, .. });
+    let demi_heure = maintenant.div_euclid(QUART_MS) * QUART_MS + IMMEDIAT_QUARTS as i64 * QUART_MS;
+    let jusqu_a = if fin_annoncee { jusqu_a } else { jusqu_a.max(demi_heure) };
+    for quart in serie.iter_mut() {
+        let fin = quart.time + QUART_MS;
+        let en_cours = quart.time <= maintenant && maintenant < fin;
+        let couvert = fin > maintenant && quart.time < jusqu_a;
+        if (en_cours || couvert) && !mouille(quart) {
+            quart.precipitation = crate::ciel::quart_observe_mm(tombe.intensite);
+            quart.weather_code = tombe.code;
         }
     }
     serie
+}
+
+/// Vrai quand l'aéroport voit tomber ce que la prévision du quart en cours ne
+/// voit pas : les modèles ont raté la cellule, et la fin qu'ils donneraient
+/// n'en est pas une. L'interface le dit plutôt que d'inventer une heure.
+pub fn aveugle(serie: &[QuartSample], maintenant: i64, ciel: Option<&crate::ciel::CielObserve>) -> bool {
+    let vu = ciel.and_then(|c| c.tombe).is_some_and(|t| t.code >= crate::fusion::seuils::CODE_MOUILLE);
+    vu && serie
+        .iter()
+        .find(|q| q.time <= maintenant && maintenant < q.time + QUART_MS)
+        .is_some_and(|q| !mouille(q))
 }
 
 /// Quand relire : une minute après le début du quart qui suit la lecture —
@@ -337,20 +365,62 @@ mod tests {
     const MAINTENANT: i64 = SEIZE_H + 7 * 60_000;
 
     #[test]
-    fn une_pluie_observee_mouille_le_quart_en_cours() {
+    fn une_pluie_observee_mouille_les_quarts_que_le_bulletin_couvre() {
+        use crate::ciel::{CielObserve, Tendance, Tombe};
+        // Le bulletin de 16 h, lu à 16 h 07 : la pluie modérée vaut jusqu'au
+        // suivant, à 16 h 30 — le quart en cours et le suivant.
+        let vu = |tombe: Option<Tombe>, tendance: Tendance| CielObserve {
+            station: "LFBD".into(),
+            nom: "Bordeaux/Merignac".into(),
+            distance_km: 8.0,
+            time: SEIZE_H,
+            tombe,
+            tendance,
+        };
+        let pluie = Some(Tombe { code: 63, intensite: Intensite::Moderee });
         let sec = serie(&[0.0; 10]);
-        let vu = observer(&sec, MAINTENANT, Some(63));
-        assert_eq!(vu[0].precipitation, 1.0);
-        assert_eq!(vu[0].weather_code, 63);
-        assert_eq!(vu[1], sec[1], "la suite reste à la prévision");
-        let v = veille(&vu, MAINTENANT).unwrap();
-        assert_eq!(v.immediat, Immediat::Cesse { fin: SEIZE_H + QUART_MS });
+
+        let lu = observer(&sec, MAINTENANT, Some(&vu(pluie, Tendance::Inconnue)));
+        assert_eq!((lu[0].precipitation, lu[0].weather_code), (1.0, 63));
+        assert_eq!(lu[1].precipitation, 1.0);
+        assert_eq!(lu[2], sec[2], "au-delà du bulletin, la prévision");
+        let v = veille(&lu, MAINTENANT).unwrap();
+        assert_eq!(
+            v.immediat,
+            Immediat::Continue { precipitation: Precipitation { nature: Nature::Pluie, intensite: Intensite::Moderee } }
+        );
+
+        // NOSIG : rien ne changera d'ici deux heures, la pluie dure.
+        let lu = observer(&sec, MAINTENANT, Some(&vu(pluie, Tendance::Stable)));
+        assert!(lu[..8].iter().all(mouille));
+        assert!(!mouille(&lu[8]));
+
+        // Un orage fort compte pour une forte pluie.
+        let orage = Some(Tombe { code: 95, intensite: Intensite::Forte });
+        let lu = observer(&sec, MAINTENANT, Some(&vu(orage, Tendance::Inconnue)));
+        assert_eq!(intensite(&lu[0]), Intensite::Forte);
+        assert_eq!(nature(&lu[0]), Nature::Orage);
+
+        // Un bulletin de 15 h 45 lu à 16 h 07 couvre encore la demi-heure.
+        let ancien = CielObserve { time: SEIZE_H - QUART_MS, ..vu(pluie, Tendance::Inconnue) };
+        let lu = observer(&sec, MAINTENANT, Some(&ancien));
+        assert!(mouille(&lu[0]) && mouille(&lu[1]) && !mouille(&lu[2]));
+        assert!(aveugle(&sec, MAINTENANT, Some(&ancien)), "les modèles n'ont rien vu");
+        assert!(!aveugle(&serie(&[0.6]), MAINTENANT, Some(&ancien)));
+        assert!(!aveugle(&sec, MAINTENANT, None));
+
+        // BECMG NSW : la fin est annoncée, le quart en cours seulement.
+        let fin = Tendance::Changement { passager: false, tombe: None, sec: true };
+        let lu = observer(&sec, MAINTENANT, Some(&vu(pluie, fin)));
+        assert!(mouille(&lu[0]) && !mouille(&lu[1]));
 
         // Un quart déjà mouillé garde sa prévision ; rien d'observé, rien ne change.
         let mouillee = serie(&[0.6, 0.6]);
-        assert_eq!(observer(&mouillee, MAINTENANT, Some(65)), mouillee);
+        assert_eq!(observer(&mouillee, MAINTENANT, Some(&vu(orage, Tendance::Inconnue)))[0], mouillee[0]);
         assert_eq!(observer(&sec, MAINTENANT, None), sec);
-        assert_eq!(observer(&sec, MAINTENANT, Some(45)), sec, "le brouillard ne mouille pas");
+        assert_eq!(observer(&sec, MAINTENANT, Some(&vu(None, Tendance::Stable))), sec);
+        let brouillard = Some(Tombe { code: 45, intensite: Intensite::Moderee });
+        assert_eq!(observer(&sec, MAINTENANT, Some(&vu(brouillard, Tendance::Stable))), sec);
     }
 
     #[test]

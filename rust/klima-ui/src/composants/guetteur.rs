@@ -9,10 +9,11 @@
 //! Les heures sont celles de la ville ; les phrases viennent du catalogue
 //! partagé, le domaine ne rendant que des états.
 
+use klima_core::ciel::{Annonce, CielObserve};
 use klima_core::format::Formats;
 use klima_core::i18n::params;
 use klima_core::veille::{
-    Immediat, Precipitation, Suite, Veille, mouille, observer, prochaine_lecture, veille,
+    Immediat, Precipitation, Suite, Veille, aveugle, mouille, observer, prochaine_lecture, veille,
 };
 use yew::prelude::*;
 
@@ -23,10 +24,11 @@ use crate::i18n::{I18n, use_i18n};
 #[derive(Properties, PartialEq)]
 pub struct Props {
     pub etat: EtatVeille,
-    /// Ce que l'aéroport le plus proche voit tomber (`Forecast::ciel`) : le
-    /// quart en cours le prend, s'il était sec.
+    /// Le ciel de l'aéroport le plus proche (`Forecast::ciel`) : ce qu'il
+    /// voit tomber mouille les quarts que son bulletin couvre, et ce que ses
+    /// prévisionnistes annoncent est dit.
     #[prop_or_default]
-    pub tombe: Option<u16>,
+    pub ciel: Option<CielObserve>,
     /// Classes de l'hôte : `card` dans l'application, rien sur la vitrine.
     #[prop_or_default]
     pub class: Classes,
@@ -44,10 +46,13 @@ pub fn Guetteur(props: &Props) -> Html {
     let vu = etat
         .maintenant_a_la_ville()
         .zip(etat.quarts.as_ref())
-        .and_then(|(maintenant, q)| veille(&observer(&q.quarts, maintenant, props.tombe), maintenant));
+        .and_then(|(maintenant, q)| {
+            let lu = veille(&observer(&q.quarts, maintenant, props.ciel.as_ref()), maintenant)?;
+            Some((lu, aveugle(&q.quarts, maintenant, props.ciel.as_ref())))
+        });
 
     let corps = match (&vu, etat.loading) {
-        (Some(vu), _) => corps(&i18n, vu),
+        (Some((vu, aveugle)), _) => corps(&i18n, vu, props.ciel.as_ref(), *aveugle),
         (None, true) => html! { <p class="guetteur__bulle guetteur__bulle--attente">{ i18n.t("veille.loading") }</p> },
         (None, false) => html! { <p class="guetteur__bulle">{ i18n.t("veille.unavailable") }</p> },
     };
@@ -84,7 +89,7 @@ pub fn Guetteur(props: &Props) -> Html {
 }
 
 /// Les deux bulles et la grille des huit quarts.
-fn corps(i18n: &I18n, vu: &Veille) -> Html {
+fn corps(i18n: &I18n, vu: &Veille, ciel: Option<&CielObserve>, aveugle: bool) -> Html {
     let f = i18n.f();
     let locale = i18n.locale();
     let heure = |ms: i64| dates::heure_minute(ms, locale);
@@ -105,8 +110,29 @@ fn corps(i18n: &I18n, vu: &Veille) -> Html {
         }
     };
 
+    // Ce que les prévisionnistes de l'aéroport annoncent. Quand ils annoncent
+    // que quelque chose tombera, le guetteur ne promet plus de sec : la
+    // prévision au quart d'heure, qui ne l'a pas vu, ne vaut pas mieux qu'eux.
+    let annonce = ciel.and_then(|c| c.annonce().map(|a| (c, a))).map(|(c, a): (&CielObserve, Annonce)| {
+        i18n.with(
+            if a.passagere { "veille.airport.tempo" } else { "veille.airport.becmg" },
+            &params([
+                ("station", c.nom.as_str().into()),
+                ("kind", genre(&a.precipitation).as_str().into()),
+                ("time", heure(a.jusqu_a).as_str().into()),
+            ]),
+        )
+    });
+
     let fin = heure(vu.fin_fenetre);
     let suite = match &vu.suite {
+        // Les modèles n'ont pas vu ce qui tombe : la fin qu'ils donneraient
+        // n'en est pas une.
+        Suite::Accalmie { .. } if aveugle => i18n.t("veille.next.unseen"),
+        Suite::Sec if annonce.is_some() => String::new(),
+        Suite::Accalmie { fin: arret, reprise: None } if annonce.is_some() => {
+            i18n.with("veille.next.stop", &params([("time", heure(*arret).as_str().into())]))
+        }
         Suite::Sec => i18n.with("veille.next.dry", &params([("end", fin.as_str().into())])),
         Suite::Episode { debut, fin: Some(arret), precipitation, cumul } => i18n.with(
             "veille.next.episode",
@@ -172,6 +198,9 @@ fn corps(i18n: &I18n, vu: &Veille) -> Html {
                 <p class="guetteur__bulle">
                     <span class="guetteur__quand">{ i18n.t("veille.next") }</span>
                     { suite }
+                    if let Some(annonce) = annonce {
+                        { " " }<strong class="guetteur__annonce">{ annonce }</strong>
+                    }
                     if let Some(rafales) = rafales {
                         { " " }{ rafales }
                     }
