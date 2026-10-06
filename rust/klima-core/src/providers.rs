@@ -51,9 +51,9 @@ pub struct ProviderOutcome {
     pub readings: Vec<SourceReading>,
 }
 
-const OPEN_METEO_ATTRIBUTION: &str = "Open-Meteo — modèles Météo-France, ECMWF, DWD et NOAA";
+const OPEN_METEO_ATTRIBUTION: &str =
+    "Open-Meteo — modèles Météo-France, ECMWF, DWD, NOAA, Met Office, ECCC et JMA";
 
-/// Les quatre modèles nationaux qu'Open-Meteo redistribue.
 /// Ce que Klima dit de lui-même aux fournisseurs.
 ///
 /// MET Norway l'exige : une requête anonyme est refusée. Un navigateur n'a pas
@@ -62,7 +62,10 @@ const OPEN_METEO_ATTRIBUTION: &str = "Open-Meteo — modèles Météo-France, EC
 /// pour tout le monde.
 pub const USER_AGENT: &str = "Klima/1.0 (météo de ville; https://maxlestage.github.io/meteo/)";
 
-pub const OPEN_METEO_SOURCES: [WeatherSource; 4] = [
+/// Les sept modèles qu'Open-Meteo redistribue, tous d'instituts différents et
+/// tous mondiaux : un modèle régional « sans couture » retombe hors de son
+/// domaine sur l'ECMWF, et le compterait deux fois dans le recoupement.
+pub const OPEN_METEO_SOURCES: [WeatherSource; 7] = [
     WeatherSource {
         id: "meteofrance_seamless",
         name: "AROME / ARPEGE",
@@ -92,6 +95,30 @@ pub const OPEN_METEO_SOURCES: [WeatherSource; 4] = [
         name: "GFS",
         institution: "NOAA",
         country: "US",
+        provider: "open-meteo",
+        attribution: OPEN_METEO_ATTRIBUTION,
+    },
+    WeatherSource {
+        id: "ukmo_seamless",
+        name: "UM",
+        institution: "Met Office",
+        country: "GB",
+        provider: "open-meteo",
+        attribution: OPEN_METEO_ATTRIBUTION,
+    },
+    WeatherSource {
+        id: "gem_seamless",
+        name: "GEM",
+        institution: "ECCC",
+        country: "CA",
+        provider: "open-meteo",
+        attribution: OPEN_METEO_ATTRIBUTION,
+    },
+    WeatherSource {
+        id: "jma_seamless",
+        name: "GSM",
+        institution: "JMA",
+        country: "JP",
         provider: "open-meteo",
         attribution: OPEN_METEO_ATTRIBUTION,
     },
@@ -217,12 +244,12 @@ mod tests {
     use std::collections::HashSet;
 
     #[test]
-    fn quatre_modeles_chez_open_meteo_tous_dinstituts_differents() {
-        assert_eq!(OPEN_METEO_SOURCES.len(), 4);
+    fn sept_modeles_chez_open_meteo_tous_dinstituts_differents() {
+        assert_eq!(OPEN_METEO_SOURCES.len(), 7);
         let instituts: HashSet<_> = OPEN_METEO_SOURCES.iter().map(|s| s.institution).collect();
-        assert_eq!(instituts.len(), 4);
+        assert_eq!(instituts.len(), 7);
         let identifiants: HashSet<_> = OPEN_METEO_SOURCES.iter().map(|s| s.id).collect();
-        assert_eq!(identifiants.len(), 4);
+        assert_eq!(identifiants.len(), 7);
     }
 
     #[test]
@@ -233,9 +260,9 @@ mod tests {
     }
 
     #[test]
-    fn six_sources_pour_trois_fournisseurs() {
+    fn neuf_sources_pour_trois_fournisseurs() {
         assert_eq!(PROVIDERS.len(), 3);
-        assert_eq!(all_sources().len(), 6);
+        assert_eq!(all_sources().len(), 9);
     }
 
     #[test]

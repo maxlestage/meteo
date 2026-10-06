@@ -118,8 +118,8 @@ final class ProvidersTests: XCTestCase {
 
     func testSourcesAreDistinctAndAttributed() {
         let sources = WeatherProviders.allSources
-        XCTAssertEqual(sources.count, 6)
-        XCTAssertEqual(Set(sources.map(\.id)).count, 6)
+        XCTAssertEqual(sources.count, 9)
+        XCTAssertEqual(Set(sources.map(\.id)).count, 9)
         XCTAssertEqual(Set(sources.map(\.provider)).count, 3)
         XCTAssertTrue(sources.allSatisfy { !$0.attribution.isEmpty })
         XCTAssertEqual(WeatherProviders.source("met-no-locationforecast")?.country, "NO")

@@ -13,6 +13,7 @@ pub mod alerts;
 pub mod calendar;
 pub mod endpoints;
 pub mod format;
+pub mod fusion;
 pub mod grid;
 pub mod horizon;
 pub mod i18n;
