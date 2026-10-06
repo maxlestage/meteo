@@ -28,6 +28,9 @@ pub struct EtatPrevision {
     pub consensus: Option<Consensus>,
     /// Qualité de l'air et pollens ; absente si le service n'a pas répondu.
     pub air: Option<AirSample>,
+    /// Ce que voit le radar, et ce qu'il prévoit pour deux heures ; absent
+    /// sans relais.
+    pub radar: Option<klima_core::radar::Prevision>,
     pub loading: bool,
     /// Message déjà traduit : le domaine rend une clé, le crochet la traduit.
     pub error: Option<String>,
@@ -36,7 +39,7 @@ pub struct EtatPrevision {
 impl Default for EtatPrevision {
     fn default() -> Self {
         // On part en chargement : la première prévision est toujours en route.
-        EtatPrevision { forecast: None, consensus: None, air: None, loading: true, error: None }
+        EtatPrevision { forecast: None, consensus: None, air: None, radar: None, loading: true, error: None }
     }
 }
 
@@ -78,6 +81,7 @@ pub fn use_forecast(
                             forecast: Some(forecast.clone()),
                             consensus: (*etat).consensus.clone(),
                             air: (*etat).air.clone(),
+                            radar: (*etat).radar.clone(),
                             loading: false,
                             error: None,
                         });
@@ -88,7 +92,7 @@ pub fn use_forecast(
                         // la base d'un seul modèle n'était qu'un premier jet.
                         let a_la_parcelle =
                             horloge::maintenant_a_la_parcelle(forecast.utc_offset_seconds);
-                        let (recoupement, air) = futures::join!(
+                        let (recoupement, air, radar) = futures::join!(
                             reseau::recoupement(
                                 &endpoints,
                                 &parcelle,
@@ -97,11 +101,13 @@ pub fn use_forecast(
                                 a_la_parcelle,
                             ),
                             reseau::air(&endpoints, &parcelle),
+                            reseau::radar(&endpoints, &parcelle),
                         );
                         let forecast = forecast.recoupee(
                             &recoupement.series,
                             recoupement.observation,
                             recoupement.ciel,
+                            radar.as_ref().and_then(|r| r.maintenant),
                         );
                         if *par_le_direct.borrow() {
                             return;
@@ -110,6 +116,7 @@ pub fn use_forecast(
                             forecast: Some(forecast),
                             consensus: consensus_from_outcomes(&recoupement.outcomes),
                             air,
+                            radar,
                             loading: false,
                             error: None,
                         });
@@ -118,6 +125,7 @@ pub fn use_forecast(
                         forecast: None,
                         consensus: None,
                         air: None,
+                        radar: None,
                         loading: false,
                         error: Some(traduire(&erreur)),
                     }),
@@ -161,15 +169,22 @@ pub fn use_forecast(
                 .as_ref()
                 .and_then(|a| klima_api::air::decode_air(a))
                 .or_else(|| (*etat).air.clone());
+            let radar = direct
+                .radar
+                .as_ref()
+                .and_then(|r| klima_api::radar::decoder(r))
+                .or_else(|| (*etat).radar.clone());
             *par_le_direct.borrow_mut() = true;
             etat.set(EtatPrevision {
                 forecast: Some(forecast.recoupee(
                     &recoupement.series,
                     recoupement.observation,
                     recoupement.ciel,
+                    radar.as_ref().and_then(|r| r.maintenant),
                 )),
                 consensus: consensus_from_outcomes(&recoupement.outcomes),
                 air,
+                radar,
                 loading: false,
                 error: None,
             });

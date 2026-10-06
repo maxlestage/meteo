@@ -17,6 +17,9 @@ final class DashboardViewModel: ObservableObject {
     /// Le guetteur : la série au quart d'heure, et quand elle a été lue.
     @Published private(set) var quarts: [QuartSample]?
     @Published private(set) var quartsLusA: Date?
+    /// Ce que voit le radar européen pour la ville, par le relais.
+    @Published private(set) var radar: RadarPrevision?
+    private var radarDe: Parcelle?
     @Published private(set) var veilleEnLecture = false
     /// La ville de la série : celle d'une autre ville ne s'affiche pas.
     private var quartsDe: Parcelle?
@@ -205,6 +208,14 @@ final class DashboardViewModel: ObservableObject {
             if let lu = AgroWeatherService.decodeAir(message.corps) {
                 air = lu
             }
+        case "radar":
+            // Le radar change ce qui tombe maintenant : la prévision est
+            // refaite avec lui, si elle peut l'être.
+            if let lu = Radar.decode(message.corps) {
+                radar = lu
+                radarDe = suivie
+            }
+            fallthrough
         default:
             // La base et les sept modèles d'abord ; MET Norway, la station et
             // les aéroports quand ils sont là.
@@ -220,12 +231,15 @@ final class DashboardViewModel: ObservableObject {
                 aviation: corpsDirects["ciel"],
                 point: suivie
             )
-            let recoupee = AgroWeatherService.recouper(prevision, avec: sources)
+            let recoupee = AgroWeatherService.recouper(prevision, avec: sources, radar: radarDeLaVille)
             forecast = recoupee
             consensus = recoupee.consensus
             errorMessage = nil
         }
     }
+
+    /// Le radar de la ville affichée, ou rien.
+    var radarDeLaVille: RadarPrevision? { radarDe == parcelle ? radar : nil }
 
     /// La série au quart d'heure de la ville affichée, ou rien.
     var quartsDeLaVille: [QuartSample]? { quartsDe == parcelle ? quarts : nil }
@@ -253,10 +267,20 @@ final class DashboardViewModel: ObservableObject {
     func relireQuarts() async {
         let parcelle = parcelle
         veilleEnLecture = true
+        // Le radar avec la série : il en refait l'heure qui vient.
+        async let vu = RadarRelais.lire(parcelle)
         let lus = try? await service.quarts(for: parcelle)
+        let radarLu = await vu
         defer { veilleEnLecture = false }
         // La ville a changé pendant la lecture : la tâche suivante relira.
         guard parcelle == self.parcelle else { return }
+        if let radarLu {
+            radar = radarLu
+            radarDe = parcelle
+            if let forecast, forecast.parcelle == parcelle {
+                self.forecast = AgroWeatherService.appliquer(radarLu, a: forecast)
+            }
+        }
         if let lus {
             quarts = lus
             quartsDe = parcelle

@@ -111,13 +111,25 @@ struct AgroWeatherService: AgroWeatherProviding {
 
     /// La prévision de base refaite avec ce que les sources ont dit — par
     /// requête ou par le direct (`DirectRelais`).
-    static func recouper(_ base: AgroForecast, avec sources: WeatherProviders.Ensemble) -> AgroForecast {
+    ///
+    /// `radar` : ce que voit le radar. Quand il voit la ville, c'est lui qui
+    /// dit ce qui tombe — il regarde la ville même, l'aéroport à quelques
+    /// kilomètres ; sinon, l'aéroport. Comme `Forecast::recoupee` côté Rust.
+    static func recouper(
+        _ base: AgroForecast, avec sources: WeatherProviders.Ensemble, radar: RadarPrevision? = nil
+    ) -> AgroForecast {
+        let tombe: Int?
+        if let radar, radar.voitLaVille {
+            tombe = Radar.tombe(radar.maintenant)
+        } else {
+            tombe = sources.ciel?.tombe?.code
+        }
         let recoupement = Fusion.recouper(
             heures: base.hourly,
             jours: base.daily,
             courant: base.current,
             series: sources.series,
-            observation: FusionObservation(temperature: sources.observation, tombe: sources.ciel?.tombe?.code)
+            observation: FusionObservation(temperature: sources.observation, tombe: tombe)
         )
         var noms = recoupement.sources
         if sources.observation != nil { noms.append(WeatherProviders.brightSkySource.id) }
@@ -135,6 +147,26 @@ struct AgroWeatherService: AgroWeatherProviding {
         forecast.consensus = sources.consensus
         forecast.ciel = sources.ciel
         return forecast
+    }
+
+    /// Une prévision déjà recoupée, à qui le radar arrive après coup : ce
+    /// qu'il voit tomber sur la ville s'impose à l'instant et à l'heure en
+    /// cours. (Il ne peut pas retirer ici une pluie que l'aéroport a mise : le
+    /// direct, qui recoupe tout d'un coup, le fera à son premier message.)
+    static func appliquer(_ radar: RadarPrevision, a forecast: AgroForecast) -> AgroForecast {
+        guard let tombe = Radar.tombe(radar.maintenant) else { return forecast }
+        let r = Fusion.recouper(
+            heures: forecast.hourly, jours: forecast.daily, courant: forecast.current,
+            series: [], observation: FusionObservation(temperature: nil, tombe: tombe)
+        )
+        var vu = AgroForecast(
+            parcelle: forecast.parcelle, timezone: forecast.timezone, elevation: forecast.elevation,
+            current: r.courant, hourly: r.heures, daily: r.jours, fetchedAt: forecast.fetchedAt
+        )
+        vu.sources = forecast.sources
+        vu.consensus = forecast.consensus
+        vu.ciel = forecast.ciel
+        return vu
     }
 
     /// La prévision de base : le meilleur modèle qu'Open-Meteo choisit pour le

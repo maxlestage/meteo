@@ -12,8 +12,9 @@
 use klima_core::ciel::{Annonce, CielObserve};
 use klima_core::format::Formats;
 use klima_core::i18n::params;
+use klima_core::radar::{Prevision, direction};
 use klima_core::veille::{
-    Immediat, Precipitation, Suite, Veille, aveugle, mouille, observer, prochaine_lecture, veille,
+    Immediat, Precipitation, Suite, Veille, aveugle, mouille, observer, prochaine_lecture, radariser, veille,
 };
 use yew::prelude::*;
 
@@ -29,6 +30,10 @@ pub struct Props {
     /// prévisionnistes annoncent est dit.
     #[prop_or_default]
     pub ciel: Option<CielObserve>,
+    /// Ce que voit le radar et ce qu'il prévoit (`EtatPrevision::radar`) :
+    /// l'heure qui vient en est refaite.
+    #[prop_or_default]
+    pub radar: Option<Prevision>,
     /// Classes de l'hôte : `card` dans l'application, rien sur la vitrine.
     #[prop_or_default]
     pub class: Classes,
@@ -47,8 +52,19 @@ pub fn Guetteur(props: &Props) -> Html {
         .maintenant_a_la_ville()
         .zip(etat.quarts.as_ref())
         .and_then(|(maintenant, q)| {
-            let lu = veille(&observer(&q.quarts, maintenant, props.ciel.as_ref()), maintenant)?;
-            Some((lu, aveugle(&q.quarts, maintenant, props.ciel.as_ref())))
+            // Le radar d'abord — il voit les averses que les modèles ratent.
+            // Quand il voit la ville, il fait foi pour ce qui tombe ; sinon,
+            // ce que voit l'aéroport.
+            let decalage = q.utc_offset_seconds * 1000;
+            let ciel = props.ciel.as_ref().filter(|_| props.radar.as_ref().is_none_or(|r| r.maintenant.is_none()));
+            let radar: Vec<(i64, f64)> = props
+                .radar
+                .iter()
+                .flat_map(|r| r.quarts.iter().map(|(t, d)| (t + decalage, *d)))
+                .collect();
+            let serie = radariser(&q.quarts, &radar);
+            let lu = veille(&observer(&serie, maintenant, ciel), maintenant)?;
+            Some((lu, aveugle(&serie, maintenant, ciel)))
         });
 
     let corps = match (&vu, etat.loading) {
@@ -70,6 +86,27 @@ pub fn Guetteur(props: &Props) -> Html {
         )
     });
 
+    // Le radar : d'où viennent les averses, et la mention de sa source.
+    let radar = props.radar.as_ref().filter(|r| r.maintenant.is_some()).map(|r| {
+        let decalage = etat.quarts.as_ref().map_or(0, |q| q.utc_offset_seconds * 1000);
+        let locale = i18n.locale();
+        let pluie = r.quarts.iter().any(|(_, d)| *d >= klima_core::radar::seuils::DEBIT_MOUILLE);
+        let mouvement = r.deplacement.filter(|_| pluie).map(|(vitesse, cap)| {
+            i18n.with(
+                "veille.radar.move",
+                &params([
+                    ("dir", i18n.t(direction(cap)).as_str().into()),
+                    ("speed", i18n.f().unit(vitesse, "km/h", 0).as_str().into()),
+                ]),
+            )
+        });
+        let source = i18n.with(
+            "veille.radar",
+            &params([("time", dates::heure_minute(r.image + decalage, locale).as_str().into())]),
+        );
+        (mouvement, source)
+    });
+
     html! {
         <section class={classes!("guetteur", props.class.clone())} aria-label={i18n.t("veille.title")}>
             <header class="guetteur__tete">
@@ -81,8 +118,14 @@ pub fn Guetteur(props: &Props) -> Html {
                 <span class={classes!("guetteur__direct", etat.loading.then_some("is-reading"))} aria-hidden="true" />
             </header>
             { corps }
+            if let Some((Some(mouvement), _)) = &radar {
+                <p class="guetteur__mouvement">{ mouvement.clone() }</p>
+            }
             if let Some(releve) = releve {
                 <p class="guetteur__releve">{ releve }</p>
+            }
+            if let Some((_, source)) = &radar {
+                <p class="guetteur__releve guetteur__radar">{ source.clone() }</p>
             }
         </section>
     }

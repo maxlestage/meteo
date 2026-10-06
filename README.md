@@ -156,6 +156,34 @@ modèles n'ont pas vu ce qui tombe — ce jour-là, à Bordeaux, tous donnaient
 zéro sous un `+TSRA` —, le guetteur ne donne pas de fin : « Les modèles ne
 voient pas ce qui tombe : sa fin ne se prévoit pas. »
 
+### Le radar : l'heure qui vient, vue d'en haut
+
+Les modèles ratent les cellules ; le radar les voit. La mosaïque européenne
+**OPERA** d'EUMETNET assemble toutes les cinq minutes les radars de
+Météo-France et de ses voisins, au kilomètre, dans un seau public sans clé
+(CC BY 4.0) :
+`https://s3.waw3-1.cloudferro.com/openradar-24h/AAAA/MM/JJ/OPERA/COMP/OPERA@AAAAMMJJTHHMM@0@DBZH.tiff`.
+
+Le relais (`klima-relay/src/radar.rs`) télécharge l'image la plus récente —
+une pour toutes les villes, 3 Mo, publiée sept à dix minutes après son
+heure — et celle d'un quart d'heure plus tôt, lit le GeoTIFF à la main (en-tête,
+tuiles deflate de 512 pixels, décompressées à la demande) et vérifie que la
+projection est bien celle qu'il attend. Le cœur (`klima-core/src/radar.rs`)
+fait le reste, en pur : projection azimutale équivalente de Lambert,
+réflectivité en débit (Marshall–Palmer, Z = 200 R^1,6), déplacement des
+averses par recherche du meilleur décalage entre les deux images, puis
+extrapolation sur huit quarts. `/v1/radar?lat=…&lon=…` rend le résultat (le
+débit du moment, les huit quarts, la vitesse et la direction), gardé cinq
+minutes, et le direct le pousse sous le sujet `radar`.
+
+Le guetteur en refait l'heure qui vient (`veille::radariser`) : le premier
+quart au radar, le huitième pour un huitième, la prévision au quart d'heure
+pour le reste ; il dit d'où viennent les averses (« Les averses filent vers
+le nord à 28 km/h ») et cite sa source. Quand le radar voit la ville, il fait
+foi pour ce qui tombe maintenant, avant l'aéroport, qui regarde à quelques
+kilomètres. Le web et l'iPhone l'ont par le relais ; la montre, qui
+interroge les fournisseurs elle-même, ne l'a pas.
+
 Ce qu'une seule source fournit — humidité, point de rosée, UV, jour ou nuit,
 lever et coucher — reste celui de la prévision de base (le « meilleur » modèle
 d'Open-Meteo pour le point). Une heure qu'aucune source ne couvre garde ses

@@ -21,11 +21,11 @@ EMBEDS = [
 MODELS = ["AgroSamples.swift", "Ville.swift", "Air.swift", "WeatherCondition.swift",
           "AgroFormat.swift", "Localized.swift", "SharedStore.swift", "Consensus.swift",
           "Plan.swift", "Alerts.swift", "Position.swift", "WeatherActivityAttributes.swift",
-          "Horizon.swift", "Veille.swift", "Villes.swift", "Fusion.swift", "Ciel.swift"]
+          "Horizon.swift", "Veille.swift", "Villes.swift", "Fusion.swift", "Ciel.swift", "Radar.swift"]
 SERVICES = ["AgroWeatherService.swift", "WeatherProviders.swift", "LocationService.swift",
             "BackgroundRefresh.swift", "Subscription.swift",
             "AlertScheduler.swift", "WeatherActivityController.swift", "PlanGrant.swift",
-            "Session.swift", "IlesRelais.swift", "DirectRelais.swift"]
+            "Session.swift", "IlesRelais.swift", "DirectRelais.swift", "RadarRelais.swift"]
 VIEWMODELS = ["DashboardViewModel.swift"]
 VIEWS = ["DashboardView.swift", "DailyListView.swift", "DetailTile.swift", "HeroView.swift",
          "HourlyStripView.swift", "SkyBackground.swift", "PluieCardView.swift",
@@ -66,7 +66,7 @@ WATCH_FILES = [(WATCH, "KliimaWatchApp.swift"), (WATCH, "WatchDashboardView.swif
 WATCH_ASSETS = (f"{WATCH}/Resources", "Assets.xcassets")
 WATCH_PLIST = (f"{WATCH}/Resources", "Info.plist")
 
-TEST_FILES = [(TESTS, n) for n in ["VilleTests.swift", "AirTests.swift", "VeilleTests.swift", "VillesTests.swift", "FusionTests.swift", "CielTests.swift",
+TEST_FILES = [(TESTS, n) for n in ["VilleTests.swift", "AirTests.swift", "VeilleTests.swift", "VillesTests.swift", "FusionTests.swift", "CielTests.swift", "RadarTests.swift",
                                    "DirectRelaisTests.swift",
                                    "AgroWeatherDecodingTests.swift",
                                    "WeatherConditionTests.swift", "AgroFormatTests.swift",

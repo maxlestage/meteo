@@ -2,7 +2,7 @@
 //!
 //! Une connexion par page, ouverte dès qu'il y a un relais
 //! (`Endpoints::direct_url`). Elle s'abonne à la ville affichée, puis reçoit
-//! sept sujets — `base`, `ensemble`, `quarts`, `met`, `station`, `air`, `ciel` —, chacun
+//! huit sujets — `base`, `ensemble`, `quarts`, `met`, `station`, `air`, `ciel`, `radar` —, chacun
 //! dans la forme exacte que le fournisseur renvoie : les décodeurs de
 //! `klima-api` les lisent comme s'ils venaient d'une requête. Le relais ne
 //! pousse que ce qui a changé ; ce crochet garde le dernier corps de chaque
@@ -37,6 +37,8 @@ pub struct Corps {
     pub air: Option<Rc<String>>,
     /// Les bulletins des aéroports proches.
     pub ciel: Option<Rc<String>>,
+    /// Ce que le radar voit, et prévoit pour deux heures.
+    pub radar: Option<Rc<String>>,
     /// Vrai quand la connexion est ouverte.
     pub connecte: bool,
 }
@@ -71,6 +73,7 @@ impl Reducible for Corps {
                     "station" => suivant.station = corps,
                     "air" => suivant.air = corps,
                     "ciel" => suivant.ciel = corps,
+                    "radar" => suivant.radar = corps,
                     _ => return self,
                 }
             }

@@ -16,6 +16,7 @@ pub mod ensemble;
 pub mod open_meteo;
 pub mod parcelle_url;
 pub mod plan;
+pub mod radar;
 pub mod readings;
 pub mod today;
 pub mod veille;
