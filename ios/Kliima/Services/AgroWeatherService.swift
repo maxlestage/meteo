@@ -117,7 +117,7 @@ struct AgroWeatherService: AgroWeatherProviding {
             jours: base.daily,
             courant: base.current,
             series: sources.series,
-            observation: FusionObservation(temperature: sources.observation, tombe: sources.ciel?.tombe)
+            observation: FusionObservation(temperature: sources.observation, tombe: sources.ciel?.tombe?.code)
         )
         var noms = recoupement.sources
         if sources.observation != nil { noms.append(WeatherProviders.brightSkySource.id) }

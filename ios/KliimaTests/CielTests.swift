@@ -44,8 +44,14 @@ final class CielTests: XCTestCase {
         XCTAssertEqual(Ciel.precipitationDuCode(82), VeillePrecipitation(nature: .pluie, intensite: .forte))
         XCTAssertEqual(Ciel.precipitationDuCode(73), VeillePrecipitation(nature: .neige, intensite: .moderee))
         XCTAssertEqual(Ciel.precipitationDuCode(95).nature, .orage)
-        XCTAssertEqual(Ciel.quartObserveMm(61), CielSeuils.quartFaibleMm)
-        XCTAssertEqual(Ciel.quartObserveMm(65), CielSeuils.quartFortMm)
+        XCTAssertEqual(Ciel.quartObserveMm(.faible), CielSeuils.quartFaibleMm)
+        XCTAssertEqual(Ciel.quartObserveMm(.forte), CielSeuils.quartFortMm)
+        // La force vient du signe : un « +TSRA » est un orage fort.
+        let fort = Ciel.tombeDuMetar("+TSRA")
+        XCTAssertEqual(fort, CielTombe(code: 95, intensite: .forte))
+        XCTAssertEqual(fort?.precipitation.key, "veille.kind.orage")
+        XCTAssertEqual(Ciel.tombeDuMetar("-RA")?.intensite, .faible)
+        XCTAssertEqual(Ciel.tombeDuMetar("RA")?.intensite, .moderee)
     }
 
     func testLeBulletinRetenuEstLePlusProcheEtAssezRecent() throws {
@@ -63,7 +69,7 @@ final class CielTests: XCTestCase {
         let vieux = [metar("LFRB", 48.444, -4.412, age: 120, ""), metar("LFRL", 48.279, -4.439, age: 20, "-RA")]
         let autre = try XCTUnwrap(Ciel.plusProche(vieux, latitude: lat, longitude: lon, maintenant: maintenant))
         XCTAssertEqual(autre.station, "LFRL")
-        XCTAssertEqual(autre.tombe, 61)
+        XCTAssertEqual(autre.tombe?.code, 61)
         XCTAssertEqual(autre.precipitation?.key, "veille.kind.pluie.faible")
     }
 
@@ -71,6 +77,59 @@ final class CielTests: XCTestCase {
         XCTAssertNil(Ciel.plusProche([metar("LFRJ", 48.527, -4.138, age: 10, "-RA")], latitude: 48, longitude: -3, maintenant: maintenant))
         XCTAssertNil(Ciel.plusProche([metar("LFRB", 48.444, -4.412, age: 80, "-RA")], latitude: 48.39, longitude: -4.4861, maintenant: maintenant))
         XCTAssertNil(Ciel.plusProche([metar("LFRB", 48.444, -4.412, age: -20, "-RA")], latitude: 48.39, longitude: -4.4861, maintenant: maintenant))
+    }
+
+    func testLaTendanceDesPrevisionnistes() {
+        let merignac = "METAR LFBD 061530Z AUTO 04004KT 9999 1900 +TSRA ///CB 21/18 Q1012 TEMPO VRB15G30KT 1200 TSRA"
+        XCTAssertEqual(
+            Ciel.tendanceDuMetar(merignac),
+            .changement(passager: true, tombe: CielTombe(code: 95, intensite: .moderee), sec: false)
+        )
+        XCTAssertEqual(Ciel.tendanceDuMetar("METAR LFPB 061400Z AUTO 14004KT CAVOK 25/10 Q1015 NOSIG"), .stable)
+        XCTAssertEqual(
+            Ciel.tendanceDuMetar("METAR LFRB 061400Z 01006KT 9999 -RA BKN008 17/16 Q1014 BECMG NSW"),
+            .changement(passager: false, tombe: nil, sec: true)
+        )
+        XCTAssertEqual(
+            Ciel.tendanceDuMetar("METAR LFRS 061400Z 24010KT 9999 FEW020 17/12 Q1014 BECMG 27015KT"),
+            .changement(passager: false, tombe: nil, sec: false),
+            "du vent seulement : rien ne tombe"
+        )
+        XCTAssertEqual(Ciel.tendanceDuMetar("METAR KJFK 061451Z 18010KT 10SM -RA OVC020 RMK AO2 TEMPO"), .inconnue)
+        XCTAssertEqual(Ciel.tendanceDuMetar("METAR LFPM 061400Z AUTO VRB02KT CAVOK 26/11 Q1015"), .inconnue)
+    }
+
+    private func vu(_ tombe: CielTombe?, _ tendance: CielTendance) -> CielObserve {
+        CielObserve(
+            station: "LFBD", nom: "Bordeaux/Merignac", distanceKm: 8, time: maintenant,
+            tombe: tombe, tendance: tendance
+        )
+    }
+
+    func testCeQuOnVoitTombeAussiLongtempsQueLeBulletinLeDit() {
+        let pluie = CielTombe(code: 63, intensite: .moderee)
+        XCTAssertEqual(vu(pluie, .stable).tombeJusquA, maintenant.addingTimeInterval(CielSeuils.tendance))
+        XCTAssertEqual(vu(pluie, .inconnue).tombeJusquA, maintenant.addingTimeInterval(CielSeuils.validite))
+        XCTAssertEqual(vu(pluie, .changement(passager: false, tombe: nil, sec: true)).tombeJusquA, maintenant)
+        XCTAssertEqual(
+            vu(pluie, .changement(passager: true, tombe: pluie, sec: false)).tombeJusquA,
+            maintenant.addingTimeInterval(CielSeuils.validite)
+        )
+        XCTAssertEqual(
+            vu(pluie, .changement(passager: false, tombe: pluie, sec: false)).tombeJusquA,
+            maintenant.addingTimeInterval(CielSeuils.tendance)
+        )
+        XCTAssertNil(vu(nil, .stable).tombeJusquA)
+    }
+
+    func testLAnnonceDeLAeroport() throws {
+        let orage = CielTombe(code: 95, intensite: .moderee)
+        let a = try XCTUnwrap(vu(nil, .changement(passager: true, tombe: orage, sec: false)).annonce)
+        XCTAssertTrue(a.passagere)
+        XCTAssertEqual(a.precipitation.key, "veille.kind.orage")
+        XCTAssertEqual(a.jusquA, maintenant.addingTimeInterval(CielSeuils.tendance))
+        XCTAssertNil(vu(orage, .stable).annonce)
+        XCTAssertNil(vu(nil, .changement(passager: false, tombe: nil, sec: true)).annonce)
     }
 
     func testUnNomDAeroportLisible() {
@@ -99,7 +158,8 @@ final class CielTests: XCTestCase {
     private let brest = Data("""
     [
       {"icaoId":"LFRJ","obsTime":1791295200,"wxString":null,"lat":48.527,"lon":-4.138,
-       "name":"Landivisiau Arpt, BRE, FR"},
+       "name":"Landivisiau Arpt, BRE, FR",
+       "rawOb":"METAR LFRJ 061400Z AUTO 01008KT 9999 ///CB 18/16 Q1013 TEMPO 06015G25KT 2500 TSRA BECMG BKN005"},
       {"icaoId":"LFRL","obsTime":1791295200,"wxString":"-RA","lat":48.279,"lon":-4.439,
        "name":"Lanveoc/Poulmic Arpt, BRE, FR"},
       {"icaoId":"LFRB","obsTime":1791295200,"lat":48.444,"lon":-4.412,
@@ -116,6 +176,10 @@ final class CielTests: XCTestCase {
         XCTAssertEqual(bulletins[1].tempsPresent, "-RA")
         XCTAssertEqual(bulletins[1].time, Date(timeIntervalSince1970: 1_791_295_200))
         XCTAssertEqual(bulletins[2].tempsPresent, "")
+        guard case .changement(passager: true, tombe: .some(_), sec: _) = bulletins[0].tendance else {
+            return XCTFail("la tendance se lit dans le bulletin brut")
+        }
+        XCTAssertEqual(bulletins[2].tendance, .inconnue)
         XCTAssertTrue(Ciel.decodeMetars(Data("pas du json".utf8)).isEmpty)
         XCTAssertTrue(Ciel.decodeMetars(Data("{}".utf8)).isEmpty)
     }
@@ -128,7 +192,7 @@ final class CielTests: XCTestCase {
         XCTAssertNil(ciel.tombe)
         let sud = try XCTUnwrap(Ciel.plusProche(bulletins, latitude: 48.30, longitude: -4.45, maintenant: apres))
         XCTAssertEqual(sud.station, "LFRL")
-        XCTAssertEqual(sud.tombe, 61)
+        XCTAssertEqual(sud.tombe?.code, 61)
     }
 
     func testLEnsembleTrouveLAeroportDeLaVille() {
@@ -137,6 +201,6 @@ final class CielTests: XCTestCase {
             point: Parcelle(name: "Lanvéoc", latitude: 48.30, longitude: -4.45),
             maintenant: Date(timeIntervalSince1970: 1_791_295_200 + 600)
         )
-        XCTAssertEqual(sources.ciel?.tombe, 61)
+        XCTAssertEqual(sources.ciel?.tombe?.code, 61)
     }
 }

@@ -24,7 +24,7 @@ fn catalog(entries: &[(&'static str, &'static str)]) -> Catalog {
     entries.iter().copied().collect()
 }
 
-const FR: [(&str, &str); 128] = [
+const FR: [(&str, &str); 132] = [
     ("wmo.clearSky", "Ciel dégagé"),
     ("wmo.mainlyClear", "Peu nuageux"),
     ("wmo.partlyCloudy", "Partiellement nuageux"),
@@ -153,9 +153,13 @@ const FR: [(&str, &str); 128] = [
     ("forecast.blended", "Recoupée de {count} sources"),
     ("ciel.observed", "Vu à l’aéroport de {station} ({distance}\u{a0}km) à {time} : {kind}."),
     ("ciel.credit", "Relevé d’aéroport (METAR) — NOAA, domaine public"),
+    ("veille.airport.tempo", "Prévision de l’aéroport de {station} : {kind} par moments d’ici {time}."),
+    ("veille.airport.becmg", "Prévision de l’aéroport de {station} : {kind} d’ici {time}."),
+    ("veille.next.stop", "Fin vers {time}."),
+    ("veille.next.unseen", "Les modèles ne voient pas ce qui tombe : sa fin ne se prévoit pas."),
 ];
 
-const EN: [(&str, &str); 128] = [
+const EN: [(&str, &str); 132] = [
     ("wmo.clearSky", "Clear sky"),
     ("wmo.mainlyClear", "Mainly clear"),
     ("wmo.partlyCloudy", "Partly cloudy"),
@@ -284,9 +288,13 @@ const EN: [(&str, &str); 128] = [
     ("forecast.blended", "Blended from {count} sources"),
     ("ciel.observed", "Seen at {station} airport ({distance}\u{a0}km) at {time}: {kind}."),
     ("ciel.credit", "Airport report (METAR) — NOAA, public domain"),
+    ("veille.airport.tempo", "{station} airport forecast: {kind} at times until {time}."),
+    ("veille.airport.becmg", "{station} airport forecast: {kind} by {time}."),
+    ("veille.next.stop", "Ending around {time}."),
+    ("veille.next.unseen", "The models don’t see what’s falling: its end can’t be forecast."),
 ];
 
-const ES: [(&str, &str); 128] = [
+const ES: [(&str, &str); 132] = [
     ("wmo.clearSky", "Cielo despejado"),
     ("wmo.mainlyClear", "Poco nuboso"),
     ("wmo.partlyCloudy", "Parcialmente nuboso"),
@@ -415,6 +423,10 @@ const ES: [(&str, &str); 128] = [
     ("forecast.blended", "Combinada de {count} fuentes"),
     ("ciel.observed", "Visto en el aeropuerto de {station} ({distance}\u{a0}km) a las {time}: {kind}."),
     ("ciel.credit", "Parte de aeropuerto (METAR) — NOAA, dominio público"),
+    ("veille.airport.tempo", "Previsión del aeropuerto de {station}: {kind} a ratos hasta las {time}."),
+    ("veille.airport.becmg", "Previsión del aeropuerto de {station}: {kind} antes de las {time}."),
+    ("veille.next.stop", "Termina hacia las {time}."),
+    ("veille.next.unseen", "Los modelos no ven lo que cae: su final no se puede prever."),
 ];
 
 /* ---------------------------------------------------------------- */
