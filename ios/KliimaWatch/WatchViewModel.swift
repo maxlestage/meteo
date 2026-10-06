@@ -13,6 +13,11 @@ final class WatchViewModel: ObservableObject {
     @Published private(set) var isLoading = false
     @Published private(set) var errorMessage: String?
 
+    /// Le guetteur : la série au quart d'heure, et quand on l'a lue.
+    @Published private(set) var quarts: [QuartSample]?
+    @Published private(set) var quartsLusA: Date?
+    @Published private(set) var veilleEnLecture = false
+
     private let service: AgroWeatherProviding
     private let location: LocationService
 
@@ -62,5 +67,28 @@ final class WatchViewModel: ObservableObject {
         }
 
         isLoading = false
+    }
+
+    /// Le guetteur relit le ciel une minute après chaque quart, tant que
+    /// l'écran est ouvert.
+    func veiller() async {
+        while !Task.isCancelled {
+            await relireQuarts()
+            let echeance = Veille.prochaineLecture(quartsLusA ?? Date())
+            while !Task.isCancelled, Date() < echeance {
+                try? await Task.sleep(nanoseconds: 30_000_000_000)
+            }
+        }
+    }
+
+    /// Une lecture du guetteur. Un échec garde la série d'avant, qui reste
+    /// vraie pour les quarts qu'elle couvre encore.
+    func relireQuarts() async {
+        veilleEnLecture = true
+        defer { veilleEnLecture = false }
+        if let lus = try? await service.quarts(for: parcelle) {
+            quarts = lus
+        }
+        quartsLusA = Date()
     }
 }

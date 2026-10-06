@@ -144,55 +144,11 @@ struct GuetteurCardView: View {
 
     // MARK: Phrases
 
-    private func heure(_ date: Date) -> String { AgroFormat.time(date, in: timeZone) }
-
     private func immediat(_ lecture: VeilleLecture) -> String {
-        switch lecture.immediat {
-        case .sec:
-            return Localized.text("veille.now.dry")
-        case let .commence(debut, precipitation):
-            return Localized.text("veille.now.starts", heure(debut), precipitation.label)
-        case let .dure(precipitation):
-            return Localized.text("veille.now.continues", precipitation.label)
-        case let .cesse(fin):
-            return Localized.text("veille.now.stops", heure(fin))
-        }
+        VeilleTextes.immediat(lecture, in: timeZone)
     }
 
     private func suite(_ lecture: VeilleLecture) -> String {
-        let fin = heure(lecture.finFenetre)
-        var phrases: [String] = []
-
-        switch lecture.suite {
-        case .sec:
-            phrases.append(Localized.text("veille.next.dry", fin))
-        case let .episode(debut, arret?, precipitation, cumul):
-            phrases.append(Localized.text(
-                "veille.next.episode", heure(debut), heure(arret), precipitation.label, AgroFormat.unit(cumul, "mm")
-            ))
-        case let .episode(debut, .none, precipitation, _):
-            phrases.append(Localized.text("veille.next.episodeOpen", heure(debut), fin, precipitation.label))
-        case let .persiste(precipitation, cumul):
-            phrases.append(Localized.text("veille.next.persists", fin, precipitation.label, AgroFormat.unit(cumul, "mm")))
-        case let .accalmie(arret, .none):
-            phrases.append(Localized.text("veille.next.lull", heure(arret), fin))
-        case let .accalmie(arret, reprise?):
-            phrases.append(Localized.text("veille.next.lullReturn", heure(arret), heure(reprise)))
-        }
-
-        if let rafales = lecture.rafales {
-            phrases.append(Localized.text(
-                "veille.gusts", AgroFormat.unit(rafales.valeur, "km/h", decimals: 0), heure(rafales.quand)
-            ))
-        }
-        if let dernier = lecture.quarts.last {
-            phrases.append(Localized.text(
-                "veille.temperature",
-                AgroFormat.temperature(dernier.temperature),
-                heure(dernier.time),
-                AgroFormat.temperature(dernier.apparentTemperature)
-            ))
-        }
-        return phrases.joined(separator: " ")
+        VeilleTextes.suite(lecture, in: timeZone).joined(separator: " ")
     }
 }

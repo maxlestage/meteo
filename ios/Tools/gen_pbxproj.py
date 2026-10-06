@@ -29,7 +29,7 @@ SERVICES = ["AgroWeatherService.swift", "WeatherProviders.swift", "LocationServi
 VIEWMODELS = ["DashboardViewModel.swift"]
 VIEWS = ["DashboardView.swift", "DailyListView.swift", "DetailTile.swift", "HeroView.swift",
          "HourlyStripView.swift", "SkyBackground.swift", "PluieCardView.swift",
-         "GuetteurCardView.swift", "VillesView.swift", "CielVivant.swift",
+         "GuetteurCardView.swift", "VeilleTextes.swift", "VillesView.swift", "CielVivant.swift",
          "Animations.swift", "Apparence.swift",
          "PaywallView.swift", "SourcesCardView.swift"]
 
@@ -81,6 +81,7 @@ TEST_FILES = [(TESTS, n) for n in ["VilleTests.swift", "AirTests.swift", "Veille
 # ajoute le réseau et la position, le widget se limite à ce qu'il affiche.
 def models(*names): return [(f"{APP}/Models", n) for n in names]
 def services(*names): return [(f"{APP}/Services", n) for n in names]
+def views(*names): return [(f"{APP}/Views", n) for n in names]
 
 WATCH_MODELS = [n for n in MODELS if n != "WeatherActivityAttributes.swift"]
 
@@ -91,6 +92,8 @@ TARGET_SOURCES = {
              + WIDGET_FILES,
     WATCH: models(*WATCH_MODELS)
            + services("AgroWeatherService.swift", "WeatherProviders.swift", "LocationService.swift")
+           # Le même ciel animé et les mêmes phrases du guetteur que l'iPhone.
+           + views("CielVivant.swift", "VeilleTextes.swift")
            + WATCH_FILES,
     WATCH_WIDGETS: models(*WATCH_MODELS)
                    + services("AgroWeatherService.swift", "WeatherProviders.swift")

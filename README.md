@@ -243,8 +243,13 @@ rectangulaire, en ligne et d'angle — avec la température de la ville.
 
 `KliimaWatch` est une application watchOS autonome : elle interroge l'API
 elle-même et se cale sur la position du poignet, sans passer par le téléphone.
-Elle montre la température, la pluie qui vient et ce qu'il faut emporter, le
-ressenti, le vent et l'UV.
+Elle s'habille comme l'iPhone : le ciel sombre et animé derrière
+(`CielVivant`, partagé), la température en grand et le nombre de sources
+recoupées, le guetteur — la demi-heure en une phrase et les huit quarts en
+barres, relus une minute après chaque quart —, la pluie qui vient et ce qu'il
+faut emporter, les quatre heures suivantes (sur la largeur du cadran, rien ne
+défile), puis le ressenti, le vent, l'UV et l'humidité. Les phrases du
+guetteur viennent du même `VeilleTextes` que la carte de l'iPhone.
 
 ```bash
 xcodebuild -project ios/Kliima.xcodeproj -scheme KliimaWatch \
