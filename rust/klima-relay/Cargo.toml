@@ -21,6 +21,9 @@ jsonwebtoken = { version = "11.1.0", default-features = false, features = ["rust
 # Le corps de la clé APNs (.p8). Déjà tiré par jsonwebtoken : rien de plus à
 # compiler.
 base64 = "0.22"
+# Les tuiles de la mosaïque radar sont compressées en deflate. Rust pur,
+# comme le reste.
+flate2 = "1"
 
 [dev-dependencies]
 # Un vrai client WebSocket, pour tester le direct de bout en bout.

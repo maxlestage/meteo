@@ -313,6 +313,37 @@ pub fn observer(serie: &[QuartSample], maintenant: i64, ciel: Option<&crate::cie
     serie
 }
 
+/// La série, refaite avec le radar (`radar::prevoir`).
+///
+/// Pour l'heure qui vient, prolonger ce que voit le radar bat les modèles —
+/// ils ratent les cellules —, puis l'avantage s'efface : le premier quart
+/// prévu par le radar compte entièrement, le huitième pour un huitième, et la
+/// prévision fait le reste. `radar` : début de chaque quart (heure de la
+/// ville, ms) et débit (mm/h). Un quart que le radar ne couvre pas garde sa
+/// prévision ; un quart qui devient mouillé prend un code de pluie, sauf si
+/// la prévision y mettait déjà neige ou orage.
+pub fn radariser(serie: &[QuartSample], radar: &[(i64, f64)]) -> Vec<QuartSample> {
+    let Some(premier) = radar.first().map(|(t, _)| *t) else {
+        return serie.to_vec();
+    };
+    serie
+        .iter()
+        .map(|quart| {
+            let Some(&(_, debit)) = radar.iter().find(|(t, _)| *t == quart.time) else {
+                return quart.clone();
+            };
+            let rang = ((quart.time - premier) / QUART_MS).max(0) as f64;
+            let poids = (1.0 - rang / HORIZON_QUARTS as f64).max(0.0);
+            let precipitation = poids * debit / 4.0 + (1.0 - poids) * quart.precipitation;
+            let mut vu = QuartSample { precipitation: (precipitation * 100.0).round() / 100.0, ..quart.clone() };
+            if mouille(&vu) && vu.weather_code < crate::fusion::seuils::CODE_MOUILLE {
+                vu.weather_code = crate::radar::code_du_debit(vu.precipitation * 4.0);
+            }
+            vu
+        })
+        .collect()
+}
+
 /// Vrai quand l'aéroport voit tomber ce que la prévision du quart en cours ne
 /// voit pas : les modèles ont raté la cellule, et la fin qu'ils donneraient
 /// n'en est pas une. L'interface le dit plutôt que d'inventer une heure.
@@ -421,6 +452,33 @@ mod tests {
         assert_eq!(observer(&sec, MAINTENANT, Some(&vu(None, Tendance::Stable))), sec);
         let brouillard = Some(Tombe { code: 45, intensite: Intensite::Moderee });
         assert_eq!(observer(&sec, MAINTENANT, Some(&vu(brouillard, Tendance::Stable))), sec);
+    }
+
+    #[test]
+    fn le_radar_fait_l_heure_qui_vient_puis_s_efface() {
+        let sec = serie(&[0.0; 10]);
+        // Le radar voit 4 mm/h sur les huit quarts à partir de 16 h.
+        let radar: Vec<(i64, f64)> = (0..8).map(|k| (SEIZE_H + k * QUART_MS, 4.0)).collect();
+        let vu = radariser(&sec, &radar);
+        assert_eq!(vu[0].precipitation, 1.0, "le premier quart : le radar seul");
+        assert_eq!(vu[0].weather_code, 63, "4 mm/h : pluie modérée");
+        assert_eq!(vu[4].precipitation, 0.5, "à mi-chemin, moitié radar");
+        assert_eq!(vu[7].precipitation, 0.13);
+        assert_eq!(vu[8], sec[8], "hors du radar, la prévision");
+        let v = veille(&vu, MAINTENANT).unwrap();
+        assert_eq!(v.immediat.code(), "continue");
+
+        // Le radar sec efface une averse que le modèle plaçait mal.
+        let mouillee = serie(&[0.8, 0.8, 0.8]);
+        let radar_sec: Vec<(i64, f64)> = (0..8).map(|k| (SEIZE_H + k * QUART_MS, 0.0)).collect();
+        let vu = radariser(&mouillee, &radar_sec);
+        assert_eq!(vu[0].precipitation, 0.0);
+        assert_eq!(vu[1].precipitation, 0.1);
+        // La neige prévue reste de la neige.
+        let neige: Vec<QuartSample> = serie(&[0.4]).into_iter().map(|q| QuartSample { weather_code: 73, ..q }).collect();
+        assert_eq!(radariser(&neige, &radar)[0].weather_code, 73);
+        // Sans radar, rien ne change.
+        assert_eq!(radariser(&sec, &[]), sec);
     }
 
     #[test]

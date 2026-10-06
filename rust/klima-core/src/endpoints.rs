@@ -99,6 +99,17 @@ impl Endpoints {
         Some(format!("{ws}/v1/direct"))
     }
 
+    /// L'adresse du radar (`/v1/radar`), quand on passe par un relais :
+    /// c'est lui qui lit la mosaïque européenne, trop lourde pour un
+    /// téléphone ou un navigateur. `None` en direct.
+    pub fn radar_url(&self) -> Option<String> {
+        if self.transport != Transport::Relais {
+            return None;
+        }
+        let base = self.open_meteo_forecast.strip_suffix("/v1/open-meteo/forecast")?;
+        Some(format!("{base}/v1/radar"))
+    }
+
     /// Les six adresses, pour les vérifications d'ensemble.
     pub fn urls(&self) -> [&str; 6] {
         [
@@ -177,6 +188,15 @@ mod tests {
         uniques.sort_unstable();
         uniques.dedup();
         assert_eq!(uniques.len(), 6);
+    }
+
+    #[test]
+    fn le_radar_ne_passe_que_par_le_relais() {
+        assert_eq!(
+            Endpoints::relais("https://klima.example/").radar_url().as_deref(),
+            Some("https://klima.example/v1/radar")
+        );
+        assert_eq!(Endpoints::direct().radar_url(), None);
     }
 
     #[test]

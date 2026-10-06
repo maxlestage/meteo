@@ -46,6 +46,14 @@ pub async fn air(endpoints: &Endpoints, parcelle: &Parcelle) -> Option<klima_cor
     klima_api::air::decode_air(&texte(&url).await.ok()?)
 }
 
+/// Ce que le radar voit au-dessus d'une ville, et prévoit pour deux heures.
+/// Seulement par un relais : c'est lui qui lit la mosaïque. `None` sans
+/// relais ou en cas de panne.
+pub async fn radar(endpoints: &Endpoints, parcelle: &Parcelle) -> Option<klima_core::radar::Prevision> {
+    let url = klima_api::radar::radar_url(endpoints, parcelle.latitude, parcelle.longitude)?;
+    klima_api::radar::decoder(&texte(&url).await.ok()?)
+}
+
 /// La prévision au quart d'heure d'une ville, pour le guetteur. `None` en cas
 /// de panne : il se tait plutôt que de dire « sec » sans avoir regardé.
 pub async fn quarts(endpoints: &Endpoints, parcelle: &Parcelle) -> Option<klima_api::veille::Quarts> {

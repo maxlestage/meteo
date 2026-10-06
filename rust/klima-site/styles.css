@@ -1835,3 +1835,11 @@ section {
   color: #7fd0f5;
   font-weight: 600;
 }
+
+/* Le radar : d'où viennent les averses. */
+.guetteur__mouvement {
+  margin: 10px 0 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: #7fd0f5;
+}

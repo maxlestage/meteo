@@ -24,7 +24,7 @@ fn catalog(entries: &[(&'static str, &'static str)]) -> Catalog {
     entries.iter().copied().collect()
 }
 
-const FR: [(&str, &str); 132] = [
+const FR: [(&str, &str); 142] = [
     ("wmo.clearSky", "Ciel dégagé"),
     ("wmo.mainlyClear", "Peu nuageux"),
     ("wmo.partlyCloudy", "Partiellement nuageux"),
@@ -156,10 +156,20 @@ const FR: [(&str, &str); 132] = [
     ("veille.airport.tempo", "Prévision de l’aéroport de {station} : {kind} par moments d’ici {time}."),
     ("veille.airport.becmg", "Prévision de l’aéroport de {station} : {kind} d’ici {time}."),
     ("veille.next.stop", "Fin vers {time}."),
+    ("veille.radar", "Radar européen OPERA de {time} — EUMETNET, CC BY 4.0."),
+    ("veille.radar.move", "Les averses filent vers {dir} à {speed}."),
+    ("dir.n", "le nord"),
+    ("dir.ne", "le nord-est"),
+    ("dir.e", "l’est"),
+    ("dir.se", "le sud-est"),
+    ("dir.s", "le sud"),
+    ("dir.so", "le sud-ouest"),
+    ("dir.o", "l’ouest"),
+    ("dir.no", "le nord-ouest"),
     ("veille.next.unseen", "Les modèles ne voient pas ce qui tombe : sa fin ne se prévoit pas."),
 ];
 
-const EN: [(&str, &str); 132] = [
+const EN: [(&str, &str); 142] = [
     ("wmo.clearSky", "Clear sky"),
     ("wmo.mainlyClear", "Mainly clear"),
     ("wmo.partlyCloudy", "Partly cloudy"),
@@ -291,10 +301,20 @@ const EN: [(&str, &str); 132] = [
     ("veille.airport.tempo", "{station} airport forecast: {kind} at times until {time}."),
     ("veille.airport.becmg", "{station} airport forecast: {kind} by {time}."),
     ("veille.next.stop", "Ending around {time}."),
+    ("veille.radar", "OPERA European radar at {time} — EUMETNET, CC BY 4.0."),
+    ("veille.radar.move", "Showers are moving toward {dir} at {speed}."),
+    ("dir.n", "the north"),
+    ("dir.ne", "the northeast"),
+    ("dir.e", "the east"),
+    ("dir.se", "the southeast"),
+    ("dir.s", "the south"),
+    ("dir.so", "the southwest"),
+    ("dir.o", "the west"),
+    ("dir.no", "the northwest"),
     ("veille.next.unseen", "The models don’t see what’s falling: its end can’t be forecast."),
 ];
 
-const ES: [(&str, &str); 132] = [
+const ES: [(&str, &str); 142] = [
     ("wmo.clearSky", "Cielo despejado"),
     ("wmo.mainlyClear", "Poco nuboso"),
     ("wmo.partlyCloudy", "Parcialmente nuboso"),
@@ -426,6 +446,16 @@ const ES: [(&str, &str); 132] = [
     ("veille.airport.tempo", "Previsión del aeropuerto de {station}: {kind} a ratos hasta las {time}."),
     ("veille.airport.becmg", "Previsión del aeropuerto de {station}: {kind} antes de las {time}."),
     ("veille.next.stop", "Termina hacia las {time}."),
+    ("veille.radar", "Radar europeo OPERA de las {time} — EUMETNET, CC BY 4.0."),
+    ("veille.radar.move", "Los chubascos avanzan hacia {dir} a {speed}."),
+    ("dir.n", "el norte"),
+    ("dir.ne", "el noreste"),
+    ("dir.e", "el este"),
+    ("dir.se", "el sureste"),
+    ("dir.s", "el sur"),
+    ("dir.so", "el suroeste"),
+    ("dir.o", "el oeste"),
+    ("dir.no", "el noroeste"),
     ("veille.next.unseen", "Los modelos no ven lo que cae: su final no se puede prever."),
 ];
 
