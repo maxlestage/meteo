@@ -19,14 +19,17 @@ import WidgetKit
 struct WeatherLiveActivity: Widget {
     var body: some WidgetConfiguration {
         ActivityConfiguration(for: WeatherActivityAttributes.self) { context in
-            WeatherActivityView(context: context)
+            ActiviteSelonFamille(context: context)
         } dynamicIsland: { context in
             Self.ile(context)
         }
+        // Sans famille supplémentaire, la montre n'en recevait que le compact
+        // de l'île : une icône et une température, sur un écran noir. Avec
+        // `.small`, elle a sa propre vue dans la pile intelligente.
+        .supplementalActivityFamilies([.small, .medium])
     }
 
-    /// L'île dynamique, partagée avec la version qui sait aussi parler à la
-    /// montre.
+    /// L'île dynamique.
     static func ile(_ context: ActivityViewContext<WeatherActivityAttributes>) -> DynamicIsland {
         let maintenant = context.state.now(stale: context.isStale)
         let suivante = context.state.upcoming(stale: context.isStale)
@@ -83,26 +86,7 @@ struct WeatherLiveActivity: Widget {
     }
 }
 
-/// La même activité, qui se montre aussi sur la montre (iOS 18).
-///
-/// Sans famille supplémentaire, la montre n'en recevait que le compact de
-/// l'île : une icône et une température, sur un écran noir. Avec `.small`,
-/// elle a sa propre vue, pensée pour la pile intelligente : la ville, la
-/// température, le ciel, les bornes du jour, l'heure qui vient et le ressenti.
-@available(iOS 18.0, *)
-struct WeatherLiveActivityMontre: Widget {
-    var body: some WidgetConfiguration {
-        ActivityConfiguration(for: WeatherActivityAttributes.self) { context in
-            ActiviteSelonFamille(context: context)
-        } dynamicIsland: { context in
-            WeatherLiveActivity.ile(context)
-        }
-        .supplementalActivityFamilies([.small, .medium])
-    }
-}
-
 /// L'écran verrouillé de l'iPhone en `.medium`, la montre en `.small`.
-@available(iOS 18.0, *)
 private struct ActiviteSelonFamille: View {
     let context: ActivityViewContext<WeatherActivityAttributes>
 
