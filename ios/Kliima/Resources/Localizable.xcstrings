@@ -996,19 +996,19 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Open-Meteo data — Météo-France, ECMWF, DWD and NOAA models. City at %1$@ elevation."
+            "value": "Open-Meteo data — Météo-France, ECMWF, DWD, NOAA, Met Office, ECCC and JMA models. City at %1$@ elevation."
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Datos de Open-Meteo — modelos de Météo-France, ECMWF, DWD y NOAA. Ciudad a %1$@ de altitud."
+            "value": "Datos de Open-Meteo — modelos de Météo-France, ECMWF, DWD, NOAA, Met Office, ECCC y JMA. Ciudad a %1$@ de altitud."
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Données Open-Meteo — modèles Météo-France, ECMWF, DWD et NOAA. Ville à %1$@ d’altitude."
+            "value": "Données Open-Meteo — modèles Météo-France, ECMWF, DWD, NOAA, Met Office, ECCC et JMA. Ville à %1$@ d’altitude."
           }
         }
       }
@@ -1216,6 +1216,29 @@
           "stringUnit": {
             "state": "translated",
             "value": "Auj."
+          }
+        }
+      }
+    },
+    "forecast.blended": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Blended from %1$@ sources"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Combinada de %1$@ fuentes"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Recoupée de %1$@ sources"
           }
         }
       }
@@ -1525,19 +1548,19 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Six sources cross-checked, and how far they agree"
+            "value": "Neuf sources cross-checked, and how far they agree"
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Seis fuentes contrastadas, y su grado de acuerdo"
+            "value": "Nueve fuentes contrastadas, y su grado de acuerdo"
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Six sources recoupées, et leur niveau d’accord"
+            "value": "Neuf sources recoupées, et leur niveau d’accord"
           }
         }
       }

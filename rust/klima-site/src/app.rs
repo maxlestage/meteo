@@ -146,6 +146,7 @@ pub fn App(props: &Props) -> Html {
                     parcelle={lieu.parcelle.clone()}
                     digest={(*digest).clone()}
                     current={courant}
+                    sources={etat.forecast.as_ref().map_or(0, |f| f.sources.len())}
                     loading={etat.loading}
                     error={etat.error.clone()}
                     endpoints={props.endpoints.clone()}

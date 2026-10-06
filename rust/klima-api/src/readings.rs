@@ -40,7 +40,7 @@ fn point(url: &str, noms: (&str, &str), latitude: f64, longitude: f64) -> String
     format!("{url}{separateur}{lat}={latitude:.4}&{lon}={longitude:.4}")
 }
 
-/// Une seule requête suffit pour les quatre modèles : le paramètre `models`
+/// Une seule requête suffit pour les sept modèles : le paramètre `models`
 /// suffixe chaque colonne de l'identifiant du modèle.
 pub fn open_meteo_call(endpoints: &Endpoints, latitude: f64, longitude: f64) -> ReadingCall {
     let modeles: Vec<&str> = OPEN_METEO_SOURCES.iter().map(|s| s.id).collect();
@@ -365,6 +365,8 @@ mod tests {
         let appel = open_meteo_call(&Endpoints::direct(), 48.44, 1.48);
         assert!(appel.url.contains("hourly=temperature_2m,precipitation,wind_speed_10m"));
         assert!(appel.url.contains("forecast_days=1"));
-        assert!(appel.url.contains("models=meteofrance_seamless,ecmwf_ifs025,icon_seamless,gfs_seamless"));
+        assert!(appel.url.contains(
+            "models=meteofrance_seamless,ecmwf_ifs025,icon_seamless,gfs_seamless,ukmo_seamless,gem_seamless,jma_seamless"
+        ));
     }
 }

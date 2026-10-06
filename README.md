@@ -66,7 +66,7 @@ de sa fiabilité.
 
 | Fournisseur | Sources | Nature | Plateformes |
 | --- | --- | --- | --- |
-| Open-Meteo | Météo-France (AROME/ARPEGE), ECMWF (IFS), DWD (ICON), NOAA (GFS) | Sorties de modèles | Web et natif |
+| Open-Meteo | Météo-France (AROME/ARPEGE), ECMWF (IFS), DWD (ICON), NOAA (GFS), Met Office (UM), ECCC (GEM), JMA (GSM) | Sorties de modèles | Web et natif |
 | MET Norway | Locationforecast 2.0 | Sortie de modèle | Natif, ou web **par le relais** |
 | Bright Sky | Observation DWD | Mesure de station | Web et natif |
 
@@ -87,8 +87,33 @@ isolée. L'accord est jugé fort quand les sources tiennent dans 1,5 °C et
 s'entendent sur la pluie, faible au-delà de 3 °C d'écart. Quand elles divergent,
 l'application le dit plutôt que d'afficher une fausse précision.
 
-Le recoupement fait l'objet d'appels séparés de la prévision principale : s'il
-échoue entièrement, la prévision reste servie. Les seuils vivent dans
+### La prévision elle-même est recoupée
+
+Les sources ne servent pas qu'à dire leur accord : elles **font** la prévision
+(`klima-core/src/fusion.rs`, miroir `ios/Kliima/Models/Fusion.swift`). Pour
+chaque heure et chaque jour, chaque source vote :
+
+- **la médiane** pour ce qui se mesure — température, ressenti, pluie, vent,
+  rafales, minimales et maximales du jour ;
+- **le risque de pluie** : la part des sources qui annoncent au moins 0,1 mm,
+  mêlée à moitié au risque que les modèles publient eux-mêmes ;
+- **le temps qu'il fait** : la majorité mouillée ou sèche, puis le code le plus
+  cité de ce camp — à égalité, le plus marqué ;
+- **l'instant présent** : la base décalée d'autant que l'heure recoupée, puis la
+  médiane avec la station de Bright Sky s'il y en a une à portée.
+
+Ce qu'une seule source fournit — humidité, point de rosée, UV, jour ou nuit,
+lever et coucher — reste celui de la prévision de base (le « meilleur » modèle
+d'Open-Meteo pour le point). Une heure qu'aucune source ne couvre garde ses
+valeurs de base. Les sept modèles d'Open-Meteo arrivent en **une** requête
+(`klima-api/src/ensemble.rs`), dont la même réponse sert aussi l'accord ; MET
+Norway entre par ses pas horaires, sur deux jours et demi.
+
+La prévision de base s'affiche d'abord ; la prévision recoupée la remplace
+quand les sources ont répondu, et l'en-tête dit « Recoupée de 8 sources ». Si
+elles se taisent toutes, la base reste servie. Sur iPhone, le service rend
+directement la prévision recoupée : le widget, la montre et les alertes ont
+la même que l'écran. Les seuils vivent dans
 `ConsensusThresholds`, des deux côtés, avec les mêmes cas de test.
 
 Les licences imposent des mentions : elles sont affichées sous la comparaison,

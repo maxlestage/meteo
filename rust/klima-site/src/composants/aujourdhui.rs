@@ -22,6 +22,10 @@ pub struct Props {
     pub digest: Option<DayDigest>,
     /// Relevé du moment : c'est lui qui donne la grande température.
     pub current: Option<CurrentSample>,
+    /// Combien de sources ont fait la prévision ; 0 tant qu'elle n'est pas
+    /// recoupée.
+    #[prop_or_default]
+    pub sources: usize,
     pub loading: bool,
     pub error: Option<String>,
     pub endpoints: Endpoints,
@@ -76,6 +80,7 @@ pub fn SectionDuJour(props: &Props) -> Html {
                         parcelle={props.parcelle.clone()}
                         digest={digest.clone()}
                         current={current.clone()}
+                        sources={props.sources}
                     />
                 }
             </div>
@@ -90,6 +95,7 @@ struct ContenuProps {
     parcelle: Parcelle,
     digest: DayDigest,
     current: CurrentSample,
+    sources: usize,
 }
 
 #[function_component]
@@ -112,6 +118,11 @@ fn Contenu(props: &ContenuProps) -> Html {
                     <p class="today__date">
                         { dates::jour_complet(digest.date, i18n.locale()) }
                     </p>
+                    if props.sources > 0 {
+                        <p class="today__recoupe">
+                            { i18n.with("forecast.blended", &params([("count", props.sources.into())])) }
+                        </p>
+                    }
                 </div>
 
                 <div class="today__now">

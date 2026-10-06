@@ -95,8 +95,44 @@ struct AgroWeatherService: AgroWeatherProviding {
         self.session = session
     }
 
-    /// Récupère la prévision d'une ville sur `days` jours.
+    /// La prévision d'une ville sur `days` jours, refaite avec toutes les
+    /// sources (`Fusion`).
+    ///
+    /// La base et les sources partent ensemble. Si les sources se taisent, la
+    /// base reste : leur silence ne prive de rien. Le widget, la montre et les
+    /// alertes passent par ici, et ont donc la même prévision que l'écran.
     func forecast(for parcelle: Parcelle, days: Int = 7) async throws -> AgroForecast {
+        async let ensemble = WeatherProviders.ensemble(for: parcelle, days: days, session: session)
+        let base = try await previsionDeBase(for: parcelle, days: days)
+        let sources = await ensemble
+
+        let recoupement = Fusion.recouper(
+            heures: base.hourly,
+            jours: base.daily,
+            courant: base.current,
+            series: sources.series,
+            observation: sources.observation
+        )
+        var noms = recoupement.sources
+        if sources.observation != nil { noms.append(WeatherProviders.brightSkySource.id) }
+
+        var forecast = AgroForecast(
+            parcelle: base.parcelle,
+            timezone: base.timezone,
+            elevation: base.elevation,
+            current: recoupement.courant,
+            hourly: recoupement.heures,
+            daily: recoupement.jours,
+            fetchedAt: base.fetchedAt
+        )
+        forecast.sources = noms
+        forecast.consensus = sources.consensus
+        return forecast
+    }
+
+    /// La prévision de base : le meilleur modèle qu'Open-Meteo choisit pour le
+    /// point. Un premier jet, que les sources refont.
+    func previsionDeBase(for parcelle: Parcelle, days: Int = 7) async throws -> AgroForecast {
         var components = URLComponents(url: Self.forecastURL, resolvingAgainstBaseURL: false)!
         components.queryItems = [
             URLQueryItem(name: "latitude", value: String(format: "%.4f", parcelle.latitude)),

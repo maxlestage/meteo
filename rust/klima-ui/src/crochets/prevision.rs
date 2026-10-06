@@ -44,7 +44,7 @@ pub struct Prevision {
     pub reload: Callback<()>,
 }
 
-/// Charge la prévision sur `days` jours, puis le recoupement des modèles.
+/// Charge la prévision sur `days` jours, puis la refait avec toutes les sources.
 #[hook]
 pub fn use_forecast(
     parcelle: Parcelle,
@@ -75,16 +75,26 @@ pub fn use_forecast(
                         });
 
                         // Le recoupement vient après, et à part : son échec ne
-                        // doit pas effacer une prévision déjà affichée.
+                        // doit pas effacer une prévision déjà affichée. Quand
+                        // il arrive, toutes les sources refont la prévision —
+                        // la base d'un seul modèle n'était qu'un premier jet.
                         let a_la_parcelle =
                             horloge::maintenant_a_la_parcelle(forecast.utc_offset_seconds);
-                        let (outcomes, air) = futures::join!(
-                            reseau::readings(&endpoints, &parcelle, a_la_parcelle),
+                        let (recoupement, air) = futures::join!(
+                            reseau::recoupement(
+                                &endpoints,
+                                &parcelle,
+                                days,
+                                forecast.utc_offset_seconds,
+                                a_la_parcelle,
+                            ),
                             reseau::air(&endpoints, &parcelle),
                         );
+                        let forecast =
+                            forecast.recoupee(&recoupement.series, recoupement.observation);
                         etat.set(EtatPrevision {
                             forecast: Some(forecast),
-                            consensus: consensus_from_outcomes(&outcomes),
+                            consensus: consensus_from_outcomes(&recoupement.outcomes),
                             air,
                             loading: false,
                             error: None,

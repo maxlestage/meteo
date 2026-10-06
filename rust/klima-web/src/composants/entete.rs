@@ -2,6 +2,7 @@
 //!
 
 use klima_api::open_meteo::Forecast;
+use klima_core::i18n::params;
 use klima_core::weather::weather_condition;
 use yew::prelude::*;
 
@@ -41,6 +42,14 @@ pub fn Entete(props: &Props) -> Html {
                     { "\u{00a0} " }
                     { format!("↓ {}", f.temperature(today.temperature_min)) }
                 </p>
+            }
+
+            // La prévision n'est pas celle d'un modèle : toutes les sources
+            // l'ont faite. On le dit, et on renvoie à leur détail.
+            if !forecast.sources.is_empty() {
+                <a class="hero__recoupe" href="#sources">
+                    { i18n.with("forecast.blended", &params([("count", forecast.sources.len().into())])) }
+                </a>
             }
         </header>
     }

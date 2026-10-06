@@ -151,6 +151,7 @@ mod tests {
             hourly: hours,
             daily: days,
             fetched_at: minuit() + 18 * HOUR_MS,
+            sources: Vec::new(),
         }
     }
 

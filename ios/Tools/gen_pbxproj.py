@@ -21,7 +21,7 @@ EMBEDS = [
 MODELS = ["AgroSamples.swift", "Ville.swift", "Air.swift", "WeatherCondition.swift",
           "AgroFormat.swift", "Localized.swift", "SharedStore.swift", "Consensus.swift",
           "Plan.swift", "Alerts.swift", "Position.swift", "WeatherActivityAttributes.swift",
-          "Horizon.swift", "Veille.swift", "Villes.swift"]
+          "Horizon.swift", "Veille.swift", "Villes.swift", "Fusion.swift"]
 SERVICES = ["AgroWeatherService.swift", "WeatherProviders.swift", "LocationService.swift",
             "BackgroundRefresh.swift", "Subscription.swift",
             "AlertScheduler.swift", "WeatherActivityController.swift", "PlanGrant.swift",
@@ -66,7 +66,7 @@ WATCH_FILES = [(WATCH, "KliimaWatchApp.swift"), (WATCH, "WatchDashboardView.swif
 WATCH_ASSETS = (f"{WATCH}/Resources", "Assets.xcassets")
 WATCH_PLIST = (f"{WATCH}/Resources", "Info.plist")
 
-TEST_FILES = [(TESTS, n) for n in ["VilleTests.swift", "AirTests.swift", "VeilleTests.swift", "VillesTests.swift",
+TEST_FILES = [(TESTS, n) for n in ["VilleTests.swift", "AirTests.swift", "VeilleTests.swift", "VillesTests.swift", "FusionTests.swift",
                                    "AgroWeatherDecodingTests.swift",
                                    "WeatherConditionTests.swift", "AgroFormatTests.swift",
                                    "LocalizationTests.swift", "SharedStoreTests.swift",

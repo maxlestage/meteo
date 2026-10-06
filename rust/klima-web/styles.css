@@ -244,6 +244,33 @@ body {
   font-size: 20px;
 }
 
+/* « Recoupée de 9 sources » : la prévision n'est pas celle d'un modèle. */
+.hero__recoupe {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 10px;
+  padding: 5px 12px;
+  border: 1px solid var(--card-border);
+  border-radius: 999px;
+  background: var(--card);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  color: var(--text);
+  font-size: 13px;
+  font-weight: 600;
+  text-decoration: none;
+  animation: entree 0.6s ease-out backwards 0.3s;
+}
+
+.hero__recoupe::before {
+  content: '';
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #7ed07a;
+}
+
 /* Cartes ----------------------------------------------------------------- */
 
 .card,

@@ -11,7 +11,8 @@
 use gloo_net::http::Request;
 use klima_api::open_meteo::{ApiError, Forecast, decode_forecast, decode_search};
 use klima_api::plan::Verdict;
-use klima_api::readings;
+use klima_api::{ensemble, readings};
+use klima_core::fusion::SerieSource;
 use klima_core::endpoints::Endpoints;
 use klima_core::position::Parcelle;
 use klima_core::providers::{Platform, ProviderOutcome, providers_for};
@@ -72,49 +73,84 @@ pub async fn search(endpoints: &Endpoints, requete: &str) -> Result<Vec<Parcelle
     decode_search(&texte(&url).await?)
 }
 
-/// Interroge tous les fournisseurs permis et rend ce que chacun a dit.
+/// Ce que tous les fournisseurs ont dit : de quoi recouper la prévision, et
+/// de quoi dire leur accord.
+pub struct Recoupement {
+    /// Ce que chaque fournisseur a dit pour l'heure en cours — l'accord.
+    pub outcomes: Vec<ProviderOutcome>,
+    /// Les séries de chaque source — la prévision recoupée.
+    pub series: Vec<SerieSource>,
+    /// La température mesurée par une station proche, s'il y en a une.
+    pub observation: Option<f64>,
+}
+
+/// Interroge tous les fournisseurs permis, en même temps.
 ///
-/// Les trois appels partent **ensemble**, comme le `Promise.allSettled` du
-/// TypeScript : à la file, le recoupement attendrait trois allers-retours au
-/// lieu d'un, et l'accord des modèles apparaîtrait trois fois plus tard que la
-/// météo qu'il commente.
+/// Les appels partent **ensemble** : à la file, la prévision recoupée
+/// attendrait trois allers-retours au lieu d'un. Chaque fournisseur est isolé :
+/// une panne, un refus ou une absence de couverture en écarte un seul.
 ///
-/// Chaque fournisseur est isolé : une panne, un refus ou une absence de
-/// couverture en écarte un seul. Le recoupement se fait sur ce qui a répondu.
-pub async fn readings(
+/// Open-Meteo répond pour sept modèles d'un coup, sur toute la période : la
+/// même réponse fait leurs séries et leur relevé de l'heure. MET Norway aussi
+/// sert deux fois. Bright Sky, une station, ne vote que pour l'instant présent.
+pub async fn recoupement(
     endpoints: &Endpoints,
     parcelle: &Parcelle,
+    days: u32,
+    utc_offset_seconds: i64,
     maintenant: i64,
-) -> Vec<ProviderOutcome> {
-    let mut appels = Vec::new();
+) -> Recoupement {
+    let permis: Vec<&str> =
+        providers_for(Platform::Web, endpoints.transport).iter().map(|p| p.id).collect();
+    let appel = |id: &'static str, url: String| {
+        let actif = permis.contains(&id);
+        async move {
+            if !actif {
+                return None;
+            }
+            // Une absence n'est pas une panne : le fournisseur sort du
+            // recoupement, et l'interface dit combien de sources ont parlé.
+            Some(texte(&url).await.ok())
+        }
+    };
 
-    for provider in providers_for(Platform::Web, endpoints.transport) {
-        let (appel, lire): (_, fn(&str, i64) -> _) = match provider.id {
-            "open-meteo" => (
-                readings::open_meteo_call(endpoints, parcelle.latitude, parcelle.longitude),
-                |corps, now| readings::decode_open_meteo(corps, now),
-            ),
-            "met-norway" => (
-                readings::met_norway_call(endpoints, parcelle.latitude, parcelle.longitude),
-                |corps, now| readings::decode_met_norway(corps, now),
-            ),
-            "bright-sky" => (
-                readings::bright_sky_call(endpoints, parcelle.latitude, parcelle.longitude),
-                |corps, _| readings::decode_bright_sky(corps),
-            ),
-            _ => continue,
-        };
+    let (open_meteo, met, bright_sky) = futures::join!(
+        appel("open-meteo", ensemble::ensemble_url(endpoints, parcelle, days)),
+        appel(
+            "met-norway",
+            readings::met_norway_call(endpoints, parcelle.latitude, parcelle.longitude).url
+        ),
+        appel(
+            "bright-sky",
+            readings::bright_sky_call(endpoints, parcelle.latitude, parcelle.longitude).url
+        ),
+    );
 
-        appels.push(async move {
-            let readings = match texte(&appel.url).await {
-                Ok(corps) => lire(&corps, maintenant),
-                // Une absence n'est pas une panne : le fournisseur sort du
-                // recoupement, et l'interface dit combien de sources ont parlé.
-                Err(_) => Vec::new(),
-            };
-            ProviderOutcome { provider_id: provider.id.to_owned(), readings }
+    let mut outcomes = Vec::new();
+    let mut series = Vec::new();
+    let mut observation = None;
+
+    if let Some(corps) = open_meteo {
+        let corps = corps.unwrap_or_default();
+        series.extend(ensemble::decode_ensemble(&corps));
+        outcomes.push(ProviderOutcome {
+            provider_id: "open-meteo".to_owned(),
+            readings: readings::decode_open_meteo(&corps, maintenant),
         });
     }
+    if let Some(corps) = met {
+        let corps = corps.unwrap_or_default();
+        series.extend(ensemble::serie_met_norway(&corps, utc_offset_seconds));
+        outcomes.push(ProviderOutcome {
+            provider_id: "met-norway".to_owned(),
+            readings: readings::decode_met_norway(&corps, maintenant - utc_offset_seconds * 1000),
+        });
+    }
+    if let Some(corps) = bright_sky {
+        let releves = readings::decode_bright_sky(&corps.unwrap_or_default());
+        observation = releves.first().map(|r| r.temperature);
+        outcomes.push(ProviderOutcome { provider_id: "bright-sky".to_owned(), readings: releves });
+    }
 
-    futures::future::join_all(appels).await
+    Recoupement { outcomes, series, observation }
 }

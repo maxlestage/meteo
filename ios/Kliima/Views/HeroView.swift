@@ -46,6 +46,25 @@ struct HeroView: View {
                 Text("↑ \(AgroFormat.temperature(today.temperatureMax))   ↓ \(AgroFormat.temperature(today.temperatureMin))")
                     .font(.title3)
             }
+
+            // La prévision n'est pas celle d'un modèle : toutes les sources
+            // l'ont faite, et on le dit.
+            if !forecast.sources.isEmpty {
+                Label {
+                    Text(Localized.text("forecast.blended", String(forecast.sources.count)))
+                } icon: {
+                    Circle()
+                        .fill(Color(red: 0.494, green: 0.816, blue: 0.478))
+                        .frame(width: 7, height: 7)
+                }
+                .font(.footnote.weight(.semibold))
+                .padding(.horizontal, 12)
+                .padding(.vertical, 5)
+                .background(.ultraThinMaterial.opacity(0.6), in: Capsule())
+                .overlay(Capsule().strokeBorder(Color.filet, lineWidth: 1))
+                .padding(.top, 8)
+                .transition(.opacity.combined(with: .scale(scale: 0.9)))
+            }
         }
         .frame(maxWidth: .infinity)
         .padding(.top, 8)
