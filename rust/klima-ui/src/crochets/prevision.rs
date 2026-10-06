@@ -10,13 +10,14 @@
 //! aussi ce qui permet à un fournisseur d'être en panne sans que la météo
 //! disparaisse.
 
-use klima_api::open_meteo::{ApiError, Forecast};
+use klima_api::open_meteo::{ApiError, Forecast, decode_forecast};
 use klima_core::air::AirSample;
 use klima_core::consensus::{Consensus, consensus_from_outcomes};
 use klima_core::endpoints::Endpoints;
 use klima_core::position::Parcelle;
 use yew::prelude::*;
 
+use crate::crochets::direct::Corps;
 use crate::horloge;
 use crate::reseau;
 
@@ -50,21 +51,28 @@ pub fn use_forecast(
     parcelle: Parcelle,
     endpoints: Endpoints,
     days: u32,
+    direct: Corps,
     traduire: impl Fn(&ApiError) -> String + 'static,
 ) -> Prevision {
     let etat = use_state(EtatPrevision::default);
     let nonce = use_state(|| 0_u32);
+    // Vrai dès que le direct a fait la prévision de cette ville : une requête
+    // qui reviendrait après ne doit pas la remplacer par plus ancien qu'elle.
+    let par_le_direct = use_mut_ref(|| false);
 
     {
         let etat = etat.clone();
         let endpoints = endpoints.clone();
+        let par_le_direct = par_le_direct.clone();
         use_effect_with((parcelle.clone(), *nonce), move |(parcelle, _)| {
             let parcelle = parcelle.clone();
+            *par_le_direct.borrow_mut() = false;
             etat.set(EtatPrevision { loading: true, error: None, ..(*etat).clone() });
 
             wasm_bindgen_futures::spawn_local(async move {
                 let maintenant = horloge::maintenant_local();
                 match reseau::forecast(&endpoints, &parcelle, days, maintenant).await {
+                    Ok(_) if *par_le_direct.borrow() => {}
                     Ok(forecast) => {
                         etat.set(EtatPrevision {
                             forecast: Some(forecast.clone()),
@@ -92,6 +100,9 @@ pub fn use_forecast(
                         );
                         let forecast =
                             forecast.recoupee(&recoupement.series, recoupement.observation);
+                        if *par_le_direct.borrow() {
+                            return;
+                        }
                         etat.set(EtatPrevision {
                             forecast: Some(forecast),
                             consensus: consensus_from_outcomes(&recoupement.outcomes),
@@ -108,6 +119,48 @@ pub fn use_forecast(
                         error: Some(traduire(&erreur)),
                     }),
                 }
+            });
+        });
+    }
+
+    // Le direct : à chaque corps poussé par le relais, la prévision est refaite
+    // avec ce qu'il a envoyé — la base et les sept modèles d'abord, puis MET
+    // Norway, la station et l'air quand ils sont là.
+    {
+        let etat = etat.clone();
+        let par_le_direct = par_le_direct.clone();
+        use_effect_with((parcelle.clone(), direct), move |(parcelle, direct)| {
+            let point = Some((parcelle.latitude, parcelle.longitude));
+            let (Some(base), Some(modeles)) = (&direct.base, &direct.ensemble) else { return };
+            if direct.point != point {
+                return;
+            }
+            let maintenant = horloge::maintenant_local();
+            let Ok(forecast) = decode_forecast(parcelle.clone(), base, maintenant) else { return };
+            let a_la_parcelle = horloge::maintenant_a_la_parcelle(forecast.utc_offset_seconds);
+            let texte = |corps: &Option<std::rc::Rc<String>>| {
+                corps.as_ref().map(|c| c.as_str().to_owned()).unwrap_or_default()
+            };
+            let (met, station) = (texte(&direct.met), texte(&direct.station));
+            let recoupement = reseau::lire_recoupement(
+                Some(modeles.as_str()),
+                Some(&met),
+                Some(&station),
+                forecast.utc_offset_seconds,
+                a_la_parcelle,
+            );
+            let air = direct
+                .air
+                .as_ref()
+                .and_then(|a| klima_api::air::decode_air(a))
+                .or_else(|| (*etat).air.clone());
+            *par_le_direct.borrow_mut() = true;
+            etat.set(EtatPrevision {
+                forecast: Some(forecast.recoupee(&recoupement.series, recoupement.observation)),
+                consensus: consensus_from_outcomes(&recoupement.outcomes),
+                air,
+                loading: false,
+                error: None,
             });
         });
     }

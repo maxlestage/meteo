@@ -23,6 +23,7 @@ use klima_ui::crochets::palier::use_palier;
 use klima_ui::crochets::parcelle::use_parcelle;
 use klima_ui::crochets::position::use_start_position;
 use klima_ui::crochets::prevision::use_forecast;
+use klima_ui::crochets::direct::use_direct;
 use klima_ui::crochets::veille::use_veille;
 use klima_ui::composants::guetteur::Guetteur;
 use klima_ui::dates;
@@ -60,11 +61,15 @@ pub fn App(props: &Props) -> Html {
     use_start_position(lieu.origine, i18n.t("search.myField"), lieu.select.clone());
 
     // Le guetteur lit à part, au quart d'heure, et relit tout seul.
-    let veille = use_veille(lieu.parcelle.clone(), props.endpoints.clone());
+    // Le direct : avec un relais, la météo est poussée par WebSocket dès
+    // qu'elle change — prévision, sources, quart d'heure, air.
+    let direct = use_direct(lieu.parcelle.clone(), props.endpoints.clone(), 7);
+
+    let veille = use_veille(lieu.parcelle.clone(), props.endpoints.clone(), direct.quarts.clone());
 
     let prevision = {
         let i18n = i18n.clone();
-        use_forecast(lieu.parcelle.clone(), props.endpoints.clone(), 7, move |erreur| {
+        use_forecast(lieu.parcelle.clone(), props.endpoints.clone(), 7, direct.clone(), move |erreur| {
             i18n.with(erreur.message_key(), &erreur.params())
         })
     };

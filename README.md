@@ -87,6 +87,25 @@ isolée. L'accord est jugé fort quand les sources tiennent dans 1,5 °C et
 s'entendent sur la pluie, faible au-delà de 3 °C d'écart. Quand elles divergent,
 l'application le dit plutôt que d'afficher une fausse précision.
 
+### Le direct : la météo poussée par WebSocket
+
+Avec un relais, le web, le site et l'iPhone ouvrent une connexion WebSocket
+(`/v1/direct`) et s'abonnent à la ville affichée. Le relais pousse alors six
+sujets — la prévision de base et l'instant présent, les sept modèles, le quart
+d'heure du guetteur, MET Norway, la station, l'air —, chacun dans la forme
+exacte que le fournisseur renvoie : les clients les lisent avec les décodeurs
+de leurs requêtes. Toutes les trente secondes, le relais relit chaque sujet
+**par les mêmes caches que les requêtes HTTP**, et ne pousse que ce qui a
+changé. Les caches fixent le rythme des fournisseurs : cinq minutes pour le
+quart d'heure, dix pour l'instant présent et la station, une heure pour les
+modèles ; le direct fixe celui des écrans. Un battement part toutes les
+vingt-cinq secondes (Heroku coupe une connexion muette à cinquante-cinq).
+
+Le direct s'ajoute aux requêtes, il ne les remplace pas : la première
+prévision arrive par HTTP, et une connexion tombée se rouvre après deux
+secondes, puis quatre, huit… jusqu'à une minute. Le widget, la montre et les
+tâches de fond, qui n'ont pas de connexion qui dure, restent sur les requêtes.
+
 ### La prévision elle-même est recoupée
 
 Les sources ne servent pas qu'à dire leur accord : elles **font** la prévision

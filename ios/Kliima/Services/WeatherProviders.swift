@@ -92,69 +92,49 @@ extension WeatherProviders {
         let observation: Double?
     }
 
-    /// Ce qu'un appel a rapporté : des relevés pour l'accord, des séries pour
-    /// la prévision, une mesure de station.
-    private struct Apport {
-        let outcome: Outcome
-        var series: [SerieSource] = []
-        var observation: Double?
+    /// Interroge les trois fournisseurs en parallèle, puis lit ce qu'ils ont
+    /// dit (`ensemble(openMeteo:met:station:)`).
+    static func ensemble(for parcelle: Parcelle, days: Int, session: URLSession = .shared) async -> Ensemble {
+        async let openMeteo = try? openMeteoEnsemble(parcelle, days: days, session)
+        async let met = try? metNorwayData(parcelle, session)
+        async let station = try? brightSkyData(parcelle, session)
+        return await ensemble(openMeteo: openMeteo ?? nil, met: met ?? nil, station: station ?? nil)
     }
 
-    /// Interroge les trois fournisseurs en parallèle.
+    /// Lit ce que les trois fournisseurs ont répondu — par requête ou par le
+    /// direct, qui pousse les mêmes réponses. `nil` : le fournisseur n'a rien
+    /// dit ; il compte dans l'accord comme une source muette.
     ///
-    /// Open-Meteo répond pour sept modèles d'un coup, sur toute la période : la
-    /// même réponse fait leurs séries et leur relevé de l'heure. MET Norway sert
-    /// deux fois aussi. Bright Sky, une station, ne vote que pour l'instant.
-    static func ensemble(for parcelle: Parcelle, days: Int, session: URLSession = .shared) async -> Ensemble {
-        let apports = await withTaskGroup(of: Apport.self) { group -> [Apport] in
-            group.addTask {
-                do {
-                    let data = try await openMeteoEnsemble(parcelle, days: days, session)
-                    let readings = (try? JSONDecoder().decode(ModelPayload.self, from: data))
-                        .map(openMeteoReadings(from:)) ?? []
-                    return Apport(
-                        outcome: Outcome(provider: "open-meteo", readings: readings, failed: false),
-                        series: decodeEnsemble(data)
-                    )
-                } catch {
-                    return Apport(outcome: Outcome(provider: "open-meteo", readings: [], failed: true))
-                }
-            }
-            group.addTask {
-                do {
-                    let payload = try await metNorwayPayload(parcelle, session)
-                    return Apport(
-                        outcome: Outcome(provider: "met-norway", readings: metNorwayReadings(from: payload), failed: false),
-                        series: metNorwaySerie(from: payload).map { [$0] } ?? []
-                    )
-                } catch {
-                    return Apport(outcome: Outcome(provider: "met-norway", readings: [], failed: true))
-                }
-            }
-            group.addTask {
-                let outcome = await run("bright-sky") { try await brightSky(parcelle, session) }
-                return Apport(outcome: outcome, observation: outcome.readings.first?.temperature)
-            }
+    /// Open-Meteo répond pour sept modèles d'un coup : la même réponse fait
+    /// leurs séries et leur relevé de l'heure. MET Norway sert deux fois aussi.
+    /// Bright Sky, une station, ne vote que pour l'instant présent.
+    static func ensemble(openMeteo: Data?, met: Data?, station: Data?) -> Ensemble {
+        let modeles = openMeteo.map(decodeEnsemble) ?? []
+        let releves = openMeteo
+            .flatMap { try? JSONDecoder().decode(ModelPayload.self, from: $0) }
+            .map(openMeteoReadings(from:)) ?? []
 
-            var collected: [Apport] = []
-            for await apport in group { collected.append(apport) }
-            return collected
-        }
+        let metPayload = met.flatMap { try? MetPayload.decode($0) }
+        let metReleves = metPayload.map(metNorwayReadings(from:)) ?? []
+        let metSerie = metPayload.flatMap(metNorwaySerie(from:))
 
-        // Toujours dans le même ordre, quel que soit celui des réponses.
-        let ordre = ["open-meteo", "met-norway", "bright-sky"]
-        let tries = apports.sorted {
-            (ordre.firstIndex(of: $0.outcome.provider) ?? 9) < (ordre.firstIndex(of: $1.outcome.provider) ?? 9)
-        }
-        let outcomes = tries.map(\.outcome)
+        let stationReleves = station
+            .flatMap { try? JSONDecoder().decode(BrightSkyPayload.self, from: $0) }
+            .map(brightSkyReadings(from:)) ?? []
+
+        let outcomes = [
+            Outcome(provider: "open-meteo", readings: releves, failed: openMeteo == nil),
+            Outcome(provider: "met-norway", readings: metReleves, failed: met == nil),
+            Outcome(provider: "bright-sky", readings: stationReleves, failed: station == nil),
+        ]
         return Ensemble(
             consensus: ModelConsensus.consensus(
                 outcomes.flatMap(\.readings),
                 answered: outcomes.filter { !$0.readings.isEmpty }.count,
                 queried: outcomes.count
             ),
-            series: tries.flatMap(\.series),
-            observation: tries.compactMap(\.observation).first
+            series: modeles + (metSerie.map { [$0] } ?? []),
+            observation: stationReleves.first?.temperature
         )
     }
 
@@ -308,6 +288,16 @@ extension WeatherProviders {
 
     // MARK: MET Norway
 
+    static func metNorwayData(_ parcelle: Parcelle, _ session: URLSession) async throws -> Data {
+        var components = URLComponents(string: "https://api.met.no/weatherapi/locationforecast/2.0/compact")!
+        components.queryItems = [
+            URLQueryItem(name: "lat", value: String(format: "%.4f", parcelle.latitude)),
+            URLQueryItem(name: "lon", value: String(format: "%.4f", parcelle.longitude)),
+        ]
+        // Leurs conditions imposent de s'identifier ; `URLSession` le permet.
+        return try await json(components.url!, session, userAgent: true)
+    }
+
     static func metNorwayPayload(_ parcelle: Parcelle, _ session: URLSession) async throws -> MetPayload {
         var components = URLComponents(string: "https://api.met.no/weatherapi/locationforecast/2.0/compact")!
         components.queryItems = [
@@ -416,6 +406,23 @@ extension WeatherProviders {
             }
         }
         return brightSkyReadings(from: try JSONDecoder().decode(BrightSkyPayload.self, from: data))
+    }
+
+    /// La réponse brute de Bright Sky ; `nil` sans station à portée (404).
+    static func brightSkyData(_ parcelle: Parcelle, _ session: URLSession) async throws -> Data? {
+        var components = URLComponents(string: "https://api.brightsky.dev/current_weather")!
+        components.queryItems = [
+            URLQueryItem(name: "lat", value: String(format: "%.4f", parcelle.latitude)),
+            URLQueryItem(name: "lon", value: String(format: "%.4f", parcelle.longitude)),
+        ]
+        var request = URLRequest(url: components.url!)
+        request.setValue(userAgent, forHTTPHeaderField: "User-Agent")
+        let (data, response) = try await session.data(for: request)
+        if let http = response as? HTTPURLResponse {
+            if http.statusCode == 404 { return nil }
+            guard (200..<300).contains(http.statusCode) else { throw AgroWeatherError.badStatus(http.statusCode) }
+        }
+        return data
     }
 
     static func brightSkyReadings(from payload: BrightSkyPayload) -> [SourceReading] {

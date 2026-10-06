@@ -4,9 +4,10 @@
 //! monde. Ce que ça change, dans l'ordre d'importance :
 //!
 //! 1. **Le prix tient.** Sans relais, la facture Open-Meteo suit le nombre
-//!    d'utilisateurs ; avec lui, elle suit le nombre de parcelles distinctes et
-//!    le rythme des modèles. Une cellule coûte vingt-quatre interrogations par
-//!    jour, qu'elle soit ouverte par une personne ou par mille.
+//!    d'utilisateurs ; avec lui, elle suit le nombre de villes distinctes et la
+//!    durée de vie des caches. Une ville suivie coûte le même nombre
+//!    d'interrogations, qu'elle soit ouverte par une personne ou par mille —
+//!    par requête comme en direct (`direct.rs`), qui lit les mêmes caches.
 //! 2. **MET Norway reste sous son plafond.** Leurs conditions plafonnent à
 //!    vingt requêtes par seconde *par application*, pas par appareil.
 //! 3. **La clé commerciale reste secrète.** Elle vit ici, jamais dans un
@@ -45,10 +46,16 @@ pub const TTL_MS: i64 = 3_600_000;
 pub const STALE_MS: i64 = 7_200_000;
 
 /// La prévision au quart d'heure du guetteur ne vaut que pour la demi-heure :
-/// dix minutes de fraîcheur, et elle ne dépanne plus au-delà d'un quart
+/// cinq minutes de fraîcheur, et elle ne dépanne plus au-delà d'un quart
 /// d'heure de retard. Un « sec » vieux d'une heure serait un mensonge.
-pub const QUARTS_TTL_MS: i64 = 600_000;
+pub const QUARTS_TTL_MS: i64 = 300_000;
 pub const QUARTS_STALE_MS: i64 = 900_000;
+
+/// L'instant présent (`current`) et l'observation de station : Open-Meteo
+/// recalcule le premier tous les quarts d'heure. Dix minutes de fraîcheur, et
+/// le direct le pousse dès qu'il a changé.
+pub const COURANTS_TTL_MS: i64 = 600_000;
+pub const COURANTS_STALE_MS: i64 = 1_800_000;
 
 /// Le géocodage ne bouge pas d'un jour à l'autre.
 pub const SEARCH_TTL_MS: i64 = 86_400_000;
@@ -61,6 +68,8 @@ pub struct Etat {
     pub forecasts: Arc<ForecastCache<String>>,
     /// Les prévisions au quart d'heure : un cache à part, plus court.
     pub quarts: Arc<ForecastCache<String>>,
+    /// L'instant présent et la station : un cache à part aussi.
+    pub courants: Arc<ForecastCache<String>>,
     pub searches: Arc<ForecastCache<String>>,
     pub open_meteo_key: Option<String>,
     /// Ce que ce déploiement accorde comme palier, en plus de la boutique.
@@ -123,8 +132,14 @@ const CLES_RELECTURE_MIN_MS: i64 = 300_000;
 /// Tout passe par un seul gestionnaire, comme dans le relais TypeScript : les
 /// routes se lisent alors dans l'ordre où elles comptent, et la priorité de
 /// l'API sur les fichiers du site se voit au lieu de se déduire.
+///
+/// Une exception : le direct (`/v1/direct`), qui monte en WebSocket et a donc
+/// besoin de son propre extracteur.
 pub fn router(etat: Etat) -> Router {
-    Router::new().fallback(handle).with_state(etat)
+    Router::new()
+        .route("/v1/direct", axum::routing::get(crate::direct::ouvrir))
+        .fallback(handle)
+        .with_state(etat)
 }
 
 async fn handle(State(etat): State<Etat>, request: Request) -> Response {
@@ -259,30 +274,45 @@ async fn handle(State(etat): State<Etat>, request: Request) -> Response {
         return servir(lu, &cors);
     }
 
-    let Some((latitude, longitude)) = point_from(&params) else {
-        return json(
+    match lire(&etat, &chemin, &params).await {
+        Lecture::HorsBornes => json(
             StatusCode::BAD_REQUEST,
             r#"{"erreur":"coordonnées manquantes ou hors bornes"}"#.to_owned(),
             &cors,
-        );
+        ),
+        Lecture::Inconnue => texte(StatusCode::NOT_FOUND, "inconnu", &cors),
+        Lecture::Lue(lu) => servir(lu, &cors),
+    }
+}
+
+/// Ce que donne une demande de fournisseur.
+pub(crate) enum Lecture {
+    /// Pas de point, ou un point hors du globe.
+    HorsBornes,
+    /// Une route que le relais ne connaît pas.
+    Inconnue,
+    Lue(Result<Served<String>, UpstreamError>),
+}
+
+/// Lit une donnée de fournisseur, par le cache de sa maille.
+///
+/// Le même chemin pour une requête HTTP et pour le direct (`direct.rs`) : les
+/// deux partagent donc les mêmes entrées de cache, et une ville suivie en
+/// direct ne coûte pas une interrogation de plus à qui la lit par HTTP.
+pub(crate) async fn lire(etat: &Etat, chemin: &str, params: &Params) -> Lecture {
+    let Some((latitude, longitude)) = point_from(params) else {
+        return Lecture::HorsBornes;
     };
     let cell = cell_for(latitude, longitude);
 
-    let (cle, appel) = match chemin.as_str() {
-        "/v1/open-meteo/forecast" => {
-            (
-                cell_key(&format!("om:{}", empreinte(&params)), &cell),
-                upstream::open_meteo_forecast(
-                    etat.open_meteo_key.as_deref(),
-                    &params,
-                    cell.latitude,
-                    cell.longitude,
-                ),
-            )
-        }
+    let (cle, appel) = match chemin {
+        "/v1/open-meteo/forecast" => (
+            cell_key(&format!("om:{}", empreinte(params)), &cell),
+            upstream::open_meteo_forecast(etat.open_meteo_key.as_deref(), params, cell.latitude, cell.longitude),
+        ),
         "/v1/open-meteo/air-quality" => (
-            cell_key(&format!("air:{}", empreinte(&params)), &cell),
-            upstream::open_meteo_air(etat.open_meteo_key.as_deref(), &params, cell.latitude, cell.longitude),
+            cell_key(&format!("air:{}", empreinte(params)), &cell),
+            upstream::open_meteo_air(etat.open_meteo_key.as_deref(), params, cell.latitude, cell.longitude),
         ),
         "/v1/met-norway/compact" => (
             cell_key("met", &cell),
@@ -292,14 +322,20 @@ async fn handle(State(etat): State<Etat>, request: Request) -> Response {
             cell_key("brightsky", &cell),
             upstream::bright_sky_current(cell.latitude, cell.longitude),
         ),
-        _ => return texte(StatusCode::NOT_FOUND, "inconnu", &cors),
+        _ => return Lecture::Inconnue,
     };
 
-    // Le guetteur demande le quart d'heure : sa réponse vieillit dix fois
-    // plus vite que la prévision horaire, et ne se garde pas aussi longtemps.
-    let cache = if params.contains_key("minutely_15") { &etat.quarts } else { &etat.forecasts };
-    let lu = cache.serve(&cle, || (etat.fetch)(appel)).await;
-    servir(lu, &cors)
+    // Ce qui vieillit vite se garde moins longtemps : le quart d'heure du
+    // guetteur, puis l'instant présent et la station ; la prévision horaire
+    // des modèles, elle, ne bouge qu'à chaque passage des modèles.
+    let cache = if params.contains_key("minutely_15") {
+        &etat.quarts
+    } else if params.contains_key("current") || chemin == "/v1/bright-sky/current" {
+        &etat.courants
+    } else {
+        &etat.forecasts
+    };
+    Lecture::Lue(cache.serve(&cle, || (etat.fetch)(appel)).await)
 }
 
 /// L'état de santé. Ni la clé ni le code n'y apparaissent — seulement le fait
@@ -308,7 +344,7 @@ fn sante(etat: &Etat) -> String {
     format!(
         r#"{{"statut":"ok","cellules":{},"interrogations":{},"cleOpenMeteo":"{}","pro":"{}","comptes":"{}","poussee":"{}","iles":{}}}"#,
         etat.forecasts.size(),
-        etat.forecasts.calls() + etat.quarts.calls() + etat.searches.calls(),
+        etat.forecasts.calls() + etat.quarts.calls() + etat.courants.calls() + etat.searches.calls(),
         if etat.open_meteo_key.is_some() { "configurée" } else { "absente" },
         etat.accord_pro.etiquette(),
         // L'état, jamais le secret.
@@ -565,6 +601,11 @@ pub fn etat(fetch: Fetch, now: crate::cache::Clock) -> Etat {
             stale_ms: QUARTS_STALE_MS,
             now: now.clone(),
         })),
+        courants: Arc::new(ForecastCache::new(CacheOptions {
+            ttl_ms: COURANTS_TTL_MS,
+            stale_ms: COURANTS_STALE_MS,
+            now: now.clone(),
+        })),
         searches: Arc::new(ForecastCache::new(CacheOptions {
             ttl_ms: SEARCH_TTL_MS,
             stale_ms: SEARCH_TTL_MS,
@@ -681,7 +722,54 @@ mod tests {
     }
 
     #[tokio::test]
-    async fn le_quart_d_heure_se_garde_dix_minutes_pas_une_heure() {
+    async fn le_direct_pousse_les_six_sujets_puis_seulement_ce_qui_change() {
+        use futures_util::{SinkExt, StreamExt};
+        use tokio_tungstenite::tungstenite::Message as Ws;
+
+        let faux = Faux::new().repond(r#"{"timezone":"Europe/Paris"}"#);
+        let ecoute = tokio::net::TcpListener::bind("127.0.0.1:0").await.unwrap();
+        let adresse = ecoute.local_addr().unwrap();
+        tokio::spawn(axum::serve(ecoute, router(relais(&faux))).into_future());
+
+        let (mut ws, _) = tokio_tungstenite::connect_async(format!("ws://{adresse}/v1/direct")).await.unwrap();
+        let abonnement = r#"{"latitude":48.8566,"longitude":2.3522,"jours":7}"#;
+        ws.send(Ws::text(abonnement)).await.unwrap();
+
+        let mut sujets = Vec::new();
+        while sujets.len() < 6 {
+            match ws.next().await.unwrap().unwrap() {
+                Ws::Text(texte) => {
+                    let v: serde_json::Value = serde_json::from_str(&texte).unwrap();
+                    assert_eq!(v["corps"]["timezone"], "Europe/Paris", "le corps passe tel quel");
+                    assert_eq!(v["latitude"], 48.8566, "le point de l'abonnement revient");
+                    sujets.push(v["sujet"].as_str().unwrap().to_owned());
+                }
+                _ => continue,
+            }
+        }
+        assert_eq!(sujets, ["base", "ensemble", "quarts", "met", "station", "air"]);
+        // Six interrogations, une par sujet : c'est tout.
+        assert_eq!(faux.appels(), 6);
+
+        // Le même abonnement, renvoyé : tout est poussé de nouveau, depuis les
+        // caches — aucun fournisseur n'est réinterrogé.
+        ws.send(Ws::text(abonnement)).await.unwrap();
+        let mut encore = 0;
+        while encore < 6 {
+            if let Ws::Text(_) = ws.next().await.unwrap().unwrap() {
+                encore += 1;
+            }
+        }
+        assert_eq!(faux.appels(), 6);
+
+        // Un abonnement absurde est ignoré, sans fermer la connexion.
+        ws.send(Ws::text(r#"{"latitude":123,"longitude":0}"#)).await.unwrap();
+        ws.send(Ws::text("pas du json")).await.unwrap();
+        ws.close(None).await.unwrap();
+    }
+
+    #[tokio::test]
+    async fn ce_qui_vieillit_vite_se_garde_moins_longtemps() {
         let faux = Faux::new();
         let instant = Arc::new(Mutex::new(0_i64));
         let horloge = {
@@ -690,19 +778,29 @@ mod tests {
         };
         let etat = etat(faux.fetch(), horloge);
         let quarts = "/v1/open-meteo/forecast?latitude=48.44&longitude=1.48&minutely_15=precipitation";
+        let courant = "/v1/open-meteo/forecast?latitude=48.44&longitude=1.48&current=temperature_2m";
         let heures = "/v1/open-meteo/forecast?latitude=48.44&longitude=1.48&hourly=precipitation";
 
         let _ = get(etat.clone(), quarts).await;
+        let _ = get(etat.clone(), courant).await;
         let _ = get(etat.clone(), heures).await;
-        assert_eq!(faux.appels(), 2);
+        assert_eq!(faux.appels(), 3);
 
-        // Onze minutes plus tard : le quart d'heure est à refaire, l'heure non.
-        *instant.lock().unwrap() = 11 * 60_000;
+        // Six minutes plus tard : le quart d'heure est à refaire, le reste non.
+        *instant.lock().unwrap() = 6 * 60_000;
         let (_, entetes, _) = get(etat.clone(), quarts).await;
+        assert_eq!(entetes["x-klima-cache"], "frais");
+        let (_, entetes, _) = get(etat.clone(), courant).await;
+        assert_eq!(entetes["x-klima-cache"], "cache");
+        assert_eq!(faux.appels(), 4);
+
+        // Onze minutes : l'instant présent aussi ; l'heure, toujours pas.
+        *instant.lock().unwrap() = 11 * 60_000;
+        let (_, entetes, _) = get(etat.clone(), courant).await;
         assert_eq!(entetes["x-klima-cache"], "frais");
         let (_, entetes, _) = get(etat, heures).await;
         assert_eq!(entetes["x-klima-cache"], "cache");
-        assert_eq!(faux.appels(), 3);
+        assert_eq!(faux.appels(), 5);
     }
 
     #[tokio::test]

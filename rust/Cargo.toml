@@ -18,7 +18,7 @@ rust-version = "1.85"
 
 [workspace.dependencies]
 # Versions relevées sur crates.io le 3 octobre 2026.
-axum = "0.8.9"
+axum = { version = "0.8.9", features = ["ws"] }
 reqwest = { version = "0.13.5", default-features = false, features = ["rustls", "http2", "charset", "system-proxy"] }
 serde_json = "1.0.151"
 url = "2"

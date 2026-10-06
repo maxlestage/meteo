@@ -591,6 +591,7 @@ dependencies = [
  "js-sys",
  "klima-api",
  "klima-core",
+ "serde_json",
  "wasm-bindgen",
  "wasm-bindgen-futures",
  "web-sys",

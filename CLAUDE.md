@@ -27,6 +27,14 @@ nouvelle pull request.
   entre pas : hors de son domaine il retombe sur l'ECMWF, qui voterait deux
   fois. Une source muette est écartée, jamais comptée pour zéro.
 
+- **La météo est poussée, en direct.** Avec un relais, chaque interface ouvre
+  `/v1/direct` (WebSocket, `klima-relay/src/direct.rs`) : le relais pousse les
+  réponses brutes des fournisseurs dès qu'elles changent, lues par les mêmes
+  caches que les requêtes — le direct ne coûte pas une interrogation de plus.
+  Il s'ajoute aux requêtes sans les remplacer : la première prévision vient par
+  HTTP, et une connexion tombée se rouvre seule (`crochets/direct.rs`,
+  `DirectRelais.swift`, même protocole, mêmes cas de test).
+
 - **Le guetteur relit, il ne garde pas.** La demi-heure en cours et les deux
   heures à venir viennent de la série au quart d'heure (`minutely_15`), dans
   un appel à part de la prévision horaire : `klima-core/src/veille.rs` et son

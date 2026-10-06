@@ -184,6 +184,8 @@ struct DashboardView: View {
             // Le guetteur relit à chaque quart d'heure ; il repart de zéro
             // quand la ville change.
             .task(id: viewModel.parcelle) { await viewModel.veiller() }
+            // Le direct : le relais pousse la météo dès qu'elle change.
+            .task(id: viewModel.parcelle) { viewModel.suivreEnDirect() }
             .sheet(isPresented: $villesOuvertes) {
                 VillesView(viewModel: viewModel, subscription: subscription)
             }
