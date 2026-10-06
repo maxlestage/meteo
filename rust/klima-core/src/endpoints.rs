@@ -33,7 +33,7 @@ impl Transport {
     }
 }
 
-/// Les cinq adresses des fournisseurs, et par où elles passent.
+/// Les six adresses des fournisseurs, et par où elles passent.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Endpoints {
     pub transport: Transport,
@@ -43,6 +43,9 @@ pub struct Endpoints {
     pub open_meteo_air: String,
     pub met_norway: String,
     pub bright_sky: String,
+    /// Les bulletins d'aéroport (METAR) de l'Aviation Weather Center : ce
+    /// qu'on voit tomber (`ciel`).
+    pub aviation: String,
 }
 
 impl Default for Endpoints {
@@ -61,6 +64,7 @@ impl Endpoints {
             open_meteo_air: "https://air-quality-api.open-meteo.com/v1/air-quality".to_owned(),
             met_norway: "https://api.met.no/weatherapi/locationforecast/2.0/compact".to_owned(),
             bright_sky: "https://api.brightsky.dev/current_weather".to_owned(),
+            aviation: "https://aviationweather.gov/api/data/metar".to_owned(),
         }
     }
 
@@ -74,6 +78,7 @@ impl Endpoints {
             open_meteo_air: format!("{base}/v1/open-meteo/air-quality"),
             met_norway: format!("{base}/v1/met-norway/compact"),
             bright_sky: format!("{base}/v1/bright-sky/current"),
+            aviation: format!("{base}/v1/aviation/metar"),
         }
     }
 
@@ -94,14 +99,15 @@ impl Endpoints {
         Some(format!("{ws}/v1/direct"))
     }
 
-    /// Les cinq adresses, pour les vérifications d'ensemble.
-    pub fn urls(&self) -> [&str; 5] {
+    /// Les six adresses, pour les vérifications d'ensemble.
+    pub fn urls(&self) -> [&str; 6] {
         [
             &self.open_meteo_forecast,
             &self.open_meteo_search,
             &self.open_meteo_air,
             &self.met_norway,
             &self.bright_sky,
+            &self.aviation,
         ]
     }
 }
@@ -139,7 +145,7 @@ mod tests {
     }
 
     #[test]
-    fn le_relais_remplace_les_cinq_adresses_dun_coup() {
+    fn le_relais_remplace_les_six_adresses_dun_coup() {
         let via = Endpoints::relais("https://relais.klima");
 
         assert_eq!(via.transport, Transport::Relais);
@@ -149,6 +155,7 @@ mod tests {
             assert!(!url.contains("open-meteo.com"), "{url}");
             assert!(!url.contains("met.no"), "{url}");
             assert!(!url.contains("brightsky"), "{url}");
+            assert!(!url.contains("aviationweather"), "{url}");
         }
     }
 
@@ -161,7 +168,7 @@ mod tests {
     }
 
     #[test]
-    fn les_cinq_adresses_directes_sont_distinctes_et_en_https() {
+    fn les_six_adresses_directes_sont_distinctes_et_en_https() {
         let direct = Endpoints::direct();
         for url in direct.urls() {
             assert!(url.starts_with("https://"), "{url}");
@@ -169,7 +176,7 @@ mod tests {
         let mut uniques = direct.urls().to_vec();
         uniques.sort_unstable();
         uniques.dedup();
-        assert_eq!(uniques.len(), 5);
+        assert_eq!(uniques.len(), 6);
     }
 
     #[test]

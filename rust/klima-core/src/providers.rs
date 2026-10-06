@@ -171,7 +171,13 @@ pub struct Provider {
     pub attribution: &'static str,
 }
 
-pub const PROVIDERS: [Provider; 3] = [
+/// L'Aviation Weather Center publie les bulletins des aéroports du monde
+/// entier. Données du gouvernement américain : domaine public. Il demande
+/// qu'on se nomme ; un navigateur ne le peut pas, il passe donc par le relais.
+pub const AVIATION_ATTRIBUTION: &str =
+    "Relevés d'aéroport (METAR) de l'Aviation Weather Center, NOAA — domaine public";
+
+pub const PROVIDERS: [Provider; 4] = [
     Provider {
         id: "open-meteo",
         institution: "Open-Meteo",
@@ -192,6 +198,14 @@ pub const PROVIDERS: [Provider; 3] = [
         platforms: &[Platform::Web, Platform::Native],
         via_relay: true,
         attribution: BRIGHT_SKY_SOURCE.attribution,
+    },
+    // Il ne vote pas : il dit ce qui tombe (`ciel`), pas une prévision.
+    Provider {
+        id: "aviation-weather",
+        institution: "NOAA Aviation Weather Center",
+        platforms: &[Platform::Native],
+        via_relay: true,
+        attribution: AVIATION_ATTRIBUTION,
     },
 ];
 
@@ -260,8 +274,9 @@ mod tests {
     }
 
     #[test]
-    fn neuf_sources_pour_trois_fournisseurs() {
-        assert_eq!(PROVIDERS.len(), 3);
+    fn neuf_sources_qui_votent_pour_quatre_fournisseurs() {
+        // Le quatrième, les aéroports, ne vote pas : il dit ce qui tombe.
+        assert_eq!(PROVIDERS.len(), 4);
         assert_eq!(all_sources().len(), 9);
     }
 
@@ -287,10 +302,11 @@ mod tests {
     }
 
     #[test]
-    fn le_natif_interroge_un_fournisseur_de_plus_que_le_web() {
+    fn le_natif_interroge_deux_fournisseurs_de_plus_que_le_web() {
+        // MET Norway et les aéroports demandent qu'on se nomme.
         assert_eq!(
             providers_for(Platform::Native, Transport::Direct).len(),
-            providers_for(Platform::Web, Transport::Direct).len() + 1
+            providers_for(Platform::Web, Transport::Direct).len() + 2
         );
     }
 

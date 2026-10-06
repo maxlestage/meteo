@@ -322,20 +322,34 @@ pub(crate) async fn lire(etat: &Etat, chemin: &str, params: &Params) -> Lecture 
             cell_key("brightsky", &cell),
             upstream::bright_sky_current(cell.latitude, cell.longitude),
         ),
+        "/v1/aviation/metar" => (
+            cell_key("metar", &cell),
+            upstream::aviation_metar(cell.latitude, cell.longitude),
+        ),
         _ => return Lecture::Inconnue,
     };
 
     // Ce qui vieillit vite se garde moins longtemps : le quart d'heure du
     // guetteur, puis l'instant présent et la station ; la prévision horaire
     // des modèles, elle, ne bouge qu'à chaque passage des modèles.
+    let observation = chemin == "/v1/bright-sky/current" || chemin == "/v1/aviation/metar";
     let cache = if params.contains_key("minutely_15") {
         &etat.quarts
-    } else if params.contains_key("current") || chemin == "/v1/bright-sky/current" {
+    } else if params.contains_key("current") || observation {
         &etat.courants
     } else {
         &etat.forecasts
     };
-    Lecture::Lue(cache.serve(&cle, || (etat.fetch)(appel)).await)
+    let fetch = etat.fetch.clone();
+    Lecture::Lue(
+        cache
+            .serve(&cle, || async move {
+                // Un cadre sans aéroport répond « 204, rien » : c'est une
+                // liste vide, pas un corps vide qu'aucun client ne lit.
+                fetch(appel).await.map(|corps| if corps.trim().is_empty() { "[]".to_owned() } else { corps })
+            })
+            .await,
+    )
 }
 
 /// L'état de santé. Ni la clé ni le code n'y apparaissent — seulement le fait
@@ -722,7 +736,7 @@ mod tests {
     }
 
     #[tokio::test]
-    async fn le_direct_pousse_les_six_sujets_puis_seulement_ce_qui_change() {
+    async fn le_direct_pousse_les_sept_sujets_puis_seulement_ce_qui_change() {
         use futures_util::{SinkExt, StreamExt};
         use tokio_tungstenite::tungstenite::Message as Ws;
 
@@ -736,7 +750,7 @@ mod tests {
         ws.send(Ws::text(abonnement)).await.unwrap();
 
         let mut sujets = Vec::new();
-        while sujets.len() < 6 {
+        while sujets.len() < 7 {
             match ws.next().await.unwrap().unwrap() {
                 Ws::Text(texte) => {
                     let v: serde_json::Value = serde_json::from_str(&texte).unwrap();
@@ -747,20 +761,20 @@ mod tests {
                 _ => continue,
             }
         }
-        assert_eq!(sujets, ["base", "ensemble", "quarts", "met", "station", "air"]);
-        // Six interrogations, une par sujet : c'est tout.
-        assert_eq!(faux.appels(), 6);
+        assert_eq!(sujets, ["base", "ensemble", "quarts", "met", "station", "air", "ciel"]);
+        // Sept interrogations, une par sujet : c'est tout.
+        assert_eq!(faux.appels(), 7);
 
         // Le même abonnement, renvoyé : tout est poussé de nouveau, depuis les
         // caches — aucun fournisseur n'est réinterrogé.
         ws.send(Ws::text(abonnement)).await.unwrap();
         let mut encore = 0;
-        while encore < 6 {
+        while encore < 7 {
             if let Ws::Text(_) = ws.next().await.unwrap().unwrap() {
                 encore += 1;
             }
         }
-        assert_eq!(faux.appels(), 6);
+        assert_eq!(faux.appels(), 7);
 
         // Un abonnement absurde est ignoré, sans fermer la connexion.
         ws.send(Ws::text(r#"{"latitude":123,"longitude":0}"#)).await.unwrap();
@@ -905,6 +919,22 @@ mod tests {
         let agent = faux.vues.lock().unwrap()[0].user_agent.expect("en-tête");
         assert!(agent.contains("Klima/"));
         assert!(agent.contains("http"));
+    }
+
+    #[tokio::test]
+    async fn les_aeroports_par_le_relais_qui_se_nomme_et_sans_corps_vide() {
+        // Un cadre en pleine mer : l'Aviation Weather Center répond « rien ».
+        let faux = Faux::new().repond("");
+        let etat = relais(&faux);
+        let (status, _, corps) = get(etat.clone(), "/v1/aviation/metar?lat=30.0&lon=-40.0").await;
+        assert_eq!(status, StatusCode::OK);
+        assert_eq!(corps, "[]", "une liste vide, que les clients savent lire");
+        let vue = faux.vues.lock().unwrap()[0].clone();
+        assert!(vue.url.starts_with("https://aviationweather.gov/api/data/metar?bbox="), "{}", vue.url);
+        assert!(vue.user_agent.expect("en-tête").contains("Klima/"));
+        // La même maille : le cache répond.
+        let _ = get(etat, "/v1/aviation/metar?lat=30.001&lon=-40.001").await;
+        assert_eq!(faux.appels(), 1);
     }
 
     #[tokio::test]

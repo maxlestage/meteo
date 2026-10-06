@@ -7,6 +7,7 @@ use klima_core::weather::weather_condition;
 use yew::prelude::*;
 
 use klima_ui::composants::pictogramme::Pictogramme;
+use klima_ui::composants::vu::CielVu;
 use klima_ui::i18n::use_i18n;
 
 #[derive(Properties, PartialEq)]
@@ -51,6 +52,10 @@ pub fn Entete(props: &Props) -> Html {
                     { i18n.with("forecast.blended", &params([("count", forecast.sources.len().into())])) }
                 </a>
             }
+
+            // Ce qu'on voit tomber à l'aéroport le plus proche, quand il
+            // tombe quelque chose : une observation, pas une prévision.
+            <CielVu ciel={forecast.ciel.clone()} class={classes!("hero__vu")} />
         </header>
     }
 }

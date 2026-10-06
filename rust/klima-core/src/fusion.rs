@@ -24,6 +24,15 @@
 //! nuit, lever et coucher — reste celui de la prévision de base. Une heure où
 //! aucune source n'a rien dit garde ses valeurs de base : on ne remplace pas
 //! une prévision par un silence.
+//!
+//! **Ce qui tombe maintenant ne se vote pas.** Le vote vaut pour une heure
+//! qu'on prévoit ; pour l'instant présent, il effaçait l'averse que le modèle
+//! le plus fin voyait, parce que les modèles mondiaux, plus grossiers, ne la
+//! voyaient pas — et quelqu'un sous la pluie lisait « sec ». Désormais, ce
+//! qu'un aéroport proche voit tomber (`ciel`) l'emporte, puis ce que la
+//! prévision de base fait tomber au quart d'heure ; le vote ne fait que
+//! peindre le ciel. Et quand quelque chose tombe, l'heure en cours est
+//! pluvieuse : la carte de la pluie dit la même chose que l'en-tête.
 
 use std::collections::HashMap;
 
@@ -39,6 +48,12 @@ pub mod seuils {
     pub const POIDS_RISQUE_PUBLIE: f64 = 0.5;
     /// Les codes météo à partir desquels il tombe quelque chose.
     pub const CODE_MOUILLE: u16 = 51;
+    /// Le risque d'une heure où la prévision fait tomber quelque chose
+    /// maintenant : assez pour qu'elle soit pluvieuse.
+    pub const RISQUE_PRESENT: f64 = crate::ville::seuils::PLUIE_PROBABILITE;
+    /// Le risque d'une heure où l'on voit tomber quelque chose : ce n'est
+    /// plus un risque.
+    pub const RISQUE_OBSERVE: f64 = 100.0;
 }
 
 use seuils::*;
@@ -126,6 +141,32 @@ pub fn code_majoritaire(codes: &[u16], cumuls: &[f64]) -> Option<u16> {
     comptes.into_iter().max_by(|(ca, na), (cb, nb)| na.cmp(nb).then(ca.cmp(cb))).map(|(c, _)| c)
 }
 
+/// Ce que des stations ont vu, pour l'instant présent seulement : une station
+/// dit ce qu'il fait, pas ce qui vient.
+#[derive(Debug, Clone, Copy, Default, PartialEq)]
+pub struct Observation {
+    /// La température mesurée par une station proche (°C).
+    pub temperature: Option<f64>,
+    /// Ce qu'un aéroport proche voit tomber, en code de l'OMM
+    /// (`ciel::CielObserve::tombe`).
+    pub tombe: Option<u16>,
+}
+
+/// Le temps qu'il fait maintenant.
+///
+/// Ce qu'on voit tomber l'emporte ; puis ce que la prévision de base fait
+/// tomber ; puis le vote de l'heure. Rien de ce qui tombe n'est effacé par le
+/// vote — mieux vaut annoncer l'averse que la taire.
+pub fn code_present(base: u16, vote: Option<u16>, tombe: Option<u16>) -> u16 {
+    if let Some(code) = tombe.filter(|c| *c >= CODE_MOUILLE) {
+        return code;
+    }
+    if base >= CODE_MOUILLE {
+        return base;
+    }
+    vote.unwrap_or(base)
+}
+
 /// Ce que la fusion a produit.
 #[derive(Debug, Clone, PartialEq)]
 pub struct Recoupement {
@@ -138,22 +179,22 @@ pub struct Recoupement {
 
 /// Recoupe la prévision de base avec toutes les séries reçues.
 ///
-/// `observation` : la température mesurée par une station proche, s'il y en
-/// a une. Elle vote pour l'instant présent, et seulement pour lui — une
-/// station dit ce qu'il fait, pas ce qui vient.
+/// `observation` : ce que des stations proches ont vu. La température vote
+/// pour l'instant présent ; ce qui tombe s'impose à lui, et à l'heure en
+/// cours.
 pub fn recouper(
     base_heures: &[HourlySample],
     base_jours: &[DailySample],
     base_courant: &CurrentSample,
     series: &[SerieSource],
-    observation: Option<f64>,
+    observation: Observation,
 ) -> Recoupement {
     let index: Vec<HashMap<i64, &HeureSource>> =
         series.iter().map(|s| s.heures.iter().map(|h| (h.time, h)).collect()).collect();
     let index_jours: Vec<HashMap<i64, &JourSource>> =
         series.iter().map(|s| s.jours.iter().map(|j| (j.date, j)).collect()).collect();
 
-    let heures: Vec<HourlySample> = base_heures
+    let mut heures: Vec<HourlySample> = base_heures
         .iter()
         .map(|base| {
             let voix: Vec<&HeureSource> = index.iter().filter_map(|i| i.get(&base.time).copied()).collect();
@@ -170,6 +211,20 @@ pub fn recouper(
         .collect();
 
     let courant = fusionner_courant(base_courant, base_heures.first(), heures.first(), &index, observation);
+
+    // Ce qui tombe maintenant mouille l'heure en cours.
+    if courant.weather_code >= CODE_MOUILLE {
+        let observe = observation.tombe.is_some_and(|c| c >= CODE_MOUILLE);
+        let maintenant = courant.time;
+        if let Some(heure) = heures.iter_mut().find(|h| h.time <= maintenant && maintenant < h.time + 3_600_000) {
+            if heure.weather_code < CODE_MOUILLE {
+                heure.weather_code = courant.weather_code;
+            }
+            heure.precipitation = heure.precipitation.max(PLUIE_MM);
+            let plancher = if observe { RISQUE_OBSERVE } else { RISQUE_PRESENT };
+            heure.precipitation_probability = heure.precipitation_probability.max(plancher);
+        }
+    }
 
     let sources = series
         .iter()
@@ -228,24 +283,27 @@ fn fusionner_jour(base: &DailySample, voix: &[&JourSource]) -> DailySample {
 
 /// L'instant présent : la base décalée d'autant que l'heure en cours l'a été
 /// par la fusion — puis, s'il y a une station, la médiane de ce chiffre et de
-/// la mesure. Le temps qu'il fait suit l'heure recoupée.
+/// la mesure. Le temps qu'il fait suit `code_present`.
 fn fusionner_courant(
     base: &CurrentSample,
     base_heure: Option<&HourlySample>,
     heure: Option<&HourlySample>,
     index: &[HashMap<i64, &HeureSource>],
-    observation: Option<f64>,
+    observation: Observation,
 ) -> CurrentSample {
+    let tombe = observation.tombe;
     let (Some(base_heure), Some(heure)) = (base_heure, heure) else {
-        return base.clone();
+        return CurrentSample { weather_code: code_present(base.weather_code, None, tombe), ..base.clone() };
     };
     let a_vote = index.iter().any(|i| i.get(&heure.time).is_some_and(|h| h.temperature.is_some()));
-    if !a_vote && observation.is_none() {
-        return base.clone();
+    let weather_code = code_present(base.weather_code, a_vote.then_some(heure.weather_code), tombe);
+    let mesure = observation.temperature.filter(|o| o.is_finite());
+    if !a_vote && mesure.is_none() {
+        return CurrentSample { weather_code, ..base.clone() };
     }
     let decalage = heure.temperature - base_heure.temperature;
     let prevue = base.temperature + decalage;
-    let temperature = match observation.filter(|o| o.is_finite()) {
+    let temperature = match mesure {
         Some(mesure) => mediane(&[prevue, mesure]).unwrap_or(prevue),
         None => prevue,
     };
@@ -254,7 +312,7 @@ fn fusionner_courant(
     CurrentSample {
         temperature,
         apparent_temperature: base.apparent_temperature + (temperature - base.temperature),
-        weather_code: if a_vote { heure.weather_code } else { base.weather_code },
+        weather_code,
         wind_speed: vent.max(0.0),
         wind_gusts: rafales.max(vent.max(0.0)),
         ..base.clone()
@@ -355,7 +413,7 @@ mod tests {
             serie("b", vec![voix(0, 20.0, 0.0, 3), voix(1, 21.0, 0.4, 61)]),
             serie("c", vec![voix(0, 26.0, 0.0, 2), voix(1, 20.5, 0.0, 3)]),
         ];
-        let r = recouper(&base_heures, &[], &courant(), &series, None);
+        let r = recouper(&base_heures, &[], &courant(), &series, Observation::default());
 
         let h0 = &r.heures[0];
         assert_eq!(h0.temperature, 20.0, "le 26 de c ne tire rien");
@@ -378,7 +436,7 @@ mod tests {
     fn une_heure_sans_voix_garde_la_base() {
         let base_heures = vec![base(0), base(1)];
         let series = vec![serie("a", vec![voix(0, 19.0, 0.0, 2)])];
-        let r = recouper(&base_heures, &[], &courant(), &series, None);
+        let r = recouper(&base_heures, &[], &courant(), &series, Observation::default());
         assert_eq!(r.heures[1], base(1));
     }
 
@@ -389,7 +447,7 @@ mod tests {
             heures: vec![HeureSource { time: MIDI, ..Default::default() }],
             jours: Vec::new(),
         };
-        let r = recouper(&[base(0)], &[], &courant(), &[muette], None);
+        let r = recouper(&[base(0)], &[], &courant(), &[muette], Observation::default());
         assert_eq!(r.heures[0].temperature, 18.0);
         assert!(r.sources.is_empty());
     }
@@ -401,16 +459,63 @@ mod tests {
             serie("b", vec![voix(0, 20.0, 0.0, 2)]),
         ];
         // L'heure passe de 18 à 20 : l'instant de 18,4 à 20,4.
-        let r = recouper(&[base(0)], &[], &courant(), &series, None);
+        let r = recouper(&[base(0)], &[], &courant(), &series, Observation::default());
         assert!((r.courant.temperature - 20.4).abs() < 1e-9);
         assert!((r.courant.apparent_temperature - 19.4).abs() < 1e-9);
         assert_eq!(r.courant.weather_code, 2);
         // Une station mesure 19 : la médiane de 20,4 et 19.
-        let r = recouper(&[base(0)], &[], &courant(), &series, Some(19.0));
+        let r = recouper(&[base(0)], &[], &courant(), &series, Observation { temperature: Some(19.0), tombe: None });
         assert!((r.courant.temperature - 19.7).abs() < 1e-9);
         // Sans aucune voix, la base telle quelle.
-        let r = recouper(&[base(0)], &[], &courant(), &[], None);
+        let r = recouper(&[base(0)], &[], &courant(), &[], Observation::default());
         assert_eq!(r.courant, courant());
+    }
+
+    #[test]
+    fn ce_qui_tombe_ne_se_vote_pas() {
+        // Ce qu'on voit tomber, puis ce que la base fait tomber, puis le vote.
+        assert_eq!(code_present(1, Some(2), Some(80)), 80);
+        assert_eq!(code_present(61, Some(2), None), 61);
+        assert_eq!(code_present(1, Some(63), None), 63);
+        assert_eq!(code_present(1, Some(2), None), 2);
+        assert_eq!(code_present(1, None, None), 1);
+        assert_eq!(code_present(3, Some(2), Some(45)), 2, "du brouillard n'est pas ce qui tombe");
+    }
+
+    #[test]
+    fn la_pluie_de_la_base_n_est_pas_effacee_par_la_majorite() {
+        // La base fait pleuvoir maintenant ; trois modèles sur trois disent sec.
+        let mouille = CurrentSample { weather_code: 61, ..courant() };
+        let series = vec![
+            serie("a", vec![voix(0, 18.0, 0.0, 2)]),
+            serie("b", vec![voix(0, 18.0, 0.0, 3)]),
+            serie("c", vec![voix(0, 18.0, 0.0, 2)]),
+        ];
+        let r = recouper(&[base(0), base(1)], &[], &mouille, &series, Observation::default());
+        assert_eq!(r.courant.weather_code, 61);
+        let h0 = &r.heures[0];
+        assert_eq!(h0.weather_code, 61, "l'heure en cours dit la même chose que l'en-tête");
+        assert_eq!(h0.precipitation, 0.1);
+        assert_eq!(h0.precipitation_probability, 50.0);
+        assert_eq!(r.heures[1], base(1), "l'heure suivante reste au vote");
+    }
+
+    #[test]
+    fn une_pluie_observee_s_impose_a_l_instant_et_a_l_heure() {
+        let series = vec![serie("a", vec![voix(0, 18.0, 0.0, 2)])];
+        let vue = Observation { temperature: None, tombe: Some(80) };
+        let r = recouper(&[base(0)], &[], &courant(), &series, vue);
+        assert_eq!(r.courant.weather_code, 80);
+        assert_eq!(r.heures[0].weather_code, 80);
+        assert_eq!(r.heures[0].precipitation_probability, 100.0, "vue, ce n'est plus un risque");
+        // Sans aucune série, l'observation suffit.
+        let r = recouper(&[base(0)], &[], &courant(), &[], vue);
+        assert_eq!(r.courant.weather_code, 80);
+        assert_eq!(r.courant.temperature, courant().temperature);
+        // Un ciel sec observé ne retire rien.
+        let sec = Observation { temperature: None, tombe: None };
+        let mouille = CurrentSample { weather_code: 61, ..courant() };
+        assert_eq!(recouper(&[base(0)], &[], &mouille, &[], sec).courant.weather_code, 61);
     }
 
     #[test]
@@ -440,7 +545,7 @@ mod tests {
             .enumerate()
             .map(|(i, jour)| SerieSource { source_id: i.to_string(), heures: Vec::new(), jours: vec![jour] })
             .collect();
-        let r = recouper(&[], std::slice::from_ref(&jour), &courant(), &series, None);
+        let r = recouper(&[], std::slice::from_ref(&jour), &courant(), &series, Observation::default());
         let d = &r.jours[0];
         assert_eq!((d.temperature_min, d.temperature_max), (10.0, 22.0));
         assert_eq!(d.precipitation_sum, 1.0);

@@ -206,8 +206,8 @@ final class DashboardViewModel: ObservableObject {
                 air = lu
             }
         default:
-            // La base et les sept modèles d'abord ; MET Norway et la station
-            // quand ils sont là.
+            // La base et les sept modèles d'abord ; MET Norway, la station et
+            // les aéroports quand ils sont là.
             guard
                 let base = corpsDirects["base"],
                 corpsDirects["ensemble"] != nil,
@@ -216,7 +216,9 @@ final class DashboardViewModel: ObservableObject {
             let sources = WeatherProviders.ensemble(
                 openMeteo: corpsDirects["ensemble"],
                 met: corpsDirects["met"],
-                station: corpsDirects["station"]
+                station: corpsDirects["station"],
+                aviation: corpsDirects["ciel"],
+                point: suivie
             )
             let recoupee = AgroWeatherService.recouper(prevision, avec: sources)
             forecast = recoupee

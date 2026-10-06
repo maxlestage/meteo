@@ -16,7 +16,8 @@
 //! `instant()` rend l'instant absolu pour qui en a besoin — un minuteur
 //! d'écran verrouillé, par exemple, qui compte dans le temps du téléphone.
 
-use klima_core::fusion::{SerieSource, recouper};
+use klima_core::ciel::CielObserve;
+use klima_core::fusion::{Observation, SerieSource, recouper};
 use klima_core::meteo::{CurrentSample, DailySample, HourlySample};
 use klima_core::calendar::civil;
 use klima_core::endpoints::Endpoints;
@@ -53,6 +54,9 @@ pub struct Forecast {
     /// Les sources qui ont fait cette prévision, quand elle est recoupée
     /// (`recoupee`) ; vide pour la prévision de base, d'un seul modèle.
     pub sources: Vec<String>,
+    /// Le ciel observé à l'aéroport le plus proche, quand il y en a un assez
+    /// près et assez récent (`klima_core::ciel`).
+    pub ciel: Option<CielObserve>,
 }
 
 impl Forecast {
@@ -67,18 +71,26 @@ impl Forecast {
 
     /// La même prévision, refaite avec toutes les sources reçues
     /// (`klima_core::fusion`). `observation` : la température d'une station
-    /// proche, qui ne vote que pour l'instant présent. Sans aucune série, la
-    /// prévision revient telle quelle.
-    pub fn recoupee(self, series: &[SerieSource], observation: Option<f64>) -> Forecast {
-        if series.is_empty() && observation.is_none() {
+    /// proche, qui ne vote que pour l'instant présent ; `ciel` : ce que voit
+    /// l'aéroport le plus proche — ce qu'il voit tomber s'impose à l'instant
+    /// et à l'heure en cours. Sans rien de tout cela, la prévision revient
+    /// telle quelle.
+    pub fn recoupee(
+        self,
+        series: &[SerieSource],
+        observation: Option<f64>,
+        ciel: Option<CielObserve>,
+    ) -> Forecast {
+        if series.is_empty() && observation.is_none() && ciel.is_none() {
             return self;
         }
-        let r = recouper(&self.hourly, &self.daily, &self.current, series, observation);
+        let vue = Observation { temperature: observation, tombe: ciel.as_ref().and_then(|c| c.tombe) };
+        let r = recouper(&self.hourly, &self.daily, &self.current, series, vue);
         let mut sources = r.sources;
         if observation.is_some() {
             sources.push(klima_core::providers::BRIGHT_SKY_SOURCE.id.to_owned());
         }
-        Forecast { hourly: r.heures, daily: r.jours, current: r.courant, sources, ..self }
+        Forecast { hourly: r.heures, daily: r.jours, current: r.courant, sources, ciel, ..self }
     }
 }
 
@@ -212,6 +224,7 @@ pub fn decode_forecast(
         daily,
         fetched_at,
         sources: Vec::new(),
+        ciel: None,
     })
 }
 

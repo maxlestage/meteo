@@ -11,7 +11,8 @@
 use gloo_net::http::Request;
 use klima_api::open_meteo::{ApiError, Forecast, decode_forecast, decode_search};
 use klima_api::plan::Verdict;
-use klima_api::{ensemble, readings};
+use klima_api::{ciel, ensemble, readings};
+use klima_core::ciel::{CielObserve, plus_proche};
 use klima_core::fusion::SerieSource;
 use klima_core::endpoints::Endpoints;
 use klima_core::position::Parcelle;
@@ -82,6 +83,8 @@ pub struct Recoupement {
     pub series: Vec<SerieSource>,
     /// La température mesurée par une station proche, s'il y en a une.
     pub observation: Option<f64>,
+    /// Le ciel de l'aéroport le plus proche, s'il y en a un assez près.
+    pub ciel: Option<CielObserve>,
 }
 
 /// Interroge tous les fournisseurs permis, en même temps.
@@ -92,7 +95,8 @@ pub struct Recoupement {
 ///
 /// Open-Meteo répond pour sept modèles d'un coup, sur toute la période : la
 /// même réponse fait leurs séries et leur relevé de l'heure. MET Norway aussi
-/// sert deux fois. Bright Sky, une station, ne vote que pour l'instant présent.
+/// sert deux fois. Bright Sky, une station, ne vote que pour l'instant présent ;
+/// les aéroports disent ce qui tombe.
 pub async fn recoupement(
     endpoints: &Endpoints,
     parcelle: &Parcelle,
@@ -114,7 +118,7 @@ pub async fn recoupement(
         }
     };
 
-    let (open_meteo, met, bright_sky) = futures::join!(
+    let (open_meteo, met, bright_sky, aviation) = futures::join!(
         appel("open-meteo", ensemble::ensemble_url(endpoints, parcelle, days)),
         appel(
             "met-norway",
@@ -124,29 +128,49 @@ pub async fn recoupement(
             "bright-sky",
             readings::bright_sky_call(endpoints, parcelle.latitude, parcelle.longitude).url
         ),
+        appel(
+            "aviation-weather",
+            ciel::metar_call(endpoints, parcelle.latitude, parcelle.longitude).url
+        ),
     );
 
     lire_recoupement(
-        open_meteo.map(Option::unwrap_or_default).as_deref(),
-        met.map(Option::unwrap_or_default).as_deref(),
-        bright_sky.map(Option::unwrap_or_default).as_deref(),
+        Corps {
+            open_meteo: open_meteo.map(Option::unwrap_or_default).as_deref(),
+            met: met.map(Option::unwrap_or_default).as_deref(),
+            bright_sky: bright_sky.map(Option::unwrap_or_default).as_deref(),
+            aviation: aviation.flatten().as_deref(),
+        },
+        (parcelle.latitude, parcelle.longitude),
         utc_offset_seconds,
         maintenant,
     )
 }
 
-/// Lit ce que les fournisseurs ont répondu — par requête ou par le direct.
+/// Les corps reçus de chaque fournisseur.
 ///
 /// `None` : le fournisseur n'a pas été interrogé (il n'est pas permis d'ici) ;
 /// `Some("")` : il l'a été et n'a rien dit. Le second compte dans l'accord
-/// comme une source muette, le premier n'y entre pas.
+/// comme une source muette, le premier n'y entre pas. Les aéroports ne votent
+/// pas : pour eux, les deux reviennent au même.
+#[derive(Default)]
+pub struct Corps<'a> {
+    pub open_meteo: Option<&'a str>,
+    pub met: Option<&'a str>,
+    pub bright_sky: Option<&'a str>,
+    pub aviation: Option<&'a str>,
+}
+
+/// Lit ce que les fournisseurs ont répondu — par requête ou par le direct.
+/// `point` : la ville, pour trouver l'aéroport le plus proche ; `maintenant`
+/// est à son heure.
 pub fn lire_recoupement(
-    open_meteo: Option<&str>,
-    met: Option<&str>,
-    bright_sky: Option<&str>,
+    corps: Corps<'_>,
+    point: (f64, f64),
     utc_offset_seconds: i64,
     maintenant: i64,
 ) -> Recoupement {
+    let Corps { open_meteo, met, bright_sky, aviation } = corps;
     let mut outcomes = Vec::new();
     let mut series = Vec::new();
     let mut observation = None;
@@ -171,5 +195,9 @@ pub fn lire_recoupement(
         outcomes.push(ProviderOutcome { provider_id: "bright-sky".to_owned(), readings: releves });
     }
 
-    Recoupement { outcomes, series, observation }
+    let ciel = aviation.and_then(|corps| {
+        plus_proche(&ciel::decode_metars(corps, utc_offset_seconds), point.0, point.1, maintenant)
+    });
+
+    Recoupement { outcomes, series, observation, ciel }
 }

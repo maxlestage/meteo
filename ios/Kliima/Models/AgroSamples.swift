@@ -117,4 +117,7 @@ struct AgroForecast: Equatable {
     var sources: [String] = []
     /// L'accord des sources pour l'heure en cours, quand elles ont répondu.
     var consensus: Consensus?
+    /// Le ciel observé à l'aéroport le plus proche, quand il y en a un assez
+    /// près et assez récent (`Ciel`).
+    var ciel: CielObserve?
 }

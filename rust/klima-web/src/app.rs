@@ -136,7 +136,11 @@ pub fn App(props: &Props) -> Html {
                         // La demi-heure en cours et les deux heures qui
                         // viennent, au quart d'heure : la question qu'on pose
                         // la main sur la poignée.
-                        <Guetteur etat={veille.clone()} class={classes!("card")} />
+                        <Guetteur
+                            etat={veille.clone()}
+                            tombe={forecast.ciel.as_ref().and_then(|c| c.tombe)}
+                            class={classes!("card")}
+                        />
                         // La première question : faut-il un parapluie, et
                         // jusqu'à quand — puis ce qu'il faut emporter.
                         <CartePluie hours={forecast.hourly.clone()} />

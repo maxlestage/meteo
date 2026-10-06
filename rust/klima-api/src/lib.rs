@@ -11,6 +11,7 @@
 //! réponse enregistrée, sans réseau ni horloge.
 
 pub mod air;
+pub mod ciel;
 pub mod ensemble;
 pub mod open_meteo;
 pub mod parcelle_url;
