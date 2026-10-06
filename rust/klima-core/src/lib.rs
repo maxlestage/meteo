@@ -11,6 +11,7 @@
 pub mod air;
 pub mod alerts;
 pub mod calendar;
+pub mod ciel;
 pub mod endpoints;
 pub mod format;
 pub mod fusion;

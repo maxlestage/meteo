@@ -32,7 +32,8 @@ struct WatchDashboardView: View {
                         WatchGuetteur(
                             quarts: viewModel.quarts,
                             enLecture: viewModel.veilleEnLecture,
-                            timeZone: viewModel.timeZone
+                            timeZone: viewModel.timeZone,
+                            tombe: forecast.ciel?.tombe
                         )
                         .apparition(1)
                         WatchPluie(forecast: forecast, timeZone: viewModel.timeZone)
@@ -224,6 +225,15 @@ private struct WatchHeader: View {
                 .lineLimit(1)
                 .minimumScaleFactor(0.8)
             }
+
+            // Ce qu'on voit tomber à l'aéroport le plus proche.
+            if let vu = VeilleTextes.vu(forecast.ciel, in: TimeZone(identifier: forecast.timezone) ?? .current) {
+                Label(vu, systemImage: "drop.fill")
+                    .font(.system(size: 11, weight: .semibold))
+                    .foregroundStyle(bleuPluie)
+                    .fixedSize(horizontal: false, vertical: true)
+                    .padding(.top, 3)
+            }
         }
         .accessibilityElement(children: .combine)
     }
@@ -244,6 +254,8 @@ private struct WatchGuetteur: View {
     let quarts: [QuartSample]?
     let enLecture: Bool
     let timeZone: TimeZone
+    /// Ce que l'aéroport le plus proche voit tomber.
+    let tombe: Int?
 
     /// Le débit qui remplit une barre (mm/h), comme sur l'iPhone.
     private let debitPlein = 8.0
@@ -261,7 +273,9 @@ private struct WatchGuetteur: View {
                 .font(.system(size: 11, weight: .semibold))
                 .foregroundStyle(bleuPluie)
 
-                if let lecture = quarts.flatMap({ Veille.veille($0, maintenant: contexte.date) }) {
+                if let lecture = quarts.flatMap({
+                    Veille.veille(Veille.observer($0, maintenant: contexte.date, tombe: tombe), maintenant: contexte.date)
+                }) {
                     Text(VeilleTextes.immediat(lecture, in: timeZone))
                         .font(.footnote)
                         .fixedSize(horizontal: false, vertical: true)

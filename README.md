@@ -119,7 +119,32 @@ chaque heure et chaque jour, chaque source vote :
 - **le temps qu'il fait** : la majorité mouillée ou sèche, puis le code le plus
   cité de ce camp — à égalité, le plus marqué ;
 - **l'instant présent** : la base décalée d'autant que l'heure recoupée, puis la
-  médiane avec la station de Bright Sky s'il y en a une à portée.
+  médiane avec la station de Bright Sky s'il y en a une à portée. Mais **ce
+  qui tombe maintenant ne se vote pas** (`code_present`) : la majorité des
+  modèles mondiaux effaçait l'averse que le modèle le plus fin voyait. Ce
+  qu'un aéroport voit tomber l'emporte, puis ce que la base fait tomber ; le
+  vote ne fait que peindre le ciel. Quand quelque chose tombe, l'heure en
+  cours devient pluvieuse — 50 % au moins, 100 % si on l'a vu.
+
+### Le ciel observé : les aéroports
+
+Toutes les autres sources sont des prévisions ; une averse qu'aucun modèle
+n'a vue venir n'existait pour aucune. Les aéroports, eux, regardent : leur
+bulletin METAR dit le temps présent (`-RA`, `+SHRA`, `TS`…). L'Aviation
+Weather Center de la NOAA les publie tous, dans le domaine public
+(`klima-core/src/ciel.rs`, `klima-api/src/ciel.rs`, miroir
+`ios/Kliima/Models/Ciel.swift`, mêmes cas de test).
+
+On garde le bulletin le plus proche à moins de 30 km et d'au plus 1 h 15. La
+règle est à sens unique : une pluie vue s'ajoute à la prévision — l'en-tête,
+l'heure en cours, et le quart en cours du guetteur (`veille::observer`) —, un
+ciel sec vu n'en retire rien : un aéroport à quinze kilomètres qui ne voit
+rien ne prouve pas qu'il ne pleut pas en ville. L'en-tête le dit alors :
+« Vu à l'aéroport de Quimper/Pluguffan (5 km) à 16:00 : pluie modérée »,
+avec la mention de la source. Le service demande qu'on se nomme : le natif
+l'appelle en direct avec son `User-Agent`, le web par le relais
+(`/v1/aviation/metar`, gardé dix minutes, et poussé par le direct sous le
+sujet `ciel`).
 
 Ce qu'une seule source fournit — humidité, point de rosée, UV, jour ou nuit,
 lever et coucher — reste celui de la prévision de base (le « meilleur » modèle

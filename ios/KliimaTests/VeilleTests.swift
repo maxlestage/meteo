@@ -35,6 +35,21 @@ final class VeilleTests: XCTestCase {
 
     private let faible = VeillePrecipitation(nature: .pluie, intensite: .faible)
 
+    func testUnePluieObserveeMouilleLeQuartEnCours() throws {
+        let sec = serie(Array(repeating: 0, count: 10))
+        let vu = Veille.observer(sec, maintenant: maintenant, tombe: 63)
+        XCTAssertEqual(vu[0].precipitation, 1.0)
+        XCTAssertEqual(vu[0].weatherCode, 63)
+        XCTAssertEqual(vu[1], sec[1], "la suite reste à la prévision")
+        let v = try XCTUnwrap(Veille.veille(vu, maintenant: maintenant))
+        XCTAssertEqual(v.immediat, .cesse(fin: seizeH.addingTimeInterval(quart)))
+
+        let mouillee = serie([0.6, 0.6])
+        XCTAssertEqual(Veille.observer(mouillee, maintenant: maintenant, tombe: 65), mouillee)
+        XCTAssertEqual(Veille.observer(sec, maintenant: maintenant, tombe: nil), sec)
+        XCTAssertEqual(Veille.observer(sec, maintenant: maintenant, tombe: 45), sec, "le brouillard ne mouille pas")
+    }
+
     func testRienNeTombe() throws {
         let v = try XCTUnwrap(Veille.veille(serie(Array(repeating: 0, count: 10)), maintenant: maintenant))
         XCTAssertEqual(v.immediat, .sec)

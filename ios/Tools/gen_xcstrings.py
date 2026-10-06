@@ -228,6 +228,16 @@ STRINGS = {
 
     # --- La prévision recoupée de toutes les sources ---
     "forecast.blended": ("Recoupée de %1$@ sources", "Blended from %1$@ sources", "Combinada de %1$@ fuentes"),
+    "ciel.observed": (
+        "Vu à l’aéroport de %1$@ (%2$@\u00a0km) à %3$@ : %4$@.",
+        "Seen at %1$@ airport (%2$@\u00a0km) at %3$@: %4$@.",
+        "Visto en el aeropuerto de %1$@ (%2$@\u00a0km) a las %3$@: %4$@.",
+    ),
+    "ciel.credit": (
+        "Relevé d’aéroport (METAR) — NOAA, domaine public",
+        "Airport report (METAR) — NOAA, public domain",
+        "Parte de aeropuerto (METAR) — NOAA, dominio público",
+    ),
 
     # --- Apparence : celle du téléphone, claire ou sombre ---
     "theme.title": ("Apparence", "Appearance", "Apariencia"),

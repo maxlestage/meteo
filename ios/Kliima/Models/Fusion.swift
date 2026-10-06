@@ -12,6 +12,11 @@ import Foundation
 /// source fournit — humidité, point de rosée, UV, jour ou nuit, lever et
 /// coucher — reste celui de la prévision de base ; une heure sans voix garde
 /// ses valeurs de base.
+///
+/// Ce qui tombe maintenant ne se vote pas : ce qu'un aéroport proche voit
+/// tomber (`Ciel`) l'emporte, puis ce que la prévision de base fait tomber ;
+/// le vote ne fait que peindre le ciel. Et quand quelque chose tombe, l'heure
+/// en cours est pluvieuse.
 enum FusionSeuils {
     /// Une source mouille une heure à partir de ce cumul (mm).
     static let pluieMm = VilleSeuils.pluieMm
@@ -19,6 +24,22 @@ enum FusionSeuils {
     static let poidsRisquePublie = 0.5
     /// Les codes météo à partir desquels il tombe quelque chose.
     static let codeMouille = 51
+    /// Le risque d'une heure où la prévision fait tomber quelque chose
+    /// maintenant.
+    static let risquePresent = VilleSeuils.pluieProbabilite
+    /// Le risque d'une heure où l'on voit tomber quelque chose.
+    static let risqueObserve = 100.0
+}
+
+/// Ce que des stations ont vu, pour l'instant présent seulement (`Observation`
+/// côté Rust).
+struct FusionObservation: Equatable, Sendable {
+    /// La température mesurée par une station proche (°C).
+    var temperature: Double?
+    /// Ce qu'un aéroport proche voit tomber, en code de l'OMM.
+    var tombe: Int?
+
+    static let aucune = FusionObservation()
 }
 
 /// Ce qu'une source annonce pour une heure. Tout est facultatif.
@@ -100,15 +121,24 @@ enum Fusion {
         return comptes.max { a, b in a.value != b.value ? a.value < b.value : a.key < b.key }?.key
     }
 
+    /// Le temps qu'il fait maintenant : ce qu'on voit tomber, puis ce que la
+    /// base fait tomber, puis le vote de l'heure.
+    static func codePresent(base: Int, vote: Int?, tombe: Int?) -> Int {
+        if let tombe, tombe >= FusionSeuils.codeMouille { return tombe }
+        if base >= FusionSeuils.codeMouille { return base }
+        return vote ?? base
+    }
+
     /// Recoupe la prévision de base avec toutes les séries reçues.
-    /// `observation` : la température d'une station proche, qui ne vote que
-    /// pour l'instant présent.
+    /// `observation` : ce que des stations proches ont vu. La température vote
+    /// pour l'instant présent ; ce qui tombe s'impose à lui, et à l'heure en
+    /// cours.
     static func recouper(
         heures base: [HourlySample],
         jours baseJours: [DailySample],
         courant baseCourant: CurrentSample,
         series: [SerieSource],
-        observation: Double?
+        observation: FusionObservation
     ) -> Recoupement {
         let index: [[Date: HeureSource]] = series.map { serie in
             Dictionary(serie.heures.map { ($0.time, $0) }, uniquingKeysWith: { premier, _ in premier })
@@ -117,13 +147,36 @@ enum Fusion {
             Dictionary(serie.jours.map { ($0.date, $0) }, uniquingKeysWith: { premier, _ in premier })
         }
 
-        let heures = base.map { heure in
+        var heures = base.map { heure in
             fusionnerHeure(heure, index.compactMap { $0[heure.time] })
         }
         let jours = baseJours.map { jour in
             fusionnerJour(jour, indexJours.compactMap { $0[jour.date] })
         }
         let courant = fusionnerCourant(baseCourant, base.first, heures.first, index, observation)
+
+        // Ce qui tombe maintenant mouille l'heure en cours.
+        if courant.weatherCode >= FusionSeuils.codeMouille,
+           let i = heures.firstIndex(where: { $0.time <= courant.time && courant.time < $0.time.addingTimeInterval(3600) }) {
+            let observe = (observation.tombe ?? 0) >= FusionSeuils.codeMouille
+            let h = heures[i]
+            heures[i] = HourlySample(
+                time: h.time,
+                weatherCode: h.weatherCode >= FusionSeuils.codeMouille ? h.weatherCode : courant.weatherCode,
+                isDay: h.isDay,
+                precipitationProbability: max(
+                    h.precipitationProbability, observe ? FusionSeuils.risqueObserve : FusionSeuils.risquePresent
+                ),
+                temperature: h.temperature,
+                apparentTemperature: h.apparentTemperature,
+                relativeHumidity: h.relativeHumidity,
+                dewPoint: h.dewPoint,
+                precipitation: max(h.precipitation, FusionSeuils.pluieMm),
+                windSpeed: h.windSpeed,
+                windGusts: h.windGusts,
+                uvIndex: h.uvIndex
+            )
+        }
         let sources = series
             .filter { $0.heures.contains { $0.temperature != nil } }
             .map(\.sourceId)
@@ -174,18 +227,23 @@ enum Fusion {
     }
 
     /// L'instant présent : la base décalée d'autant que l'heure en cours l'a été
-    /// par la fusion, puis la médiane avec la station s'il y en a une.
+    /// par la fusion, puis la médiane avec la station s'il y en a une. Le temps
+    /// qu'il fait suit `codePresent`.
     private static func fusionnerCourant(
         _ base: CurrentSample,
         _ baseHeure: HourlySample?,
         _ heure: HourlySample?,
         _ index: [[Date: HeureSource]],
-        _ observation: Double?
+        _ observation: FusionObservation
     ) -> CurrentSample {
-        guard let baseHeure, let heure else { return base }
+        let tombe = observation.tombe
+        guard let baseHeure, let heure else {
+            return base.avec(weatherCode: codePresent(base: base.weatherCode, vote: nil, tombe: tombe))
+        }
         let aVote = index.contains { $0[heure.time]?.temperature != nil }
-        let mesure = observation.flatMap { $0.isFinite ? $0 : nil }
-        guard aVote || mesure != nil else { return base }
+        let code = codePresent(base: base.weatherCode, vote: aVote ? heure.weatherCode : nil, tombe: tombe)
+        let mesure = observation.temperature.flatMap { $0.isFinite ? $0 : nil }
+        guard aVote || mesure != nil else { return base.avec(weatherCode: code) }
 
         let prevue = base.temperature + (heure.temperature - baseHeure.temperature)
         let temperature = mesure.flatMap { mediane([prevue, $0]) } ?? prevue
@@ -195,12 +253,23 @@ enum Fusion {
             time: base.time,
             temperature: temperature,
             apparentTemperature: base.apparentTemperature + (temperature - base.temperature),
-            weatherCode: aVote ? heure.weatherCode : base.weatherCode,
+            weatherCode: code,
             isDay: base.isDay,
             relativeHumidity: base.relativeHumidity,
             windSpeed: vent,
             windGusts: rafales,
             pressure: base.pressure
+        )
+    }
+}
+
+private extension CurrentSample {
+    /// Le même instant, avec un autre temps.
+    func avec(weatherCode: Int) -> CurrentSample {
+        CurrentSample(
+            time: time, temperature: temperature, apparentTemperature: apparentTemperature,
+            weatherCode: weatherCode, isDay: isDay, relativeHumidity: relativeHumidity,
+            windSpeed: windSpeed, windGusts: windGusts, pressure: pressure
         )
     }
 }

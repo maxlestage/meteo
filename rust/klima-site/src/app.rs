@@ -15,6 +15,7 @@ use klima_ui::crochets::prevision::use_forecast;
 use klima_ui::crochets::direct::use_direct;
 use klima_ui::crochets::veille::use_veille;
 use klima_ui::composants::guetteur::Guetteur;
+use klima_ui::composants::vu::CielVu;
 use klima_ui::i18n::use_i18n;
 use yew::prelude::*;
 
@@ -158,7 +159,15 @@ pub fn App(props: &Props) -> Html {
                     on_select={lieu.select.clone()}
                     on_retry={prevision.reload.clone()}
                 >
-                    <Guetteur etat={veille} class={classes!("today__guetteur")} />
+                    <CielVu
+                        ciel={etat.forecast.as_ref().and_then(|f| f.ciel.clone())}
+                        class={classes!("today__vu")}
+                    />
+                    <Guetteur
+                        etat={veille}
+                        tombe={etat.forecast.as_ref().and_then(|f| f.ciel.as_ref()).and_then(|c| c.tombe)}
+                        class={classes!("today__guetteur")}
+                    />
                 </SectionDuJour>
 
                 <Sources consensus={etat.consensus.clone()} loading={etat.loading} />
