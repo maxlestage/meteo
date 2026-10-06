@@ -86,6 +86,27 @@ final class VeilleTests: XCTestCase {
         )
     }
 
+    func testLeRadarFaitLHeureQuiVientPuisSEfface() throws {
+        let sec = serie(Array(repeating: 0, count: 10))
+        let radar: [(debut: Date, debit: Double)] = (0..<8).map { (debut: seizeH.addingTimeInterval(Double($0) * quart), debit: 4.0) }
+        let vu = Veille.radariser(sec, radar: radar)
+        XCTAssertEqual(vu[0].precipitation, 1.0, "le premier quart : le radar seul")
+        XCTAssertEqual(vu[0].weatherCode, 63, "4 mm/h : pluie modérée")
+        XCTAssertEqual(vu[4].precipitation, 0.5, "à mi-chemin, moitié radar")
+        XCTAssertEqual(vu[7].precipitation, 0.13)
+        XCTAssertEqual(vu[8], sec[8], "hors du radar, la prévision")
+        XCTAssertEqual(try XCTUnwrap(Veille.veille(vu, maintenant: maintenant)).immediat.code, "continue")
+
+        let mouillee = serie([0.8, 0.8, 0.8])
+        let radarSec: [(debut: Date, debit: Double)] = (0..<8).map { (debut: seizeH.addingTimeInterval(Double($0) * quart), debit: 0.0) }
+        let seche = Veille.radariser(mouillee, radar: radarSec)
+        XCTAssertEqual(seche[0].precipitation, 0)
+        XCTAssertEqual(seche[1].precipitation, 0.1)
+        let neige = serie([0.4]).map { avec($0, code: 73) }
+        XCTAssertEqual(Veille.radariser(neige, radar: radar)[0].weatherCode, 73)
+        XCTAssertEqual(Veille.radariser(sec, radar: []), sec)
+    }
+
     func testRienNeTombe() throws {
         let v = try XCTUnwrap(Veille.veille(serie(Array(repeating: 0, count: 10)), maintenant: maintenant))
         XCTAssertEqual(v.immediat, .sec)

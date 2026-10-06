@@ -15,6 +15,7 @@ mod identite;
 mod iles;
 mod poussee;
 mod pro;
+mod radar;
 mod routes;
 mod site;
 mod upstream;
@@ -32,7 +33,9 @@ async fn main() {
         .build()
         .expect("client HTTP");
 
-    let mut etat = routes::etat(upstream::http_fetch(client), Arc::new(maintenant));
+    let mut etat = routes::etat(upstream::http_fetch(client.clone()), Arc::new(maintenant));
+    // La mosaïque radar européenne : publique, sans clé, lue à la demande.
+    etat.radar = Arc::new(radar::Radar::new(radar::http_charge(client), Arc::new(maintenant)));
     etat.open_meteo_key = std::env::var("OPEN_METEO_KEY").ok().filter(|k| !k.is_empty());
 
     // Ce que ce déploiement accorde comme palier, en plus de la boutique. La

@@ -17,6 +17,9 @@ struct GuetteurCardView: View {
     /// voit tomber mouille les quarts que son bulletin couvre, et ce que ses
     /// prévisionnistes annoncent est dit.
     var ciel: CielObserve? = nil
+    /// Ce que voit le radar et ce qu'il prévoit : l'heure qui vient en est
+    /// refaite, et quand il voit la ville, il fait foi pour ce qui tombe.
+    var radar: RadarPrevision? = nil
 
     @ScaledMetric(relativeTo: .body) private var hauteurBarres: CGFloat = 48
 
@@ -30,9 +33,9 @@ struct GuetteurCardView: View {
                 tete
 
                 if let quarts, let lecture = Veille.veille(
-                    Veille.observer(quarts, maintenant: contexte.date, ciel: ciel), maintenant: contexte.date
+                    Veille.observer(serie(quarts), maintenant: contexte.date, ciel: aeroport), maintenant: contexte.date
                 ) {
-                    let aveugle = Veille.aveugle(quarts, maintenant: contexte.date, ciel: ciel)
+                    let aveugle = Veille.aveugle(serie(quarts), maintenant: contexte.date, ciel: aeroport)
                     bulle(Localized.text("veille.now"), immediat(lecture))
                     bulle(Localized.text("veille.next"), suite(lecture, aveugle: aveugle))
                     grille(lecture)
@@ -45,6 +48,13 @@ struct GuetteurCardView: View {
                         .background(Color.filet.opacity(0.6), in: bulleForme)
                 }
 
+                if let mouvement = VeilleTextes.mouvement(radar) {
+                    Label(mouvement, systemImage: "location.north.line.fill")
+                        .font(.subheadline.weight(.semibold))
+                        .foregroundStyle(bleuPluie)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+
                 if let luA, quarts != nil {
                     Text(Localized.text(
                         "veille.checked",
@@ -54,11 +64,28 @@ struct GuetteurCardView: View {
                     .font(.caption)
                     .foregroundStyle(Color.encreDouce)
                 }
+
+                // La mention que la licence du radar demande.
+                if let source = VeilleTextes.sourceRadar(radar, in: timeZone) {
+                    Text(source)
+                        .font(.caption2)
+                        .foregroundStyle(Color.encreDouce)
+                }
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .cardBackground()
         .accessibilityElement(children: .combine)
+    }
+
+    /// La série refaite avec le radar.
+    private func serie(_ quarts: [QuartSample]) -> [QuartSample] {
+        Veille.radariser(quarts, radar: radar?.quarts ?? [])
+    }
+
+    /// Ce que voit l'aéroport ne compte que si le radar ne voit pas la ville.
+    private var aeroport: CielObserve? {
+        radar?.voitLaVille == true ? nil : ciel
     }
 
     // MARK: Morceaux

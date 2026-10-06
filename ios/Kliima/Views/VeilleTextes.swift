@@ -22,6 +22,24 @@ enum VeilleTextes {
         }
     }
 
+    /// D'où viennent les averses, quand le radar en voit qui comptent.
+    static func mouvement(_ radar: RadarPrevision?) -> String? {
+        guard let radar, radar.voitLaVille, let deplacement = radar.deplacement,
+              radar.quarts.contains(where: { $0.debit >= RadarSeuils.debitMouille })
+        else { return nil }
+        return Localized.text(
+            "veille.radar.move",
+            Localized.text(Radar.direction(deplacement.cap)),
+            AgroFormat.unit(deplacement.vitesse, "km/h", decimals: 0)
+        )
+    }
+
+    /// La mention du radar : son heure, sa source, sa licence.
+    static func sourceRadar(_ radar: RadarPrevision?, in zone: TimeZone) -> String? {
+        guard let radar, radar.voitLaVille else { return nil }
+        return Localized.text("veille.radar", AgroFormat.time(radar.image, in: zone))
+    }
+
     /// Ce que les prévisionnistes de l'aéroport annoncent de tomber d'ici deux
     /// heures, en une phrase.
     static func annonce(_ ciel: CielObserve?, in zone: TimeZone) -> String? {

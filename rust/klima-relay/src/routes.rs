@@ -93,6 +93,8 @@ pub struct Etat {
     /// De quoi pousser. Absent, les îles basculent seules à l'heure pile, et
     /// `/v1/activites` répond qu'il n'y a pas de poussée.
     pub apns: Option<Apns>,
+    /// La mosaïque radar européenne, lue à la demande (`radar.rs`).
+    pub radar: Arc<crate::radar::Radar>,
 }
 
 /// Les comptes : de quoi vérifier ce qu'Apple prouve, et signer ce qu'on en tire.
@@ -304,6 +306,22 @@ pub(crate) async fn lire(etat: &Etat, chemin: &str, params: &Params) -> Lecture 
         return Lecture::HorsBornes;
     };
     let cell = cell_for(latitude, longitude);
+
+    // Le radar ne relaie pas une réponse : il la calcule, d'après la mosaïque
+    // qu'il garde en mémoire. Elle se garde cinq minutes — une image.
+    if chemin == "/v1/radar" {
+        let radar = etat.radar.clone();
+        let lu = etat
+            .quarts
+            .serve(&cell_key("radar", &cell), || async move {
+                radar
+                    .prevision(cell.latitude, cell.longitude)
+                    .await
+                    .map(|p| klima_api::radar::encoder(&p))
+            })
+            .await;
+        return Lecture::Lue(lu);
+    }
 
     let (cle, appel) = match chemin {
         "/v1/open-meteo/forecast" => (
@@ -625,6 +643,7 @@ pub fn etat(fetch: Fetch, now: crate::cache::Clock) -> Etat {
             stale_ms: SEARCH_TTL_MS,
             now: now.clone(),
         })),
+        radar: Arc::new(crate::radar::Radar::eteint(now.clone())),
         now,
         comptes: None,
         iles: Arc::new(Iles::new()),
@@ -762,7 +781,9 @@ mod tests {
             }
         }
         assert_eq!(sujets, ["base", "ensemble", "quarts", "met", "station", "air", "ciel"]);
-        // Sept interrogations, une par sujet : c'est tout.
+        // Sept interrogations, une par sujet relayé : c'est tout. Le radar,
+        // calculé par le relais, ne coûte rien au fournisseur — et ce relais
+        // d'essai n'a pas d'image : il se tait.
         assert_eq!(faux.appels(), 7);
 
         // Le même abonnement, renvoyé : tout est poussé de nouveau, depuis les

@@ -139,6 +139,7 @@ pub fn App(props: &Props) -> Html {
                         <Guetteur
                             etat={veille.clone()}
                             ciel={forecast.ciel.clone()}
+                            radar={etat.radar.clone()}
                             class={classes!("card")}
                         />
                         // La première question : faut-il un parapluie, et
