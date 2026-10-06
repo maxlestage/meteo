@@ -17,6 +17,7 @@
 		076631A9A497778C8DACA248 /* KliimaWidgetsBundle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B148DA87ACC29FF2D439C47 /* KliimaWidgetsBundle.swift */; };
 		0B2F4EAAC64FE8ABB9F33BD9 /* Fusion.swift in Sources */ = {isa = PBXBuildFile; fileRef = 148584A04619D9EBA4A9C3E8 /* Fusion.swift */; };
 		0BB56120FCC1896DDD3C211C /* LocationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8FCC89F11BCF6BA08E68ADF1 /* LocationService.swift */; };
+		0C2379A3D6B2F617DB9C0BB6 /* DirectRelaisTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6391F931C0469CC1D9D01B83 /* DirectRelaisTests.swift */; };
 		0F948ABA198BF7C1906F6618 /* Air.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2BBBB23EFBB4B3D314307BC6 /* Air.swift */; };
 		122A060395C5DCFBBD6EE3CD /* KliimaWidgets.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 9806D2D88C6DC00561E1AA4F /* KliimaWidgets.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		14DA38B392C3F9CCE393DC2F /* Plan.swift in Sources */ = {isa = PBXBuildFile; fileRef = ACDA8384F78BD3E95B72FB7A /* Plan.swift */; };
@@ -113,6 +114,7 @@
 		C4EDCD12F4C4C33DE5043197 /* IlesRelaisTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7748536D30C8CF45EA5382D1 /* IlesRelaisTests.swift */; };
 		C7F3184030D7D939A4CF6885 /* Consensus.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4720B7B1832151B0FB656485 /* Consensus.swift */; };
 		C7F9ACD95A2C43E43B6F321D /* Fusion.swift in Sources */ = {isa = PBXBuildFile; fileRef = 148584A04619D9EBA4A9C3E8 /* Fusion.swift */; };
+		C81DADAFEB6E5C0A147AF1F4 /* DirectRelais.swift in Sources */ = {isa = PBXBuildFile; fileRef = 744C50D5B8F87966D19AD4F5 /* DirectRelais.swift */; };
 		C95DA666AA21E005D127B225 /* Localized.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5450F8A4FCE049DD06100EC9 /* Localized.swift */; };
 		C9C810C3BF18F031960B0D73 /* Position.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB8F1DD4A8E34FF10F2CCB10 /* Position.swift */; };
 		CD50AC741D60BCE2B9A76E96 /* WeatherProviders.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B02EF58B1456D6BD190EA69 /* WeatherProviders.swift */; };
@@ -206,11 +208,13 @@
 		5EC9D5F7632B1EF2E5B81F82 /* BackgroundRefresh.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackgroundRefresh.swift; sourceTree = "<group>"; };
 		60CFD29504CB4299897A809C /* VilleTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VilleTests.swift; sourceTree = "<group>"; };
 		6202144CAAD11B150D2A067A /* Session.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Session.swift; sourceTree = "<group>"; };
+		6391F931C0469CC1D9D01B83 /* DirectRelaisTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DirectRelaisTests.swift; sourceTree = "<group>"; };
 		6580A8FAA2962596D57856A9 /* WeatherCondition.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeatherCondition.swift; sourceTree = "<group>"; };
 		6C5717DB9A72E3BC677A00B3 /* PlanTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlanTests.swift; sourceTree = "<group>"; };
 		709FE1DF782C6EA2B2E1890B /* Veille.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Veille.swift; sourceTree = "<group>"; };
 		70A323DF1CDDEA680AC90086 /* AlertsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlertsTests.swift; sourceTree = "<group>"; };
 		72250014395A5607AA9841A4 /* PaywallView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaywallView.swift; sourceTree = "<group>"; };
+		744C50D5B8F87966D19AD4F5 /* DirectRelais.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DirectRelais.swift; sourceTree = "<group>"; };
 		7748536D30C8CF45EA5382D1 /* IlesRelaisTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IlesRelaisTests.swift; sourceTree = "<group>"; };
 		77B55B9E0D7865BFA00A4D86 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		79B5C71DD4D3CCC7FEFA0890 /* Animations.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Animations.swift; sourceTree = "<group>"; };
@@ -421,6 +425,7 @@
 				CFD368A2A4B59C7B26F9AB9F /* PlanGrant.swift */,
 				6202144CAAD11B150D2A067A /* Session.swift */,
 				F047E762B19A20BE5BE32006 /* IlesRelais.swift */,
+				744C50D5B8F87966D19AD4F5 /* DirectRelais.swift */,
 			);
 			path = Services;
 			sourceTree = "<group>";
@@ -518,6 +523,7 @@
 				F848E716249AD6FD2F717ED3 /* VeilleTests.swift */,
 				02A39BFBD0DC3B0E11BA8772 /* VillesTests.swift */,
 				8D9BC68178838FAD0F348FD6 /* FusionTests.swift */,
+				6391F931C0469CC1D9D01B83 /* DirectRelaisTests.swift */,
 				50FD6BD0437A604828C49471 /* AgroWeatherDecodingTests.swift */,
 				5957CAFC6F87D0B5FCCC85D5 /* WeatherConditionTests.swift */,
 				8E172A50C653860D0436BDA6 /* AgroFormatTests.swift */,
@@ -761,6 +767,7 @@
 				42043A473875D12D735301EF /* PlanGrant.swift in Sources */,
 				23D4D55E45A75CD9C2731FCE /* Session.swift in Sources */,
 				2623BCFEFD18F32FFDC79756 /* IlesRelais.swift in Sources */,
+				C81DADAFEB6E5C0A147AF1F4 /* DirectRelais.swift in Sources */,
 				F1BB1FE2BA5912881D1C4E38 /* DashboardViewModel.swift in Sources */,
 				A5096683B0D64D48DE29C934 /* DashboardView.swift in Sources */,
 				0361672A474EBC61E33E5BDF /* DailyListView.swift in Sources */,
@@ -871,6 +878,7 @@
 				3482581B32C9B0AF26A3B8E4 /* VeilleTests.swift in Sources */,
 				02288E9EBC36152207A3F027 /* VillesTests.swift in Sources */,
 				ABCDBB4ACC319D5F9AA48FCD /* FusionTests.swift in Sources */,
+				0C2379A3D6B2F617DB9C0BB6 /* DirectRelaisTests.swift in Sources */,
 				8F4E7FAC158D1BB25607DBCD /* AgroWeatherDecodingTests.swift in Sources */,
 				6FEBD20EBF3E8E706C271299 /* WeatherConditionTests.swift in Sources */,
 				D45B1BDA0C9B9713831FA3A2 /* AgroFormatTests.swift in Sources */,

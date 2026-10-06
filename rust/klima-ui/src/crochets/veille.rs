@@ -6,6 +6,11 @@
 //! le quart en cours change même sans nouvelle lecture — et déclenche la
 //! relecture quand l'heure est passée. Un onglet laissé en arrière-plan,
 //! dont le navigateur endort les minuteurs, relit donc dès qu'on y revient.
+//!
+//! Avec un relais, le direct (`crochets::direct`) pousse en plus chaque
+//! nouvelle série dès qu'elle change, entre deux relectures.
+
+use std::rc::Rc;
 
 use klima_api::veille::Quarts;
 use klima_core::endpoints::Endpoints;
@@ -42,7 +47,7 @@ impl EtatVeille {
 }
 
 #[hook]
-pub fn use_veille(parcelle: Parcelle, endpoints: Endpoints) -> EtatVeille {
+pub fn use_veille(parcelle: Parcelle, endpoints: Endpoints, direct: Option<Rc<String>>) -> EtatVeille {
     let quarts = use_state(|| None::<(Parcelle, Quarts)>);
     let loading = use_state(|| true);
     let lu_a = use_state(|| None::<i64>);
@@ -72,6 +77,20 @@ pub fn use_veille(parcelle: Parcelle, endpoints: Endpoints) -> EtatVeille {
                 lu_a.set(Some(horloge::maintenant_utc()));
                 loading.set(false);
             });
+        });
+    }
+
+    // Le direct : le relais pousse le quart d'heure dès qu'il a changé, sans
+    // attendre la relecture. Elle continue pourtant — par le cache du relais,
+    // elle ne coûte rien — et dit « relu à » même quand rien n'a bougé.
+    {
+        let quarts = quarts.clone();
+        let lu_a = lu_a.clone();
+        use_effect_with((parcelle.clone(), direct), move |(parcelle, direct)| {
+            if let Some(lu) = direct.as_deref().and_then(|corps| klima_api::veille::decode_quarts(corps)) {
+                quarts.set(Some((parcelle.clone(), lu)));
+                lu_a.set(Some(horloge::maintenant_utc()));
+            }
         });
     }
 

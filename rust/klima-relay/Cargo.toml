@@ -23,6 +23,9 @@ jsonwebtoken = { version = "11.1.0", default-features = false, features = ["rust
 base64 = "0.22"
 
 [dev-dependencies]
+# Un vrai client WebSocket, pour tester le direct de bout en bout.
+tokio-tungstenite = "0.29"
+futures-util = { version = "0.3", default-features = false, features = ["sink"] }
 tokio = { version = "1", features = ["rt-multi-thread", "macros", "sync", "time", "fs", "test-util"] }
 tower = { version = "0.5.3", features = ["util"] }
 # Les tests fabriquent leur propre paire de clés à l'exécution, pour signer des

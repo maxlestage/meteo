@@ -77,6 +77,23 @@ impl Endpoints {
         }
     }
 
+    /// L'adresse du direct (`/v1/direct`, en WebSocket), quand on passe par un
+    /// relais ; `None` en direct chez les fournisseurs, qui ne poussent rien.
+    pub fn direct_url(&self) -> Option<String> {
+        if self.transport != Transport::Relais {
+            return None;
+        }
+        let base = self.open_meteo_forecast.strip_suffix("/v1/open-meteo/forecast")?;
+        let ws = if let Some(reste) = base.strip_prefix("https://") {
+            format!("wss://{reste}")
+        } else if let Some(reste) = base.strip_prefix("http://") {
+            format!("ws://{reste}")
+        } else {
+            return None;
+        };
+        Some(format!("{ws}/v1/direct"))
+    }
+
     /// Les cinq adresses, pour les vérifications d'ensemble.
     pub fn urls(&self) -> [&str; 5] {
         [
@@ -153,6 +170,20 @@ mod tests {
         uniques.sort_unstable();
         uniques.dedup();
         assert_eq!(uniques.len(), 5);
+    }
+
+    #[test]
+    fn le_direct_passe_par_le_relais_en_websocket() {
+        assert_eq!(
+            Endpoints::relais("https://klima.example/").direct_url().as_deref(),
+            Some("wss://klima.example/v1/direct")
+        );
+        assert_eq!(
+            Endpoints::relais("http://localhost:8787").direct_url().as_deref(),
+            Some("ws://localhost:8787/v1/direct")
+        );
+        // Sans relais, personne pour pousser.
+        assert_eq!(Endpoints::direct().direct_url(), None);
     }
 
     #[test]

@@ -25,7 +25,7 @@ MODELS = ["AgroSamples.swift", "Ville.swift", "Air.swift", "WeatherCondition.swi
 SERVICES = ["AgroWeatherService.swift", "WeatherProviders.swift", "LocationService.swift",
             "BackgroundRefresh.swift", "Subscription.swift",
             "AlertScheduler.swift", "WeatherActivityController.swift", "PlanGrant.swift",
-            "Session.swift", "IlesRelais.swift"]
+            "Session.swift", "IlesRelais.swift", "DirectRelais.swift"]
 VIEWMODELS = ["DashboardViewModel.swift"]
 VIEWS = ["DashboardView.swift", "DailyListView.swift", "DetailTile.swift", "HeroView.swift",
          "HourlyStripView.swift", "SkyBackground.swift", "PluieCardView.swift",
@@ -67,6 +67,7 @@ WATCH_ASSETS = (f"{WATCH}/Resources", "Assets.xcassets")
 WATCH_PLIST = (f"{WATCH}/Resources", "Info.plist")
 
 TEST_FILES = [(TESTS, n) for n in ["VilleTests.swift", "AirTests.swift", "VeilleTests.swift", "VillesTests.swift", "FusionTests.swift",
+                                   "DirectRelaisTests.swift",
                                    "AgroWeatherDecodingTests.swift",
                                    "WeatherConditionTests.swift", "AgroFormatTests.swift",
                                    "LocalizationTests.swift", "SharedStoreTests.swift",

@@ -126,28 +126,47 @@ pub async fn recoupement(
         ),
     );
 
+    lire_recoupement(
+        open_meteo.map(Option::unwrap_or_default).as_deref(),
+        met.map(Option::unwrap_or_default).as_deref(),
+        bright_sky.map(Option::unwrap_or_default).as_deref(),
+        utc_offset_seconds,
+        maintenant,
+    )
+}
+
+/// Lit ce que les fournisseurs ont répondu — par requête ou par le direct.
+///
+/// `None` : le fournisseur n'a pas été interrogé (il n'est pas permis d'ici) ;
+/// `Some("")` : il l'a été et n'a rien dit. Le second compte dans l'accord
+/// comme une source muette, le premier n'y entre pas.
+pub fn lire_recoupement(
+    open_meteo: Option<&str>,
+    met: Option<&str>,
+    bright_sky: Option<&str>,
+    utc_offset_seconds: i64,
+    maintenant: i64,
+) -> Recoupement {
     let mut outcomes = Vec::new();
     let mut series = Vec::new();
     let mut observation = None;
 
     if let Some(corps) = open_meteo {
-        let corps = corps.unwrap_or_default();
-        series.extend(ensemble::decode_ensemble(&corps));
+        series.extend(ensemble::decode_ensemble(corps));
         outcomes.push(ProviderOutcome {
             provider_id: "open-meteo".to_owned(),
-            readings: readings::decode_open_meteo(&corps, maintenant),
+            readings: readings::decode_open_meteo(corps, maintenant),
         });
     }
     if let Some(corps) = met {
-        let corps = corps.unwrap_or_default();
-        series.extend(ensemble::serie_met_norway(&corps, utc_offset_seconds));
+        series.extend(ensemble::serie_met_norway(corps, utc_offset_seconds));
         outcomes.push(ProviderOutcome {
             provider_id: "met-norway".to_owned(),
-            readings: readings::decode_met_norway(&corps, maintenant - utc_offset_seconds * 1000),
+            readings: readings::decode_met_norway(corps, maintenant - utc_offset_seconds * 1000),
         });
     }
     if let Some(corps) = bright_sky {
-        let releves = readings::decode_bright_sky(&corps.unwrap_or_default());
+        let releves = readings::decode_bright_sky(corps);
         observation = releves.first().map(|r| r.temperature);
         outcomes.push(ProviderOutcome { provider_id: "bright-sky".to_owned(), readings: releves });
     }

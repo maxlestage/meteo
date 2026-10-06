@@ -106,6 +106,12 @@ struct AgroWeatherService: AgroWeatherProviding {
         let base = try await previsionDeBase(for: parcelle, days: days)
         let sources = await ensemble
 
+        return Self.recouper(base, avec: sources)
+    }
+
+    /// La prévision de base refaite avec ce que les sources ont dit — par
+    /// requête ou par le direct (`DirectRelais`).
+    static func recouper(_ base: AgroForecast, avec sources: WeatherProviders.Ensemble) -> AgroForecast {
         let recoupement = Fusion.recouper(
             heures: base.hourly,
             jours: base.daily,
@@ -146,6 +152,19 @@ struct AgroWeatherService: AgroWeatherProviding {
         ]
 
         let payload: ForecastPayload = try await get(components.url!)
+        return Self.base(payload, parcelle: parcelle)
+    }
+
+    /// Lit une prévision de base reçue telle quelle — du direct, par exemple.
+    static func decodeBase(_ data: Data, parcelle: Parcelle) throws -> AgroForecast {
+        do {
+            return base(try JSONDecoder().decode(ForecastPayload.self, from: data), parcelle: parcelle)
+        } catch {
+            throw AgroWeatherError.malformedResponse
+        }
+    }
+
+    private static func base(_ payload: ForecastPayload, parcelle: Parcelle) -> AgroForecast {
         let zone = TimeZone(identifier: payload.timezone) ?? .current
         let current = payload.current.decode(in: zone)
 
@@ -157,7 +176,7 @@ struct AgroWeatherService: AgroWeatherProviding {
             // L'API renvoie la journée entière depuis minuit : on repart de
             // l'heure en cours, pour que « maintenant » soit bien le premier
             // élément des séries.
-            hourly: Self.fromCurrentHour(payload.hourly.decode(in: zone), now: current.time),
+            hourly: fromCurrentHour(payload.hourly.decode(in: zone), now: current.time),
             daily: payload.daily.decode(in: zone),
             fetchedAt: Date()
         )

@@ -34,6 +34,10 @@ final class DashboardViewModel: ObservableObject {
 
     private let service: AgroWeatherProviding
     private let location: LocationService
+    /// Le direct : ce que le relais pousse, par WebSocket.
+    private let direct = DirectRelais()
+    /// Le dernier corps reçu de chaque sujet, pour la ville affichée.
+    private var corpsDirects: [String: Data] = [:]
     private var loadTask: Task<Void, Never>?
     private var searchTask: Task<Void, Never>?
 
@@ -167,6 +171,58 @@ final class DashboardViewModel: ObservableObject {
     private func chargerApercu(_ ville: Parcelle) async {
         guard let prevision = try? await service.forecast(for: ville, days: 1) else { return }
         apercus[ville.id] = prevision.current
+    }
+
+    // MARK: Direct
+
+    /// Suit la ville affichée en direct : le relais pousse la prévision, les
+    /// sources, le quart d'heure et l'air dès qu'ils changent. Rappelé à chaque
+    /// changement de ville (`.task(id:)` de la vue).
+    func suivreEnDirect() {
+        let suivie = parcelle
+        corpsDirects = [:]
+        direct.suivre(suivie, jours: 7) { [weak self] message in
+            self?.recevoir(message, pour: suivie)
+        }
+    }
+
+    private func recevoir(_ message: DirectRelais.Message, pour suivie: Parcelle) {
+        // Ce qui était en route pour une autre ville est écarté.
+        guard suivie == parcelle,
+              message.latitude == suivie.latitude,
+              message.longitude == suivie.longitude
+        else { return }
+        corpsDirects[message.sujet] = message.corps
+
+        switch message.sujet {
+        case "quarts":
+            if let lus = AgroWeatherService.decodeQuarts(message.corps) {
+                quarts = lus
+                quartsDe = suivie
+                quartsLusA = Date()
+            }
+        case "air":
+            if let lu = AgroWeatherService.decodeAir(message.corps) {
+                air = lu
+            }
+        default:
+            // La base et les sept modèles d'abord ; MET Norway et la station
+            // quand ils sont là.
+            guard
+                let base = corpsDirects["base"],
+                corpsDirects["ensemble"] != nil,
+                let prevision = try? AgroWeatherService.decodeBase(base, parcelle: suivie)
+            else { return }
+            let sources = WeatherProviders.ensemble(
+                openMeteo: corpsDirects["ensemble"],
+                met: corpsDirects["met"],
+                station: corpsDirects["station"]
+            )
+            let recoupee = AgroWeatherService.recouper(prevision, avec: sources)
+            forecast = recoupee
+            consensus = recoupee.consensus
+            errorMessage = nil
+        }
     }
 
     /// La série au quart d'heure de la ville affichée, ou rien.

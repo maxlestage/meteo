@@ -12,6 +12,7 @@ use klima_ui::composants::marque::MarqueEtNom;
 use klima_ui::crochets::parcelle::use_parcelle;
 use klima_ui::crochets::position::use_start_position;
 use klima_ui::crochets::prevision::use_forecast;
+use klima_ui::crochets::direct::use_direct;
 use klima_ui::crochets::veille::use_veille;
 use klima_ui::composants::guetteur::Guetteur;
 use klima_ui::i18n::use_i18n;
@@ -59,15 +60,19 @@ pub fn App(props: &Props) -> Html {
 
     // Deux jours suffisent : aujourd'hui, et les douze heures qui débordent
     // sur demain pour la pluie et les conseils.
+    // Le direct : avec un relais, la météo est poussée par WebSocket dès
+    // qu'elle change — prévision, sources, quart d'heure, air.
+    let direct = use_direct(lieu.parcelle.clone(), props.endpoints.clone(), 2);
+
     let prevision = {
         let i18n = i18n.clone();
-        use_forecast(lieu.parcelle.clone(), props.endpoints.clone(), 2, move |erreur| {
+        use_forecast(lieu.parcelle.clone(), props.endpoints.clone(), 2, direct.clone(), move |erreur| {
             i18n.with(erreur.message_key(), &erreur.params())
         })
     };
     // Le guetteur : la demi-heure en cours et les deux heures, au quart
     // d'heure, relus tout seuls.
-    let veille = use_veille(lieu.parcelle.clone(), props.endpoints.clone());
+    let veille = use_veille(lieu.parcelle.clone(), props.endpoints.clone(), direct.quarts.clone());
     let etat = &prevision.etat;
 
     let digest = use_memo(etat.forecast.clone(), |forecast| {
