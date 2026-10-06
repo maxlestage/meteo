@@ -24,7 +24,7 @@ fn catalog(entries: &[(&'static str, &'static str)]) -> Catalog {
     entries.iter().copied().collect()
 }
 
-const FR: [(&str, &str); 126] = [
+const FR: [(&str, &str); 128] = [
     ("wmo.clearSky", "Ciel dégagé"),
     ("wmo.mainlyClear", "Peu nuageux"),
     ("wmo.partlyCloudy", "Partiellement nuageux"),
@@ -151,9 +151,11 @@ const FR: [(&str, &str); 126] = [
     ("plan.reason.villes", "Enregistrer plusieurs villes demande l’abonnement."),
     ("plan.feature.villes", "Plusieurs villes enregistrées, de l’une à l’autre d’un geste"),
     ("forecast.blended", "Recoupée de {count} sources"),
+    ("ciel.observed", "Vu à l’aéroport de {station} ({distance}\u{a0}km) à {time} : {kind}."),
+    ("ciel.credit", "Relevé d’aéroport (METAR) — NOAA, domaine public"),
 ];
 
-const EN: [(&str, &str); 126] = [
+const EN: [(&str, &str); 128] = [
     ("wmo.clearSky", "Clear sky"),
     ("wmo.mainlyClear", "Mainly clear"),
     ("wmo.partlyCloudy", "Partly cloudy"),
@@ -280,9 +282,11 @@ const EN: [(&str, &str); 126] = [
     ("plan.reason.villes", "Saving several cities needs the subscription."),
     ("plan.feature.villes", "Several saved cities, one tap from each other"),
     ("forecast.blended", "Blended from {count} sources"),
+    ("ciel.observed", "Seen at {station} airport ({distance}\u{a0}km) at {time}: {kind}."),
+    ("ciel.credit", "Airport report (METAR) — NOAA, public domain"),
 ];
 
-const ES: [(&str, &str); 126] = [
+const ES: [(&str, &str); 128] = [
     ("wmo.clearSky", "Cielo despejado"),
     ("wmo.mainlyClear", "Poco nuboso"),
     ("wmo.partlyCloudy", "Parcialmente nuboso"),
@@ -409,6 +413,8 @@ const ES: [(&str, &str); 126] = [
     ("plan.reason.villes", "Guardar varias ciudades requiere la suscripción."),
     ("plan.feature.villes", "Varias ciudades guardadas, a un toque una de otra"),
     ("forecast.blended", "Combinada de {count} fuentes"),
+    ("ciel.observed", "Visto en el aeropuerto de {station} ({distance}\u{a0}km) a las {time}: {kind}."),
+    ("ciel.credit", "Parte de aeropuerto (METAR) — NOAA, dominio público"),
 ];
 
 /* ---------------------------------------------------------------- */

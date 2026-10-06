@@ -276,6 +276,26 @@ pub fn veille(serie: &[QuartSample], maintenant: i64) -> Option<Veille> {
     Some(Veille { quarts, immediat, suite, fin_fenetre, rafales })
 }
 
+/// La série, corrigée de ce qu'un aéroport proche voit tomber (`ciel`).
+///
+/// Le quart en cours, s'il était sec, prend la pluie observée : le guetteur
+/// ne dit pas « pas une goutte » à qui la reçoit. Les quarts suivants restent
+/// ceux de la prévision — une observation dit maintenant, pas ensuite. Un ciel
+/// sec observé ne retire rien.
+pub fn observer(serie: &[QuartSample], maintenant: i64, tombe: Option<u16>) -> Vec<QuartSample> {
+    let mut serie = serie.to_vec();
+    let Some(code) = tombe.filter(|c| *c >= crate::fusion::seuils::CODE_MOUILLE) else {
+        return serie;
+    };
+    if let Some(quart) = serie.iter_mut().find(|q| q.time <= maintenant && maintenant < q.time + QUART_MS) {
+        if !mouille(quart) {
+            quart.precipitation = crate::ciel::quart_observe_mm(code);
+            quart.weather_code = code;
+        }
+    }
+    serie
+}
+
 /// Quand relire : une minute après le début du quart qui suit la lecture —
 /// le temps que la série du nouveau quart soit publiée. Les deux horloges
 /// (lecture et retour) sont les mêmes, quelles qu'elles soient.
@@ -315,6 +335,23 @@ mod tests {
 
     /// Il est 16 h 07 : le quart entamé est celui de 16 h.
     const MAINTENANT: i64 = SEIZE_H + 7 * 60_000;
+
+    #[test]
+    fn une_pluie_observee_mouille_le_quart_en_cours() {
+        let sec = serie(&[0.0; 10]);
+        let vu = observer(&sec, MAINTENANT, Some(63));
+        assert_eq!(vu[0].precipitation, 1.0);
+        assert_eq!(vu[0].weather_code, 63);
+        assert_eq!(vu[1], sec[1], "la suite reste à la prévision");
+        let v = veille(&vu, MAINTENANT).unwrap();
+        assert_eq!(v.immediat, Immediat::Cesse { fin: SEIZE_H + QUART_MS });
+
+        // Un quart déjà mouillé garde sa prévision ; rien d'observé, rien ne change.
+        let mouillee = serie(&[0.6, 0.6]);
+        assert_eq!(observer(&mouillee, MAINTENANT, Some(65)), mouillee);
+        assert_eq!(observer(&sec, MAINTENANT, None), sec);
+        assert_eq!(observer(&sec, MAINTENANT, Some(45)), sec, "le brouillard ne mouille pas");
+    }
 
     #[test]
     fn rien_ne_tombe() {

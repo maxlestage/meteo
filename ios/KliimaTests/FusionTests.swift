@@ -58,7 +58,7 @@ final class FusionTests: XCTestCase {
             SerieSource(sourceId: "b", heures: [voix(0, 20, 0, 3), voix(1, 21, 0.4, 61)]),
             SerieSource(sourceId: "c", heures: [voix(0, 26, 0, 2), voix(1, 20.5, 0, 3)]),
         ]
-        let r = Fusion.recouper(heures: [base(0), base(1)], jours: [], courant: courant, series: series, observation: nil)
+        let r = Fusion.recouper(heures: [base(0), base(1)], jours: [], courant: courant, series: series, observation: .aucune)
 
         let h0 = r.heures[0]
         XCTAssertEqual(h0.temperature, 20, "le 26 de c ne tire rien")
@@ -80,14 +80,14 @@ final class FusionTests: XCTestCase {
     func testUneHeureSansVoixGardeLaBase() {
         let r = Fusion.recouper(
             heures: [base(0), base(1)], jours: [], courant: courant,
-            series: [SerieSource(sourceId: "a", heures: [voix(0, 19, 0, 2)])], observation: nil
+            series: [SerieSource(sourceId: "a", heures: [voix(0, 19, 0, 2)])], observation: .aucune
         )
         XCTAssertEqual(r.heures[1], base(1))
     }
 
     func testUneSourceSansTemperatureNeVotePas() {
         let muette = SerieSource(sourceId: "muette", heures: [HeureSource(time: midi)])
-        let r = Fusion.recouper(heures: [base(0)], jours: [], courant: courant, series: [muette], observation: nil)
+        let r = Fusion.recouper(heures: [base(0)], jours: [], courant: courant, series: [muette], observation: .aucune)
         XCTAssertEqual(r.heures[0].temperature, 18)
         XCTAssertTrue(r.sources.isEmpty)
     }
@@ -97,16 +97,66 @@ final class FusionTests: XCTestCase {
             SerieSource(sourceId: "a", heures: [voix(0, 20, 0, 2)]),
             SerieSource(sourceId: "b", heures: [voix(0, 20, 0, 2)]),
         ]
-        var r = Fusion.recouper(heures: [base(0)], jours: [], courant: courant, series: series, observation: nil)
+        var r = Fusion.recouper(heures: [base(0)], jours: [], courant: courant, series: series, observation: .aucune)
         XCTAssertEqual(r.courant.temperature, 20.4, accuracy: 1e-9)
         XCTAssertEqual(r.courant.apparentTemperature, 19.4, accuracy: 1e-9)
         XCTAssertEqual(r.courant.weatherCode, 2)
 
-        r = Fusion.recouper(heures: [base(0)], jours: [], courant: courant, series: series, observation: 19)
+        r = Fusion.recouper(heures: [base(0)], jours: [], courant: courant, series: series, observation: FusionObservation(temperature: 19))
         XCTAssertEqual(r.courant.temperature, 19.7, accuracy: 1e-9)
 
-        r = Fusion.recouper(heures: [base(0)], jours: [], courant: courant, series: [], observation: nil)
+        r = Fusion.recouper(heures: [base(0)], jours: [], courant: courant, series: [], observation: .aucune)
         XCTAssertEqual(r.courant, courant)
+    }
+
+    func testCeQuiTombeNeSeVotePas() {
+        XCTAssertEqual(Fusion.codePresent(base: 1, vote: 2, tombe: 80), 80)
+        XCTAssertEqual(Fusion.codePresent(base: 61, vote: 2, tombe: nil), 61)
+        XCTAssertEqual(Fusion.codePresent(base: 1, vote: 63, tombe: nil), 63)
+        XCTAssertEqual(Fusion.codePresent(base: 1, vote: 2, tombe: nil), 2)
+        XCTAssertEqual(Fusion.codePresent(base: 1, vote: nil, tombe: nil), 1)
+        XCTAssertEqual(Fusion.codePresent(base: 3, vote: 2, tombe: 45), 2, "du brouillard n'est pas ce qui tombe")
+    }
+
+    private func avecCode(_ c: CurrentSample, _ code: Int) -> CurrentSample {
+        CurrentSample(
+            time: c.time, temperature: c.temperature, apparentTemperature: c.apparentTemperature,
+            weatherCode: code, isDay: c.isDay, relativeHumidity: c.relativeHumidity,
+            windSpeed: c.windSpeed, windGusts: c.windGusts, pressure: c.pressure
+        )
+    }
+
+    func testLaPluieDeLaBaseNEstPasEffaceeParLaMajorite() {
+        let mouille = avecCode(courant, 61)
+        let series = [
+            SerieSource(sourceId: "a", heures: [voix(0, 18, 0, 2)]),
+            SerieSource(sourceId: "b", heures: [voix(0, 18, 0, 3)]),
+            SerieSource(sourceId: "c", heures: [voix(0, 18, 0, 2)]),
+        ]
+        let r = Fusion.recouper(heures: [base(0), base(1)], jours: [], courant: mouille, series: series, observation: .aucune)
+        XCTAssertEqual(r.courant.weatherCode, 61)
+        let h0 = r.heures[0]
+        XCTAssertEqual(h0.weatherCode, 61, "l'heure en cours dit la même chose que l'en-tête")
+        XCTAssertEqual(h0.precipitation, 0.1)
+        XCTAssertEqual(h0.precipitationProbability, 50)
+        XCTAssertEqual(r.heures[1], base(1), "l'heure suivante reste au vote")
+    }
+
+    func testUnePluieObserveeSImposeALInstantEtALHeure() {
+        let series = [SerieSource(sourceId: "a", heures: [voix(0, 18, 0, 2)])]
+        let vue = FusionObservation(temperature: nil, tombe: 80)
+        var r = Fusion.recouper(heures: [base(0)], jours: [], courant: courant, series: series, observation: vue)
+        XCTAssertEqual(r.courant.weatherCode, 80)
+        XCTAssertEqual(r.heures[0].weatherCode, 80)
+        XCTAssertEqual(r.heures[0].precipitationProbability, 100, "vue, ce n'est plus un risque")
+        r = Fusion.recouper(heures: [base(0)], jours: [], courant: courant, series: [], observation: vue)
+        XCTAssertEqual(r.courant.weatherCode, 80)
+        XCTAssertEqual(r.courant.temperature, courant.temperature)
+        let mouille = avecCode(courant, 61)
+        XCTAssertEqual(
+            Fusion.recouper(heures: [base(0)], jours: [], courant: mouille, series: [], observation: .aucune).courant.weatherCode,
+            61
+        )
     }
 
     func testLesJourneesPrennentAussiLaMediane() {
@@ -122,7 +172,7 @@ final class FusionTests: XCTestCase {
         let series = [j(9, 21, 0, 2), j(11, 22, 2, 61), j(10, 23, 1, 61)].enumerated().map {
             SerieSource(sourceId: String($0.offset), heures: [], jours: [$0.element])
         }
-        let d = Fusion.recouper(heures: [], jours: [jour], courant: courant, series: series, observation: nil).jours[0]
+        let d = Fusion.recouper(heures: [], jours: [jour], courant: courant, series: series, observation: .aucune).jours[0]
         XCTAssertEqual(d.temperatureMin, 10)
         XCTAssertEqual(d.temperatureMax, 22)
         XCTAssertEqual(d.precipitationSum, 1)

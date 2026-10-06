@@ -11,7 +11,9 @@
 
 use klima_core::format::Formats;
 use klima_core::i18n::params;
-use klima_core::veille::{Immediat, Precipitation, Suite, Veille, mouille, prochaine_lecture, veille};
+use klima_core::veille::{
+    Immediat, Precipitation, Suite, Veille, mouille, observer, prochaine_lecture, veille,
+};
 use yew::prelude::*;
 
 use crate::crochets::veille::EtatVeille;
@@ -21,6 +23,10 @@ use crate::i18n::{I18n, use_i18n};
 #[derive(Properties, PartialEq)]
 pub struct Props {
     pub etat: EtatVeille,
+    /// Ce que l'aéroport le plus proche voit tomber (`Forecast::ciel`) : le
+    /// quart en cours le prend, s'il était sec.
+    #[prop_or_default]
+    pub tombe: Option<u16>,
     /// Classes de l'hôte : `card` dans l'application, rien sur la vitrine.
     #[prop_or_default]
     pub class: Classes,
@@ -38,7 +44,7 @@ pub fn Guetteur(props: &Props) -> Html {
     let vu = etat
         .maintenant_a_la_ville()
         .zip(etat.quarts.as_ref())
-        .and_then(|(maintenant, q)| veille(&q.quarts, maintenant));
+        .and_then(|(maintenant, q)| veille(&observer(&q.quarts, maintenant, props.tombe), maintenant));
 
     let corps = match (&vu, etat.loading) {
         (Some(vu), _) => corps(&i18n, vu),

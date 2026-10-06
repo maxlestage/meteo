@@ -232,6 +232,25 @@ enum Veille {
         )
     }
 
+    /// La série, corrigée de ce qu'un aéroport proche voit tomber (`Ciel`) :
+    /// le quart en cours, s'il était sec, prend la pluie observée. Les quarts
+    /// suivants restent ceux de la prévision ; un ciel sec observé ne retire
+    /// rien.
+    static func observer(_ serie: [QuartSample], maintenant: Date, tombe: Int?) -> [QuartSample] {
+        guard let code = tombe, code >= FusionSeuils.codeMouille,
+              let i = serie.firstIndex(where: { $0.time <= maintenant && maintenant < $0.time.addingTimeInterval(VeilleSeuils.quart) }),
+              !mouille(serie[i])
+        else { return serie }
+        var vue = serie
+        let q = serie[i]
+        vue[i] = QuartSample(
+            time: q.time, precipitation: Ciel.quartObserveMm(code), weatherCode: code,
+            temperature: q.temperature, apparentTemperature: q.apparentTemperature,
+            windGusts: q.windGusts, isDay: q.isDay
+        )
+        return vue
+    }
+
     /// Quand relire : une minute après le début du quart qui suit la lecture.
     static func prochaineLecture(_ luA: Date) -> Date {
         let quart = VeilleSeuils.quart

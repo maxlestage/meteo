@@ -13,6 +13,9 @@ struct GuetteurCardView: View {
     let luA: Date?
     let enLecture: Bool
     let timeZone: TimeZone
+    /// Ce que l'aéroport le plus proche voit tomber (`AgroForecast.ciel`) : le
+    /// quart en cours le prend, s'il était sec.
+    var tombe: Int? = nil
 
     @ScaledMetric(relativeTo: .body) private var hauteurBarres: CGFloat = 48
 
@@ -25,7 +28,9 @@ struct GuetteurCardView: View {
             VStack(alignment: .leading, spacing: 10) {
                 tete
 
-                if let lecture = quarts.flatMap({ Veille.veille($0, maintenant: contexte.date) }) {
+                if let lecture = quarts.flatMap({
+                    Veille.veille(Veille.observer($0, maintenant: contexte.date, tombe: tombe), maintenant: contexte.date)
+                }) {
                     bulle(Localized.text("veille.now"), immediat(lecture))
                     bulle(Localized.text("veille.next"), suite(lecture))
                     grille(lecture)

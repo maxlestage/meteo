@@ -4,8 +4,8 @@ import Foundation
 ///
 /// Miroir de `rust/klima-ui/src/crochets/direct.rs`, sur le même protocole
 /// (`rust/klima-relay/src/direct.rs`). L'application s'abonne à la ville
-/// affichée ; le relais pousse six sujets — `base`, `ensemble`, `quarts`,
-/// `met`, `station`, `air` —, chacun dans la forme exacte que le fournisseur
+/// affichée ; le relais pousse sept sujets — `base`, `ensemble`, `quarts`,
+/// `met`, `station`, `air`, `ciel` —, chacun dans la forme exacte que le fournisseur
 /// renvoie : les décodeurs du service les lisent comme une réponse de requête.
 ///
 /// Le direct s'ajoute aux requêtes, il ne les remplace pas : la première

@@ -1013,6 +1013,52 @@
         }
       }
     },
+    "ciel.credit": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Airport report (METAR) — NOAA, public domain"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Parte de aeropuerto (METAR) — NOAA, dominio público"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Relevé d’aéroport (METAR) — NOAA, domaine public"
+          }
+        }
+      }
+    },
+    "ciel.observed": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Seen at %1$@ airport (%2$@ km) at %3$@: %4$@."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Visto en el aeropuerto de %1$@ (%2$@ km) a las %3$@: %4$@."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vu à l’aéroport de %1$@ (%2$@ km) à %3$@ : %4$@."
+          }
+        }
+      }
+    },
     "consensus.detail": {
       "extractionState": "manual",
       "localizations": {

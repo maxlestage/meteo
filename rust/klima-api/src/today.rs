@@ -152,6 +152,7 @@ mod tests {
             daily: days,
             fetched_at: minuit() + 18 * HOUR_MS,
             sources: Vec::new(),
+            ciel: None,
         }
     }
 
