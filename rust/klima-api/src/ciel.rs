@@ -4,7 +4,7 @@
 //! `klima_core::ciel`. Ici, seulement le fil : l'Aviation Weather Center
 //! répond un tableau JSON, un bulletin par aéroport du cadre demandé.
 
-use klima_core::ciel::{Metar, cadre, nom_lisible};
+use klima_core::ciel::{Metar, cadre, nom_lisible, tendance_du_metar};
 use klima_core::endpoints::{Endpoints, Transport};
 use klima_core::providers::USER_AGENT;
 use serde_json::Value;
@@ -50,6 +50,7 @@ pub fn decode_metars(body: &str, utc_offset_seconds: i64) -> Vec<Metar> {
                 longitude: b["lon"].as_f64()?,
                 time: (b["obsTime"].as_i64()? + utc_offset_seconds) * 1000,
                 temps_present: b["wxString"].as_str().unwrap_or_default().to_owned(),
+                tendance: tendance_du_metar(b["rawOb"].as_str().unwrap_or_default()),
             })
         })
         .collect()
@@ -65,7 +66,7 @@ mod tests {
     /// Trois bulletins autour de Brest, le 6 octobre 2026 à 14 h UTC.
     const BREST: &str = r#"[
       {"icaoId":"LFRJ","obsTime":1791295200,"wxString":null,"lat":48.527,"lon":-4.138,
-       "name":"Landivisiau Arpt, BRE, FR","rawOb":"METAR LFRJ 061400Z AUTO 01008KT 9999 ///CB 18/16 Q1013"},
+       "name":"Landivisiau Arpt, BRE, FR","rawOb":"METAR LFRJ 061400Z AUTO 01008KT 9999 ///CB 18/16 Q1013 TEMPO 06015G25KT 2500 TSRA BECMG BKN005"},
       {"icaoId":"LFRL","obsTime":1791295200,"wxString":"-RA","lat":48.279,"lon":-4.439,
        "name":"Lanveoc/Poulmic Arpt, BRE, FR","rawOb":"METAR LFRL 061400Z AUTO 35005KT 9000 -RA ///CB 17/16 Q1014"},
       {"icaoId":"LFRB","obsTime":1791295200,"lat":48.444,"lon":-4.412,
@@ -84,6 +85,12 @@ mod tests {
         // 14 h UTC, 16 h à Brest.
         assert_eq!(lanveoc.time, (1_791_295_200 + 7200) * 1000);
         assert_eq!(bulletins[2].temps_present, "", "sans temps présent, rien ne tombe");
+        // La tendance se lit dans le bulletin brut.
+        assert!(matches!(
+            bulletins[0].tendance,
+            klima_core::ciel::Tendance::Changement { passager: true, tombe: Some(_), .. }
+        ));
+        assert_eq!(bulletins[2].tendance, klima_core::ciel::Tendance::Inconnue);
         assert!(decode_metars("pas du json", 0).is_empty());
         assert!(decode_metars("{}", 0).is_empty());
     }
@@ -97,7 +104,7 @@ mod tests {
         assert_eq!(ciel.tombe, None);
         // Au sud de la rade, c'est Lanvéoc qui parle — et il pleut.
         let ciel = plus_proche(&bulletins, 48.30, -4.45, maintenant).unwrap();
-        assert_eq!((ciel.station.as_str(), ciel.tombe), ("LFRL", Some(61)));
+        assert_eq!((ciel.station.as_str(), ciel.tombe.map(|t| t.code)), ("LFRL", Some(61)));
     }
 
     #[test]

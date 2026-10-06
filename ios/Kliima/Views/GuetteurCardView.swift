@@ -13,9 +13,10 @@ struct GuetteurCardView: View {
     let luA: Date?
     let enLecture: Bool
     let timeZone: TimeZone
-    /// Ce que l'aéroport le plus proche voit tomber (`AgroForecast.ciel`) : le
-    /// quart en cours le prend, s'il était sec.
-    var tombe: Int? = nil
+    /// Le ciel de l'aéroport le plus proche (`AgroForecast.ciel`) : ce qu'il
+    /// voit tomber mouille les quarts que son bulletin couvre, et ce que ses
+    /// prévisionnistes annoncent est dit.
+    var ciel: CielObserve? = nil
 
     @ScaledMetric(relativeTo: .body) private var hauteurBarres: CGFloat = 48
 
@@ -28,11 +29,12 @@ struct GuetteurCardView: View {
             VStack(alignment: .leading, spacing: 10) {
                 tete
 
-                if let lecture = quarts.flatMap({
-                    Veille.veille(Veille.observer($0, maintenant: contexte.date, tombe: tombe), maintenant: contexte.date)
-                }) {
+                if let quarts, let lecture = Veille.veille(
+                    Veille.observer(quarts, maintenant: contexte.date, ciel: ciel), maintenant: contexte.date
+                ) {
+                    let aveugle = Veille.aveugle(quarts, maintenant: contexte.date, ciel: ciel)
                     bulle(Localized.text("veille.now"), immediat(lecture))
-                    bulle(Localized.text("veille.next"), suite(lecture))
+                    bulle(Localized.text("veille.next"), suite(lecture, aveugle: aveugle))
                     grille(lecture)
                 } else {
                     Text(Localized.text(enLecture ? "veille.loading" : "veille.unavailable"))
@@ -153,7 +155,7 @@ struct GuetteurCardView: View {
         VeilleTextes.immediat(lecture, in: timeZone)
     }
 
-    private func suite(_ lecture: VeilleLecture) -> String {
-        VeilleTextes.suite(lecture, in: timeZone).joined(separator: " ")
+    private func suite(_ lecture: VeilleLecture, aveugle: Bool) -> String {
+        VeilleTextes.suite(lecture, in: timeZone, ciel: ciel, aveugle: aveugle).joined(separator: " ")
     }
 }

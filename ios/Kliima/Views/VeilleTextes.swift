@@ -22,14 +22,40 @@ enum VeilleTextes {
         }
     }
 
-    /// Les deux heures à venir : d'abord la pluie, puis les rafales et la
-    /// température au bout de la fenêtre. La montre ne garde que la première.
-    static func suite(_ lecture: VeilleLecture, in zone: TimeZone) -> [String] {
+    /// Ce que les prévisionnistes de l'aéroport annoncent de tomber d'ici deux
+    /// heures, en une phrase.
+    static func annonce(_ ciel: CielObserve?, in zone: TimeZone) -> String? {
+        guard let ciel, let prevue = ciel.annonce else { return nil }
+        return Localized.text(
+            prevue.passagere ? "veille.airport.tempo" : "veille.airport.becmg",
+            ciel.nom,
+            prevue.precipitation.label,
+            AgroFormat.time(prevue.jusquA, in: zone)
+        )
+    }
+
+    /// Les deux heures à venir : d'abord la pluie — et ce que l'aéroport
+    /// annonce —, puis les rafales et la température au bout de la fenêtre.
+    /// Quand l'aéroport annonce que quelque chose tombera, le guetteur ne
+    /// promet plus de sec : la prévision au quart d'heure ne l'a pas vu. La
+    /// montre ne garde que la première phrase.
+    static func suite(
+        _ lecture: VeilleLecture, in zone: TimeZone, ciel: CielObserve? = nil, aveugle: Bool = false
+    ) -> [String] {
         let heure = { AgroFormat.time($0, in: zone) }
         let fin = heure(lecture.finFenetre)
+        let annoncee = Self.annonce(ciel, in: zone)
         var phrases: [String] = []
 
         switch lecture.suite {
+        case .accalmie where aveugle:
+            // Les modèles n'ont pas vu ce qui tombe : la fin qu'ils donneraient
+            // n'en est pas une.
+            phrases.append(Localized.text("veille.next.unseen"))
+        case .sec where annoncee != nil:
+            break
+        case let .accalmie(arret, .none) where annoncee != nil:
+            phrases.append(Localized.text("veille.next.stop", heure(arret)))
         case .sec:
             phrases.append(Localized.text("veille.next.dry", fin))
         case let .episode(debut, arret?, precipitation, cumul):
@@ -46,6 +72,7 @@ enum VeilleTextes {
             phrases.append(Localized.text("veille.next.lullReturn", heure(arret), heure(reprise)))
         }
 
+        if let annoncee { phrases.append(annoncee) }
         if let rafales = lecture.rafales {
             phrases.append(Localized.text(
                 "veille.gusts", AgroFormat.unit(rafales.valeur, "km/h", decimals: 0), heure(rafales.quand)

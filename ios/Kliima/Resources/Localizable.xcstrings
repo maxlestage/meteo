@@ -2899,6 +2899,52 @@
         }
       }
     },
+    "veille.airport.becmg": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@ airport forecast: %2$@ by %3$@."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Previsión del aeropuerto de %1$@: %2$@ antes de las %3$@."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Prévision de l’aéroport de %1$@ : %2$@ d’ici %3$@."
+          }
+        }
+      }
+    },
+    "veille.airport.tempo": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@ airport forecast: %2$@ at times until %3$@."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Previsión del aeropuerto de %1$@: %2$@ a ratos hasta las %3$@."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Prévision de l’aéroport de %1$@ : %2$@ par moments d’ici %3$@."
+          }
+        }
+      }
+    },
     "veille.chart": {
       "extractionState": "manual",
       "localizations": {
@@ -3309,6 +3355,52 @@
           "stringUnit": {
             "state": "translated",
             "value": "Ça ne s’arrête pas avant %1$@ : %2$@, %3$@ en tout."
+          }
+        }
+      }
+    },
+    "veille.next.stop": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ending around %1$@."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Termina hacia las %1$@."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fin vers %1$@."
+          }
+        }
+      }
+    },
+    "veille.next.unseen": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The models don’t see what’s falling: its end can’t be forecast."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Los modelos no ven lo que cae: su final no se puede prever."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Les modèles ne voient pas ce qui tombe : sa fin ne se prévoit pas."
           }
         }
       }

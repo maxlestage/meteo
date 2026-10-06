@@ -233,22 +233,42 @@ enum Veille {
     }
 
     /// La série, corrigée de ce qu'un aéroport proche voit tomber (`Ciel`) :
-    /// le quart en cours, s'il était sec, prend la pluie observée. Les quarts
-    /// suivants restent ceux de la prévision ; un ciel sec observé ne retire
-    /// rien.
-    static func observer(_ serie: [QuartSample], maintenant: Date, tombe: Int?) -> [QuartSample] {
-        guard let code = tombe, code >= FusionSeuils.codeMouille,
-              let i = serie.firstIndex(where: { $0.time <= maintenant && maintenant < $0.time.addingTimeInterval(VeilleSeuils.quart) }),
-              !mouille(serie[i])
+    /// les quarts secs que le bulletin couvre (`CielObserve.tombeJusquA`) —
+    /// le quart en cours toujours — prennent ce qu'on voit, à sa force. Au-delà,
+    /// la prévision reprend la parole ; un ciel sec observé ne retire rien.
+    static func observer(_ serie: [QuartSample], maintenant: Date, ciel: CielObserve?) -> [QuartSample] {
+        guard let ciel, let tombe = ciel.tombe, let validite = ciel.tombeJusquA,
+              tombe.code >= FusionSeuils.codeMouille
         else { return serie }
-        var vue = serie
-        let q = serie[i]
-        vue[i] = QuartSample(
-            time: q.time, precipitation: Ciel.quartObserveMm(code), weatherCode: code,
-            temperature: q.temperature, apparentTemperature: q.apparentTemperature,
-            windGusts: q.windGusts, isDay: q.isDay
-        )
-        return vue
+        // Ce qu'on voit couvre au moins la demi-heure en cours, sauf si les
+        // prévisionnistes en annoncent la fin.
+        var finAnnoncee = false
+        if case .changement(passager: false, tombe: _, sec: true) = ciel.tendance { finAnnoncee = true }
+        let quart = VeilleSeuils.quart
+        let debutDuQuart = (maintenant.timeIntervalSince1970 / quart).rounded(.down) * quart
+        let demiHeure = Date(timeIntervalSince1970: debutDuQuart + Double(VeilleSeuils.immediatQuarts) * quart)
+        let jusquA = finAnnoncee ? validite : max(validite, demiHeure)
+        let mm = Ciel.quartObserveMm(tombe.intensite)
+        return serie.map { q in
+            let fin = q.time.addingTimeInterval(VeilleSeuils.quart)
+            let enCours = q.time <= maintenant && maintenant < fin
+            let couvert = fin > maintenant && q.time < jusquA
+            guard enCours || couvert, !mouille(q) else { return q }
+            return QuartSample(
+                time: q.time, precipitation: mm, weatherCode: tombe.code,
+                temperature: q.temperature, apparentTemperature: q.apparentTemperature,
+                windGusts: q.windGusts, isDay: q.isDay
+            )
+        }
+    }
+
+    /// Vrai quand l'aéroport voit tomber ce que la prévision du quart en cours
+    /// ne voit pas : la fin que donneraient les modèles n'en est pas une.
+    static func aveugle(_ serie: [QuartSample], maintenant: Date, ciel: CielObserve?) -> Bool {
+        guard let tombe = ciel?.tombe, tombe.code >= FusionSeuils.codeMouille,
+              let quart = serie.first(where: { $0.time <= maintenant && maintenant < $0.time.addingTimeInterval(VeilleSeuils.quart) })
+        else { return false }
+        return !mouille(quart)
     }
 
     /// Quand relire : une minute après le début du quart qui suit la lecture.
