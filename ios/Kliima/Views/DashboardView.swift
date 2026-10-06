@@ -128,6 +128,12 @@ struct DashboardView: View {
             .toolbar {
                 // Mes villes : une au palier libre, autant qu'on veut avec
                 // Kliima ‣ Pro.
+                // L'apparence : celle du téléphone, claire ou sombre.
+                ToolbarItem(placement: .topBarTrailing) {
+                    SelecteurApparence()
+                        .tint(Color.encre)
+                }
+
                 ToolbarItem(placement: .topBarTrailing) {
                     Button {
                         villesOuvertes = true
