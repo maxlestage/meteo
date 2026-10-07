@@ -298,16 +298,25 @@ Cinq widgets, chacun pour une question qu'on se pose devant la porte, tous
 sur la même prévision (une entrée par heure calculée d'avance, qui bascule
 seule) et avec le ciel qu'il fait en fond :
 
-- **Météo** (petit, moyen) : la température, le ciel, les bornes du jour et
-  la pluie qui vient ; en moyen, quatre heures sur un panneau de verre.
-- **Pluie** (petit, moyen) : la phrase de la carte Pluie et les douze heures
-  en barres ; en moyen, ce qu'il faut emporter.
+- **Météo** (petit, moyen, grand) : la température, le ciel, les bornes du
+  jour et la pluie qui vient ; en moyen, quatre heures sur un panneau de
+  verre ; en grand, le ressenti, le vent et l'UV en tuiles, puis six heures.
+- **Pluie** (petit, moyen, grand) : la phrase de la carte Pluie et les douze
+  heures en barres ; en moyen, ce qu'il faut emporter ; en grand, de hautes
+  barres avec leurs heures.
 - **Prochaines heures** (moyen, grand) : six heures ; en grand, les quatre
   jours suivants.
 - **La semaine** (moyen, grand) : les jours, du plus frais au plus chaud, sur
   une même échelle.
-- **Pour sortir** (petit, moyen) : le ressenti, le vent, l'UV et ce qu'il faut
-  emporter.
+- **Pour sortir** (petit, moyen, grand) : le ressenti, le vent, l'UV et ce
+  qu'il faut emporter ; en grand, l'humidité et la pluie en plus.
+
+Les widgets montrent la ville choisie dans l'application quand le groupe
+d'applications la leur transmet. Sans lui, ils partent de la position — si
+l'on a permis la localisation « lorsque l'app ou les widgets sont actifs »
+(`NSWidgetWantsLocation`) —, arrondie à la maille et nommée par sa commune ;
+Paris en dernier recours. Un widget ne demande jamais l'autorisation : il ne
+le peut pas.
 
 Et la météo sur l'écran verrouillé.
 

@@ -1,3 +1,4 @@
+import CoreLocation
 import SwiftUI
 import WidgetKit
 
@@ -11,7 +12,77 @@ struct WeatherWidget: Widget {
         }
         .configurationDisplayName(Localized.text("weather.title"))
         .description(Localized.text("weather.widgetDescription"))
-        .supportedFamilies([.systemSmall, .systemMedium])
+        .supportedFamilies([.systemSmall, .systemMedium, .systemLarge])
+    }
+}
+
+/// Là où l'on est, pour un widget qui ne connaît pas la ville de
+/// l'application.
+///
+/// Sans groupe d'applications enregistré chez Apple, le widget ne lit pas ce
+/// que l'application a choisi : il restait sur Paris. Il part maintenant de
+/// la position — comme l'application quand rien n'est choisi —, si l'on a
+/// permis aux widgets de la lire (`NSWidgetWantsLocation`, « Lorsque l'app ou
+/// les widgets sont actifs »). Jamais de demande d'autorisation ici : un
+/// widget ne peut pas en présenter. La position est arrondie à la maille, et
+/// porte le nom de la commune.
+enum PositionDuWidget {
+
+    /// Sur le fil principal : le gestionnaire de position y rend ses réponses.
+    @MainActor
+    static func ville() async -> Parcelle? {
+        let gestionnaire = CLLocationManager()
+        guard gestionnaire.isAuthorizedForWidgetUpdates else { return nil }
+
+        var coordonnee: CLLocationCoordinate2D?
+        // La dernière position connue du système suffit, si elle a moins de
+        // six heures : pas besoin de réveiller le GPS pour une ville.
+        if let connue = gestionnaire.location, connue.timestamp.timeIntervalSinceNow > -6 * 3600 {
+            coordonnee = connue.coordinate
+        } else {
+            let service = LocationService()
+            coordonnee = await avecDelai(8) { try? await service.currentCoordinate() }
+        }
+        guard let coordonnee else { return nil }
+
+        let lieu = CLLocation(latitude: coordonnee.latitude, longitude: coordonnee.longitude)
+        let commune = await avecDelai(5) { try? await CLGeocoder().reverseGeocodeLocation(lieu).first?.locality }
+        return Position.parcelle(
+            named: commune ?? Localized.text("search.myField"),
+            latitude: coordonnee.latitude,
+            longitude: coordonnee.longitude
+        )
+    }
+
+    /// Le résultat de `travail`, ou rien s'il tarde : un widget a peu de temps.
+    /// Un groupe de tâches attendrait la plus lente ; ici, la première
+    /// réponse rend la main, et l'autre n'est plus écoutée.
+    @MainActor
+    private static func avecDelai<T>(_ secondes: Double, _ travail: @escaping () async -> T?) async -> T? {
+        await withCheckedContinuation { (suite: CheckedContinuation<T?, Never>) in
+            let reponse = PremiereReponse(suite)
+            Task { @MainActor in reponse.rendre(await travail()) }
+            Task { @MainActor in
+                try? await Task.sleep(nanoseconds: UInt64(secondes * 1_000_000_000))
+                reponse.rendre(nil)
+            }
+        }
+    }
+}
+
+/// Une suite qu'on ne reprend qu'une fois, quel que soit le premier à répondre.
+private final class PremiereReponse<T> {
+    private let verrou = NSLock()
+    private var suite: CheckedContinuation<T?, Never>?
+
+    init(_ suite: CheckedContinuation<T?, Never>) { self.suite = suite }
+
+    func rendre(_ valeur: T?) {
+        verrou.lock()
+        let attente = suite
+        suite = nil
+        verrou.unlock()
+        attente?.resume(returning: valeur)
     }
 }
 
@@ -64,7 +135,16 @@ struct WeatherTimelineProvider: TimelineProvider {
     }
 
     private func entries() async -> [WeatherEntry] {
-        let parcelle = SharedStore.loadParcelle() ?? .paris
+        // La ville choisie dans l'application si le groupe partagé la donne ;
+        // sinon là où l'on est ; Paris en dernier recours.
+        let parcelle: Parcelle
+        if let choisie = SharedStore.loadParcelle() {
+            parcelle = choisie
+        } else if let ici = await PositionDuWidget.ville() {
+            parcelle = ici
+        } else {
+            parcelle = .paris
+        }
         let maintenant = Date()
 
         // Sept jours : la semaine a son widget.
@@ -140,6 +220,8 @@ struct WeatherWidgetView: View {
         Group {
             if let current = entry.current {
                 switch family {
+                case .systemLarge:
+                    grand(current)
                 case .systemMedium:
                     HStack(alignment: .top, spacing: 12) {
                         essentiel(current)
@@ -160,6 +242,66 @@ struct WeatherWidgetView: View {
             }
         }
         .foregroundStyle(.white)
+    }
+
+    /// En grand : la température en très gros et son ciel, la pluie qui vient,
+    /// trois tuiles — ressenti, vent, UV —, puis six heures.
+    private func grand(_ current: CurrentSample) -> some View {
+        let condition = WeatherCondition.forCode(current.weatherCode)
+        return VStack(alignment: .leading, spacing: 10) {
+            HStack(alignment: .top) {
+                VStack(alignment: .leading, spacing: 0) {
+                    Text(entry.parcelleName)
+                        .font(.subheadline.weight(.semibold))
+                        .lineLimit(1)
+                    Text(AgroFormat.temperature(current.temperature))
+                        .font(.system(size: 58, weight: .thin, design: .rounded))
+                        .lineLimit(1)
+                        .widgetAccentable()
+                    Text(condition.label)
+                        .font(.subheadline.weight(.medium))
+                        .lineLimit(1)
+                    if let today = entry.today {
+                        Text("↓ \(AgroFormat.temperature(today.temperatureMin))  ↑ \(AgroFormat.temperature(today.temperatureMax))")
+                            .font(.caption)
+                            .monospacedDigit()
+                            .opacity(0.8)
+                    }
+                }
+                Spacer(minLength: 8)
+                Image(systemName: condition.icon.symbolName(isDay: current.isDay))
+                    .symbolRenderingMode(.multicolor)
+                    .font(.system(size: 52))
+            }
+
+            if let pluie = phraseDePluie {
+                Label(pluie.texte, systemImage: pluie.seche ? "umbrella" : "cloud.rain.fill")
+                    .font(.footnote.weight(.semibold))
+                    .foregroundStyle(pluie.seche ? Color.white.opacity(0.85) : bleuPluie)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.7)
+            }
+
+            HStack(spacing: 8) {
+                TuileWidget(
+                    symbole: "figure.walk", titre: Localized.text("tile.feelsLike"),
+                    valeur: AgroFormat.temperature(current.apparentTemperature)
+                )
+                TuileWidget(
+                    symbole: "wind", titre: Localized.text("tile.wind"),
+                    valeur: AgroFormat.unit(current.windSpeed, "km/h", decimals: 0),
+                    detail: AgroFormat.unit(current.windGusts, "km/h", decimals: 0)
+                )
+                TuileWidget(
+                    symbole: "sun.max.fill", titre: Localized.text("tile.uv"),
+                    valeur: entry.today.map { AgroFormat.decimal($0.uvIndexMax, decimals: 0) } ?? "–",
+                    detail: entry.today.map { Ville.niveauUv($0.uvIndexMax).label }
+                )
+            }
+
+            Spacer(minLength: 0)
+            BandeauHeures(heures: Array(entry.hours.dropFirst().prefix(6)), timeZone: entry.timeZone)
+        }
     }
 
     /// La ville, la température et le ciel, puis la pluie qui vient.
