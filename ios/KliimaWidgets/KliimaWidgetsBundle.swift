@@ -8,6 +8,10 @@ struct KliimaWidgetsBundle: WidgetBundle {
     var body: some Widget {
         WeatherLiveActivity()
         WeatherWidget()
+        PluieWidget()
+        HeuresWidget()
+        SemaineWidget()
+        DehorsWidget()
         WeatherLockScreenWidget()
     }
 }

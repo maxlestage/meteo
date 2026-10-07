@@ -139,6 +139,30 @@ STRINGS = {
     "weather.follow": ("Suivre la météo", "Follow the weather", "Seguir el tiempo"),
     "weather.stop": ("Arrêter le suivi météo", "Stop following", "Dejar de seguir"),
     "widget.unavailable": ("Prévision indisponible", "Forecast unavailable", "Previsión no disponible"),
+    "widget.rain.name": ("Pluie", "Rain", "Lluvia"),
+    "widget.rain.description": (
+        "La pluie des douze prochaines heures, et ce qu’il faut emporter.",
+        "Rain over the next twelve hours, and what to take with you.",
+        "La lluvia de las próximas doce horas, y qué llevar.",
+    ),
+    "widget.hours.name": ("Prochaines heures", "Next hours", "Próximas horas"),
+    "widget.hours.description": (
+        "Le ciel, la température et le risque de pluie, heure par heure.",
+        "Sky, temperature and chance of rain, hour by hour.",
+        "Cielo, temperatura y probabilidad de lluvia, hora a hora.",
+    ),
+    "widget.week.name": ("La semaine", "The week", "La semana"),
+    "widget.week.description": (
+        "Les jours qui viennent, du plus frais au plus chaud.",
+        "The days ahead, from coolest to warmest.",
+        "Los próximos días, del más fresco al más cálido.",
+    ),
+    "widget.outside.name": ("Pour sortir", "Heading out", "Para salir"),
+    "widget.outside.description": (
+        "Le ressenti, le vent, l’UV et ce qu’il faut emporter.",
+        "Feels-like, wind, UV and what to take with you.",
+        "Sensación, viento, UV y qué llevar.",
+    ),
 
     "tile.wind": ("Vent", "Wind", "Viento"),
     "tile.sunrise": ("Lever", "Sunrise", "Amanecer"),
