@@ -292,10 +292,24 @@ l'île bascule seule à l'heure pile, même sans réseau. Le relais, s'il a une 
 APNs, pousse ce qui change en temps réel — voir
 [`rust/DEPLOIEMENT.md`](rust/DEPLOIEMENT.md).
 
-### Widget d'écran d'accueil
+### Widgets d'écran d'accueil
 
-La température et le ciel de la ville, avec une entrée par heure calculée
-d'avance ; et la météo sur l'écran verrouillé.
+Cinq widgets, chacun pour une question qu'on se pose devant la porte, tous
+sur la même prévision (une entrée par heure calculée d'avance, qui bascule
+seule) et avec le ciel qu'il fait en fond :
+
+- **Météo** (petit, moyen) : la température, le ciel, les bornes du jour et
+  la pluie qui vient ; en moyen, quatre heures sur un panneau de verre.
+- **Pluie** (petit, moyen) : la phrase de la carte Pluie et les douze heures
+  en barres ; en moyen, ce qu'il faut emporter.
+- **Prochaines heures** (moyen, grand) : six heures ; en grand, les quatre
+  jours suivants.
+- **La semaine** (moyen, grand) : les jours, du plus frais au plus chaud, sur
+  une même échelle.
+- **Pour sortir** (petit, moyen) : le ressenti, le vent, l'UV et ce qu'il faut
+  emporter.
+
+Et la météo sur l'écran verrouillé.
 
 ### Complication de cadran
 
