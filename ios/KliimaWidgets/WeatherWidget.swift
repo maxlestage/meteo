@@ -7,7 +7,7 @@ struct WeatherWidget: Widget {
     var body: some WidgetConfiguration {
         StaticConfiguration(kind: "KliimaWeatherWidget", provider: WeatherTimelineProvider()) { entry in
             WeatherWidgetView(entry: entry)
-                .containerBackground(.fill.tertiary, for: .widget)
+                .containerBackground(for: .widget) { CielDuWidget(current: entry.current) }
         }
         .configurationDisplayName(Localized.text("weather.title"))
         .description(Localized.text("weather.widgetDescription"))
@@ -21,7 +21,8 @@ struct WeatherEntry: TimelineEntry {
     /// Absents quand la prévision n'a pas pu être chargée.
     let current: CurrentSample?
     let today: DailySample?
-    /// Les prochaines heures, pour la forme moyenne.
+    /// Les douze prochaines heures : la pluie qui vient, et le bandeau de la
+    /// forme moyenne.
     let hours: [HourlySample]
     let timeZone: TimeZone
 }
@@ -80,82 +81,177 @@ struct WeatherTimelineProvider: TimelineProvider {
                 parcelleName: parcelle.name,
                 current: moment.courant,
                 today: moment.jour,
-                hours: Array(moment.heures.prefix(6)),
+                hours: Array(moment.heures.prefix(12)),
                 timeZone: zone
             )
         }
     }
 }
 
+/// Le fond : le ciel qu'il fait, comme dans l'application — azur le jour,
+/// ardoise sous les nuages, bleu de pluie quand il tombe quelque chose, nuit
+/// profonde après le coucher. Assez sombre pour que le texte blanc se lise
+/// partout ; en mode teinté, le système le retire et garde le texte.
+struct CielDuWidget: View {
+    let current: CurrentSample?
+
+    var body: some View {
+        LinearGradient(colors: couleurs, startPoint: .top, endPoint: .bottom)
+    }
+
+    private var couleurs: [Color] {
+        guard let current else {
+            return [Color(red: 0.20, green: 0.27, blue: 0.36), Color(red: 0.10, green: 0.14, blue: 0.20)]
+        }
+        let icone = WeatherCondition.forCode(current.weatherCode).icon
+        if !current.isDay {
+            return [Color(red: 0.08, green: 0.13, blue: 0.24), Color(red: 0.02, green: 0.04, blue: 0.10)]
+        }
+        switch icone {
+        case .rain, .showers, .thunder, .drizzle:
+            return [Color(red: 0.25, green: 0.33, blue: 0.45), Color(red: 0.11, green: 0.15, blue: 0.23)]
+        case .cloudy, .fog, .snow:
+            return [Color(red: 0.36, green: 0.43, blue: 0.52), Color(red: 0.17, green: 0.21, blue: 0.28)]
+        default:
+            return [Color(red: 0.22, green: 0.50, blue: 0.82), Color(red: 0.09, green: 0.27, blue: 0.55)]
+        }
+    }
+}
+
+/// Le widget d'écran d'accueil.
+///
+/// La première version empilait tout dans une colonne — ville, température,
+/// ciel, bornes, puis le bandeau des heures — et la forme moyenne débordait en
+/// haut et en bas, sur un fond gris qui ne disait rien du temps. Le petit dit
+/// maintenant l'essentiel et la pluie qui vient ; le moyen met l'essentiel à
+/// gauche et quatre heures à droite, sur un fond qui est le ciel.
 struct WeatherWidgetView: View {
     @Environment(\.widgetFamily) private var family
     let entry: WeatherEntry
 
+    private let bleuPluie = Color(red: 0.62, green: 0.86, blue: 1.0)
+
     var body: some View {
-        VStack(alignment: .leading, spacing: 4) {
-            Text(entry.parcelleName)
-                .font(.caption2)
-                .foregroundStyle(.secondary)
-                .lineLimit(1)
-
+        Group {
             if let current = entry.current {
-                let condition = WeatherCondition.forCode(current.weatherCode)
-
-                HStack(alignment: .firstTextBaseline, spacing: 6) {
-                    Text(AgroFormat.temperature(current.temperature))
-                        .font(family == .systemSmall ? .largeTitle : .system(size: 44))
-                        .lineLimit(1)
-                        .minimumScaleFactor(0.7)
-
-                    Image(systemName: condition.icon.symbolName(isDay: current.isDay))
-                        .symbolRenderingMode(.multicolor)
-                        .font(.title3)
-                }
-
-                Text(condition.label)
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-                    .lineLimit(1)
-
-                if let today = entry.today {
-                    Text(bornes(today))
-                        .font(.caption2)
-                        .foregroundStyle(.secondary)
-                        .lineLimit(1)
-                }
-
-                if family == .systemMedium && !entry.hours.isEmpty {
-                    Spacer(minLength: 4)
-                    HStack(alignment: .top, spacing: 10) {
-                        ForEach(entry.hours) { hour in
-                            VStack(spacing: 3) {
-                                Text(AgroFormat.hour(hour.time, in: entry.timeZone))
-                                    .font(.system(size: 10, weight: .semibold))
-                                    .foregroundStyle(.secondary)
-                                    .lineLimit(1)
-                                Image(systemName: WeatherCondition.forCode(hour.weatherCode)
-                                    .icon.symbolName(isDay: hour.isDay))
-                                    .symbolRenderingMode(.multicolor)
-                                    .font(.caption)
-                                Text(AgroFormat.temperature(hour.temperature))
-                                    .font(.caption2)
-                                    .lineLimit(1)
-                            }
-                        }
+                switch family {
+                case .systemMedium:
+                    HStack(alignment: .top, spacing: 12) {
+                        essentiel(current)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                        bandeau
                     }
+                default:
+                    essentiel(current)
+                        .frame(maxWidth: .infinity, alignment: .leading)
                 }
             } else {
-                Text(Localized.text("widget.unavailable"))
-                    .font(.footnote)
-                    .foregroundStyle(.secondary)
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(entry.parcelleName).font(.caption.weight(.semibold))
+                    Text(Localized.text("widget.unavailable")).font(.footnote).opacity(0.8)
+                    Spacer(minLength: 0)
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
+            }
+        }
+        .foregroundStyle(.white)
+    }
+
+    /// La ville, la température et le ciel, puis la pluie qui vient.
+    private func essentiel(_ current: CurrentSample) -> some View {
+        let condition = WeatherCondition.forCode(current.weatherCode)
+
+        return VStack(alignment: .leading, spacing: 2) {
+            Text(entry.parcelleName)
+                .font(.caption.weight(.semibold))
+                .lineLimit(1)
+
+            // L'icône à côté de la température, pas sur une ligne à elle : un
+            // petit widget n'a qu'environ 126 points de haut.
+            HStack(alignment: .center, spacing: 6) {
+                Text(AgroFormat.temperature(current.temperature))
+                    .font(.system(size: 40, weight: .light, design: .rounded))
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.6)
+                    .widgetAccentable()
+                Image(systemName: condition.icon.symbolName(isDay: current.isDay))
+                    .symbolRenderingMode(.multicolor)
+                    .font(.title2)
             }
 
             Spacer(minLength: 0)
+
+            Text(condition.label)
+                .font(.caption.weight(.medium))
+                .lineLimit(1)
+                .minimumScaleFactor(0.8)
+
+            if let today = entry.today {
+                Text("↓ \(AgroFormat.temperature(today.temperatureMin))  ↑ \(AgroFormat.temperature(today.temperatureMax))")
+                    .font(.caption2)
+                    .monospacedDigit()
+                    .opacity(0.8)
+                    .lineLimit(1)
+            }
+
+            if let pluie = phraseDePluie {
+                Label(pluie.texte, systemImage: pluie.seche ? "umbrella" : "cloud.rain.fill")
+                    .font(.caption2.weight(.semibold))
+                    .foregroundStyle(pluie.seche ? Color.white.opacity(0.8) : bleuPluie)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.7)
+                    .padding(.top, 2)
+            }
         }
     }
 
-    /// « 17° / 30° » — les bornes du jour, sur la parcelle.
-    private func bornes(_ today: DailySample) -> String {
-        "\(AgroFormat.temperature(today.temperatureMin)) / \(AgroFormat.temperature(today.temperatureMax))"
+    /// Quatre heures, sur un panneau de verre.
+    private var bandeau: some View {
+        HStack(spacing: 0) {
+            ForEach(Array(entry.hours.dropFirst().prefix(4))) { hour in
+                VStack(spacing: 4) {
+                    Text(AgroFormat.hour(hour.time, in: entry.timeZone))
+                        .font(.system(size: 11, weight: .semibold))
+                        .opacity(0.8)
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.7)
+                    Image(systemName: WeatherCondition.forCode(hour.weatherCode).icon.symbolName(isDay: hour.isDay))
+                        .symbolRenderingMode(.multicolor)
+                        .font(.system(size: 18))
+                        .frame(height: 22)
+                    Text(AgroFormat.temperature(hour.temperature))
+                        .font(.system(size: 15, weight: .medium, design: .rounded))
+                        .monospacedDigit()
+                        .lineLimit(1)
+                    Text(hour.precipitationProbability >= 30 ? AgroFormat.percent(hour.precipitationProbability) : " ")
+                        .font(.system(size: 10, weight: .semibold))
+                        .foregroundStyle(bleuPluie)
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.7)
+                }
+                .frame(maxWidth: .infinity)
+            }
+        }
+        .padding(.vertical, 8)
+        .padding(.horizontal, 4)
+        .frame(maxHeight: .infinity)
+        .background(Color.white.opacity(0.12), in: RoundedRectangle(cornerRadius: 14))
+        .frame(width: 160)
+    }
+
+    /// « Pluie vers 11 h », « Il pleut, et pour un moment », « Pas de pluie
+    /// d'ici 12 h » — la même règle que la carte de l'application.
+    private var phraseDePluie: (texte: String, seche: Bool)? {
+        guard !entry.hours.isEmpty else { return nil }
+        switch Ville.prochainePluie(entry.hours) {
+        case .aucune(let heures):
+            return (Localized.text("rain.none", String(heures)), true)
+        case .enCours(let fin?):
+            return (Localized.text("rain.now", AgroFormat.hour(fin, in: entry.timeZone)), false)
+        case .enCours(.none):
+            return (Localized.text("rain.nowLasting"), false)
+        case .prevue(let debut, _, _):
+            return (Localized.text("rain.soon", AgroFormat.hour(debut, in: entry.timeZone)), false)
+        }
     }
 }
