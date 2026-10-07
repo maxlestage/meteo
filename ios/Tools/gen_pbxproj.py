@@ -48,7 +48,7 @@ STRINGS = (f"{APP}/Resources", "Localizable.xcstrings")
 INFO_STRINGS = (f"{APP}/Resources", "InfoPlist.xcstrings")
 APP_PLIST = (f"{APP}/Resources", "Info.plist")
 
-WIDGET_FILES = [(WIDGETS, "KliimaWidgetsBundle.swift"), (WIDGETS, "WeatherLiveActivity.swift"),
+WIDGET_FILES = [(WIDGETS, "KliimaWidgetsBundle.swift"), (WIDGETS, "WeatherLiveActivity.swift"), (WIDGETS, "WidgetsVille.swift"),
                 (WIDGETS, "WeatherWidget.swift"),
                 (WIDGETS, "WeatherLockScreenWidget.swift")]
 WIDGET_PLIST = (WIDGETS, "Info.plist")

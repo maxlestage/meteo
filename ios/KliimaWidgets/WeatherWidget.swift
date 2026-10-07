@@ -24,6 +24,9 @@ struct WeatherEntry: TimelineEntry {
     /// Les douze prochaines heures : la pluie qui vient, et le bandeau de la
     /// forme moyenne.
     let hours: [HourlySample]
+    /// Les jours qui viennent, à partir de celui de l'entrée : le widget de la
+    /// semaine.
+    var days: [DailySample] = []
     let timeZone: TimeZone
 }
 
@@ -64,7 +67,8 @@ struct WeatherTimelineProvider: TimelineProvider {
         let parcelle = SharedStore.loadParcelle() ?? .paris
         let maintenant = Date()
 
-        guard let forecast = try? await AgroWeatherService().forecast(for: parcelle, days: 2) else {
+        // Sept jours : la semaine a son widget.
+        guard let forecast = try? await AgroWeatherService().forecast(for: parcelle, days: 7) else {
             return [WeatherEntry(date: maintenant, parcelleName: parcelle.name,
                                  current: nil, today: nil, hours: [], timeZone: .current)]
         }
@@ -82,6 +86,7 @@ struct WeatherTimelineProvider: TimelineProvider {
                 current: moment.courant,
                 today: moment.jour,
                 hours: Array(moment.heures.prefix(12)),
+                days: Array(forecast.daily.filter { $0.date >= (moment.jour?.date ?? .distantPast) }.prefix(7)),
                 timeZone: zone
             )
         }
@@ -239,19 +244,23 @@ struct WeatherWidgetView: View {
         .frame(width: 160)
     }
 
+    private var phraseDePluie: (texte: String, seche: Bool)? { entry.phraseDePluie }
+}
+
+extension WeatherEntry {
     /// « Pluie vers 11 h », « Il pleut, et pour un moment », « Pas de pluie
     /// d'ici 12 h » — la même règle que la carte de l'application.
-    private var phraseDePluie: (texte: String, seche: Bool)? {
-        guard !entry.hours.isEmpty else { return nil }
-        switch Ville.prochainePluie(entry.hours) {
+    var phraseDePluie: (texte: String, seche: Bool)? {
+        guard !hours.isEmpty else { return nil }
+        switch Ville.prochainePluie(hours) {
         case .aucune(let heures):
             return (Localized.text("rain.none", String(heures)), true)
         case .enCours(let fin?):
-            return (Localized.text("rain.now", AgroFormat.hour(fin, in: entry.timeZone)), false)
+            return (Localized.text("rain.now", AgroFormat.hour(fin, in: timeZone)), false)
         case .enCours(.none):
             return (Localized.text("rain.nowLasting"), false)
         case .prevue(let debut, _, _):
-            return (Localized.text("rain.soon", AgroFormat.hour(debut, in: entry.timeZone)), false)
+            return (Localized.text("rain.soon", AgroFormat.hour(debut, in: timeZone)), false)
         }
     }
 }
