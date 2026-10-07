@@ -52,7 +52,7 @@ struct PluieWidget: Widget {
         }
         .configurationDisplayName(Localized.text("widget.rain.name"))
         .description(Localized.text("widget.rain.description"))
-        .supportedFamilies([.systemSmall, .systemMedium])
+        .supportedFamilies([.systemSmall, .systemMedium, .systemLarge])
     }
 }
 
@@ -64,6 +64,8 @@ struct PluieWidgetView: View {
         Group {
             if entry.current == nil || entry.hours.isEmpty {
                 Indisponible(ville: entry.parcelleName)
+            } else if family == .systemLarge {
+                grand
             } else if family == .systemMedium {
                 HStack(alignment: .top, spacing: 14) {
                     pluie
@@ -75,6 +77,38 @@ struct PluieWidgetView: View {
             }
         }
         .foregroundStyle(.white)
+    }
+
+    /// En grand : la phrase en gros, les douze heures en hautes barres avec
+    /// leurs heures, puis ce qu'il faut emporter.
+    private var grand: some View {
+        let phrase = entry.phraseDePluie
+        let heures = entry.hours
+        return VStack(alignment: .leading, spacing: 8) {
+            HStack {
+                Titre(symbole: phrase?.seche == false ? "cloud.rain.fill" : "umbrella", texte: Localized.text("rain.title"))
+                Spacer()
+                Text(entry.parcelleName).font(.caption2.weight(.semibold)).opacity(0.85).lineLimit(1)
+            }
+            Text(phrase?.texte ?? "")
+                .font(.title3.weight(.semibold))
+                .foregroundStyle(phrase?.seche == false ? bleuPluie : .white)
+                .lineLimit(2)
+                .minimumScaleFactor(0.75)
+            BarresDePluie(heures: heures, hauteur: 76)
+            HStack(spacing: 0) {
+                ForEach(Array(heures.enumerated()), id: \.element.id) { rang, heure in
+                    Text(rang % 3 == 0 ? (rang == 0 ? Localized.text("hourly.now") : AgroFormat.hour(heure.time, in: entry.timeZone)) : " ")
+                        .font(.system(size: 10, weight: .semibold))
+                        .opacity(0.75)
+                        .lineLimit(1)
+                        .fixedSize()
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                }
+            }
+            Divider().overlay(Color.white.opacity(0.3))
+            Emporter(conseils: Ville.conseils(heures), limite: 4)
+        }
     }
 
     private var pluie: some View {
@@ -218,10 +252,23 @@ struct HeuresWidgetView: View {
 
     /// Six heures, après l'heure en cours.
     private var colonnes: some View {
+        BandeauHeures(heures: Array(entry.hours.dropFirst().prefix(6)), timeZone: entry.timeZone)
+    }
+
+    private var bornes: ClosedRange<Double> { Semaine.bornes(entry.days.dropFirst().prefix(4)) }
+}
+
+/// Des heures en colonnes, sur un panneau de verre : l'heure, le ciel, la
+/// température, et le risque de pluie quand il compte.
+struct BandeauHeures: View {
+    let heures: [HourlySample]
+    let timeZone: TimeZone
+
+    var body: some View {
         HStack(spacing: 0) {
-            ForEach(Array(entry.hours.dropFirst().prefix(6))) { heure in
+            ForEach(heures) { heure in
                 VStack(spacing: 4) {
-                    Text(AgroFormat.hour(heure.time, in: entry.timeZone))
+                    Text(AgroFormat.hour(heure.time, in: timeZone))
                         .font(.system(size: 11, weight: .semibold))
                         .opacity(0.8)
                         .lineLimit(1)
@@ -246,8 +293,38 @@ struct HeuresWidgetView: View {
         .padding(.vertical, 4)
         .background(Color.white.opacity(0.12), in: RoundedRectangle(cornerRadius: 14))
     }
+}
 
-    private var bornes: ClosedRange<Double> { Semaine.bornes(entry.days.dropFirst().prefix(4)) }
+/// Une mesure sur une tuile de verre : son nom, sa valeur, son complément.
+struct TuileWidget: View {
+    let symbole: String
+    let titre: String
+    let valeur: String
+    var detail: String?
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 2) {
+            Label(titre, systemImage: symbole)
+                .font(.system(size: 10, weight: .bold))
+                .textCase(.uppercase)
+                .opacity(0.8)
+                .lineLimit(1)
+                .minimumScaleFactor(0.7)
+            Text(valeur)
+                .font(.system(size: 18, weight: .medium, design: .rounded))
+                .monospacedDigit()
+                .lineLimit(1)
+                .minimumScaleFactor(0.6)
+            Text(detail ?? " ")
+                .font(.system(size: 10))
+                .opacity(0.8)
+                .lineLimit(1)
+                .minimumScaleFactor(0.7)
+        }
+        .padding(8)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(Color.white.opacity(0.12), in: RoundedRectangle(cornerRadius: 12))
+    }
 }
 
 // MARK: - La semaine
@@ -337,10 +414,14 @@ private struct LigneDeJour: View {
                 .lineLimit(1)
                 .minimumScaleFactor(0.7)
                 .frame(width: 30, alignment: .leading)
+            // Jamais coupées ni repliées : « 15 » sur une ligne et « ° » sur
+            // l'autre, c'était la première version.
             Text(AgroFormat.temperature(jour.temperatureMin))
                 .font(.caption.monospacedDigit())
                 .opacity(0.75)
-                .frame(width: 30, alignment: .trailing)
+                .lineLimit(1)
+                .fixedSize()
+                .frame(minWidth: 30, alignment: .trailing)
             GeometryReader { geo in
                 let etendue = bornes.upperBound - bornes.lowerBound
                 let debut = (jour.temperatureMin - bornes.lowerBound) / etendue
@@ -359,7 +440,9 @@ private struct LigneDeJour: View {
             .frame(height: 5)
             Text(AgroFormat.temperature(jour.temperatureMax))
                 .font(.caption.weight(.semibold).monospacedDigit())
-                .frame(width: 30, alignment: .leading)
+                .lineLimit(1)
+                .fixedSize()
+                .frame(minWidth: 30, alignment: .leading)
         }
     }
 }
@@ -376,7 +459,7 @@ struct DehorsWidget: Widget {
         }
         .configurationDisplayName(Localized.text("widget.outside.name"))
         .description(Localized.text("widget.outside.description"))
-        .supportedFamilies([.systemSmall, .systemMedium])
+        .supportedFamilies([.systemSmall, .systemMedium, .systemLarge])
     }
 }
 
@@ -387,7 +470,9 @@ struct DehorsWidgetView: View {
     var body: some View {
         Group {
             if let current = entry.current {
-                if family == .systemMedium {
+                if family == .systemLarge {
+                    grand(current)
+                } else if family == .systemMedium {
                     HStack(alignment: .top, spacing: 14) {
                         mesures(current)
                         Emporter(conseils: Ville.conseils(entry.hours), limite: 4)
@@ -419,6 +504,59 @@ struct DehorsWidgetView: View {
             }
         }
         .foregroundStyle(.white)
+    }
+
+    /// En grand : le ressenti et le thermomètre, quatre tuiles, puis ce qu'il
+    /// faut emporter.
+    private func grand(_ current: CurrentSample) -> some View {
+        let condition = WeatherCondition.forCode(current.weatherCode)
+        let colonnes = [GridItem(.flexible(), spacing: 8), GridItem(.flexible(), spacing: 8)]
+        return VStack(alignment: .leading, spacing: 8) {
+            HStack {
+                Titre(symbole: "figure.walk", texte: Localized.text("widget.outside.name"))
+                Spacer()
+                Text(entry.parcelleName).font(.caption2.weight(.semibold)).opacity(0.85).lineLimit(1)
+            }
+            HStack(alignment: .center, spacing: 10) {
+                Text(AgroFormat.temperature(current.apparentTemperature))
+                    .font(.system(size: 50, weight: .light, design: .rounded))
+                    .lineLimit(1)
+                    .widgetAccentable()
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(Localized.text("tile.feelsLike")).font(.caption.weight(.semibold))
+                    Text(Localized.text("tile.feelsLike.caption", AgroFormat.temperature(current.temperature)))
+                        .font(.caption2)
+                        .opacity(0.8)
+                        .lineLimit(2)
+                        .minimumScaleFactor(0.8)
+                }
+                Spacer(minLength: 0)
+                Image(systemName: condition.icon.symbolName(isDay: current.isDay))
+                    .symbolRenderingMode(.multicolor)
+                    .font(.title)
+            }
+            LazyVGrid(columns: colonnes, spacing: 8) {
+                TuileWidget(
+                    symbole: "wind", titre: Localized.text("tile.wind"),
+                    valeur: AgroFormat.unit(current.windSpeed, "km/h", decimals: 0),
+                    detail: Localized.text("tile.wind.caption", AgroFormat.unit(current.windGusts, "km/h", decimals: 0))
+                )
+                TuileWidget(
+                    symbole: "sun.max.fill", titre: Localized.text("tile.uv"),
+                    valeur: entry.today.map { AgroFormat.decimal($0.uvIndexMax, decimals: 0) } ?? "–",
+                    detail: entry.today.map { Ville.niveauUv($0.uvIndexMax).label }
+                )
+                TuileWidget(
+                    symbole: "humidity.fill", titre: Localized.text("tile.humidity"),
+                    valeur: AgroFormat.percent(current.relativeHumidity)
+                )
+                TuileWidget(
+                    symbole: "umbrella", titre: Localized.text("rain.title"),
+                    valeur: entry.phraseDePluie?.texte ?? "–"
+                )
+            }
+            Emporter(conseils: Ville.conseils(entry.hours), limite: 3)
+        }
     }
 
     /// Le ressenti en grand, puis le vent et l'UV.
