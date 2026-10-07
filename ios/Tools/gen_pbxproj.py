@@ -88,7 +88,7 @@ WATCH_MODELS = [n for n in MODELS if n != "WeatherActivityAttributes.swift"]
 TARGET_SOURCES = {
     APP: sum(APP_FILES.values(), []),
     # Le widget affiche l'activité en direct et va chercher sa propre prévision.
-    WIDGETS: models(*MODELS) + services("AgroWeatherService.swift", "WeatherProviders.swift")
+    WIDGETS: models(*MODELS) + services("AgroWeatherService.swift", "WeatherProviders.swift", "LocationService.swift")
              + WIDGET_FILES,
     WATCH: models(*WATCH_MODELS)
            + services("AgroWeatherService.swift", "WeatherProviders.swift", "LocationService.swift")
