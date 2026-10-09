@@ -17,7 +17,7 @@ fn catalog(entries: &[(&'static str, &'static str)]) -> Catalog {
     entries.iter().copied().collect()
 }
 
-const FR: [(&str, &str); 106] = [
+const FR: [(&str, &str); 116] = [
     ("nav.today", "Météo du jour"),
     ("nav.data", "Données"),
     ("app.open", "Ouvrir l’application"),
@@ -124,9 +124,19 @@ const FR: [(&str, &str); 106] = [
     ("feature.veille.rule", "Un quart d’heure est mouillé dès {amount} ; la pluie est forte dès {heavy} par heure."),
     ("feature.veille.detail", "Il lit la prévision au quart d’heure et la relit tous les quarts d’heure, tout seul : ce qui tombe dans la demi-heure en cours, puis ce qui vient d’ici deux heures, à la minute près."),
     ("app.openShort", "L’app"),
+    ("film.label", "Ce que Klima regarde avant que vous sortiez"),
+    ("film.signe", "Klima. La météo de votre ville."),
+    ("film.nuage", "Il va pleuvoir ?"),
+    ("film.heures", "Klima dit à quelle heure, et combien."),
+    ("film.radar", "Le radar voit ce que les modèles ratent."),
+    ("film.sources", "Neuf sources votent, heure par heure."),
+    ("film.parapluie", "Et ce qu’il faut emporter."),
+    ("film.soleil", "Le soleil, l’air, les pollens."),
+    ("film.appareils", "Sur iPhone, sur la montre et sur le web."),
+    ("film.fin", "Un coup d’œil, avant de sortir."),
 ];
 
-const EN: [(&str, &str); 106] = [
+const EN: [(&str, &str); 116] = [
     ("nav.today", "Today"),
     ("nav.data", "Data"),
     ("app.open", "Open the app"),
@@ -233,9 +243,19 @@ const EN: [(&str, &str); 106] = [
     ("feature.veille.rule", "A quarter hour counts as wet from {amount}; rain is heavy from {heavy} an hour."),
     ("feature.veille.detail", "It reads the quarter-hourly forecast and rereads it every fifteen minutes on its own: what falls in the current half hour, then what is coming over the next two hours, to the minute."),
     ("app.openShort", "App"),
+    ("film.label", "What Klima looks at before you head out"),
+    ("film.signe", "Klima. Your city’s weather."),
+    ("film.nuage", "Will it rain?"),
+    ("film.heures", "Klima tells you when, and how much."),
+    ("film.radar", "The radar sees what the models miss."),
+    ("film.sources", "Nine sources vote, hour by hour."),
+    ("film.parapluie", "And what to take with you."),
+    ("film.soleil", "The sun, the air, the pollen."),
+    ("film.appareils", "On iPhone, Apple Watch and the web."),
+    ("film.fin", "One glance, before you head out."),
 ];
 
-const ES: [(&str, &str); 106] = [
+const ES: [(&str, &str); 116] = [
     ("nav.today", "El tiempo de hoy"),
     ("nav.data", "Datos"),
     ("app.open", "Abrir la aplicación"),
@@ -342,6 +362,16 @@ const ES: [(&str, &str); 106] = [
     ("feature.veille.rule", "Un cuarto de hora es lluvioso desde {amount}; la lluvia es fuerte desde {heavy} por hora."),
     ("feature.veille.detail", "Lee la previsión por cuartos de hora y la relee cada cuarto de hora, solo: lo que cae en la media hora en curso, y lo que viene en las próximas dos horas, al minuto."),
     ("app.openShort", "La app"),
+    ("film.label", "Lo que Klima mira antes de que salgas"),
+    ("film.signe", "Klima. El tiempo de tu ciudad."),
+    ("film.nuage", "¿Va a llover?"),
+    ("film.heures", "Klima te dice a qué hora, y cuánto."),
+    ("film.radar", "El radar ve lo que los modelos no ven."),
+    ("film.sources", "Nueve fuentes votan, hora a hora."),
+    ("film.parapluie", "Y qué llevar contigo."),
+    ("film.soleil", "El sol, el aire, el polen."),
+    ("film.appareils", "En iPhone, en el Apple Watch y en la web."),
+    ("film.fin", "Un vistazo, antes de salir."),
 ];
 
 #[cfg(test)]

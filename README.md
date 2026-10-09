@@ -384,6 +384,30 @@ trunk build --release
 Les seuils affichés dans la page sont lus dans les modules `seuils` du cœur : la
 vitrine ne peut pas annoncer autre chose que ce que l'application applique.
 
+### Le mouvement
+
+- **L'écran d'entrée** trace le signe pendant que la page se monte, un compte de
+  0 à 100 sous lui, puis se lève comme une porte. Il est en CSS seul
+  (`index.html`) : il part avant le WebAssembly et s'en va de lui-même si
+  celui-ci ne vient pas. Le titre monte ensuite mot à mot.
+- **Le film de grains**, sous l'ouverture : la page se fige sur un ciel de nuit
+  et seize mille grains (sept mille sur téléphone) y dessinent, au rythme du
+  défilement, le signe, un nuage qui pleut, douze heures en barres, le radar
+  qui balaie, les neuf sources qui votent vers le centre, un parapluie, le
+  soleil et l'échelle des UV, les trois appareils. Une phrase par station, en
+  trois langues. Les formes sont de la géométrie pure et testée
+  (`src/film/formes.rs`) ; le passage d'une station à l'autre, la pluie qui
+  tombe et le radar qui tourne sont dans les shaders WebGL 2
+  (`src/film/moteur.rs`). Sans WebGL 2, les phrases restent, en liste. Le ciel
+  de la page ne compte pas la course du film : la journée reprend où elle en
+  était.
+- **Un grain de pellicule** passe sur toute la page, et, à la souris, **un
+  anneau** la suit tandis que les boutons s'y penchent (`data-aimant`).
+
+Pour qui demande moins de mouvement : ni écran d'entrée, ni grain animé, ni
+anneau ; le film change toujours avec le défilement — c'est le lecteur qui le
+fait avancer —, mais rien n'y tombe ni n'y tourne de soi-même.
+
 ### Marque et typographie
 
 Le signe de Klima — un K dont la hampe porte une goutte et dont les bras sont
