@@ -9,6 +9,7 @@
 mod app;
 mod composants;
 mod crochets;
+mod film;
 mod messages;
 
 use klima_core::endpoints::{Endpoints, relay_from};
@@ -45,5 +46,13 @@ fn acheminement() -> Endpoints {
 }
 
 fn main() {
-    yew::Renderer::<Racine>::new().render();
+    // Dans `#root`, et pas dans `body` : Yew vide l'élément qui l'accueille,
+    // et l'écran d'entrée et le grain, posés à côté, doivent rester.
+    let racine = web_sys::window()
+        .and_then(|w| w.document())
+        .and_then(|d| d.get_element_by_id("root"));
+    match racine {
+        Some(racine) => yew::Renderer::<Racine>::with_root(racine).render(),
+        None => yew::Renderer::<Racine>::new().render(),
+    };
 }

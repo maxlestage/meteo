@@ -17,7 +17,9 @@ web-sys = { version = "0.3", features = [
   "Window", "Document", "Element", "HtmlElement", "HtmlInputElement",
   "IntersectionObserver", "IntersectionObserverInit", "IntersectionObserverEntry",
   "MediaQueryList", "EventTarget", "Node", "AddEventListenerOptions",
-  "CssStyleDeclaration",
+  "CssStyleDeclaration", "DomRect", "DomTokenList", "NodeList", "PointerEvent", "MouseEvent",
+  "HtmlCanvasElement", "WebGl2RenderingContext", "WebGlBuffer", "WebGlProgram", "WebGlShader",
+  "WebGlUniformLocation", "WebGlVertexArrayObject", "console", "Performance",
 ] }
 wasm-bindgen-futures = "0.4.79"
 
