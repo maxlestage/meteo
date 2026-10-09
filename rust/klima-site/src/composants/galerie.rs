@@ -9,6 +9,8 @@
 use klima_ui::i18n::use_i18n;
 use yew::prelude::*;
 
+use crate::composants::film::mots;
+
 /// (fichier, clé) : la clé donne le titre, le texte et la description.
 const ECRANS: [(&str, &str); 3] =
     [("accueil.jpg", "home"), ("tuiles.jpg", "tiles"), ("sources.jpg", "sources")];
@@ -19,10 +21,11 @@ pub fn Galerie() -> Html {
 
     let ecrans: Html = ECRANS
         .iter()
-        .map(|(fichier, cle)| {
+        .enumerate()
+        .map(|(i, (fichier, cle))| {
             html! {
-                <figure class="shot" key={*cle}>
-                    <div class="shot__device">
+                <figure class="shot" key={*cle} style={format!("--i: {i}")}>
+                    <div class="shot__device" data-incline="" data-lueur="">
                         <img
                             src={format!("./captures/{fichier}")}
                             alt={i18n.t(&format!("gallery.{cle}.alt"))}
@@ -43,11 +46,11 @@ pub fn Galerie() -> Html {
 
     html! {
         <section class="gallery" id="images">
-            <div class="section-head">
-                <h2>{ i18n.t("gallery.title") }</h2>
+            <div class="section-head" data-apparait="titre">
+                <h2>{ mots(&i18n.t("gallery.title")) }</h2>
                 <p>{ i18n.t("gallery.lead") }</p>
             </div>
-            <div class="gallery__grid">{ ecrans }</div>
+            <div class="gallery__grid" data-apparait="eventail">{ ecrans }</div>
         </section>
     }
 }

@@ -73,7 +73,8 @@ pub fn ChoixDeCommune(props: &Props) -> Html {
 
     let liste: Html = resultats
         .iter()
-        .map(|resultat| {
+        .enumerate()
+        .map(|(i, resultat)| {
             let onclick = {
                 let on_select = props.on_select.clone();
                 let saisie = saisie.clone();
@@ -91,7 +92,7 @@ pub fn ChoixDeCommune(props: &Props) -> Html {
                 .collect();
 
             html! {
-                <li key={format!("{},{}", resultat.latitude, resultat.longitude)}>
+                <li key={format!("{},{}", resultat.latitude, resultat.longitude)} style={format!("--i: {i}")}>
                     <button type="button" {onclick}>
                         <span>{ &resultat.name }</span>
                         <span class="commune__admin">{ region.join(", ") }</span>

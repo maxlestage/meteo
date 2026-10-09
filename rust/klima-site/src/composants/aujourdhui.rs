@@ -15,6 +15,8 @@ use klima_ui::i18n::use_i18n;
 use yew::prelude::*;
 
 use crate::composants::commune::ChoixDeCommune;
+use crate::composants::compte::{Compte, Forme};
+use crate::composants::film::mots;
 
 #[derive(Properties, PartialEq)]
 pub struct Props {
@@ -47,8 +49,8 @@ pub fn SectionDuJour(props: &Props) -> Html {
 
     html! {
         <section class="today" id="aujourdhui">
-            <div class="section-head">
-                <h2>{ i18n.t("today.title") }</h2>
+            <div class="section-head" data-apparait="titre">
+                <h2>{ mots(&i18n.t("today.title")) }</h2>
                 <p>{ i18n.t("today.lead") }</p>
                 <a class="today__app" href="./app/">{ i18n.t("app.open") }</a>
             </div>
@@ -59,7 +61,7 @@ pub fn SectionDuJour(props: &Props) -> Html {
                 on_select={props.on_select.clone()}
             />
 
-            <div class="today__card">
+            <div class="today__card" data-apparait="monte">
                 if props.loading {
                     <p class="today__state">{ i18n.t("today.loading") }</p>
                 }
@@ -85,7 +87,9 @@ pub fn SectionDuJour(props: &Props) -> Html {
                 }
             </div>
 
-            { props.children.clone() }
+            <div class="today__suite" data-apparait="monte">
+                { props.children.clone() }
+            </div>
         </section>
     }
 }
@@ -130,9 +134,10 @@ fn Contenu(props: &ContenuProps) -> Html {
                         icon={condition.icon}
                         size={54}
                         title={i18n.t(condition.label_key)}
+                        anime={true}
                     />
                     <p class="today__temperature">
-                        { f.temperature(props.current.temperature) }
+                        <Compte valeur={props.current.temperature} forme={Forme::Temperature} />
                     </p>
                     <div>
                         <p class="today__condition">{ i18n.t(condition.label_key) }</p>
@@ -148,26 +153,26 @@ fn Contenu(props: &ContenuProps) -> Html {
             <dl class="today__facts">
                 <Fait
                     label={i18n.t("today.rain")}
-                    value={f.unit(digest.precipitation_sum, "mm", 1)}
+                    value={html! { <Compte valeur={digest.precipitation_sum} forme={Forme::Unite("mm", 1)} /> }}
                     detail={i18n.with("today.rain.detail", &params([
                         ("probability", f.percent(digest.precipitation_probability_max).as_str().into()),
                     ]))}
                 />
                 <Fait
                     label={i18n.t("today.gusts")}
-                    value={f.unit(digest.wind_gusts_max, "km/h", 0)}
+                    value={html! { <Compte valeur={digest.wind_gusts_max} forme={Forme::Unite("km/h", 0)} /> }}
                     detail={i18n.t("today.gusts.detail")}
                 />
                 <Fait
                     label={i18n.t("today.sunrise")}
-                    value={heure(digest.sunrise)}
+                    value={html! { heure(digest.sunrise) }}
                     detail={i18n.with("today.sunrise.detail", &params([
                         ("time", heure(digest.sunset).as_str().into()),
                     ]))}
                 />
                 <Fait
                     label={i18n.t("today.uv")}
-                    value={f.decimal(digest.uv_index_max, 0)}
+                    value={html! { <Compte valeur={digest.uv_index_max} forme={Forme::Decimale(0)} /> }}
                     detail={i18n.t(&digest.uv.key())}
                 />
             </dl>
@@ -243,7 +248,8 @@ fn Contenu(props: &ContenuProps) -> Html {
 #[derive(Properties, PartialEq)]
 struct FaitProps {
     label: AttrValue,
-    value: AttrValue,
+    /// Un chiffre, le plus souvent qui roule.
+    value: Html,
     detail: AttrValue,
 }
 
@@ -253,7 +259,7 @@ fn Fait(props: &FaitProps) -> Html {
         <div class="fact">
             <dt>{ &props.label }</dt>
             <dd>
-                <span class="fact__value">{ &props.value }</span>
+                <span class="fact__value">{ props.value.clone() }</span>
                 <span class="fact__detail">{ &props.detail }</span>
             </dd>
         </div>

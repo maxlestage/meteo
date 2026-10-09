@@ -1,8 +1,10 @@
 //! Illustrations vectorielles, dessinées à la main.
 //!
 //! Pas de photographies : rien à licencier, rien à charger, et le trait reste
-//! net à toutes les tailles. Les animations sont en CSS et se coupent
-//! d'elles-mêmes si le système demande moins de mouvement.
+//! net à toutes les tailles. Chaque dessin bouge à sa façon — les gouttes
+//! tombent, le parapluie se balance, la cloche sonne. Les animations sont en
+//! CSS, ne partent qu'une fois le dessin à l'écran, et se coupent d'elles-mêmes
+//! si le système demande moins de mouvement.
 
 use yew::prelude::*;
 
@@ -14,6 +16,9 @@ pub struct CielProps {
     /// Vrai quand la pluie tombe sur la ville.
     #[prop_or(false)]
     pub raining: bool,
+    /// Vrai quand il tonne : le ciel s'éclaire de temps en temps.
+    #[prop_or(false)]
+    pub orage: bool,
 }
 
 /// Scène de tête : un bandeau large, dessiné au format où il s'affiche. Le
@@ -114,6 +119,21 @@ pub fn SceneDeCiel(props: &CielProps) -> Html {
                 </g>
             }
 
+            // Le jour, trois oiseaux traversent, chacun à son heure.
+            if props.is_day {
+                <g class="scene__oiseaux" fill="none" stroke="#1d2836" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round" opacity="0.55">
+                    <g class="scene__oiseau" style="--y: 22px; animation-delay: -4s">
+                        <path d="M0 0q3-3 6 0q3-3 6 0" />
+                    </g>
+                    <g class="scene__oiseau" style="--y: 32px; animation-delay: -9s; animation-duration: 31s">
+                        <path d="M0 0q2.4-2.4 4.8 0q2.4-2.4 4.8 0" />
+                    </g>
+                    <g class="scene__oiseau" style="--y: 15px; animation-delay: -19s; animation-duration: 24s">
+                        <path d="M0 0q2-2 4 0q2-2 4 0" />
+                    </g>
+                </g>
+            }
+
             // Trois nuages à des vitesses différentes : le ciel n'est jamais figé.
             <g class="scene__cloud scene__cloud--slow" fill="#c6d6e4" opacity="0.3">
                 <ellipse cx="88" cy="30" rx="34" ry="10" />
@@ -144,6 +164,11 @@ pub fn SceneDeCiel(props: &CielProps) -> Html {
             <g fill="url(#cityGradient)">{ immeubles }</g>
             if !props.is_day {
                 <g class="scene__windows" fill="#f7d77a">{ fenetres }</g>
+            }
+
+            // L'orage : un éclair blanchit le ciel, de loin en loin.
+            if props.orage {
+                <rect class="scene__eclair" width="420" height="96" fill="#eaf4ff" />
             }
         </svg>
     }
@@ -180,10 +205,17 @@ pub fn ScenePluie() -> Html {
             role="img"
             aria-label="Le risque de pluie heure par heure, sur douze heures"
         >
-            // Le parapluie.
+            // Le parapluie, sous des gouttes qui s'y posent.
+            <g class="rain-scene__gouttes" stroke="#7fd0f5" stroke-width="2" stroke-linecap="round">
+                <line x1="262" y1="2" x2="261" y2="8" style="animation-delay: 0s" />
+                <line x1="280" y1="2" x2="279" y2="8" style="animation-delay: -0.45s" />
+                <line x1="298" y1="2" x2="297" y2="8" style="animation-delay: -0.9s" />
+            </g>
             <g transform="translate(250 18)">
-                <path d="M0 26 A30 26 0 0 1 60 26 Q52 20 45 26 Q37 20 30 26 Q22 20 15 26 Q8 20 0 26 Z" fill="#4aa3d8" />
-                <path d="M30 26 V58 a6 6 0 0 1 -12 0" fill="none" stroke="#e8edf2" stroke-width="2.6" stroke-linecap="round" />
+                <g class="rain-scene__parapluie">
+                    <path d="M0 26 A30 26 0 0 1 60 26 Q52 20 45 26 Q37 20 30 26 Q22 20 15 26 Q8 20 0 26 Z" fill="#4aa3d8" />
+                    <path d="M30 26 V58 a6 6 0 0 1 -12 0" fill="none" stroke="#e8edf2" stroke-width="2.6" stroke-linecap="round" />
+                </g>
             </g>
             <line x1="20" y1="148" x2="308" y2="148" stroke="rgba(255,255,255,0.3)" stroke-width="1" />
             { barres }
@@ -216,7 +248,7 @@ pub fn EchelleUv() -> Html {
         >
             <g class="uv-scene__sun">
                 <circle cx="160" cy="56" r="22" fill="#f7c948" />
-                <g stroke="#f7c948" stroke-width="3" stroke-linecap="round">
+                <g class="uv-scene__rayons" stroke="#f7c948" stroke-width="3" stroke-linecap="round">
                     <line x1="160" y1="14" x2="160" y2="24" />
                     <line x1="160" y1="88" x2="160" y2="98" />
                     <line x1="118" y1="56" x2="128" y2="56" />
@@ -250,8 +282,8 @@ pub fn IconeFonction(props: &IconeProps) -> Html {
     let dessin = match props.cle.as_str() {
         "rain" => html! {
             <>
-                <path d="M18 40h28a10 10 0 0 0 0-20 14 14 0 0 0-27-3A9 9 0 0 0 18 40Z" fill="#c6d6e4" />
-                <g stroke="#7fd0f5" stroke-width="3.2" stroke-linecap="round">
+                <path class="icone__nuage" d="M18 40h28a10 10 0 0 0 0-20 14 14 0 0 0-27-3A9 9 0 0 0 18 40Z" fill="#c6d6e4" />
+                <g class="icone__gouttes" stroke="#7fd0f5" stroke-width="3.2" stroke-linecap="round">
                     <line x1="24" y1="46" x2="21" y2="54" />
                     <line x1="34" y1="46" x2="31" y2="54" />
                     <line x1="44" y1="46" x2="41" y2="54" />
@@ -259,16 +291,16 @@ pub fn IconeFonction(props: &IconeProps) -> Html {
             </>
         },
         "advice" => html! {
-            <>
+            <g class="icone__parapluie">
                 <path d="M8 32a24 22 0 0 1 48 0q-6-5-12 0-6-5-12 0-6-5-12 0-6-5-12 0Z" fill="#4aa3d8" />
                 <path d="M32 10v2" stroke="#e8edf2" stroke-width="3" stroke-linecap="round" />
                 <path d="M32 32v18a5 5 0 0 1-10 0" fill="none" stroke="#e8edf2" stroke-width="3.2" stroke-linecap="round" />
-            </>
+            </g>
         },
         "uv" => html! {
             <>
-                <circle cx="32" cy="32" r="11" fill="#f7c948" />
-                <g stroke="#f7c948" stroke-width="3.2" stroke-linecap="round">
+                <circle class="icone__coeur" cx="32" cy="32" r="11" fill="#f7c948" />
+                <g class="icone__rayons" stroke="#f7c948" stroke-width="3.2" stroke-linecap="round">
                     <line x1="32" y1="6" x2="32" y2="13" />
                     <line x1="32" y1="51" x2="32" y2="58" />
                     <line x1="6" y1="32" x2="13" y2="32" />
@@ -282,12 +314,12 @@ pub fn IconeFonction(props: &IconeProps) -> Html {
         },
         "air" => html! {
             <>
-                <g fill="none" stroke="#8fd3c8" stroke-width="3.2" stroke-linecap="round">
-                    <path d="M8 24h30a7 7 0 1 0-7-7" />
-                    <path d="M8 34h40a7 7 0 1 1-7 7" />
-                    <path d="M8 44h18" />
+                <g class="icone__souffle" fill="none" stroke="#8fd3c8" stroke-width="3.2" stroke-linecap="round">
+                    <path d="M8 24h30a7 7 0 1 0-7-7" pathLength="100" />
+                    <path d="M8 34h40a7 7 0 1 1-7 7" pathLength="100" />
+                    <path d="M8 44h18" pathLength="100" />
                 </g>
-                <g fill="#c6d6e4">
+                <g class="icone__poussieres" fill="#c6d6e4">
                     <circle cx="50" cy="20" r="2.4" />
                     <circle cx="56" cy="30" r="1.8" />
                     <circle cx="36" cy="50" r="2" />
@@ -296,17 +328,19 @@ pub fn IconeFonction(props: &IconeProps) -> Html {
         },
         "pollen" => html! {
             <>
-                <path d="M32 58V38" stroke="#7ed07a" stroke-width="3.2" stroke-linecap="round" />
-                <path d="M32 50c-8 0-12-4-13-10 7 0 12 3 13 10Z" fill="#7ed07a" />
-                <g fill="#f0c14b">
-                    <circle cx="32" cy="14" r="7" />
-                    <circle cx="43" cy="22" r="7" />
-                    <circle cx="39" cy="34" r="7" />
-                    <circle cx="25" cy="34" r="7" />
-                    <circle cx="21" cy="22" r="7" />
+                <g class="icone__fleur">
+                    <path d="M32 58V38" stroke="#7ed07a" stroke-width="3.2" stroke-linecap="round" />
+                    <path d="M32 50c-8 0-12-4-13-10 7 0 12 3 13 10Z" fill="#7ed07a" />
+                    <g fill="#f0c14b">
+                        <circle cx="32" cy="14" r="7" />
+                        <circle cx="43" cy="22" r="7" />
+                        <circle cx="39" cy="34" r="7" />
+                        <circle cx="25" cy="34" r="7" />
+                        <circle cx="21" cy="22" r="7" />
+                    </g>
+                    <circle cx="32" cy="25" r="6" fill="#ef8a5a" />
                 </g>
-                <circle cx="32" cy="25" r="6" fill="#ef8a5a" />
-                <g fill="#f7d77a" opacity="0.8">
+                <g class="icone__grains" fill="#f7d77a" opacity="0.8">
                     <circle cx="52" cy="10" r="1.6" />
                     <circle cx="56" cy="18" r="1.2" />
                     <circle cx="10" cy="12" r="1.4" />
@@ -319,7 +353,7 @@ pub fn IconeFonction(props: &IconeProps) -> Html {
                 <circle cx="32" cy="32" r="24" fill="none" stroke="#c6d6e4" stroke-width="2.4" opacity="0.5" />
                 <circle cx="32" cy="32" r="15" fill="none" stroke="#7fd0f5" stroke-width="2.4" opacity="0.6" />
                 <path class="feature__radar" d="M32 32 L32 8 A24 24 0 0 1 52.8 20 Z" fill="#7fd0f5" opacity="0.45" />
-                <circle cx="44" cy="18" r="4" fill="#7fd0f5" />
+                <circle class="icone__echo" cx="44" cy="18" r="4" fill="#7fd0f5" />
                 <circle cx="32" cy="32" r="3.4" fill="#e8edf2" />
             </>
         },
@@ -327,17 +361,19 @@ pub fn IconeFonction(props: &IconeProps) -> Html {
         // partagée, une horloge à l'heure de la ville.
         "model" => html! {
             <>
-                <path d="M32 10 56 22 32 34 8 22Z" fill="#7fd0f5" />
-                <path d="M8 32l24 12 24-12" fill="none" stroke="#c6d6e4" stroke-width="3.2" stroke-linejoin="round" stroke-linecap="round" />
-                <path d="M8 42l24 12 24-12" fill="none" stroke="#9ed073" stroke-width="3.2" stroke-linejoin="round" stroke-linecap="round" />
+                <path class="icone__couche" d="M32 10 56 22 32 34 8 22Z" fill="#7fd0f5" />
+                <path class="icone__couche" d="M8 32l24 12 24-12" fill="none" stroke="#c6d6e4" stroke-width="3.2" stroke-linejoin="round" stroke-linecap="round" />
+                <path class="icone__couche" d="M8 42l24 12 24-12" fill="none" stroke="#9ed073" stroke-width="3.2" stroke-linejoin="round" stroke-linecap="round" />
             </>
         },
         "rules" => html! {
             <>
                 <path d="M32 10v42M18 52h28" stroke="#c6d6e4" stroke-width="3.2" stroke-linecap="round" />
-                <path d="M12 18h40" stroke="#c6d6e4" stroke-width="3.2" stroke-linecap="round" />
-                <path d="M12 18 5 34h14Z M52 18l-7 16h14Z" fill="none" stroke="#f0c14b" stroke-width="2.6" stroke-linejoin="round" />
-                <path d="M5 34a7 5 0 0 0 14 0Z M45 34a7 5 0 0 0 14 0Z" fill="#f0c14b" />
+                <g class="icone__fleau">
+                    <path d="M12 18h40" stroke="#c6d6e4" stroke-width="3.2" stroke-linecap="round" />
+                    <path d="M12 18 5 34h14Z M52 18l-7 16h14Z" fill="none" stroke="#f0c14b" stroke-width="2.6" stroke-linejoin="round" />
+                    <path d="M5 34a7 5 0 0 0 14 0Z M45 34a7 5 0 0 0 14 0Z" fill="#f0c14b" />
+                </g>
                 <circle cx="32" cy="10" r="3.4" fill="#9ed073" />
             </>
         },
@@ -357,9 +393,11 @@ pub fn IconeFonction(props: &IconeProps) -> Html {
         },
         _ => html! {
             <>
-                <path d="M32 8a4 4 0 0 1 4 4v1.5A15 15 0 0 1 47 28v10l5 7H12l5-7V28a15 15 0 0 1 11-14.5V12a4 4 0 0 1 4-4Z" fill="#f0c14b" />
-                <path d="M26 49a6 6 0 0 0 12 0Z" fill="#f0c14b" />
-                <g fill="none" stroke="#ef8a5a" stroke-width="3" stroke-linecap="round">
+                <g class="icone__cloche">
+                    <path d="M32 8a4 4 0 0 1 4 4v1.5A15 15 0 0 1 47 28v10l5 7H12l5-7V28a15 15 0 0 1 11-14.5V12a4 4 0 0 1 4-4Z" fill="#f0c14b" />
+                    <path d="M26 49a6 6 0 0 0 12 0Z" fill="#f0c14b" />
+                </g>
+                <g class="icone__ondes" fill="none" stroke="#ef8a5a" stroke-width="3" stroke-linecap="round">
                     <path d="M8 22a26 26 0 0 1 6-10" />
                     <path d="M56 22a26 26 0 0 0-6-10" />
                 </g>

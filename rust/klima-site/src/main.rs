@@ -8,7 +8,6 @@
 
 mod app;
 mod composants;
-mod crochets;
 mod film;
 mod messages;
 

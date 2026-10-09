@@ -1,10 +1,11 @@
-//! Le curseur qui suit, et les boutons qui l'attirent.
+//! Le curseur qui suit, et ce qui lui répond.
 //!
 //! Un anneau suit la souris avec un temps de retard et s'ouvre sur ce qui se
 //! clique ; les boutons marqués `data-aimant` se penchent vers elle quand
-//! elle approche. C'est un ornement : le pointeur du système reste là, et
-//! rien de tout cela n'existe au doigt ni pour qui demande moins de
-//! mouvement.
+//! elle approche ; les téléphones marqués `data-incline` pivotent pour la
+//! regarder ; et les cartes marquées `data-lueur` s'éclairent là où elle
+//! passe. C'est un ornement : le pointeur du système reste là, et rien de
+//! tout cela n'existe au doigt ni pour qui demande moins de mouvement.
 
 use std::cell::{Cell, RefCell};
 use std::rc::Rc;
@@ -19,6 +20,11 @@ use yew::prelude::*;
 const PORTEE: f64 = 36.0;
 const ATTRACTION: f64 = 0.3;
 
+/// Jusqu'où, autour d'un téléphone, la souris le fait pivoter (px), et de
+/// combien au plus (degrés).
+const PORTEE_INCLINE: f64 = 160.0;
+const INCLINE_MAX: f64 = 9.0;
+
 /// Une boucle d'images : le rappel se redemande lui-même tant qu'il vit.
 type Boucle = Rc<RefCell<Option<Closure<dyn FnMut()>>>>;
 
@@ -30,6 +36,18 @@ fn souris_fine() -> bool {
                 .flatten()
         })
         .is_some_and(|m| m.matches())
+}
+
+/// Le pivot d'un appareil vers la souris : `(rotateX, rotateY)` en degrés,
+/// ou `None` si elle est trop loin. Le haut se penche vers elle quand elle
+/// est en haut, le côté quand elle est sur le côté.
+fn incline(x: f64, y: f64, gauche: f64, haut: f64, largeur: f64, hauteur: f64) -> Option<(f64, f64)> {
+    let (dx, dy) = (x - (gauche + largeur / 2.0), y - (haut + hauteur / 2.0));
+    let (mx, my) = (largeur / 2.0 + PORTEE_INCLINE, hauteur / 2.0 + PORTEE_INCLINE);
+    if dx.abs() > mx || dy.abs() > my {
+        return None;
+    }
+    Some((-dy / my * INCLINE_MAX, dx / mx * INCLINE_MAX))
 }
 
 #[function_component]
@@ -63,20 +81,51 @@ pub fn Curseur() -> Html {
                         if let Some(a) = anneau.cast::<Element>() {
                             let _ = a.class_list().toggle_with_force("curseur--lien", sur_lien);
                         }
-                        // Les aimants.
+                        // La lueur : la carte survolée sait où est la souris.
+                        if let Some(carte) = e
+                            .target()
+                            .and_then(|t| t.dyn_into::<Element>().ok())
+                            .and_then(|el| el.closest("[data-lueur]").ok().flatten())
+                            .and_then(|el| el.dyn_into::<HtmlElement>().ok())
+                        {
+                            let r = carte.get_bounding_client_rect();
+                            let style = carte.style();
+                            let _ = style.set_property("--mx", &format!("{:.0}px", x - r.left()));
+                            let _ = style.set_property("--my", &format!("{:.0}px", y - r.top()));
+                        }
                         let Some(document) = &document else { return };
-                        let Ok(aimants) = document.query_selector_all("[data-aimant]") else { return };
-                        for i in 0..aimants.length() {
-                            let Some(el) = aimants.item(i).and_then(|n| n.dyn_into::<HtmlElement>().ok()) else { continue };
-                            let r = el.get_bounding_client_rect();
-                            let (cx, cy) = (r.left() + r.width() / 2.0, r.top() + r.height() / 2.0);
-                            let proche = x > r.left() - PORTEE && x < r.right() + PORTEE && y > r.top() - PORTEE && y < r.bottom() + PORTEE;
-                            let decalage = if proche {
-                                format!("translate({:.1}px, {:.1}px)", (x - cx) * ATTRACTION, (y - cy) * ATTRACTION)
-                            } else {
-                                String::new()
-                            };
-                            let _ = el.style().set_property("transform", &decalage);
+                        // Les aimants.
+                        if let Ok(aimants) = document.query_selector_all("[data-aimant]") {
+                            for i in 0..aimants.length() {
+                                let Some(el) = aimants.item(i).and_then(|n| n.dyn_into::<HtmlElement>().ok()) else { continue };
+                                let r = el.get_bounding_client_rect();
+                                let (cx, cy) = (r.left() + r.width() / 2.0, r.top() + r.height() / 2.0);
+                                let proche = x > r.left() - PORTEE && x < r.right() + PORTEE && y > r.top() - PORTEE && y < r.bottom() + PORTEE;
+                                let decalage = if proche {
+                                    format!("translate({:.1}px, {:.1}px)", (x - cx) * ATTRACTION, (y - cy) * ATTRACTION)
+                                } else {
+                                    String::new()
+                                };
+                                let _ = el.style().set_property("transform", &decalage);
+                            }
+                        }
+                        // Les téléphones qui se tournent vers elle.
+                        if let Ok(appareils) = document.query_selector_all("[data-incline]") {
+                            for i in 0..appareils.length() {
+                                let Some(el) = appareils.item(i).and_then(|n| n.dyn_into::<HtmlElement>().ok()) else { continue };
+                                let r = el.get_bounding_client_rect();
+                                let style = el.style();
+                                match incline(x, y, r.left(), r.top(), r.width(), r.height()) {
+                                    Some((rx, ry)) => {
+                                        let _ = style.set_property("--rx", &format!("{rx:.2}deg"));
+                                        let _ = style.set_property("--ry", &format!("{ry:.2}deg"));
+                                    }
+                                    None => {
+                                        let _ = style.remove_property("--rx");
+                                        let _ = style.remove_property("--ry");
+                                    }
+                                }
+                            }
                         }
                     })
                 };
@@ -124,5 +173,31 @@ pub fn Curseur() -> Html {
         <div class={classes!("curseur", (*actif).then_some("curseur--actif"))} ref={anneau} aria-hidden="true">
             <span></span>
         </div>
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn un_appareil_se_tourne_vers_la_souris() {
+        // Au centre, il ne bouge pas.
+        assert_eq!(incline(150.0, 300.0, 100.0, 100.0, 100.0, 400.0), Some((0.0, 0.0)));
+        // La souris à droite : il tourne sa face vers la droite.
+        let (rx, ry) = incline(250.0, 300.0, 100.0, 100.0, 100.0, 400.0).unwrap();
+        assert!(rx.abs() < 1e-9 && ry > 0.0);
+        // En haut : le haut se penche vers elle.
+        let (rx, _) = incline(150.0, 0.0, 100.0, 100.0, 100.0, 400.0).unwrap();
+        assert!(rx > 0.0);
+        // Jamais plus que le maximum, même au bord de la portée.
+        let (rx, ry) = incline(150.0 + 50.0 + PORTEE_INCLINE, 300.0 - 200.0 - PORTEE_INCLINE, 100.0, 100.0, 100.0, 400.0).unwrap();
+        assert!(rx <= INCLINE_MAX + 1e-9 && ry <= INCLINE_MAX + 1e-9);
+    }
+
+    #[test]
+    fn loin_de_lui_il_revient_droit() {
+        assert_eq!(incline(900.0, 300.0, 100.0, 100.0, 100.0, 400.0), None);
+        assert_eq!(incline(150.0, 900.0, 100.0, 100.0, 100.0, 400.0), None);
     }
 }

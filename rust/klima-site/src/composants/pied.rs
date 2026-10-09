@@ -39,8 +39,8 @@ pub fn Pied() -> Html {
 
     html! {
         <footer class="footer">
-            <div class="footer__grid">
-                <div class="footer__brand">
+            <div class="footer__grid" data-apparait="cascade">
+                <div class="footer__brand" style="--i: 0">
                     <span class="brand">
                         <Marque size={30} />
                         <span class="footer__wordmark">{ "Klima" }</span>
@@ -49,7 +49,7 @@ pub fn Pied() -> Html {
                     <ul class="footer__languages">{ langues }</ul>
                 </div>
 
-                <nav class="footer__column" aria-label={i18n.t("footer.product")}>
+                <nav class="footer__column" aria-label={i18n.t("footer.product")} style="--i: 1">
                     <h2>{ i18n.t("footer.product") }</h2>
                     <ul>
                         <li><a href="#images">{ i18n.t("nav.images") }</a></li>
@@ -61,7 +61,7 @@ pub fn Pied() -> Html {
                     </ul>
                 </nav>
 
-                <div class="footer__column">
+                <div class="footer__column" style="--i: 2">
                     <h2>{ i18n.t("footer.dataTitle") }</h2>
                     <ul>
                         <li>
@@ -89,14 +89,14 @@ pub fn Pied() -> Html {
                     </ul>
                 </div>
 
-                <div class="footer__column footer__column--credits">
+                <div class="footer__column footer__column--credits" style="--i: 3">
                     <h2>{ i18n.t("footer.credits") }</h2>
                     <p class="footer__author">{ i18n.t("footer.author") }</p>
                     <p class="footer__role">{ i18n.t("footer.role") }</p>
                 </div>
             </div>
 
-            <div class="footer__bottom">
+            <div class="footer__bottom" data-apparait="monte">
                 <p>{ i18n.with("footer.rights", &params([("year", (annee as i32).into())])) }</p>
                 <p class="footer__legal">{ i18n.t("footer.legal") }</p>
             </div>

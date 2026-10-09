@@ -3,6 +3,9 @@
 //! Chaque service porte son point sur l'axe des températures, la médiane est
 //! marquée, et l'écart se lit d'un coup d'œil. Dire « nous recoupons cinq
 //! instituts » n'engage à rien ; les montrer en désaccord de 1,9 °C, si.
+//!
+//! Les points partent tous de la médiane et s'écartent jusqu'à leur place :
+//! c'est le vote qu'on voit se faire.
 
 use klima_core::consensus::{Agreement, Consensus};
 use klima_core::i18n::params;
@@ -10,7 +13,8 @@ use klima_core::providers::attributions_for;
 use klima_ui::i18n::use_i18n;
 use yew::prelude::*;
 
-use crate::crochets::apparition::use_apparition;
+use crate::composants::compte::{Compte, Forme};
+use crate::composants::film::mots;
 
 #[derive(Properties, PartialEq)]
 pub struct Props {
@@ -30,7 +34,6 @@ fn code_accord(accord: Agreement) -> &'static str {
 pub fn Sources(props: &Props) -> Html {
     let i18n = use_i18n();
     let f = i18n.f();
-    let apparition = use_apparition();
 
     let modeles: Html = props
         .consensus
@@ -39,28 +42,35 @@ pub fn Sources(props: &Props) -> Html {
             consensus
                 .readings
                 .iter()
-                .map(|reading| {
+                .enumerate()
+                .map(|(i, reading)| {
                     // Une étendue nulle mettrait tous les points au même
                     // endroit : on garde un dixième de degré de marge.
                     let etendue = consensus.temperature.spread.max(0.1);
-                    let position =
-                        (reading.temperature - consensus.temperature.min) / etendue * 100.0;
+                    let place = |t: f64| (t - consensus.temperature.min) / etendue * 100.0;
+                    let position = place(reading.temperature);
+                    let mediane = place(consensus.temperature.median);
 
                     html! {
-                        <li class="models__row" key={reading.source.id}>
+                        <li
+                            class="models__row"
+                            key={reading.source.id}
+                            style={format!("--i: {i}; --mediane: {mediane:.1}%")}
+                        >
                             <span class="models__flag">{ reading.source.country }</span>
                             <span class="models__name">
                                 <strong>{ reading.source.institution }</strong>
                                 <span>{ reading.source.name }</span>
                             </span>
                             <span class="models__axis">
+                                <span class="models__mediane" />
                                 <span
                                     class="models__dot"
-                                    style={format!("left: {position}%")}
+                                    style={format!("left: {position:.1}%")}
                                 />
                             </span>
                             <span class="models__value">
-                                { f.unit(reading.temperature, "°C", 1) }
+                                <Compte valeur={reading.temperature} forme={Forme::Unite("°C", 1)} />
                             </span>
                         </li>
                     }
@@ -82,15 +92,12 @@ pub fn Sources(props: &Props) -> Html {
 
     html! {
         <section class="sources" id="sources">
-            <div class="section-head">
-                <h2>{ i18n.t("sources.title") }</h2>
+            <div class="section-head" data-apparait="titre">
+                <h2>{ mots(&i18n.t("sources.title")) }</h2>
                 <p>{ i18n.t("sources.lead") }</p>
             </div>
 
-            <div
-                ref={apparition.node}
-                class={classes!("sources__panel", apparition.class)}
-            >
+            <div class="sources__panel" data-apparait="monte">
                 if props.loading && props.consensus.is_none() {
                     <p class="sources__state">{ i18n.t("sources.loading") }</p>
                 }
@@ -116,7 +123,7 @@ pub fn Sources(props: &Props) -> Html {
                             <div class="sources__median">
                                 <p class="sources__label">{ i18n.t("sources.now") }</p>
                                 <p class="sources__value">
-                                    { f.unit(consensus.temperature.median, "°C", 1) }
+                                    <Compte valeur={consensus.temperature.median} forme={Forme::Unite("°C", 1)} />
                                 </p>
                                 <p class="sources__providers">
                                     { i18n.with("sources.answered", &params([
@@ -141,7 +148,7 @@ pub fn Sources(props: &Props) -> Html {
                 }
             </div>
 
-            <div class="sources__method">
+            <div class="sources__method" data-apparait="monte">
                 <h3>{ i18n.t("sources.method") }</h3>
                 <p>{ i18n.t("sources.methodBody") }</p>
                 <p class="sources__note">{ i18n.t("sources.note") }</p>
