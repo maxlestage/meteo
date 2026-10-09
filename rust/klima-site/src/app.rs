@@ -21,10 +21,13 @@ use yew::prelude::*;
 
 use crate::composants::aujourdhui::SectionDuJour;
 use crate::composants::ciel::{Ciel, Horizon};
+use crate::composants::curseur::Curseur;
+use crate::composants::film::{Film, mots};
 use crate::composants::fonctions::Fonctions;
 use crate::composants::galerie::Galerie;
 use crate::composants::illustrations::{EchelleUv, IconeFonction, SceneDeCiel, ScenePluie};
 use crate::composants::pied::Pied;
+use crate::composants::porte::use_porte;
 use crate::composants::sources::Sources;
 use crate::composants::telephone::Telephone;
 use crate::crochets::apparition::use_apparition;
@@ -49,6 +52,7 @@ pub struct Props {
 pub fn App(props: &Props) -> Html {
     let i18n = use_i18n();
     let f = i18n.f();
+    use_porte();
 
     // La ville consultée vit dans l'adresse : le bouton retour la défait, et
     // l'adresse envoyée à quelqu'un lui montre bien la ville qu'on a
@@ -109,7 +113,7 @@ pub fn App(props: &Props) -> Html {
                     </nav>
                     // Sur téléphone, le bouton dit « L'app » : la marque, le bouton
                     // et les trois langues tiennent alors sur une ligne.
-                    <a class="button button--compact" href="./app/" aria-label={i18n.t("app.open")}>
+                    <a class="button button--compact" href="./app/" data-aimant="" aria-label={i18n.t("app.open")}>
                         <span class="nav__app-long">{ i18n.t("app.open") }</span>
                         <span class="nav__app-court" aria-hidden="true">{ i18n.t("app.openShort") }</span>
                     </a>
@@ -118,14 +122,15 @@ pub fn App(props: &Props) -> Html {
             </header>
 
             <main id="top">
+                <div class="page">
                 <section class="hero">
                     <div class="hero__text">
                         <p class="hero__eyebrow">{ i18n.t("hero.eyebrow") }</p>
-                        <h1>{ i18n.t("hero.title") }</h1>
+                        <h1 class="hero__titre">{ mots(&i18n.t("hero.title")) }</h1>
                         <p class="hero__lead">{ i18n.t("hero.lead") }</p>
                         <div class="hero__actions">
-                            <a class="button" href="#aujourdhui">{ i18n.t("hero.cta.today") }</a>
-                            <a class="button button--ghost" href="#indicateurs">
+                            <a class="button" href="#aujourdhui" data-aimant="">{ i18n.t("hero.cta.today") }</a>
+                            <a class="button button--ghost" href="#indicateurs" data-aimant="">
                                 { i18n.t("hero.cta.indicators") }
                             </a>
                         </div>
@@ -138,7 +143,12 @@ pub fn App(props: &Props) -> Html {
                         current={courant.clone()}
                     />
                 </section>
+                </div>
 
+                // Le film de grains, pleine largeur, entre l'ouverture et la suite.
+                <Film />
+
+                <div class="page">
                 <div class="banner">
                     <SceneDeCiel
                         is_day={courant.as_ref().map(|c| c.is_day).unwrap_or(true)}
@@ -218,10 +228,12 @@ pub fn App(props: &Props) -> Html {
                         </article>
                     </div>
                 </section>
+                </div>
             </main>
 
             <Pied />
             <Horizon />
+            <Curseur />
         </>
     }
 }

@@ -47,6 +47,10 @@
   --radius: 16px;
   --display: 'Fraunces', Georgia, 'Times New Roman', serif;
   --shadow: 0 1px 2px rgb(0 0 0 / 18%), 0 18px 40px rgb(0 0 0 / 24%);
+  /* La nuit du film et de l'écran d'entrée. */
+  --nuit: #0b1320;
+  --creme: #f2f6ec;
+  --pluie: #7fd0f5;
   color-scheme: dark;
 }
 
@@ -442,7 +446,8 @@ body::before {
 
 /* Structure -------------------------------------------------------------- */
 
-main {
+/* La page tient dans sa colonne ; le film, lui, prend toute la largeur. */
+.page {
   max-width: 1040px;
   margin: 0 auto;
   padding: 0 20px;
@@ -1842,4 +1847,386 @@ section {
   font-size: 14px;
   font-weight: 600;
   color: #7fd0f5;
+}
+
+/* ==========================================================================
+ * Le mouvement de la vitrine
+ *
+ * L'écran d'entrée trace le signe pendant que la page se monte ; un grain de
+ * pellicule passe sur tout ; un anneau suit la souris et les boutons s'y
+ * penchent ; et, sous l'ouverture, le film de grains raconte ce que Klima
+ * regarde, au rythme du défilement. Tout est ornement : sans lui, la page se
+ * lit pareil.
+ * ========================================================================== */
+
+/* L'écran d'entrée : le signe se trace, le compte monte, la porte s'ouvre.
+   Tout en CSS : il part avant le WebAssembly, et s'en va même si celui-ci
+   ne vient pas. */
+@property --compte {
+  syntax: '<integer>';
+  initial-value: 0;
+  inherits: false;
+}
+
+.porte {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  gap: 26px;
+  background: var(--nuit);
+  pointer-events: none;
+  /* Si la page ne se monte jamais, l'écran se lève quand même. */
+  animation: porte-ouvre 0.8s cubic-bezier(0.7, 0, 0.2, 1) 8s forwards;
+}
+
+.ouverte .porte {
+  animation: porte-ouvre 0.8s cubic-bezier(0.7, 0, 0.2, 1) forwards;
+}
+
+.porte__signe {
+  width: min(32vw, 132px);
+  height: auto;
+  overflow: visible;
+}
+
+.porte__trace {
+  --plein: var(--creme);
+  fill: transparent;
+  stroke: var(--creme);
+  stroke-width: 14;
+  stroke-linejoin: round;
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  animation:
+    porte-trace 0.95s cubic-bezier(0.6, 0, 0.2, 1) forwards,
+    porte-remplit 0.35s ease 1s forwards;
+}
+
+.porte__trace--carreau {
+  --plein: transparent;
+  stroke: rgb(242 246 236 / 45%);
+  stroke-width: 8;
+}
+
+.porte__trace--feuille {
+  --plein: #b9d98f;
+  stroke: #b9d98f;
+  animation-delay: 0.2s, 1.05s;
+}
+
+.porte__trace--pluie {
+  --plein: var(--pluie);
+  stroke: var(--pluie);
+  animation-delay: 0.3s, 1.1s;
+}
+
+.porte__compte {
+  min-width: 4ch;
+  color: rgb(255 255 255 / 55%);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.24em;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+  counter-reset: compte var(--compte);
+  animation: porte-compte 1.3s cubic-bezier(0.5, 0, 0.2, 1) forwards;
+}
+
+.porte__compte::after {
+  content: counter(compte);
+}
+
+@keyframes porte-trace {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes porte-remplit {
+  to {
+    fill: var(--plein);
+  }
+}
+
+@keyframes porte-compte {
+  to {
+    --compte: 100;
+  }
+}
+
+@keyframes porte-ouvre {
+  to {
+    clip-path: inset(0 0 100% 0);
+    visibility: hidden;
+  }
+}
+
+/* Le grain de pellicule : une poussière fine qui ne tient jamais en place. */
+.grain {
+  position: fixed;
+  inset: -50%;
+  z-index: 90;
+  pointer-events: none;
+  opacity: 0.06;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 1.4 -0.2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23g)'/%3E%3C/svg%3E");
+  animation: grain 0.9s steps(5) infinite;
+}
+
+@keyframes grain {
+  0% { transform: translate(0, 0); }
+  20% { transform: translate(-4%, 3%); }
+  40% { transform: translate(3%, -5%); }
+  60% { transform: translate(-6%, -2%); }
+  80% { transform: translate(5%, 4%); }
+  100% { transform: translate(0, 0); }
+}
+
+/* L'anneau qui suit la souris ; il s'ouvre sur ce qui se clique. */
+.curseur {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 95;
+  display: none;
+  pointer-events: none;
+}
+
+.curseur--actif {
+  display: block;
+}
+
+.curseur span {
+  display: block;
+  width: 34px;
+  height: 34px;
+  margin: -17px 0 0 -17px;
+  border: 1.5px solid rgb(255 255 255 / 65%);
+  border-radius: 50%;
+  transition:
+    transform 0.3s cubic-bezier(0.2, 0.7, 0.2, 1),
+    background-color 0.3s,
+    border-color 0.3s;
+}
+
+.curseur--lien span {
+  transform: scale(1.7);
+  border-color: var(--accent);
+  background: rgb(158 208 115 / 12%);
+}
+
+/* Les boutons aimantés reviennent en douceur quand la souris s'en va. */
+[data-aimant] {
+  transition:
+    transform 0.4s cubic-bezier(0.2, 0.7, 0.2, 1),
+    background-color 0.2s;
+}
+
+/* Le titre monte mot à mot, une fois la porte ouverte. */
+.hero__titre .mot {
+  display: inline-block;
+}
+
+.ouverte .hero__titre .mot {
+  animation: mot-monte 0.9s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+  animation-delay: calc(0.3s + var(--i) * 70ms);
+}
+
+@keyframes mot-monte {
+  from {
+    opacity: 0;
+    transform: translateY(0.45em);
+    filter: blur(10px);
+  }
+}
+
+/* Le film de grains. La section est longue ; sa scène reste à l'écran le
+   temps de la traverser, et l'avancée dans la section fait le film. */
+.film {
+  position: relative;
+  height: calc(var(--stations, 9) * 72vh + 100vh);
+  margin-top: 32px;
+  background: linear-gradient(
+    to bottom,
+    rgb(11 19 32 / 0%) 0,
+    var(--nuit) 70vh,
+    var(--nuit) calc(100% - 70vh),
+    rgb(11 19 32 / 0%) 100%
+  );
+}
+
+.film__scene {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  height: 100svh;
+  overflow: hidden;
+}
+
+.film__grains {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.film__lignes {
+  position: absolute;
+  right: 0;
+  bottom: max(10vh, 72px);
+  left: 0;
+  display: grid;
+  padding: 0 20px;
+  text-align: center;
+}
+
+.film__ligne {
+  grid-area: 1 / 1;
+  align-self: end;
+  justify-self: center;
+  max-width: 20ch;
+  margin: 0;
+  font-family: var(--display);
+  font-size: clamp(28px, 4.6vw, 56px);
+  font-optical-sizing: auto;
+  font-weight: 600;
+  line-height: 1.08;
+  letter-spacing: -0.02em;
+  text-wrap: balance;
+  pointer-events: none;
+}
+
+.film__ligne p {
+  margin: 0;
+}
+
+/* La question, et ce que le radar voit : dans le bleu de la pluie. */
+.film__ligne:nth-child(2),
+.film__ligne:nth-child(4) {
+  color: var(--pluie);
+}
+
+.film__ligne .mot {
+  display: inline-block;
+  opacity: 0;
+  transform: translateY(0.5em);
+  filter: blur(8px);
+  transition:
+    opacity 0.45s ease,
+    transform 0.7s cubic-bezier(0.2, 0.7, 0.2, 1),
+    filter 0.6s ease;
+}
+
+.film__ligne--active {
+  pointer-events: auto;
+}
+
+.film__ligne--active .mot {
+  opacity: 1;
+  transform: none;
+  filter: none;
+  transition-delay: calc(var(--i) * 55ms);
+}
+
+.film__bouton {
+  margin-top: 22px;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  letter-spacing: 0;
+  opacity: 0;
+  transform: translateY(12px);
+  transition: opacity 0.5s ease 0.3s;
+}
+
+.film__ligne--active .film__bouton {
+  opacity: 1;
+  transform: none;
+}
+
+/* Le fil qui invite à descendre. */
+.film__defiler {
+  position: absolute;
+  bottom: 22px;
+  left: 50%;
+  width: 1px;
+  height: 36px;
+  overflow: hidden;
+  background: rgb(255 255 255 / 18%);
+}
+
+.film__defiler i {
+  position: absolute;
+  inset: 0;
+  background: var(--creme);
+  animation: defiler 1.8s cubic-bezier(0.6, 0, 0.2, 1) infinite;
+}
+
+@keyframes defiler {
+  from { transform: translateY(-100%); }
+  to { transform: translateY(100%); }
+}
+
+/* Sans WebGL 2 : les phrases, en liste, sans scène figée. */
+.film--simple {
+  height: auto;
+  background: none;
+}
+
+.film--simple .film__scene {
+  position: static;
+  height: auto;
+  padding: 56px 0;
+}
+
+.film--simple .film__grains,
+.film--simple .film__defiler {
+  display: none;
+}
+
+.film--simple .film__lignes {
+  position: static;
+  gap: 14px;
+}
+
+.film--simple .film__ligne {
+  grid-area: auto;
+  pointer-events: auto;
+}
+
+.film--simple .film__ligne .mot,
+.film--simple .film__bouton {
+  opacity: 1;
+  transform: none;
+  filter: none;
+}
+
+@media (max-width: 700px) {
+  .film {
+    height: calc(var(--stations, 9) * 62vh + 100vh);
+  }
+
+  .film__lignes {
+    bottom: max(12vh, 80px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .porte,
+  .curseur {
+    display: none;
+  }
+
+  .grain,
+  .film__defiler i,
+  .ouverte .hero__titre .mot {
+    animation: none;
+  }
+
+  .film__ligne .mot,
+  .film__bouton,
+  [data-aimant] {
+    transition: none;
+  }
 }

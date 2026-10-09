@@ -30,11 +30,24 @@ impl Graine {
 }
 
 /// Avancée dans la page, de 0 (en haut) à 1 (en bas).
+///
+/// Le film de grains ne compte pas : la page s'y fige sur un ciel de nuit, et
+/// la journée reprend où elle en était quand il s'achève. Sans cela, sa
+/// longue course ferait tomber la nuit avant la suite de la page.
 fn avancee() -> Option<f64> {
     let fenetre = web_sys::window()?;
-    let document = fenetre.document()?.document_element()?;
-    let hauteur = f64::from(document.scroll_height()) - fenetre.inner_height().ok()?.as_f64()?;
-    let y = fenetre.scroll_y().ok()?;
+    let document = fenetre.document()?;
+    let racine = document.document_element()?;
+    let ecran = fenetre.inner_height().ok()?.as_f64()?;
+    let mut hauteur = f64::from(racine.scroll_height()) - ecran;
+    let mut y = fenetre.scroll_y().ok()?;
+    if let Some(film) = document.query_selector(".film").ok().flatten() {
+        let cadre = film.get_bounding_client_rect();
+        let course = (cadre.height() - ecran).max(0.0);
+        let debut = cadre.top() + y;
+        y -= (y - debut).clamp(0.0, course);
+        hauteur -= course;
+    }
     Some(if hauteur > 1.0 { (y / hauteur).clamp(0.0, 1.0) } else { 0.0 })
 }
 
