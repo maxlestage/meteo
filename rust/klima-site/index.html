@@ -57,6 +57,19 @@
     <link data-trunk rel="copy-dir" href="public" data-target-path="." />
   </head>
   <body>
+    <!-- L'écran d'entrée : le signe se trace pendant que la page se monte.
+         Il ne dépend pas du WebAssembly et s'en va de lui-même. -->
+    <div class="porte" aria-hidden="true">
+      <svg class="porte__signe" viewBox="0 0 1024 1024">
+        <rect class="porte__trace porte__trace--carreau" x="8" y="8" width="1008" height="1008" rx="229" pathLength="1" />
+        <rect class="porte__trace" x="322" y="276" width="96" height="560" rx="48" pathLength="1" />
+        <path class="porte__trace" d="M418 556c118-36 214-124 286-244 22 148-70 268-206 316Z" pathLength="1" />
+        <path class="porte__trace porte__trace--feuille" d="M418 556c118 36 214 124 286 244 22-148-70-268-206-316Z" pathLength="1" />
+        <circle class="porte__trace porte__trace--pluie" cx="370" cy="240" r="52" pathLength="1" />
+      </svg>
+      <span class="porte__compte"></span>
+    </div>
+    <div class="grain" aria-hidden="true"></div>
     <div id="root"></div>
   </body>
 </html>
