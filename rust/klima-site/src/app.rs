@@ -26,11 +26,11 @@ use crate::composants::film::{Film, mots};
 use crate::composants::fonctions::Fonctions;
 use crate::composants::galerie::Galerie;
 use crate::composants::illustrations::{EchelleUv, IconeFonction, SceneDeCiel, ScenePluie};
+use crate::composants::mouvement::Mouvement;
 use crate::composants::pied::Pied;
 use crate::composants::porte::use_porte;
 use crate::composants::sources::Sources;
 use crate::composants::telephone::Telephone;
-use crate::crochets::apparition::use_apparition;
 
 /// Paris, au premier chargement, quand on ne sait pas où est le visiteur.
 fn defaut() -> Parcelle {
@@ -85,16 +85,11 @@ pub fn App(props: &Props) -> Html {
     });
 
     let courant = etat.forecast.as_ref().map(|f| f.current.clone());
-    let pluie = courant.as_ref().is_some_and(|c| {
-        matches!(
-            weather_condition(c.weather_code).icon,
-            ConditionIcon::Drizzle | ConditionIcon::Rain | ConditionIcon::Showers
-                | ConditionIcon::Thunder
-        )
-    });
-
-    let fonctions = use_apparition();
-    let donnees = use_apparition();
+    let icone = courant.as_ref().map(|c| weather_condition(c.weather_code).icon);
+    let pluie = matches!(
+        icone,
+        Some(ConditionIcon::Drizzle | ConditionIcon::Rain | ConditionIcon::Showers | ConditionIcon::Thunder)
+    );
 
     html! {
         <>
@@ -149,10 +144,11 @@ pub fn App(props: &Props) -> Html {
                 <Film />
 
                 <div class="page">
-                <div class="banner">
+                <div class="banner" data-apparait="rideau">
                     <SceneDeCiel
                         is_day={courant.as_ref().map(|c| c.is_day).unwrap_or(true)}
                         raining={pluie}
+                        orage={icone == Some(ConditionIcon::Thunder)}
                     />
                 </div>
 
@@ -183,45 +179,43 @@ pub fn App(props: &Props) -> Html {
 
                 <Sources consensus={etat.consensus.clone()} loading={etat.loading} />
 
-                <div ref={fonctions.node} class={fonctions.class}>
-                    <Fonctions />
-                    <div class="figures">
-                        <figure>
-                            <ScenePluie />
-                            <figcaption>
-                                { i18n.with("feature.rain.rule", &params([
-                                    ("amount", f.unit(PLUIE_MM, "mm", 1).as_str().into()),
-                                    ("probability", f.percent(PLUIE_PROBABILITE).as_str().into()),
-                                ])) }
-                            </figcaption>
-                        </figure>
-                        <figure>
-                            <EchelleUv />
-                            <figcaption>
-                                { i18n.with("figure.uv", &params([
-                                    ("sunscreen", f.decimal(UV_CREME, 0).as_str().into()),
-                                ])) }
-                            </figcaption>
-                        </figure>
-                    </div>
+                <Fonctions />
+                <div class="figures" data-apparait="cascade">
+                    <figure style="--i: 0">
+                        <ScenePluie />
+                        <figcaption>
+                            { i18n.with("feature.rain.rule", &params([
+                                ("amount", f.unit(PLUIE_MM, "mm", 1).as_str().into()),
+                                ("probability", f.percent(PLUIE_PROBABILITE).as_str().into()),
+                            ])) }
+                        </figcaption>
+                    </figure>
+                    <figure style="--i: 1">
+                        <EchelleUv />
+                        <figcaption>
+                            { i18n.with("figure.uv", &params([
+                                ("sunscreen", f.decimal(UV_CREME, 0).as_str().into()),
+                            ])) }
+                        </figcaption>
+                    </figure>
                 </div>
 
-                <section class="data" id="donnees" ref={donnees.node}>
-                    <div class="section-head">
-                        <h2>{ i18n.t("data.title") }</h2>
+                <section class="data" id="donnees">
+                    <div class="section-head" data-apparait="titre">
+                        <h2>{ mots(&i18n.t("data.title")) }</h2>
                     </div>
-                    <div class={classes!("data__grid", donnees.class)}>
-                        <article>
+                    <div class="data__grid" data-apparait="cascade">
+                        <article style="--i: 0" data-lueur="">
                             <IconeFonction cle="model" />
                             <h3>{ i18n.t("data.model.title") }</h3>
                             <p>{ i18n.t("data.model.body") }</p>
                         </article>
-                        <article>
+                        <article style="--i: 1" data-lueur="">
                             <IconeFonction cle="rules" />
                             <h3>{ i18n.t("data.rules.title") }</h3>
                             <p>{ i18n.t("data.rules.body") }</p>
                         </article>
-                        <article>
+                        <article style="--i: 2" data-lueur="">
                             <IconeFonction cle="hours" />
                             <h3>{ i18n.t("data.hours.title") }</h3>
                             <p>{ i18n.t("data.hours.body") }</p>
@@ -234,6 +228,7 @@ pub fn App(props: &Props) -> Html {
             <Pied />
             <Horizon />
             <Curseur />
+            <Mouvement />
         </>
     }
 }
