@@ -204,8 +204,8 @@ pub fn Ciel() -> Html {
 }
 
 /// La ville au pied de la page : la nuit est tombée quand on y arrive, et les
-/// fenêtres s'allument. Pleine largeur, dans le flux : rien ne se lit
-/// par-dessus.
+/// fenêtres s'allument une à une sous les yeux du lecteur. Pleine largeur,
+/// dans le flux : rien ne se lit par-dessus.
 #[function_component]
 pub fn Horizon() -> Html {
     // Une ligne d'immeubles sur 1200 unités, tirée une fois pour toutes.
@@ -245,11 +245,14 @@ pub fn Horizon() -> Html {
             let fy = 140.0 - hauteur + 6.0 + (k / colonnes) as f64 * 10.0;
             let vacille = (k + i) % 4 == 0;
             let delai = graine.suivant() * 9.0;
+            // Quand elle s'allume, une fois la ville à l'écran : au hasard,
+            // dans les trois secondes, les plus à gauche un peu plus tôt.
+            let allumage = graine.suivant() * 2.2 + fx / 1200.0 * 0.8;
             fenetres.push(html! {
                 <rect
                     x={format!("{fx}")} y={format!("{fy}")} width="3.5" height="4.5"
                     class={classes!(vacille.then_some("horizon__vacille"))}
-                    style={format!("animation-delay: -{delai:.2}s")}
+                    style={format!("--allume: {allumage:.2}s; --vacille: -{delai:.2}s")}
                 />
             });
         }
@@ -273,7 +276,7 @@ pub fn Horizon() -> Html {
         .collect();
 
     html! {
-        <div class="horizon" aria-hidden="true">
+        <div class="horizon" aria-hidden="true" data-apparait="ville">
             <svg viewBox="0 0 1200 140" preserveAspectRatio="xMidYMax slice">
                 <defs>
                     <linearGradient id="horizonFacade" x1="0" y1="0" x2="0" y2="1">

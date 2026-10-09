@@ -12,6 +12,7 @@ use klima_core::ville::seuils::{
 };
 use klima_ui::i18n::use_i18n;
 
+use crate::composants::film::mots;
 use crate::composants::illustrations::IconeFonction;
 use yew::prelude::*;
 
@@ -64,9 +65,15 @@ pub fn Fonctions() -> Html {
 
     let cartes: Html = fonctions
         .into_iter()
-        .map(|(cle, regle, detail)| {
+        .enumerate()
+        .map(|(i, (cle, regle, detail))| {
             html! {
-                <article class={classes!("feature", (cle == "veille").then_some("feature--large"))} key={cle}>
+                <article
+                    class={classes!("feature", (cle == "veille").then_some("feature--large"))}
+                    key={cle}
+                    style={format!("--i: {i}")}
+                    data-lueur=""
+                >
                     <IconeFonction cle={cle} />
                     <h3>{ i18n.t(&format!("feature.{cle}.title")) }</h3>
                     <p class="feature__rule">
@@ -82,11 +89,11 @@ pub fn Fonctions() -> Html {
 
     html! {
         <section class="features" id="indicateurs">
-            <div class="section-head">
-                <h2>{ i18n.t("features.title") }</h2>
+            <div class="section-head" data-apparait="titre">
+                <h2>{ mots(&i18n.t("features.title")) }</h2>
                 <p>{ i18n.t("features.lead") }</p>
             </div>
-            <div class="features__grid">{ cartes }</div>
+            <div class="features__grid" data-apparait="cascade">{ cartes }</div>
         </section>
     }
 }

@@ -402,11 +402,34 @@ vitrine ne peut pas annoncer autre chose que ce que l'application applique.
   de la page ne compte pas la course du film : la journée reprend où elle en
   était.
 - **Un grain de pellicule** passe sur toute la page, et, à la souris, **un
-  anneau** la suit tandis que les boutons s'y penchent (`data-aimant`).
+  anneau** la suit tandis que les boutons s'y penchent (`data-aimant`), que
+  les téléphones pivotent vers elle (`data-incline`) et que les cartes
+  s'éclairent là où elle passe (`data-lueur`).
+- **Chaque section entre quand on l'atteint.** Un seul observateur
+  (`src/composants/mouvement.rs`) pose `data-vu` sur les blocs marqués
+  `data-apparait` ; la feuille de style dit comment ils entrent — les titres
+  mot à mot avec un trait qui se tire dessous, les cartes en cascade, les
+  écrans de la galerie en éventail, le bandeau comme un rideau. Tant qu'un
+  bloc n'a pas été vu, ses animations attendent sur leur première image. Rien
+  n'est caché avant qu'on sache pouvoir le ramener.
+- **Les chiffres roulent** jusqu'à leur valeur (`src/composants/compte.rs`),
+  une fois à l'écran, puis d'une valeur à l'autre quand la ville ou la
+  prévision change. Hors de vue, ils affichent leur vraie valeur, jamais un
+  zéro de départ.
+- **Les sources votent sous les yeux** : chaque point part de la médiane,
+  marquée sur l'axe, et file à sa place. Chaque dessin bouge à sa façon — la
+  cloche sonne, le parapluie se balance, le souffle court le long des traits —,
+  des oiseaux traversent le bandeau le jour, et les fenêtres de la ville
+  s'allument une à une au pied de la page.
+- **Le défilement mène**, là où le navigateur sait lier une animation au
+  défilement : un fil d'avancée en haut de l'écran, l'ouverture qui s'efface
+  en partant, le bandeau qui glisse sous son cadre, la ville qui se lève.
 
 Pour qui demande moins de mouvement : ni écran d'entrée, ni grain animé, ni
-anneau ; le film change toujours avec le défilement — c'est le lecteur qui le
-fait avancer —, mais rien n'y tombe ni n'y tourne de soi-même.
+anneau, ni entrée, ni chiffre qui roule — un filet en fin de feuille de style
+coupe toute animation, celles qu'on ajoutera comprises ; le film change
+toujours avec le défilement — c'est le lecteur qui le fait avancer —, mais rien
+n'y tombe ni n'y tourne de soi-même.
 
 ### Marque et typographie
 

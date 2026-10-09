@@ -12,6 +12,8 @@ use klima_ui::composants::pictogramme::Pictogramme;
 use klima_ui::i18n::use_i18n;
 use yew::prelude::*;
 
+use crate::composants::compte::{Compte, Forme};
+
 #[derive(Properties, PartialEq)]
 pub struct Props {
     pub parcelle: Parcelle,
@@ -33,9 +35,10 @@ pub fn Telephone(props: &Props) -> Html {
                 .remaining_hours
                 .iter()
                 .take(5)
-                .map(|hour| {
+                .enumerate()
+                .map(|(i, hour)| {
                     html! {
-                        <div class="phone__hour" key={hour.time}>
+                        <div class="phone__hour" key={hour.time} style={format!("--i: {i}")}>
                             <span>{ hour_of(hour.time) }</span>
                             <Pictogramme
                                 icon={weather_condition(hour.weather_code).icon}
@@ -51,7 +54,7 @@ pub fn Telephone(props: &Props) -> Html {
         .unwrap_or_default();
 
     html! {
-        <div class="phone" aria-hidden="true">
+        <div class="phone" aria-hidden="true" data-incline="" data-lueur="">
             <div class="phone__screen">
                 <div class="phone__status">
                     <span>{ "9:41" }</span>
@@ -61,8 +64,10 @@ pub fn Telephone(props: &Props) -> Html {
                 <p class="phone__place">{ &props.parcelle.name }</p>
                 <p class="phone__temperature">
                     { match &props.current {
-                        Some(current) => f.temperature(current.temperature),
-                        None => "—".to_owned(),
+                        Some(current) => html! {
+                            <Compte valeur={current.temperature} forme={Forme::Temperature} />
+                        },
+                        None => html! { "—" },
                     } }
                 </p>
                 <p class="phone__condition">
@@ -105,8 +110,10 @@ pub fn Telephone(props: &Props) -> Html {
                         <p class="phone__label">{ i18n.t("phone.feels") }</p>
                         <p class="phone__value">
                             { match &props.current {
-                                Some(current) => f.temperature(current.apparent_temperature),
-                                None => "—".to_owned(),
+                                Some(current) => html! {
+                                    <Compte valeur={current.apparent_temperature} forme={Forme::Temperature} />
+                                },
+                                None => html! { "—" },
                             } }
                         </p>
                     </div>
