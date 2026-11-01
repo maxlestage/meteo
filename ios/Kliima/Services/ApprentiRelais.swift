@@ -2,7 +2,7 @@ import Foundation
 
 /// L'apprenti, demandé au relais (`/v1/apprenti`).
 ///
-/// C'est le relais qui compare la semaine passée — deux interrogations qu'il
+/// C'est le relais qui compare la semaine passée — trois interrogations qu’il
 /// garde six heures pour tout le monde. Sans relais configuré (`KliimaRelay`),
 /// pas d'apprenti : les modèles votent tels quels.
 enum ApprentiRelais {

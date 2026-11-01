@@ -62,7 +62,7 @@ struct WeatherLiveActivity: Widget {
 
             DynamicIslandExpandedRegion(.bottom) {
                 HStack(spacing: 6) {
-                    Text(maintenant.condition.label)
+                    Text(maintenant.condition.label(isDay: maintenant.isDay))
                         .lineLimit(1)
                     if let suivante {
                         Spacer(minLength: 4)
@@ -129,7 +129,7 @@ private struct ActiviteSurLaMontre: View {
                 .fixedSize(horizontal: true, vertical: false)
 
             VStack(alignment: .leading, spacing: 0) {
-                Text(maintenant.condition.label)
+                Text(maintenant.condition.label(isDay: maintenant.isDay))
                     .font(.caption2.weight(.semibold))
                 if let ressenti = maintenant.apparentTemperature {
                     Text(Localized.text("weather.feelsLike", AgroFormat.temperature(ressenti)))
@@ -203,7 +203,13 @@ private struct DansUneHeure: View {
     }
 }
 
-/// Écran verrouillé : la ville, la température, le ciel et les bornes du jour.
+/// Écran verrouillé : la ville, la température, le ciel, et l'heure qui vient.
+///
+/// La première version était une carte blanche : le croissant de lune, blanc
+/// lui aussi, y disparaissait, et « Ciel dégagé » s'affichait à 22 h. Elle
+/// porte maintenant le ciel qu'il fait en fond — celui des widgets —, le texte
+/// en blanc, le temps selon qu'il fait jour ou nuit, et en bas, sur une bande
+/// de verre, les bornes du jour et l'heure qui vient.
 ///
 /// Nommée « activité » et non « écran verrouillé » : le widget d'écran
 /// verrouillé, lui, a une vue qui porte déjà ce nom. Deux types de même nom
@@ -217,73 +223,109 @@ private struct WeatherActivityView: View {
     }
 
     var body: some View {
+        let condition = WeatherCondition.forCode(maintenant.weatherCode)
+        let suivante = context.state.upcoming(stale: context.isStale)
+
         VStack(alignment: .leading, spacing: 10) {
-            HStack {
-                VStack(alignment: .leading, spacing: 1) {
-                    Text(Localized.text("weather.title"))
-                        .font(.caption2.weight(.semibold))
-                        .textCase(.uppercase)
-                        .foregroundStyle(.secondary)
-                    Text(context.attributes.parcelleName)
+            HStack(spacing: 5) {
+                Text(verbatim: "Kliima ‣")
+                    .font(.caption.weight(.heavy))
+                Text(context.attributes.parcelleName)
+                    .font(.caption.weight(.semibold))
+                    .opacity(0.85)
+                    .lineLimit(1)
+                Spacer(minLength: 6)
+                Label(AgroFormat.unit(maintenant.windSpeed, "km/h", decimals: 0), systemImage: "wind")
+                    .font(.caption.weight(.semibold))
+                    .monospacedDigit()
+                    .opacity(0.85)
+                    .lineLimit(1)
+                    .fixedSize(horizontal: true, vertical: false)
+            }
+
+            HStack(alignment: .center, spacing: 12) {
+                Image(systemName: condition.icon.symbolName(isDay: maintenant.isDay))
+                    .symbolRenderingMode(.multicolor)
+                    .font(.system(size: 34))
+                    .frame(width: 44)
+                Text(AgroFormat.temperature(maintenant.temperature))
+                    .font(.system(size: 46, weight: .medium, design: .rounded))
+                    .monospacedDigit()
+                    .lineLimit(1)
+                    .fixedSize(horizontal: true, vertical: false)
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(condition.label(isDay: maintenant.isDay))
                         .font(.headline)
                         .lineLimit(1)
+                        .minimumScaleFactor(0.75)
+                    // Le ressenti n'existe que pour la mesure : passée
+                    // l'heure, la prévision horaire n'en porte pas, et on ne
+                    // l'invente pas.
+                    if let ressenti = maintenant.apparentTemperature {
+                        Text(Localized.text("weather.feelsLike", AgroFormat.temperature(ressenti)))
+                            .font(.subheadline)
+                            .opacity(0.8)
+                            .lineLimit(1)
+                    }
                 }
-
-                Spacer()
-
-                Image(systemName: maintenant.condition.icon.symbolName(isDay: maintenant.isDay))
-                    .symbolRenderingMode(.multicolor)
-                    .font(.title)
+                Spacer(minLength: 0)
             }
 
-            HStack(alignment: .firstTextBaseline, spacing: 8) {
-                Text(AgroFormat.temperature(maintenant.temperature))
-                    .font(.system(size: 40, weight: .light))
+            HStack(spacing: 8) {
+                Text(bornes)
+                    .monospacedDigit()
                     .lineLimit(1)
-
-                VStack(alignment: .leading, spacing: 1) {
-                    Text(maintenant.condition.label)
-                        .font(.subheadline)
-                        .lineLimit(1)
-                    Text(bornes)
-                        .font(.caption2)
-                        .foregroundStyle(.secondary)
-                        .lineLimit(1)
-                }
-
-                Spacer()
-
-                Label(
-                    AgroFormat.unit(maintenant.windSpeed, "km/h", decimals: 0),
-                    systemImage: "wind"
-                )
-                .font(.subheadline)
-                .monospacedDigit()
-                .lineLimit(1)
-                .fixedSize(horizontal: true, vertical: false)
-            }
-
-            HStack(spacing: 6) {
-                // Le ressenti n'existe que pour la mesure : passée l'heure,
-                // la prévision horaire n'en porte pas, et on ne l'invente pas.
-                if let ressenti = maintenant.apparentTemperature {
-                    Text(Localized.text("weather.feelsLike", AgroFormat.temperature(ressenti)))
-                        .lineLimit(1)
-                }
-                Spacer(minLength: 4)
-                if let suivante = context.state.upcoming(stale: context.isStale) {
+                Spacer(minLength: 6)
+                if let suivante {
                     DansUneHeure(heure: suivante, timeZone: context.attributes.timeZone)
                 }
             }
-            .font(.caption)
-            .foregroundStyle(.secondary)
+            .font(.footnote.weight(.semibold))
+            .padding(.horizontal, 12)
+            .padding(.vertical, 7)
+            .background(Color.white.opacity(0.16), in: Capsule())
         }
+        .foregroundStyle(.white)
         .padding(16)
+        .background(CielDeLActivite(weatherCode: maintenant.weatherCode, isDay: maintenant.isDay))
+        .activityBackgroundTint(CielDeLActivite.teinte(weatherCode: maintenant.weatherCode, isDay: maintenant.isDay))
+        .activitySystemActionForegroundColor(.white)
     }
 
-    /// « ↓ 17° ↑ 30° » — les bornes du jour sur la parcelle.
+    /// « ↓ 4°  ↑ 16° » — les bornes du jour dans la ville.
     private var bornes: String {
         "↓ \(AgroFormat.temperature(context.state.temperatureMin))"
             + "  ↑ \(AgroFormat.temperature(context.state.temperatureMax))"
+    }
+}
+
+/// Le ciel de l'activité : les couleurs des widgets, d'après le code et
+/// l'heure du jour — nuit profonde, pluie, couvert, azur.
+private struct CielDeLActivite: View {
+    let weatherCode: Int
+    let isDay: Bool
+
+    var body: some View {
+        LinearGradient(colors: Self.couleurs(weatherCode: weatherCode, isDay: isDay),
+                       startPoint: .topLeading, endPoint: .bottomTrailing)
+    }
+
+    /// La teinte unie que le système montre quand il ne dessine pas le fond.
+    static func teinte(weatherCode: Int, isDay: Bool) -> Color {
+        couleurs(weatherCode: weatherCode, isDay: isDay).last ?? .black
+    }
+
+    static func couleurs(weatherCode: Int, isDay: Bool) -> [Color] {
+        if !isDay {
+            return [Color(red: 0.12, green: 0.18, blue: 0.34), Color(red: 0.03, green: 0.06, blue: 0.15)]
+        }
+        switch WeatherCondition.forCode(weatherCode).icon {
+        case .rain, .showers, .thunder, .drizzle:
+            return [Color(red: 0.27, green: 0.36, blue: 0.48), Color(red: 0.11, green: 0.15, blue: 0.23)]
+        case .cloudy, .fog, .snow:
+            return [Color(red: 0.40, green: 0.47, blue: 0.56), Color(red: 0.17, green: 0.21, blue: 0.28)]
+        default:
+            return [Color(red: 0.24, green: 0.55, blue: 0.88), Color(red: 0.09, green: 0.27, blue: 0.55)]
+        }
     }
 }
