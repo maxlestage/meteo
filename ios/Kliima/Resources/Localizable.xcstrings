@@ -4532,6 +4532,29 @@
         }
       }
     },
+    "wmo.clearNight": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Clear night"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Noche despejada"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nuit claire"
+          }
+        }
+      }
+    },
     "wmo.clearSky": {
       "extractionState": "manual",
       "localizations": {
@@ -4827,6 +4850,29 @@
           "stringUnit": {
             "state": "translated",
             "value": "Peu nuageux"
+          }
+        }
+      }
+    },
+    "wmo.mainlyClearNight": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mostly clear night"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Noche poco nubosa"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nuit peu nuageuse"
           }
         }
       }

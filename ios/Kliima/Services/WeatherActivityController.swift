@@ -84,6 +84,20 @@ final class WeatherActivityController: ObservableObject {
 
     /// Reflète la prévision fraîchement chargée sur toute activité affichée.
     func refresh(forecast: AgroForecast) async {
+        #if canImport(ActivityKit)
+        // Le nom est figé à l'ouverture : une île ouverte sous « Ma ville »
+        // le gardait toute la journée. Même endroit, nom devenu celui de la
+        // commune : on la rouvre sous son vrai nom.
+        if #available(iOS 16.2, *),
+           let ouverte = Activity<WeatherActivityAttributes>.activities.first,
+           ouverte.attributes.parcelleName != forecast.parcelle.name,
+           ouverte.attributes.latitude == forecast.parcelle.latitude,
+           ouverte.attributes.longitude == forecast.parcelle.longitude {
+            await stop()
+            start(parcelle: forecast.parcelle, forecast: forecast)
+            return
+        }
+        #endif
         await Self.update(forecast: forecast)
         isRunning = Self.hasActivities
     }

@@ -59,7 +59,7 @@ struct WeatherLockScreenView: View {
                         .font(.system(size: 14))
                 }
                 if let condition {
-                    Text(condition.label)
+                    Text(condition.label(isDay: entry.current?.isDay ?? true))
                         .font(.system(size: 11))
                         .foregroundStyle(.secondary)
                         .lineLimit(1)

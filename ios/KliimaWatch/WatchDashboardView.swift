@@ -210,7 +210,7 @@ private struct WatchHeader: View {
             }
 
             HStack(spacing: 6) {
-                Text(condition.label)
+                Text(condition.label(isDay: current.isDay))
                     .lineLimit(1)
                 Spacer(minLength: 0)
                 if let today = forecast.daily.first {

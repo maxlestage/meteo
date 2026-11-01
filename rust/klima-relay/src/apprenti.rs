@@ -1,9 +1,11 @@
 //! L'apprenti, côté relais : il va chercher de quoi noter les modèles.
 //!
-//! Deux interrogations, l'une après l'autre : une semaine de bulletins autour
-//! de la ville — pour choisir l'aéroport qui jugera et lire ce qu'il a relevé —
-//! puis, au point de cet aéroport, ce que chaque modèle avait annoncé la
-//! veille pour chacune de ces heures. La note elle-même est pure
+//! Trois interrogations, l'une après l'autre : les bulletins du moment autour
+//! de la ville, pour choisir l'aéroport qui jugera ; sa semaine à lui seul —
+//! demander la semaine de tout le cadre butait sur le plafond de quatre cents
+//! bulletins et n'en rendait que vingt-huit heures ; puis, au point de cet
+//! aéroport, ce que chaque modèle avait annoncé la veille pour chacune de ces
+//! heures. La note elle-même est pure
 //! (`klima_core::apprenti`).
 //!
 //! Rien n'est gardé ailleurs qu'en mémoire, et rien n'a besoin de l'être :
@@ -39,8 +41,12 @@ pub async fn apprendre(
     longitude: f64,
     maintenant_s: i64,
 ) -> Result<String, UpstreamError> {
-    let bulletins = fetch(upstream::aviation_historique(latitude, longitude)).await?;
-    let Some((station, nom, lat, lon, releves)) = station_juge(&bulletins, latitude, longitude, RELEVES_MIN)
+    let autour = fetch(upstream::aviation_metar(latitude, longitude)).await?;
+    let Some((proche, ..)) = station_juge(&autour, latitude, longitude, 1) else {
+        return Ok(SANS_JUGE.to_owned());
+    };
+    let semaine = fetch(upstream::aviation_historique(&proche)).await?;
+    let Some((station, nom, lat, lon, releves)) = station_juge(&semaine, latitude, longitude, RELEVES_MIN)
     else {
         return Ok(SANS_JUGE.to_owned());
     };
@@ -69,7 +75,13 @@ mod tests {
     fn fournisseur(vues: Arc<Mutex<Vec<String>>>) -> Fetch {
         Arc::new(move |call: Call| {
             vues.lock().unwrap().push(call.url.clone());
-            let corps = if call.url.contains("aviationweather") {
+            let corps = if call.url.contains("aviationweather") && call.url.contains("bbox=") {
+                // Le cadre : un bulletin par aéroport, celui du moment.
+                format!(
+                    r#"[{{"icaoId":"LFPO","obsTime":{},"temp":10,"lat":48.717,"lon":2.384,"name":"Paris/Orly Fld, ID, FR"}}]"#,
+                    DEBUT + 71 * H
+                )
+            } else if call.url.contains("aviationweather") {
                 let bulletins: Vec<String> = (0..72)
                     .map(|i| {
                         format!(
@@ -104,10 +116,11 @@ mod tests {
         assert_eq!(appris.notes[0].correction(), 1.5);
 
         let vues = vues.lock().unwrap();
-        assert!(vues[0].contains("hours=168"), "{}", vues[0]);
-        assert!(vues[1].starts_with("https://previous-runs-api.open-meteo.com/v1/forecast"), "{}", vues[1]);
-        assert!(vues[1].contains("latitude=48.717") && vues[1].contains("longitude=2.384"), "au point de l'aéroport : {}", vues[1]);
-        assert!(vues[1].contains("timeformat=unixtime"));
+        assert!(vues[0].contains("bbox="), "{}", vues[0]);
+        assert!(vues[1].contains("ids=LFPO") && vues[1].contains("hours=168"), "la semaine d'un seul aéroport : {}", vues[1]);
+        assert!(vues[2].starts_with("https://previous-runs-api.open-meteo.com/v1/forecast"), "{}", vues[2]);
+        assert!(vues[2].contains("latitude=48.717") && vues[2].contains("longitude=2.384"), "au point de l'aéroport : {}", vues[2]);
+        assert!(vues[2].contains("timeformat=unixtime"));
     }
 
     #[tokio::test]
@@ -124,7 +137,7 @@ mod tests {
         let vues = Arc::new(Mutex::new(Vec::new()));
         let _ = apprendre(fournisseur(vues.clone()), Some("secret".into()), 48.80, 2.40, DEBUT + 100 * H).await;
         let vues = vues.lock().unwrap();
-        assert!(vues[1].starts_with("https://customer-previous-runs-api.open-meteo.com/"));
-        assert!(vues[1].contains("apikey=secret"));
+        assert!(vues[2].starts_with("https://customer-previous-runs-api.open-meteo.com/"));
+        assert!(vues[2].contains("apikey=secret"));
     }
 }
