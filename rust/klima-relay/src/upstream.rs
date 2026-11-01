@@ -166,13 +166,14 @@ pub fn aviation_metar(latitude: f64, longitude: f64) -> Call {
     Call { url: url.into(), user_agent: Some(USER_AGENT) }
 }
 
-/// Une semaine de bulletins autour de la maille, pour l'apprenti : le même
-/// cadre que le ciel, toutes les heures des sept derniers jours.
-pub fn aviation_historique(latitude: f64, longitude: f64) -> Call {
-    let (sud, ouest, nord, est) = klima_core::ciel::cadre(latitude, longitude);
+/// Une semaine de bulletins d'un seul aéroport, pour l'apprenti. Un seul :
+/// l'Aviation Weather Center plafonne une réponse à quatre cents bulletins, et
+/// un cadre autour de Paris en compte sept — la semaine demandée tombait à
+/// vingt-huit heures.
+pub fn aviation_historique(station: &str) -> Call {
     let mut url = Url::parse(AVIATION_WEATHER).expect("hôte").join("/api/data/metar").expect("chemin");
     url.query_pairs_mut()
-        .append_pair("bbox", &format!("{sud},{ouest},{nord},{est}"))
+        .append_pair("ids", station)
         .append_pair("hours", &(klima_api::apprenti::JOURS * 24).to_string())
         .append_pair("format", "json");
     Call { url: url.into(), user_agent: Some(USER_AGENT) }

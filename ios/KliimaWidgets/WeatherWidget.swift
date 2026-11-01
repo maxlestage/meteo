@@ -122,13 +122,16 @@ struct WeatherTimelineProvider: TimelineProvider {
     /// début d'une heure de la série, avec sa prévision : le widget bascule tout
     /// seul à l'heure pile, sans réseau.
     ///
-    /// On redemande malgré tout la prévision au bout de trois heures : les
-    /// modèles tournent, et douze heures calculées d'avance restent un filet,
-    /// pas une raison de ne plus rien demander.
+    /// On redemande malgré tout la prévision au bout d'une heure — trois,
+    /// c'était une averse arrivée entre-temps que le widget ignorait encore.
+    /// Sans réseau, on retente un quart d'heure plus tard. Les entrées
+    /// calculées d'avance restent un filet, pas une raison de ne plus rien
+    /// demander.
     func getTimeline(in context: Context, completion: @escaping (Timeline<WeatherEntry>) -> Void) {
         Task {
             let entries = await entries()
-            let relecture = Date().addingTimeInterval(3 * 3600)
+            let charge = entries.contains { $0.current != nil }
+            let relecture = Date().addingTimeInterval(charge ? 3600 : 15 * 60)
             completion(Timeline(entries: entries.isEmpty ? [placeholder(in: context)] : entries,
                                 policy: .after(relecture)))
         }
