@@ -494,6 +494,29 @@ body {
   color: var(--text-muted);
 }
 
+.sources__apprenti {
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px solid var(--card-border);
+}
+
+.sources__apprenti-titre {
+  margin: 0 0 6px;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.sources__apprenti ul {
+  margin: 0;
+  padding-left: 18px;
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+.sources__apprenti li + li {
+  margin-top: 3px;
+}
+
 /* Pluie et conseils ------------------------------------------------------ */
 
 .rain__headline {

@@ -36,6 +36,8 @@ const OPEN_METEO_AIR_CUSTOMER: &str = "https://customer-air-quality-api.open-met
 const MET_NORWAY: &str = "https://api.met.no";
 const BRIGHT_SKY: &str = "https://api.brightsky.dev";
 const AVIATION_WEATHER: &str = "https://aviationweather.gov";
+const OPEN_METEO_PREVIOUS_PUBLIC: &str = "https://previous-runs-api.open-meteo.com";
+const OPEN_METEO_PREVIOUS_CUSTOMER: &str = "https://customer-previous-runs-api.open-meteo.com";
 
 /// Le fournisseur n'a pas donné ce qu'on lui demandait.
 ///
@@ -162,6 +164,41 @@ pub fn aviation_metar(latitude: f64, longitude: f64) -> Call {
         .append_pair("bbox", &format!("{sud},{ouest},{nord},{est}"))
         .append_pair("format", "json");
     Call { url: url.into(), user_agent: Some(USER_AGENT) }
+}
+
+/// Une semaine de bulletins autour de la maille, pour l'apprenti : le même
+/// cadre que le ciel, toutes les heures des sept derniers jours.
+pub fn aviation_historique(latitude: f64, longitude: f64) -> Call {
+    let (sud, ouest, nord, est) = klima_core::ciel::cadre(latitude, longitude);
+    let mut url = Url::parse(AVIATION_WEATHER).expect("hôte").join("/api/data/metar").expect("chemin");
+    url.query_pairs_mut()
+        .append_pair("bbox", &format!("{sud},{ouest},{nord},{est}"))
+        .append_pair("hours", &(klima_api::apprenti::JOURS * 24).to_string())
+        .append_pair("format", "json");
+    Call { url: url.into(), user_agent: Some(USER_AGENT) }
+}
+
+/// Ce que les sept modèles avaient annoncé la veille, heure par heure, sur
+/// la semaine passée — au point de l'aéroport qui juge, pour comparer ce qui
+/// se compare. La clé commerciale, quand il y en a une, passe par l'hôte
+/// payant, comme pour la prévision.
+pub fn open_meteo_veilles(key: Option<&str>, latitude: f64, longitude: f64) -> Call {
+    let hote = if key.is_some() { OPEN_METEO_PREVIOUS_CUSTOMER } else { OPEN_METEO_PREVIOUS_PUBLIC };
+    let modeles: Vec<&str> = klima_core::providers::OPEN_METEO_SOURCES.iter().map(|s| s.id).collect();
+    let mut url = Url::parse(hote).expect("hôte").join("/v1/forecast").expect("chemin");
+    url.query_pairs_mut()
+        .append_pair("latitude", &format!("{latitude:.3}"))
+        .append_pair("longitude", &format!("{longitude:.3}"))
+        .append_pair("hourly", klima_api::apprenti::VARIABLES)
+        .append_pair("models", &modeles.join(","))
+        .append_pair("past_days", &klima_api::apprenti::JOURS.to_string())
+        .append_pair("forecast_days", "1")
+        .append_pair("timeformat", "unixtime")
+        .append_pair("timezone", "GMT");
+    if let Some(key) = key {
+        url.query_pairs_mut().append_pair("apikey", key);
+    }
+    Call::plain(url)
 }
 
 /// Le `Fetch` qui parle vraiment au réseau.

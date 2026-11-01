@@ -120,4 +120,7 @@ struct AgroForecast: Equatable {
     /// Le ciel observé à l'aéroport le plus proche, quand il y en a un assez
     /// près et assez récent (`Ciel`).
     var ciel: CielObserve?
+    /// Ce que l'apprenti savait des modèles quand ils ont voté (`Apprenti`) ;
+    /// absent sans relais, ou sans aéroport pour juger.
+    var apprentissage: Apprentissage?
 }

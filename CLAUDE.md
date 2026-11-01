@@ -43,6 +43,21 @@ nouvelle pull request.
   minutes, pas une heure. Sans série qui couvre le quart en cours, le
   guetteur se tait : un « sec » dit sans avoir regardé est un mensonge.
 
+- **L'apprenti redresse, il ne remplace pas le vote.** Le relais note chaque
+  modèle sur la semaine passée : ce qu'il avait annoncé la veille
+  (`previous-runs-api` d'Open-Meteo, au point de l'aéroport qui juge) contre
+  ce que l'aéroport le plus proche a relevé (METAR, sept jours). La note —
+  biais et écart de température, justesse sur la pluie — vit dans
+  `klima-core/src/apprenti.rs` et son miroir `ios/Kliima/Models/Apprenti.swift` ;
+  le relais la sert sur `/v1/apprenti` (`klima-relay/src/apprenti.rs`, six
+  heures de cache). Avant le vote, la température de chaque modèle est décalée
+  de son biais appris : rien sous vingt-quatre heures comparées, retenu tant
+  qu'il y en a peu, jamais plus de trois degrés. La pluie ne se corrige pas :
+  sa justesse se montre, elle ne pèse pas. Pas de base de données : tout se
+  relit chez les fournisseurs, un redémarrage du dyno n'efface rien. MET
+  Norway n'archive pas ses prévisions : il vote tel quel. Sans relais (la
+  montre), pas d'apprenti.
+
 - **Ce qui tombe se voit, ça ne se vote pas.** Quelqu'un sous la pluie a lu
   « sec » : la majorité des modèles avait effacé l'averse. Pour l'instant
   présent, ce qu'un aéroport proche voit tomber (METAR de la NOAA, domaine
