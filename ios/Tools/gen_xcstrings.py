@@ -76,6 +76,24 @@ STRINGS = {
     "consensus.median": ("Valeur retenue : %1$@", "Value used: %1$@", "Valor retenido: %1$@"),
     "sources.title": ("Ce que dit chaque source", "What each source says", "Lo que dice cada fuente"),
     "sources.dry": ("sec", "dry", "seco"),
+    # --- L'apprenti : chaque modèle noté sur la semaine passée ---
+    "apprenti.title": ("Ce que l’apprenti a appris", "What the apprentice learned", "Lo que aprendió el aprendiz"),
+    "apprenti.juge": ("Chaque modèle comparé à ce qu’a relevé %1$@ ces %2$@ derniers jours.",
+                      "Each model checked against what %1$@ recorded over the last %2$@ days.",
+                      "Cada modelo comparado con lo que registró %1$@ en los últimos %2$@ días."),
+    "apprenti.meilleure": ("Le plus juste : %1$@, %2$@ d’écart en moyenne.",
+                           "Most accurate: %1$@, off by %2$@ on average.",
+                           "El más acertado: %1$@, con %2$@ de desvío medio."),
+    "apprenti.tropChaud": ("%1$@ voyait trop chaud de %2$@ : corrigé avant le vote.",
+                           "%1$@ ran %2$@ too warm: corrected before the vote.",
+                           "%1$@ veía %2$@ de más: corregido antes del voto."),
+    "apprenti.tropFroid": ("%1$@ voyait trop froid de %2$@ : corrigé avant le vote.",
+                           "%1$@ ran %2$@ too cold: corrected before the vote.",
+                           "%1$@ veía %2$@ de menos: corregido antes del voto."),
+    "apprenti.aucun": ("Aucun modèle n’a eu besoin d’être corrigé.", "No model needed correcting.",
+                       "Ningún modelo necesitó corrección."),
+    "apprenti.pluie": ("Pluie : %1$@ a dit juste %2$@ des heures.", "Rain: %1$@ was right %2$@ of the hours.",
+                       "Lluvia: %1$@ acertó el %2$@ de las horas."),
 
     # --- Alertes : ce que Kliima dit sans qu'on ouvre l'application ---
 

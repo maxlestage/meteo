@@ -156,7 +156,7 @@ pub fn App(props: &Props) -> Html {
                         // Qui annonce quoi pour la ville : la tuile d'accord
                         // le résume, cette carte le détaille.
                         if let Some(consensus) = &etat.consensus {
-                            <Sources consensus={consensus.clone()} />
+                            <Sources consensus={consensus.clone()} apprentissage={etat.apprentissage.clone()} />
                         }
                         <div class="tiles">
                             <Tuile

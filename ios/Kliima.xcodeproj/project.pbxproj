@@ -23,6 +23,7 @@
 		122A060395C5DCFBBD6EE3CD /* KliimaWidgets.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 9806D2D88C6DC00561E1AA4F /* KliimaWidgets.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		14DA38B392C3F9CCE393DC2F /* Plan.swift in Sources */ = {isa = PBXBuildFile; fileRef = ACDA8384F78BD3E95B72FB7A /* Plan.swift */; };
 		1A35121207BC163E5662BDE8 /* AirTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AE6029A3A45626534E54441E /* AirTests.swift */; };
+		1A505A2F1C96770693870EA7 /* ApprentiTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B77789123CA5C713F2B31E6 /* ApprentiTests.swift */; };
 		1C756352C9A060737CCE2DE4 /* Ciel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 18150441E66010AC657D5A11 /* Ciel.swift */; };
 		1DA42EB957AB41423899C064 /* Villes.swift in Sources */ = {isa = PBXBuildFile; fileRef = 26B19E55D822C008FD310D54 /* Villes.swift */; };
 		1DEBAB0050D24B8DC0828345 /* Air.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2BBBB23EFBB4B3D314307BC6 /* Air.swift */; };
@@ -32,6 +33,7 @@
 		21C1E31CFC40D9A436686E87 /* Alerts.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9707DFF5CA818F05AB43EBA1 /* Alerts.swift */; };
 		230F1057771FD270D7309A21 /* CielVivant.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7A2590617CE8DE92FE511AE7 /* CielVivant.swift */; };
 		23D4D55E45A75CD9C2731FCE /* Session.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6202144CAAD11B150D2A067A /* Session.swift */; };
+		23FCE8936F8FF927B7BCF115 /* Apprenti.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2915063E4D412F3B14D45F4B /* Apprenti.swift */; };
 		24141C10E98B7C3F39FDEA2F /* WatchViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9DFCEE1BB00EFE0321D4C01A /* WatchViewModel.swift */; };
 		255ACA347CF9AE0C712E2372 /* VeilleTextes.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7421049AE17554D04B76A7F3 /* VeilleTextes.swift */; };
 		257D3B727C84AFDA7BB58E05 /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = BDAA24888AF82B3F0F77BEAC /* Localizable.xcstrings */; };
@@ -53,9 +55,11 @@
 		42043A473875D12D735301EF /* PlanGrant.swift in Sources */ = {isa = PBXBuildFile; fileRef = CFD368A2A4B59C7B26F9AB9F /* PlanGrant.swift */; };
 		420C76EE3B79A358C8B791FE /* Position.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB8F1DD4A8E34FF10F2CCB10 /* Position.swift */; };
 		421B6FEE5575083F54E009D5 /* WeatherCondition.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6580A8FAA2962596D57856A9 /* WeatherCondition.swift */; };
+		431B46DA7BBEEB3734A96ADB /* Apprenti.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2915063E4D412F3B14D45F4B /* Apprenti.swift */; };
 		43C88D74E43EBFC3FF3A51F8 /* Alerts.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9707DFF5CA818F05AB43EBA1 /* Alerts.swift */; };
 		4A37B788864DE37846AFFC9A /* Ville.swift in Sources */ = {isa = PBXBuildFile; fileRef = 471C0497ED82D84B7F8C9299 /* Ville.swift */; };
 		4EA4164CFB0F6BF972D5CD35 /* Veille.swift in Sources */ = {isa = PBXBuildFile; fileRef = 709FE1DF782C6EA2B2E1890B /* Veille.swift */; };
+		4FCED2ADCD30E0F41B5DFE20 /* ApprentiRelais.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7E9F3440ED67CDECDADB35FC /* ApprentiRelais.swift */; };
 		4FEE791FA44A990E010B9616 /* AgroFormat.swift in Sources */ = {isa = PBXBuildFile; fileRef = B457BBEBEAB42296C88BBA73 /* AgroFormat.swift */; };
 		51EABAB1CB6EC84EC5CDA384 /* PaywallView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 72250014395A5607AA9841A4 /* PaywallView.swift */; };
 		52107F0CE5EB66152149F039 /* WeatherActivityAttributes.swift in Sources */ = {isa = PBXBuildFile; fileRef = D5D96242648F683B45087C7B /* WeatherActivityAttributes.swift */; };
@@ -126,6 +130,7 @@
 		BB645B9D595D48563BB33D48 /* Horizon.swift in Sources */ = {isa = PBXBuildFile; fileRef = A108654E8394458F85F1FD47 /* Horizon.swift */; };
 		BC0C44A99F6940D479EAED5A /* WeatherWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9AF7C0B1999B4323F84609D4 /* WeatherWidget.swift */; };
 		BCA77F887960BBB8B6530C3D /* SharedStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 817D0E86880F9A5C255CC9CA /* SharedStore.swift */; };
+		BF59DA78D809DE25E8BE91EB /* Apprenti.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2915063E4D412F3B14D45F4B /* Apprenti.swift */; };
 		BFECAE5FE146209EE48874C0 /* HeroView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 07648D3F3C3D6F0CFF6F562F /* HeroView.swift */; };
 		C4EDCD12F4C4C33DE5043197 /* IlesRelaisTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7748536D30C8CF45EA5382D1 /* IlesRelaisTests.swift */; };
 		C7F3184030D7D939A4CF6885 /* Consensus.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4720B7B1832151B0FB656485 /* Consensus.swift */; };
@@ -157,6 +162,7 @@
 		F1BB1FE2BA5912881D1C4E38 /* DashboardViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = D271A216C9DBED75A8724752 /* DashboardViewModel.swift */; };
 		F2BEC19CCE1C05DF23208DEB /* WeatherCondition.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6580A8FAA2962596D57856A9 /* WeatherCondition.swift */; };
 		F77107620B89E9EF18B91720 /* AgroFormat.swift in Sources */ = {isa = PBXBuildFile; fileRef = B457BBEBEAB42296C88BBA73 /* AgroFormat.swift */; };
+		F9868DE0C36345CAB95EF468 /* Apprenti.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2915063E4D412F3B14D45F4B /* Apprenti.swift */; };
 		FAF73354FB06C71C816A016B /* Villes.swift in Sources */ = {isa = PBXBuildFile; fileRef = 26B19E55D822C008FD310D54 /* Villes.swift */; };
 		FBFE7ECDAA7CBD948D6E7572 /* WeatherActivityController.swift in Sources */ = {isa = PBXBuildFile; fileRef = EC2943147A1F876131069F7E /* WeatherActivityController.swift */; };
 		FE92D85149BF14BF38E701F8 /* Consensus.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4720B7B1832151B0FB656485 /* Consensus.swift */; };
@@ -204,12 +210,14 @@
 		192B737833F30139C0992522 /* HorizonTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HorizonTests.swift; sourceTree = "<group>"; };
 		1A5124FDFE368E7208E1385D /* WatchDashboardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WatchDashboardView.swift; sourceTree = "<group>"; };
 		26B19E55D822C008FD310D54 /* Villes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Villes.swift; sourceTree = "<group>"; };
+		2915063E4D412F3B14D45F4B /* Apprenti.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Apprenti.swift; sourceTree = "<group>"; };
 		2BBBB23EFBB4B3D314307BC6 /* Air.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Air.swift; sourceTree = "<group>"; };
 		2D56D2AFEB6AE6DB08B2F311 /* AgroSamples.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AgroSamples.swift; sourceTree = "<group>"; };
 		2DC46CF12C3BDE1077973D85 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		3A0B686888AD8C8B302A7169 /* KliimaWatch.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = KliimaWatch.entitlements; sourceTree = "<group>"; };
 		3A92F285D90BF784E3CE2062 /* Subscription.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Subscription.swift; sourceTree = "<group>"; };
 		3B02EF58B1456D6BD190EA69 /* WeatherProviders.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeatherProviders.swift; sourceTree = "<group>"; };
+		3B77789123CA5C713F2B31E6 /* ApprentiTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ApprentiTests.swift; sourceTree = "<group>"; };
 		433301E88D0ACA32C67F98AB /* DashboardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DashboardView.swift; sourceTree = "<group>"; };
 		470A470B59D28A20E3156536 /* Kliima.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Kliima.entitlements; sourceTree = "<group>"; };
 		471C0497ED82D84B7F8C9299 /* Ville.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Ville.swift; sourceTree = "<group>"; };
@@ -241,6 +249,7 @@
 		77B55B9E0D7865BFA00A4D86 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		79B5C71DD4D3CCC7FEFA0890 /* Animations.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Animations.swift; sourceTree = "<group>"; };
 		7A2590617CE8DE92FE511AE7 /* CielVivant.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CielVivant.swift; sourceTree = "<group>"; };
+		7E9F3440ED67CDECDADB35FC /* ApprentiRelais.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ApprentiRelais.swift; sourceTree = "<group>"; };
 		817D0E86880F9A5C255CC9CA /* SharedStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SharedStore.swift; sourceTree = "<group>"; };
 		884410DA2162211647EB6D45 /* LocalizationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalizationTests.swift; sourceTree = "<group>"; };
 		8B148DA87ACC29FF2D439C47 /* KliimaWidgetsBundle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KliimaWidgetsBundle.swift; sourceTree = "<group>"; };
@@ -434,6 +443,7 @@
 				148584A04619D9EBA4A9C3E8 /* Fusion.swift */,
 				18150441E66010AC657D5A11 /* Ciel.swift */,
 				5C4D023F15C58A449DEAF656 /* Radar.swift */,
+				2915063E4D412F3B14D45F4B /* Apprenti.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -453,6 +463,7 @@
 				F047E762B19A20BE5BE32006 /* IlesRelais.swift */,
 				744C50D5B8F87966D19AD4F5 /* DirectRelais.swift */,
 				4D92E37CAF446472E154A93B /* RadarRelais.swift */,
+				7E9F3440ED67CDECDADB35FC /* ApprentiRelais.swift */,
 			);
 			path = Services;
 			sourceTree = "<group>";
@@ -554,6 +565,7 @@
 				8D9BC68178838FAD0F348FD6 /* FusionTests.swift */,
 				F615F6D48369094269786FA6 /* CielTests.swift */,
 				9E95C19A2437427B04ACAC7B /* RadarTests.swift */,
+				3B77789123CA5C713F2B31E6 /* ApprentiTests.swift */,
 				6391F931C0469CC1D9D01B83 /* DirectRelaisTests.swift */,
 				50FD6BD0437A604828C49471 /* AgroWeatherDecodingTests.swift */,
 				5957CAFC6F87D0B5FCCC85D5 /* WeatherConditionTests.swift */,
@@ -790,6 +802,7 @@
 				E52D85926D65D5B31501CDA0 /* Fusion.swift in Sources */,
 				E4432352EDBD7BC8199EB54F /* Ciel.swift in Sources */,
 				8EB727101DA6481C974061A5 /* Radar.swift in Sources */,
+				23FCE8936F8FF927B7BCF115 /* Apprenti.swift in Sources */,
 				96A4E1A6DD8A75B811BE93A9 /* AgroWeatherService.swift in Sources */,
 				2AEC62A5036EAA7E15DEBBBF /* WeatherProviders.swift in Sources */,
 				B6BE20AE614CC1FA23FF70B3 /* LocationService.swift in Sources */,
@@ -802,6 +815,7 @@
 				2623BCFEFD18F32FFDC79756 /* IlesRelais.swift in Sources */,
 				C81DADAFEB6E5C0A147AF1F4 /* DirectRelais.swift in Sources */,
 				9440C3E1DE4999DBB33ECEDD /* RadarRelais.swift in Sources */,
+				4FCED2ADCD30E0F41B5DFE20 /* ApprentiRelais.swift in Sources */,
 				F1BB1FE2BA5912881D1C4E38 /* DashboardViewModel.swift in Sources */,
 				A5096683B0D64D48DE29C934 /* DashboardView.swift in Sources */,
 				0361672A474EBC61E33E5BDF /* DailyListView.swift in Sources */,
@@ -843,6 +857,7 @@
 				DEB9659DF92A237E3BC39588 /* Fusion.swift in Sources */,
 				1C756352C9A060737CCE2DE4 /* Ciel.swift in Sources */,
 				100AFE4F31BA3EA82D1AB380 /* Radar.swift in Sources */,
+				F9868DE0C36345CAB95EF468 /* Apprenti.swift in Sources */,
 				3C2CE8F8F6017276AD70D067 /* AgroWeatherService.swift in Sources */,
 				CD50AC741D60BCE2B9A76E96 /* WeatherProviders.swift in Sources */,
 				5D8B9AC5F93F95862255104C /* LocationService.swift in Sources */,
@@ -875,6 +890,7 @@
 				0B2F4EAAC64FE8ABB9F33BD9 /* Fusion.swift in Sources */,
 				6182D8157514361F50050100 /* Ciel.swift in Sources */,
 				53EC0706AA2A7DE1AA53F96F /* Radar.swift in Sources */,
+				431B46DA7BBEEB3734A96ADB /* Apprenti.swift in Sources */,
 				8493BAC3272CA6D47A52366F /* AgroWeatherService.swift in Sources */,
 				79320F1D2A6C540B619E896D /* WeatherProviders.swift in Sources */,
 				0BB56120FCC1896DDD3C211C /* LocationService.swift in Sources */,
@@ -907,6 +923,7 @@
 				C7F9ACD95A2C43E43B6F321D /* Fusion.swift in Sources */,
 				9C61AEFC4C97CFC8FDC672D3 /* Ciel.swift in Sources */,
 				66051FB917EA972C790A68D3 /* Radar.swift in Sources */,
+				BF59DA78D809DE25E8BE91EB /* Apprenti.swift in Sources */,
 				2E0D26664442860C4D4A811C /* AgroWeatherService.swift in Sources */,
 				D461CDD744E459C7FF88E76F /* WeatherProviders.swift in Sources */,
 				21AD9BE47C084F9A4AB27344 /* LocationService.swift in Sources */,
@@ -926,6 +943,7 @@
 				ABCDBB4ACC319D5F9AA48FCD /* FusionTests.swift in Sources */,
 				AD7CB26380134E4F89D93A80 /* CielTests.swift in Sources */,
 				27539E2B91F353ABAED37AD7 /* RadarTests.swift in Sources */,
+				1A505A2F1C96770693870EA7 /* ApprentiTests.swift in Sources */,
 				0C2379A3D6B2F617DB9C0BB6 /* DirectRelaisTests.swift in Sources */,
 				8F4E7FAC158D1BB25607DBCD /* AgroWeatherDecodingTests.swift in Sources */,
 				6FEBD20EBF3E8E706C271299 /* WeatherConditionTests.swift in Sources */,

@@ -135,3 +135,16 @@ fn le_binaire_vise_par_le_procfile_est_bien_celui_de_cette_caisse() {
         env!("CARGO_PKG_NAME")
     );
 }
+
+/// `app.json` déclare le buildpack que `RustConfig` suppose : une application
+/// créée depuis le dépôt (ou une « review app ») part du bon pied, sans le
+/// geste dans l'interface d'Heroku.
+#[test]
+fn app_json_declare_le_buildpack_rust() {
+    let manifeste = lire("app.json");
+    assert!(
+        manifeste.contains("https://github.com/emk/heroku-buildpack-rust"),
+        "app.json doit déclarer le buildpack emk/heroku-buildpack-rust"
+    );
+    assert!(!manifeste.contains("heroku/nodejs"), "le buildpack Node n'a plus rien à construire");
+}

@@ -13,6 +13,8 @@ import SwiftUI
 /// nom d'institut n'est pas celle d'un autre.
 struct SourcesCardView: View {
     let consensus: Consensus
+    /// Ce que l'apprenti a appris des modèles, quand le relais l'a dit.
+    var apprentissage: Apprentissage? = nil
 
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
@@ -31,8 +33,53 @@ struct SourcesCardView: View {
                 .font(.footnote)
                 .foregroundStyle(Color.encreDouce)
                 .fixedSize(horizontal: false, vertical: true)
+
+            if let apprentissage, !apprentissage.notes.isEmpty {
+                Divider().overlay(Color.filet)
+                VStack(alignment: .leading, spacing: 4) {
+                    Label(Localized.text("apprenti.title"), systemImage: "graduationcap")
+                        .font(.footnote.weight(.semibold))
+                        .foregroundStyle(Color.encre)
+                    ForEach(Self.phrases(apprentissage), id: \.self) { phrase in
+                        Text(phrase)
+                            .font(.footnote)
+                            .foregroundStyle(Color.encreDouce)
+                            .fixedSize(horizontal: false, vertical: true)
+                    }
+                }
+                .accessibilityElement(children: .combine)
+            }
         }
         .cardBackground()
+    }
+
+    /// Le nom d'une source d'après son identifiant : l'institut.
+    private static func institut(_ id: String) -> String {
+        WeatherProviders.openMeteoSources.first { $0.id == id }?.institution ?? id
+    }
+
+    /// Qui a jugé, le plus juste, ce qui a été corrigé, et la pluie — comme la
+    /// carte des sources du web.
+    static func phrases(_ appris: Apprentissage) -> [String] {
+        var phrases = [Localized.text("apprenti.juge", appris.nom, String(appris.jours))]
+        if let juste = Apprenti.meilleure(appris.notes) {
+            phrases.append(Localized.text("apprenti.meilleure", institut(juste.sourceId), AgroFormat.unit(juste.ecart, "°C")))
+        }
+        let corrigees = appris.notes.filter { $0.correction != 0 }.map { note in
+            Localized.text(
+                note.correction > 0 ? "apprenti.tropChaud" : "apprenti.tropFroid",
+                institut(note.sourceId),
+                AgroFormat.unit(abs(note.correction), "°C")
+            )
+        }
+        phrases += corrigees.isEmpty ? [Localized.text("apprenti.aucun")] : corrigees
+        if let pluie = appris.notes
+            .filter({ $0.pluieN >= ApprentiSeuils.relevesMin })
+            .max(by: { ($0.justessePluie ?? 0) < ($1.justessePluie ?? 0) }),
+           let justesse = pluie.justessePluie {
+            phrases.append(Localized.text("apprenti.pluie", institut(pluie.sourceId), AgroFormat.unit(justesse, "%", decimals: 0)))
+        }
+        return phrases
     }
 
     private func row(_ reading: SourceReading) -> some View {

@@ -50,7 +50,9 @@ final class DashboardViewModel: ObservableObject {
     private var positionDemandee = false
 
     init(
-        service: AgroWeatherProviding = AgroWeatherService(),
+        // L'application demande l'apprenti au relais ; le widget et les
+        // alertes relisent ce qu'elle en a recopié.
+        service: AgroWeatherProviding = AgroWeatherService(apprenti: { await ApprentiRelais.lire($0) }),
         location: LocationService = LocationService()
     ) {
         self.service = service
@@ -231,7 +233,14 @@ final class DashboardViewModel: ObservableObject {
                 aviation: corpsDirects["ciel"],
                 point: suivie
             )
-            let recoupee = AgroWeatherService.recouper(prevision, avec: sources, radar: radarDeLaVille)
+            // Le direct ne pousse pas l'apprenti : il change en heures. On
+            // garde ce qu'il avait appris au chargement de cette ville.
+            let appris = forecast?.parcelle == suivie
+                ? forecast?.apprentissage
+                : SharedStore.loadApprentissage(pour: suivie)
+            let recoupee = AgroWeatherService.recouper(
+                prevision, avec: sources, radar: radarDeLaVille, apprentissage: appris
+            )
             forecast = recoupee
             consensus = recoupee.consensus
             errorMessage = nil

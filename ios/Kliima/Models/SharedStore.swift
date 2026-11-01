@@ -15,6 +15,7 @@ enum SharedStore {
     private static let villesKey = "kliima.villes"
     private static let planKey = "kliima.plan"
     private static let alertStateKey = "kliima.alertState"
+    private static let apprentissageKey = "kliima.apprentissage"
 
     static var defaults: UserDefaults {
         UserDefaults(suiteName: appGroup) ?? .standard
@@ -73,6 +74,31 @@ enum SharedStore {
     /// en cas de doute, on n'ouvre pas ce qui se paie.
     static func loadPlan() -> Plan {
         Plan(rawValue: defaults.string(forKey: planKey) ?? "") ?? .libre
+    }
+
+    // MARK: Apprenti
+
+    /// La maille d'une ville, au centième de degré : l'apprenti juge à
+    /// l'aéroport, pas au mètre près.
+    private static func maille(_ parcelle: Parcelle) -> String {
+        String(format: "%.2f,%.2f", parcelle.latitude, parcelle.longitude)
+    }
+
+    /// Ce que l'apprenti a appris pour une ville, recopié par l'application
+    /// pour que le widget et les alertes redressent les mêmes modèles.
+    static func save(_ apprentissage: Apprentissage, pour parcelle: Parcelle) {
+        guard let data = try? JSONEncoder().encode(apprentissage) else { return }
+        defaults.set(data, forKey: apprentissageKey)
+        defaults.set(maille(parcelle), forKey: apprentissageKey + ".maille")
+    }
+
+    /// Ce que l'apprenti a appris pour cette ville-ci, ou rien : celui d'une
+    /// autre ville ne redresse pas ses modèles.
+    static func loadApprentissage(pour parcelle: Parcelle) -> Apprentissage? {
+        guard defaults.string(forKey: apprentissageKey + ".maille") == maille(parcelle),
+              let data = defaults.data(forKey: apprentissageKey)
+        else { return nil }
+        return try? JSONDecoder().decode(Apprentissage.self, from: data)
     }
 
     // MARK: État des alertes

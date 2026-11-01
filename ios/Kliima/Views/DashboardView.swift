@@ -98,7 +98,7 @@ struct DashboardView: View {
                                 // la résume — fermée, c'est elle qui le dit.
                                 if subscription.plan.allows(.recoupement),
                                    let consensus = viewModel.consensus {
-                                    SourcesCardView(consensus: consensus)
+                                    SourcesCardView(consensus: consensus, apprentissage: viewModel.forecast?.apprentissage)
                                         .entreeEnCascade(5)
                                 }
 

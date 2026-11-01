@@ -18,7 +18,14 @@ fn catalog(entries: &[(&'static str, &'static str)]) -> Catalog {
     entries.iter().copied().collect()
 }
 
-const FR: [(&str, &str); 52] = [
+const FR: [(&str, &str); 59] = [
+    ("apprenti.title", "Ce que l’apprenti a appris"),
+    ("apprenti.juge", "Chaque modèle comparé à ce qu’a relevé {station} ces {days} derniers jours."),
+    ("apprenti.meilleure", "Le plus juste : {source}, {ecart} d’écart en moyenne."),
+    ("apprenti.tropChaud", "{source} voyait trop chaud de {value} : corrigé avant le vote."),
+    ("apprenti.tropFroid", "{source} voyait trop froid de {value} : corrigé avant le vote."),
+    ("apprenti.aucun", "Aucun modèle n’a eu besoin d’être corrigé."),
+    ("apprenti.pluie", "Pluie : {source} a dit juste {percent} % des heures."),
     ("app.retry", "Réessayer"),
     ("app.refresh", "Actualiser"),
     ("app.updatedAt", "mise à jour {time}"),
@@ -73,7 +80,14 @@ const FR: [(&str, &str); 52] = [
     ("tile.pollen.noneCaption", "Rien de notable dans l’air."),
 ];
 
-const EN: [(&str, &str); 52] = [
+const EN: [(&str, &str); 59] = [
+    ("apprenti.title", "What the apprentice learned"),
+    ("apprenti.juge", "Each model checked against what {station} recorded over the last {days} days."),
+    ("apprenti.meilleure", "Most accurate: {source}, off by {ecart} on average."),
+    ("apprenti.tropChaud", "{source} ran {value} too warm: corrected before the vote."),
+    ("apprenti.tropFroid", "{source} ran {value} too cold: corrected before the vote."),
+    ("apprenti.aucun", "No model needed correcting."),
+    ("apprenti.pluie", "Rain: {source} was right {percent}% of the hours."),
     ("app.retry", "Try again"),
     ("app.refresh", "Refresh"),
     ("app.updatedAt", "updated {time}"),
@@ -128,7 +142,14 @@ const EN: [(&str, &str); 52] = [
     ("tile.pollen.noneCaption", "Nothing notable in the air."),
 ];
 
-const ES: [(&str, &str); 52] = [
+const ES: [(&str, &str); 59] = [
+    ("apprenti.title", "Lo que aprendió el aprendiz"),
+    ("apprenti.juge", "Cada modelo comparado con lo que registró {station} en los últimos {days} días."),
+    ("apprenti.meilleure", "El más acertado: {source}, con {ecart} de desvío medio."),
+    ("apprenti.tropChaud", "{source} veía {value} de más: corregido antes del voto."),
+    ("apprenti.tropFroid", "{source} veía {value} de menos: corregido antes del voto."),
+    ("apprenti.aucun", "Ningún modelo necesitó corrección."),
+    ("apprenti.pluie", "Lluvia: {source} acertó el {percent} % de las horas."),
     ("app.retry", "Reintentar"),
     ("app.refresh", "Actualizar"),
     ("app.updatedAt", "actualizado a las {time}"),

@@ -126,6 +126,25 @@ chaque heure et chaque jour, chaque source vote :
   vote ne fait que peindre le ciel. Quand quelque chose tombe, l'heure en
   cours devient pluvieuse — 50 % au moins, 100 % si on l'a vu.
 
+### L'apprenti : chaque modèle noté sur la semaine passée
+
+Les sources votent, mais toutes ne se valent pas partout : un modèle peut voir
+un degré de trop, semaine après semaine, sur une ville. Le relais compare ce que
+chacun des sept modèles d'Open-Meteo avait annoncé **la veille** à ce que
+l'aéroport le plus proche a relevé, heure par heure sur sept jours
+(`/v1/apprenti`). Il en tire un biais et un écart de température, et la part
+des heures où le modèle a dit juste sur la pluie.
+
+Avant le vote, chaque modèle est redressé de son biais appris — retenu tant
+que les comparaisons sont peu nombreuses, jamais plus de trois degrés, rien
+sous vingt-quatre heures. Le vote reste un vote, entre des modèles corrigés ;
+la pluie, elle, ne se corrige pas : ce qui tombe se voit. La carte « Ce que dit
+chaque source » dit qui a jugé, le modèle le plus juste, ce qui a été corrigé
+et qui a le mieux vu la pluie (`klima-core/src/apprenti.rs`, miroir
+`Apprenti.swift`). Pas de base de données : tout se relit chez les
+fournisseurs. MET Norway n'archive pas ses prévisions et vote tel quel ; la
+montre, sans relais, n'a pas d'apprenti.
+
 ### Le ciel observé : les aéroports
 
 Toutes les autres sources sont des prévisions ; une averse qu'aucun modèle

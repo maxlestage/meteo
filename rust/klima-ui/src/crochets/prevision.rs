@@ -31,6 +31,9 @@ pub struct EtatPrevision {
     /// Ce que voit le radar, et ce qu'il prévoit pour deux heures ; absent
     /// sans relais.
     pub radar: Option<klima_core::radar::Prevision>,
+    /// Ce que l'apprenti a appris des modèles sur la semaine passée ; absent
+    /// sans relais, ou sans aéroport pour juger.
+    pub apprentissage: Option<klima_api::apprenti::Apprentissage>,
     pub loading: bool,
     /// Message déjà traduit : le domaine rend une clé, le crochet la traduit.
     pub error: Option<String>,
@@ -39,7 +42,15 @@ pub struct EtatPrevision {
 impl Default for EtatPrevision {
     fn default() -> Self {
         // On part en chargement : la première prévision est toujours en route.
-        EtatPrevision { forecast: None, consensus: None, air: None, radar: None, loading: true, error: None }
+        EtatPrevision {
+            forecast: None,
+            consensus: None,
+            air: None,
+            radar: None,
+            apprentissage: None,
+            loading: true,
+            error: None,
+        }
     }
 }
 
@@ -82,6 +93,7 @@ pub fn use_forecast(
                             consensus: (*etat).consensus.clone(),
                             air: (*etat).air.clone(),
                             radar: (*etat).radar.clone(),
+                            apprentissage: (*etat).apprentissage.clone(),
                             loading: false,
                             error: None,
                         });
@@ -92,7 +104,7 @@ pub fn use_forecast(
                         // la base d'un seul modèle n'était qu'un premier jet.
                         let a_la_parcelle =
                             horloge::maintenant_a_la_parcelle(forecast.utc_offset_seconds);
-                        let (recoupement, air, radar) = futures::join!(
+                        let (mut recoupement, air, radar, apprentissage) = futures::join!(
                             reseau::recoupement(
                                 &endpoints,
                                 &parcelle,
@@ -102,7 +114,13 @@ pub fn use_forecast(
                             ),
                             reseau::air(&endpoints, &parcelle),
                             reseau::radar(&endpoints, &parcelle),
+                            reseau::apprenti(&endpoints, &parcelle),
                         );
+                        // Chaque modèle redressé de ce que l'apprenti sait de
+                        // lui, avant qu'il vote.
+                        if let Some(appris) = &apprentissage {
+                            klima_core::apprenti::corriger(&mut recoupement.series, &appris.notes);
+                        }
                         let forecast = forecast.recoupee(
                             &recoupement.series,
                             recoupement.observation,
@@ -117,6 +135,7 @@ pub fn use_forecast(
                             consensus: consensus_from_outcomes(&recoupement.outcomes),
                             air,
                             radar,
+                            apprentissage,
                             loading: false,
                             error: None,
                         });
@@ -126,6 +145,7 @@ pub fn use_forecast(
                         consensus: None,
                         air: None,
                         radar: None,
+                        apprentissage: None,
                         loading: false,
                         error: Some(traduire(&erreur)),
                     }),
@@ -153,7 +173,7 @@ pub fn use_forecast(
                 corps.as_ref().map(|c| c.as_str().to_owned()).unwrap_or_default()
             };
             let (met, station) = (texte(&direct.met), texte(&direct.station));
-            let recoupement = reseau::lire_recoupement(
+            let mut recoupement = reseau::lire_recoupement(
                 reseau::Corps {
                     open_meteo: Some(modeles.as_str()),
                     met: Some(&met),
@@ -174,6 +194,12 @@ pub fn use_forecast(
                 .as_ref()
                 .and_then(|r| klima_api::radar::decoder(r))
                 .or_else(|| (*etat).radar.clone());
+            // Le direct ne pousse pas l'apprenti : il change en heures, pas en
+            // minutes. On garde ce qu'il a appris au chargement.
+            let apprentissage = (*etat).apprentissage.clone();
+            if let Some(appris) = &apprentissage {
+                klima_core::apprenti::corriger(&mut recoupement.series, &appris.notes);
+            }
             *par_le_direct.borrow_mut() = true;
             etat.set(EtatPrevision {
                 forecast: Some(forecast.recoupee(
@@ -185,6 +211,7 @@ pub fn use_forecast(
                 consensus: consensus_from_outcomes(&recoupement.outcomes),
                 air,
                 radar,
+                apprentissage,
                 loading: false,
                 error: None,
             });

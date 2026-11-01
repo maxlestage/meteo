@@ -1013,6 +1013,167 @@
         }
       }
     },
+    "apprenti.aucun": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No model needed correcting."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ningún modelo necesitó corrección."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aucun modèle n’a eu besoin d’être corrigé."
+          }
+        }
+      }
+    },
+    "apprenti.juge": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Each model checked against what %1$@ recorded over the last %2$@ days."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cada modelo comparado con lo que registró %1$@ en los últimos %2$@ días."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Chaque modèle comparé à ce qu’a relevé %1$@ ces %2$@ derniers jours."
+          }
+        }
+      }
+    },
+    "apprenti.meilleure": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Most accurate: %1$@, off by %2$@ on average."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "El más acertado: %1$@, con %2$@ de desvío medio."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Le plus juste : %1$@, %2$@ d’écart en moyenne."
+          }
+        }
+      }
+    },
+    "apprenti.pluie": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rain: %1$@ was right %2$@ of the hours."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lluvia: %1$@ acertó el %2$@ de las horas."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pluie : %1$@ a dit juste %2$@ des heures."
+          }
+        }
+      }
+    },
+    "apprenti.title": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "What the apprentice learned"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lo que aprendió el aprendiz"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ce que l’apprenti a appris"
+          }
+        }
+      }
+    },
+    "apprenti.tropChaud": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@ ran %2$@ too warm: corrected before the vote."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@ veía %2$@ de más: corregido antes del voto."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@ voyait trop chaud de %2$@ : corrigé avant le vote."
+          }
+        }
+      }
+    },
+    "apprenti.tropFroid": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@ ran %2$@ too cold: corrected before the vote."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@ veía %2$@ de menos: corregido antes del voto."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@ voyait trop froid de %2$@ : corrigé avant le vote."
+          }
+        }
+      }
+    },
     "ciel.credit": {
       "extractionState": "manual",
       "localizations": {
