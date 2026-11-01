@@ -323,7 +323,17 @@ Et la météo sur l'écran verrouillé.
 ### Complication de cadran
 
 `KliimaWatchWidgets` fournit les quatre formes de watchOS — circulaire,
-rectangulaire, en ligne et d'angle — avec la température de la ville.
+rectangulaire, en ligne et d'angle — avec la température de la ville. La
+rectangulaire dit aussi les bornes du jour et la pluie qui vient (« Pluie vers
+18 h »), avec la règle de la carte Pluie.
+
+Elle part du poignet (`NSWidgetWantsLocation`), comme les widgets de
+l'iPhone : sans groupe d'applications, la ville que l'application montre
+enregistre ne lui parvient pas, et elle restait sur Paris. Dans la pile
+intelligente, son fond est le ciel qu'il fait — `.clear` y faisait une tuile
+noire — et elle remonte d'elle-même quand la pluie approche
+(`TimelineEntryRelevance`). La prévision est relue toutes les heures, un
+quart d'heure après un échec, et dès que l'application montre en charge une.
 
 ### Application montre
 

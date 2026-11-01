@@ -95,8 +95,10 @@ TARGET_SOURCES = {
            # Le même ciel animé et les mêmes phrases du guetteur que l'iPhone.
            + views("CielVivant.swift", "VeilleTextes.swift")
            + WATCH_FILES,
+    # La complication se cale sur le poignet elle-même : sans groupe
+    # d'applications, la ville de l'application montre ne lui parvient pas.
     WATCH_WIDGETS: models(*WATCH_MODELS)
-                   + services("AgroWeatherService.swift", "WeatherProviders.swift")
+                   + services("AgroWeatherService.swift", "WeatherProviders.swift", "LocationService.swift")
                    + WATCH_WIDGET_FILES,
     TESTS: TEST_FILES,
 }
