@@ -15,6 +15,12 @@ on:
         required: false
         default: false
 
+# Lire le dépôt, et l'historique des exécutions : « À tester » liste les
+# commits livrés depuis le dernier build envoyé.
+permissions:
+  contents: read
+  actions: read
+
 # Un envoi à la fois : deux archives concurrentes se disputeraient le même
 # numéro de build.
 concurrency:
@@ -44,7 +50,10 @@ jobs:
       EXPORT: ${{ github.workspace }}/build/export
 
     steps:
+      # Tout l'historique : « À tester » remonte jusqu'au build précédent.
       - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
 
       # On s'arrête tout de suite plutôt qu'après vingt minutes de compilation :
       # une archive signée avec des secrets manquants échouerait à l'envoi.
@@ -301,6 +310,21 @@ jobs:
           echo "envoi de $(basename "$ipa")"
           xcrun altool --upload-app -f "$ipa" -t ios \
             --apiKey "$ASC_KEY_ID" --apiIssuer "$ASC_ISSUER_ID"
+
+      # « À tester » : le message complet du commit et les commits livrés
+      # depuis le build précédent (`ios/Tools/a-tester.mjs`). L'envoi est fait :
+      # un échec ici ne le défait pas, il se signale sans faire virer au rouge.
+      - name: Remplir « À tester »
+        continue-on-error: true
+        timeout-minutes: 25
+        env:
+          ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
+          ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
+          ASC_KEY_P8: ${{ secrets.ASC_KEY_P8 }}
+          BUILD: ${{ github.run_number }}
+          NOTES: ${{ inputs.notes }}
+          GITHUB_TOKEN: ${{ github.token }}
+        run: node ios/Tools/a-tester.mjs
 
       # On garde l'archive : c'est elle qui porte les symboles de débogage,
       # sans lesquels un rapport de plantage reste illisible.

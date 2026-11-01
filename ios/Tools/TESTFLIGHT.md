@@ -202,3 +202,19 @@ Le relais (`server/`) n'est pas hébergé : sans lui, l'application retombe sur
 les fournisseurs qu'elle peut appeler seule. Pour une première version de test,
 c'est suffisant — mais le recoupement complet et la clé commerciale
 d'Open-Meteo attendent un hébergement.
+
+## « À tester »
+
+Après l'envoi, l'étape « Remplir « À tester » » (`ios/Tools/a-tester.mjs`)
+écrit dans TestFlight ce que le build contient : les notes données au
+lancement s'il y en a, « Build N · commit abcd1234 », le message complet du
+commit construit (sans ses lignes de signature), puis les commits livrés
+depuis le dernier build envoyé avec succès. Elle attend qu'Apple ait
+enregistré le build — quelques minutes — et ne fait pas échouer l'envoi si
+elle bute : l'avertissement se lit dans le journal.
+
+Pour voir le texte sans rien envoyer :
+
+```bash
+BUILD=0 node ios/Tools/a-tester.mjs --apercu
+```
