@@ -167,8 +167,6 @@ jobs:
 
       # La première exécution réelle de ces tests : le banc d'essai Linux ne
       # compile que le domaine pur, pas SwiftUI, StoreKit ni WidgetKit.
-      # La première exécution réelle de ces tests : le banc d'essai Linux ne
-      # compile que le domaine pur, pas SwiftUI, StoreKit ni WidgetKit.
       - name: Tests iOS sur simulateur
         run: |
           # Le nom des simulateurs change avec Xcode : on prend le dernier

@@ -1,4 +1,6 @@
+import CoreLocation
 import Foundation
+import WidgetKit
 
 /// État de l'application montre.
 ///
@@ -8,7 +10,11 @@ import Foundation
 @MainActor
 final class WatchViewModel: ObservableObject {
 
-    @Published private(set) var parcelle: Parcelle = .paris
+    /// La dernière ville connue plutôt que Paris : ouvrir la montre ne doit
+    /// pas montrer une autre ville le temps que la position arrive.
+    @Published private(set) var parcelle: Parcelle = SharedStore.loadParcelle() ?? .paris
+    /// Quand la prévision affichée a été chargée.
+    @Published private(set) var chargeeA: Date?
     @Published private(set) var forecast: AgroForecast?
     @Published private(set) var isLoading = false
     @Published private(set) var errorMessage: String?
@@ -46,8 +52,12 @@ final class WatchViewModel: ObservableObject {
 
         // La position est un confort : sans elle, on garde la ville par défaut.
         if let coordinate = try? await location.currentCoordinate() {
+            // Le nom de la commune, comme les widgets de l'iPhone : « Ma
+            // ville » ne disait pas où l'on était.
+            let lieu = CLLocation(latitude: coordinate.latitude, longitude: coordinate.longitude)
+            let commune = try? await CLGeocoder().reverseGeocodeLocation(lieu).first?.locality
             parcelle = Position.parcelle(
-                named: Localized.text("search.myField"),
+                named: commune ?? Localized.text("search.myField"),
                 latitude: coordinate.latitude,
                 longitude: coordinate.longitude
             )
@@ -60,8 +70,13 @@ final class WatchViewModel: ObservableObject {
             // débordent parfois sur demain.
             let forecast = try await service.forecast(for: parcelle, days: 2)
             self.forecast = forecast
+            chargeeA = Date()
+            // Ce que la montre vient d'apprendre, le cadran et la pile
+            // intelligente le montrent aussi, sans attendre leur prochain tour.
+            WidgetCenter.shared.reloadAllTimelines()
         } catch {
-            self.forecast = nil
+            // Une relecture qui échoue garde la prévision d'avant : elle reste
+            // plus juste qu'un écran vide.
             self.errorMessage = (error as? LocalizedError)?.errorDescription
                 ?? Localized.text("app.error")
         }
