@@ -9,6 +9,7 @@ import SwiftUI
 /// `SkyBackground`, et `CielVivant` y dessine le même temps qu'il fait.
 struct WatchDashboardView: View {
     @StateObject private var viewModel = WatchViewModel()
+    @Environment(\.scenePhase) private var scenePhase
 
     var body: some View {
         NavigationStack {
@@ -59,6 +60,16 @@ struct WatchDashboardView: View {
         }
         .task { await viewModel.load() }
         .task { await viewModel.veiller() }
+        // Au retour au poignet, une prévision de plus de dix minutes est
+        // relue : la montre restait sur l'heure où elle avait été ouverte.
+        .onChange(of: scenePhase) { _, phase in
+            guard phase == .active else { return }
+            if let lue = viewModel.chargeeA, Date().timeIntervalSince(lue) < 600 { return }
+            Task {
+                await viewModel.load()
+                await viewModel.relireQuarts()
+            }
+        }
         .refreshable {
             await viewModel.load()
             await viewModel.relireQuarts()
