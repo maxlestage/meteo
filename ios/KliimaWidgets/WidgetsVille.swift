@@ -234,7 +234,7 @@ struct HeuresWidgetView: View {
                 Text(entry.parcelleName)
                     .font(.caption.weight(.semibold))
                     .lineLimit(1)
-                Text(condition.label)
+                Text(condition.label(isDay: current.isDay))
                     .font(.caption2)
                     .opacity(0.8)
                     .lineLimit(1)

@@ -1,3 +1,4 @@
+import CoreLocation
 import Foundation
 import SwiftUI
 #if canImport(WidgetKit)
@@ -83,14 +84,34 @@ final class DashboardViewModel: ObservableObject {
 
         Task {
             guard let coordinate = try? await location.currentCoordinate() else { return }
-            select(
-                Position.parcelle(
-                    named: Localized.text("search.myField"),
-                    latitude: coordinate.latitude,
-                    longitude: coordinate.longitude
-                )
-            )
+            select(await Self.ville(coordinate))
         }
+    }
+
+    /// La ville d'une position, arrondie à la maille et nommée par sa commune.
+    /// « Ma ville » ne disait pas où l'on était — ni dans l'application, ni
+    /// sur l'écran verrouillé. Sans réponse du géocodeur, le nom générique.
+    static func ville(_ coordinate: CLLocationCoordinate2D) async -> Parcelle {
+        let lieu = CLLocation(latitude: coordinate.latitude, longitude: coordinate.longitude)
+        let commune = try? await CLGeocoder().reverseGeocodeLocation(lieu).first?.locality
+        return Position.parcelle(
+            named: commune ?? Localized.text("search.myField"),
+            latitude: coordinate.latitude,
+            longitude: coordinate.longitude
+        )
+    }
+
+    /// Une ville enregistrée sous le nom générique reçoit celui de sa commune,
+    /// une fois. Même point, même identifiant : la prévision ne se recharge pas.
+    private func nommerSiAnonyme() async {
+        let anonyme = parcelle
+        guard anonyme.name == Localized.text("search.myField") else { return }
+        let nommee = await Self.ville(CLLocationCoordinate2D(latitude: anonyme.latitude, longitude: anonyme.longitude))
+        guard nommee.name != anonyme.name, parcelle == anonyme else { return }
+        let renommee = Parcelle(name: nommee.name, latitude: anonyme.latitude, longitude: anonyme.longitude,
+                                admin: anonyme.admin, country: anonyme.country)
+        parcelle = renommee
+        persist(renommee)
     }
 
     /// Fuseau de la parcelle, pour dater correctement les créneaux affichés.
@@ -104,6 +125,7 @@ final class DashboardViewModel: ObservableObject {
     /// Charge la prévision. L'appel attend la fin du chargement : un « tirer
     /// pour rafraîchir » garde ainsi son indicateur jusqu'aux données reçues.
     func load() async {
+        await nommerSiAnonyme()
         loadTask?.cancel()
         let parcelle = parcelle
         isLoading = true
@@ -333,13 +355,7 @@ final class DashboardViewModel: ObservableObject {
         Task {
             do {
                 let coordinate = try await location.currentCoordinate()
-                select(
-                    Position.parcelle(
-                        named: Localized.text("search.myField"),
-                        latitude: coordinate.latitude,
-                        longitude: coordinate.longitude
-                    )
-                )
+                select(await Self.ville(coordinate))
             } catch {
                 errorMessage = (error as? LocalizedError)?.errorDescription
                     ?? Localized.text("location.unavailable")

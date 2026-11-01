@@ -41,7 +41,7 @@ struct HeroView: View {
                 .animation(.snappy, value: forecast.current.temperature)
                 .padding(.top, -6)
 
-            Text(condition.label)
+            Text(condition.label(isDay: forecast.current.isDay))
                 .font(.title3)
                 .foregroundStyle(Color.encreDouce)
 

@@ -326,7 +326,7 @@ pub(crate) async fn lire(etat: &Etat, chemin: &str, params: &Params) -> Lecture 
     }
 
     // L'apprenti ne relaie pas non plus : il note les modèles sur la semaine
-    // passée, d'après deux interrogations, et garde sa note six heures.
+    // passée, d’après trois interrogations, et garde sa note six heures.
     if chemin == "/v1/apprenti" {
         let (fetch, cle, now) = (etat.fetch.clone(), etat.open_meteo_key.clone(), etat.now.clone());
         let lu = etat

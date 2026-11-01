@@ -13,6 +13,17 @@ struct WeatherCondition: Equatable {
     /// Libellé traduit dans la langue de l'appareil.
     var label: String { Localized.text(labelKey) }
 
+    /// Le libellé selon qu'il fait jour : « Ciel dégagé » sous une lune
+    /// disait le soleil à 22 h. La nuit, un ciel clair est une nuit claire.
+    func label(isDay: Bool) -> String {
+        guard !isDay else { return label }
+        switch labelKey {
+        case "wmo.clearSky": return Localized.text("wmo.clearNight")
+        case "wmo.mainlyClear": return Localized.text("wmo.mainlyClearNight")
+        default: return label
+        }
+    }
+
     /// Famille de pictogramme, déclinée jour / nuit à l'affichage.
     enum Icon: String {
         case clear, partly, cloudy, fog, drizzle, rain, showers, snow, thunder

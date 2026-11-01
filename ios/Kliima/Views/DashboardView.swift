@@ -4,6 +4,7 @@ import SwiftUI
 /// l'application Météo du système.
 struct DashboardView: View {
     @StateObject private var viewModel = DashboardViewModel()
+    @Environment(\.scenePhase) private var scenePhase
     @StateObject private var weather = WeatherActivityController()
     @StateObject private var subscription = Subscription()
     @State private var query = ""
@@ -180,6 +181,21 @@ struct DashboardView: View {
             }
             .refreshable { await reload() }
             .task { await reload() }
+            // Au retour dans l'application, une prévision de plus de dix
+            // minutes est relue, avec le guetteur et le direct : l'application
+            // gardait sinon celle de son lancement, parfois vieille de la
+            // veille.
+            .onChange(of: scenePhase) { _, phase in
+                guard phase == .active,
+                      let lue = viewModel.forecast?.fetchedAt,
+                      Date().timeIntervalSince(lue) > 600
+                else { return }
+                Task {
+                    await reload()
+                    await viewModel.relireQuarts()
+                }
+                viewModel.suivreEnDirect()
+            }
             // À part du chargement, et pas avant lui : la prévision par défaut
             // s'affiche pendant que le système demande l'autorisation.
             .task { viewModel.locateIfUnchosen() }

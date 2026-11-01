@@ -255,7 +255,8 @@ redresser chaque modèle avant le vote. Rien à configurer :
   (`previous-runs-api.open-meteo.com`), l'Aviation Weather Center garde une
   semaine de bulletins. Le relais relit, garde sa note six heures en mémoire,
   et un redémarrage du dyno n'efface rien d'utile.
-- **Deux interrogations par ville toutes les six heures**, partagées par tout
+- **Trois interrogations par ville toutes les six heures** (l’aéroport le plus
+  proche, sa semaine à lui seul, l’archive des modèles), partagées par tout
   le monde. Avec `OPEN_METEO_KEY`, l'archive passe par l'hôte payant
   (`customer-previous-runs-api`), comme la prévision.
 - **Sans aéroport à moins de trente kilomètres**, ou avec moins de deux jours

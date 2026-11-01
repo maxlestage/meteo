@@ -262,7 +262,7 @@ struct WeatherComplicationView: View {
                         .lineLimit(1)
                         .minimumScaleFactor(0.7)
                 } else if let condition = condition {
-                    Text(condition.label)
+                    Text(condition.label(isDay: entry.current?.isDay ?? true))
                         .font(.system(size: 11))
                         .foregroundStyle(.secondary)
                         .lineLimit(1)
