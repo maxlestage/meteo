@@ -89,7 +89,7 @@ async function precedent() {
   if (!reponse.ok) return null
   const { workflow_runs: runs = [] } = await reponse.json()
   const run = runs.find((r) => String(r.id) !== String(courant))
-  return run?.head_sha ?? null
+  return run ? { sha: run.head_sha, date: run.created_at } : null
 }
 
 export async function texte() {
@@ -100,16 +100,23 @@ export async function texte() {
   lignes.push(`Build ${process.env.BUILD} · commit ${sha.slice(0, 8)}`, '')
   lignes.push(sansSignatures(git('log', '-1', '--format=%B', 'HEAD')))
 
-  let depuis = await precedent()
-  if (depuis) {
+  // Le commit du build précédent ; s'il n'est plus dans l'historique — une
+  // branche fusionnée en « squash » —, la date de ce build.
+  const avant = await precedent()
+  let plage = ['-15', 'HEAD']
+  let depuis = false
+  if (avant) {
     try {
-      depuis = git('merge-base', depuis, 'HEAD')
+      const base = git('merge-base', avant.sha, 'HEAD')
+      plage = base === sha ? ['-1', 'HEAD'] : [`${base}..HEAD`]
+      depuis = true
     } catch {
-      depuis = null
+      plage = [`--since=${avant.date}`, 'HEAD']
+      depuis = true
     }
   }
-  const plage = depuis && depuis !== sha ? [`${depuis}..HEAD`] : ['-15', 'HEAD']
-  const sujets = git('log', '--format=%s', ...plage).split('\n').filter(Boolean)
+  let sujets = git('log', '--format=%s', ...plage).split('\n').filter(Boolean)
+  if (sujets.length === 0) sujets = git('log', '--format=%s', '-1', 'HEAD').split('\n')
   if (sujets.length > 1) {
     lignes.push('', depuis ? 'Commits depuis le build précédent :' : 'Derniers commits :')
     for (const sujet of sujets) lignes.push(`• ${sujet}`)
