@@ -73,6 +73,23 @@ struct Apprentissage: Equatable, Codable {
     let nom: String
     let jours: Int
     let notes: [ApprentiNote]
+
+    enum CodingKeys: String, CodingKey { case station, nom, jours, notes }
+
+    init(station: String, nom: String, jours: Int, notes: [ApprentiNote]) {
+        self.station = station
+        self.nom = nom
+        self.jours = jours
+        self.notes = notes
+    }
+
+    init(from decoder: Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        station = try c.decode(String.self, forKey: .station)
+        nom = try c.decodeIfPresent(String.self, forKey: .nom) ?? ""
+        jours = try c.decodeIfPresent(Int.self, forKey: .jours) ?? 7
+        notes = try c.decode([ApprentiNote].self, forKey: .notes)
+    }
 }
 
 extension ApprentiNote: Codable {
@@ -154,17 +171,5 @@ enum Apprenti {
     static func decode(_ data: Data) -> Apprentissage? {
         guard let appris = try? JSONDecoder().decode(Apprentissage.self, from: data) else { return nil }
         return appris
-    }
-}
-
-extension Apprentissage {
-    enum CodingKeys: String, CodingKey { case station, nom, jours, notes }
-
-    init(from decoder: Decoder) throws {
-        let c = try decoder.container(keyedBy: CodingKeys.self)
-        station = try c.decode(String.self, forKey: .station)
-        nom = try c.decodeIfPresent(String.self, forKey: .nom) ?? ""
-        jours = try c.decodeIfPresent(Int.self, forKey: .jours) ?? 7
-        notes = try c.decode([ApprentiNote].self, forKey: .notes)
     }
 }

@@ -131,7 +131,12 @@ enum PositionDeLaMontre {
     @MainActor
     static func ville() async -> Parcelle? {
         let gestionnaire = CLLocationManager()
-        guard gestionnaire.isAuthorizedForWidgetUpdates else { return nil }
+        // `isAuthorizedForWidgetUpdates` n'existe pas sur watchOS : c'est
+        // l'autorisation donnée à l'application montre qui vaut ici.
+        switch gestionnaire.authorizationStatus {
+        case .authorizedWhenInUse, .authorizedAlways: break
+        default: return nil
+        }
 
         var coordonnee: CLLocationCoordinate2D?
         if let connue = gestionnaire.location, connue.timestamp.timeIntervalSinceNow > -3 * 3600 {
