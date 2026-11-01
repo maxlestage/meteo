@@ -23,6 +23,8 @@ concurrency:
 jobs:
   build:
     runs-on: ubuntu-latest
+    outputs:
+      pages: ${{ steps.pages.outputs.actif }}
     steps:
       - uses: actions/checkout@v5
 
@@ -84,14 +86,34 @@ jobs:
       # site demande les droits d'administration du dépôt, qu'il n'a pas —
       # « Create Pages site failed: Resource not accessible by integration »
       # (exécution nº 26). C'est une case à cocher, une fois, à la main.
-      - uses: actions/configure-pages@v5
+      #
+      # Tant que la case n'est pas cochée, on construit quand même — une
+      # vitrine qui ne compile plus se voit ici — mais on ne publie pas, et
+      # l'exécution le dit en avertissement au lieu de virer au rouge à chaque
+      # fusion (exécutions nº 99 à 102, toutes sur « Get Pages site failed »).
+      - name: Pages est-il activé ?
+        id: pages
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if gh api "repos/${{ github.repository }}/pages" --silent 2> /dev/null; then
+            echo "actif=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "actif=false" >> "$GITHUB_OUTPUT"
+            echo "::warning::GitHub Pages n'est pas activé : vitrine construite, pas publiée. Settings → Pages → Source : « GitHub Actions »."
+          fi
 
-      - uses: actions/upload-pages-artifact@v3
+      - if: steps.pages.outputs.actif == 'true'
+        uses: actions/configure-pages@v5
+
+      - if: steps.pages.outputs.actif == 'true'
+        uses: actions/upload-pages-artifact@v3
         with:
           path: rust/klima-site/dist
 
   deploy:
     needs: build
+    if: needs.build.outputs.pages == 'true'
     runs-on: ubuntu-latest
     environment:
       name: github-pages
