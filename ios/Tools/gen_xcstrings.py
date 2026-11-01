@@ -6,6 +6,8 @@ STRINGS = {
     # --- Codes météo WMO ---
     "wmo.clearSky": ("Ciel dégagé", "Clear sky", "Cielo despejado"),
     "wmo.mainlyClear": ("Peu nuageux", "Mainly clear", "Poco nuboso"),
+    "wmo.clearNight": ("Nuit claire", "Clear night", "Noche despejada"),
+    "wmo.mainlyClearNight": ("Nuit peu nuageuse", "Mostly clear night", "Noche poco nubosa"),
     "wmo.partlyCloudy": ("Partiellement nuageux", "Partly cloudy", "Parcialmente nuboso"),
     "wmo.overcast": ("Couvert", "Overcast", "Cubierto"),
     "wmo.fog": ("Brouillard", "Fog", "Niebla"),

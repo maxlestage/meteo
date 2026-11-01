@@ -261,7 +261,7 @@ struct WeatherWidgetView: View {
                         .font(.system(size: 58, weight: .thin, design: .rounded))
                         .lineLimit(1)
                         .widgetAccentable()
-                    Text(condition.label)
+                    Text(condition.label(isDay: current.isDay))
                         .font(.subheadline.weight(.medium))
                         .lineLimit(1)
                     if let today = entry.today {
@@ -331,7 +331,7 @@ struct WeatherWidgetView: View {
 
             Spacer(minLength: 0)
 
-            Text(condition.label)
+            Text(condition.label(isDay: current.isDay))
                 .font(.caption.weight(.medium))
                 .lineLimit(1)
                 .minimumScaleFactor(0.8)
