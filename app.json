@@ -1,0 +1,41 @@
+{
+  "name": "Klima",
+  "description": "Le relais de Klima : interroge les fournisseurs météo une fois pour tout le monde, note les modèles (l'apprenti), lit le radar et sert la vitrine et l'application.",
+  "buildpacks": [
+    { "url": "https://github.com/emk/heroku-buildpack-rust" }
+  ],
+  "formation": {
+    "web": { "quantity": 1 }
+  },
+  "env": {
+    "OPEN_METEO_KEY": {
+      "description": "Clé du plan commercial d'Open-Meteo. Vide : plan gratuit, non commercial, et plafonné par adresse IP — partagée entre les applications d'Heroku.",
+      "required": false
+    },
+    "KLIMA_PRO": {
+      "description": "Palier accordé pendant l'essai : liste d'adresses séparées par des virgules.",
+      "required": false
+    },
+    "KLIMA_SESSION_SECRET": {
+      "description": "Secret qui signe les sessions des comptes (« Se connecter avec Apple »). Sans lui, comptes désactivés.",
+      "generator": "secret",
+      "required": false
+    },
+    "KLIMA_APNS_KEY": {
+      "description": "Contenu du fichier .p8 d'Apple, pour tenir l'île dynamique à l'heure. Va avec les deux suivantes.",
+      "required": false
+    },
+    "KLIMA_APNS_KEY_ID": {
+      "description": "Identifiant de la clé APNs, dix caractères.",
+      "required": false
+    },
+    "KLIMA_APNS_TEAM_ID": {
+      "description": "Identifiant de l'équipe Apple, dix caractères.",
+      "required": false
+    },
+    "KLIMA_ORIGINS": {
+      "description": "Origines admises depuis un navigateur — inutile quand le relais sert lui-même le site.",
+      "required": false
+    }
+  }
+}

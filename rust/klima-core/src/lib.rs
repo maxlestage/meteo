@@ -10,6 +10,7 @@
 
 pub mod air;
 pub mod alerts;
+pub mod apprenti;
 pub mod calendar;
 pub mod ciel;
 pub mod endpoints;

@@ -90,9 +90,17 @@ struct AgroWeatherService: AgroWeatherProviding {
     ]
 
     private let session: URLSession
+    /// Ce que l'apprenti sait des modèles autour d'une ville. L'application le
+    /// demande au relais (`ApprentiRelais`) ; les extensions, qui n'ont pas de
+    /// relais, relisent ce que l'application a appris en dernier.
+    private let apprenti: (Parcelle) async -> Apprentissage?
 
-    init(session: URLSession = .shared) {
+    init(
+        session: URLSession = .shared,
+        apprenti: @escaping (Parcelle) async -> Apprentissage? = { SharedStore.loadApprentissage(pour: $0) }
+    ) {
         self.session = session
+        self.apprenti = apprenti
     }
 
     /// La prévision d'une ville sur `days` jours, refaite avec toutes les
@@ -103,10 +111,11 @@ struct AgroWeatherService: AgroWeatherProviding {
     /// alertes passent par ici, et ont donc la même prévision que l'écran.
     func forecast(for parcelle: Parcelle, days: Int = 7) async throws -> AgroForecast {
         async let ensemble = WeatherProviders.ensemble(for: parcelle, days: days, session: session)
+        async let appris = apprenti(parcelle)
         let base = try await previsionDeBase(for: parcelle, days: days)
         let sources = await ensemble
 
-        return Self.recouper(base, avec: sources)
+        return Self.recouper(base, avec: sources, apprentissage: await appris)
     }
 
     /// La prévision de base refaite avec ce que les sources ont dit — par
@@ -115,8 +124,12 @@ struct AgroWeatherService: AgroWeatherProviding {
     /// `radar` : ce que voit le radar. Quand il voit la ville, c'est lui qui
     /// dit ce qui tombe — il regarde la ville même, l'aéroport à quelques
     /// kilomètres ; sinon, l'aéroport. Comme `Forecast::recoupee` côté Rust.
+    ///
+    /// `apprentissage` : ce que l'apprenti sait des modèles. Chacun est
+    /// redressé de son biais appris avant de voter (`Apprenti.corriger`).
     static func recouper(
-        _ base: AgroForecast, avec sources: WeatherProviders.Ensemble, radar: RadarPrevision? = nil
+        _ base: AgroForecast, avec sources: WeatherProviders.Ensemble, radar: RadarPrevision? = nil,
+        apprentissage: Apprentissage? = nil
     ) -> AgroForecast {
         let tombe: Int?
         if let radar, radar.voitLaVille {
@@ -128,7 +141,7 @@ struct AgroWeatherService: AgroWeatherProviding {
             heures: base.hourly,
             jours: base.daily,
             courant: base.current,
-            series: sources.series,
+            series: apprentissage.map { Apprenti.corriger(sources.series, $0.notes) } ?? sources.series,
             observation: FusionObservation(temperature: sources.observation, tombe: tombe)
         )
         var noms = recoupement.sources
@@ -146,6 +159,7 @@ struct AgroWeatherService: AgroWeatherProviding {
         forecast.sources = noms
         forecast.consensus = sources.consensus
         forecast.ciel = sources.ciel
+        forecast.apprentissage = apprentissage
         return forecast
     }
 
@@ -166,6 +180,7 @@ struct AgroWeatherService: AgroWeatherProviding {
         vu.sources = forecast.sources
         vu.consensus = forecast.consensus
         vu.ciel = forecast.ciel
+        vu.apprentissage = forecast.apprentissage
         return vu
     }
 

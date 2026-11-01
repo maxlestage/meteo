@@ -244,6 +244,39 @@ Il ne donne rien sur iPhone, qui ne présente plus que sa session.
 Un code écrit ici serait lisible par quiconque lit le dépôt, bien avant d'être
 extrait du binaire. Les comptes rendent la question sans objet.
 
+## L'apprenti
+
+`/v1/apprenti?lat=…&lon=…` note les sept modèles d'Open-Meteo sur la semaine
+passée, pour la ville demandée : ce que chacun avait annoncé la veille contre
+ce que l'aéroport le plus proche a relevé. Les interfaces s'en servent pour
+redresser chaque modèle avant le vote. Rien à configurer :
+
+- **Pas de base de données.** Open-Meteo archive les prévisions passées
+  (`previous-runs-api.open-meteo.com`), l'Aviation Weather Center garde une
+  semaine de bulletins. Le relais relit, garde sa note six heures en mémoire,
+  et un redémarrage du dyno n'efface rien d'utile.
+- **Deux interrogations par ville toutes les six heures**, partagées par tout
+  le monde. Avec `OPEN_METEO_KEY`, l'archive passe par l'hôte payant
+  (`customer-previous-runs-api`), comme la prévision.
+- **Sans aéroport à moins de trente kilomètres**, ou avec moins de deux jours
+  de relevés, la réponse est `{"station":null,"notes":[]}` et les modèles
+  votent tels quels.
+
+Le plan gratuit d'Open-Meteo plafonne par adresse IP, et les dynos d'Heroku
+sortent par des adresses partagées avec d'autres applications : un « Daily API
+request limit exceeded » peut arriver sans que Klima y soit pour grand-chose.
+La clé commerciale le règle.
+
+```bash
+curl "https://VOTRE-APP.herokuapp.com/v1/apprenti?lat=48.8566&lon=2.3522"
+# {"station":"LFPO","nom":"Paris/Orly Fld","jours":7,"notes":[{"id":"gfs_seamless","n":160,"biais":1.21,…}]}
+```
+
+`app.json`, à la racine, déclare le buildpack et les variables : une
+application créée depuis le dépôt part avec le bon buildpack, sans le geste
+dans l'interface. Pour l'application déjà en service, le buildpack se règle
+toujours dans **Settings → Buildpacks**.
+
 ## L'île dynamique en temps réel
 
 Sans le relais, l'île dynamique de Kliima ‣ bascule seule à l'heure pile —
