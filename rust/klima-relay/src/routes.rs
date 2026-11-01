@@ -71,6 +71,8 @@ pub struct Etat {
     /// L'instant présent et la station : un cache à part aussi.
     pub courants: Arc<ForecastCache<String>>,
     pub searches: Arc<ForecastCache<String>>,
+    /// Ce que l'apprenti a appris, par maille : six heures (`apprenti.rs`).
+    pub apprentissages: Arc<ForecastCache<String>>,
     pub open_meteo_key: Option<String>,
     /// Ce que ce déploiement accorde comme palier, en plus de la boutique.
     pub accord_pro: Accord,
@@ -323,6 +325,19 @@ pub(crate) async fn lire(etat: &Etat, chemin: &str, params: &Params) -> Lecture 
         return Lecture::Lue(lu);
     }
 
+    // L'apprenti ne relaie pas non plus : il note les modèles sur la semaine
+    // passée, d'après deux interrogations, et garde sa note six heures.
+    if chemin == "/v1/apprenti" {
+        let (fetch, cle, now) = (etat.fetch.clone(), etat.open_meteo_key.clone(), etat.now.clone());
+        let lu = etat
+            .apprentissages
+            .serve(&cell_key("apprenti", &cell), || async move {
+                crate::apprenti::apprendre(fetch, cle, cell.latitude, cell.longitude, now() / 1000).await
+            })
+            .await;
+        return Lecture::Lue(lu);
+    }
+
     let (cle, appel) = match chemin {
         "/v1/open-meteo/forecast" => (
             cell_key(&format!("om:{}", empreinte(params)), &cell),
@@ -376,7 +391,11 @@ fn sante(etat: &Etat) -> String {
     format!(
         r#"{{"statut":"ok","cellules":{},"interrogations":{},"cleOpenMeteo":"{}","pro":"{}","comptes":"{}","poussee":"{}","iles":{}}}"#,
         etat.forecasts.size(),
-        etat.forecasts.calls() + etat.quarts.calls() + etat.courants.calls() + etat.searches.calls(),
+        etat.forecasts.calls()
+            + etat.quarts.calls()
+            + etat.courants.calls()
+            + etat.searches.calls()
+            + etat.apprentissages.calls(),
         if etat.open_meteo_key.is_some() { "configurée" } else { "absente" },
         etat.accord_pro.etiquette(),
         // L'état, jamais le secret.
@@ -643,6 +662,11 @@ pub fn etat(fetch: Fetch, now: crate::cache::Clock) -> Etat {
             stale_ms: SEARCH_TTL_MS,
             now: now.clone(),
         })),
+        apprentissages: Arc::new(ForecastCache::new(CacheOptions {
+            ttl_ms: crate::apprenti::TTL_MS,
+            stale_ms: crate::apprenti::STALE_MS,
+            now: now.clone(),
+        })),
         radar: Arc::new(crate::radar::Radar::eteint(now.clone())),
         now,
         comptes: None,
@@ -737,6 +761,22 @@ mod tests {
 
     async fn get(etat: Etat, chemin: &str) -> (StatusCode, HeaderMap, String) {
         demande(etat, chemin, None).await
+    }
+
+    #[tokio::test]
+    async fn l_apprenti_se_garde_a_la_maille() {
+        // Aucun aéroport dans la réponse : l'apprenti se tait, et ce silence
+        // se garde comme une note — on ne repose pas la question au voisin.
+        let faux = Faux::new().repond("[]");
+        let etat = relais(&faux);
+        let (status, _, corps) = get(etat.clone(), "/v1/apprenti?lat=48.8566&lon=2.3522").await;
+        assert_eq!(status, StatusCode::OK);
+        assert_eq!(corps, crate::apprenti::SANS_JUGE);
+        let _ = get(etat.clone(), "/v1/apprenti?lat=48.8567&lon=2.3521").await;
+        assert_eq!(faux.appels(), 1);
+        assert!(faux.premiere_url().starts_with("https://aviationweather.gov/api/data/metar?bbox="));
+        let (status, _, _) = get(etat, "/v1/apprenti?lat=999&lon=2").await;
+        assert_eq!(status, StatusCode::BAD_REQUEST);
     }
 
     #[tokio::test]

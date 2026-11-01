@@ -9,6 +9,7 @@
 //! `upstream`, les fichiers dans `site`, le cache dans `cache`.
 
 mod apns;
+mod apprenti;
 mod cache;
 mod direct;
 mod identite;
@@ -101,6 +102,7 @@ fn balayer_regulierement(etat: routes::Etat) {
             horloge.tick().await;
             etat.forecasts.sweep();
             etat.searches.sweep();
+            etat.apprentissages.sweep();
         }
     });
 }
