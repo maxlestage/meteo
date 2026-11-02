@@ -213,8 +213,12 @@ struct AgroWeatherService: AgroWeatherProviding {
             // Ni Open-Meteo ni le relais : MET Norway, qui ne dépend pas
             // d'eux, fait la prévision de base — moins détaillée (ni UV ni
             // rafales), mais de l'heure.
+            // MET Norway date en UTC sans dire le fuseau : celui de la ville
+            // vient de la dernière réponse d'Open-Meteo gardée, quel que soit
+            // son âge — un fuseau ne change pas.
+            let zone = (try? Data(contentsOf: cache)).flatMap(Self.fuseauGarde) ?? .current
             if let met = try? await WeatherProviders.metNorwayPayload(parcelle, session),
-               let deSecours = Self.baseMetNorway(met, parcelle: parcelle) {
+               let deSecours = Self.baseMetNorway(met, parcelle: parcelle, zone: zone) {
                 return deSecours
             }
             // Puis la dernière prévision reçue pour cette ville, si elle a
@@ -234,8 +238,10 @@ struct AgroWeatherService: AgroWeatherProviding {
     /// les jours se résument d'après ces heures. Ce que MET Norway ne donne
     /// pas dans sa forme compacte n'est pas inventé : l'UV reste à zéro et les
     /// rafales valent le vent moyen. Le risque de pluie vient du cumul annoncé.
-    static func baseMetNorway(_ payload: MetPayload, parcelle: Parcelle) -> AgroForecast? {
-        let zone = TimeZone.current
+    /// Les heures et les jours sont ceux de la ville (`zone`) : le fuseau de
+    /// l'appareil n'est qu'un dernier recours, quand aucune réponse d'Open-Meteo
+    /// n'a jamais été gardée pour elle.
+    static func baseMetNorway(_ payload: MetPayload, parcelle: Parcelle, zone: TimeZone = .current) -> AgroForecast? {
         var calendrier = Calendar(identifier: .gregorian)
         calendrier.timeZone = zone
         let debut = Date(timeIntervalSince1970: (Date().timeIntervalSince1970 / 3600).rounded(.down) * 3600)
@@ -312,6 +318,13 @@ struct AgroWeatherService: AgroWeatherProviding {
         let a = 17.62, b = 243.12
         let g = log(humidite / 100) + a * t / (b + t)
         return b * g / (a - g)
+    }
+
+    /// Le fuseau de la ville lu dans une réponse d'Open-Meteo gardée.
+    static func fuseauGarde(_ data: Data) -> TimeZone? {
+        struct Fuseau: Decodable { let timezone: String }
+        guard let fuseau = try? JSONDecoder().decode(Fuseau.self, from: data) else { return nil }
+        return TimeZone(identifier: fuseau.timezone)
     }
 
     /// Où garder la dernière prévision de base reçue pour une ville.
