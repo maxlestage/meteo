@@ -33,7 +33,18 @@ struct DashboardView: View {
                         }
 
                         if let message = viewModel.errorMessage {
-                            errorBanner(message)
+                            if viewModel.forecast == nil {
+                                errorBanner(message)
+                            } else {
+                                // La prévision d'avant reste affichée : le
+                                // message se fait discret au-dessus d'elle.
+                                bandeauAncien(message)
+                            }
+                        } else if viewModel.previsionAncienne, let lue = viewModel.forecast?.fetchedAt {
+                            bandeauAncien(Localized.text(
+                                "app.staleForecast",
+                                lue.formatted(date: .omitted, time: .shortened)
+                            ))
                         }
 
                         if let forecast = viewModel.forecast {
@@ -305,6 +316,25 @@ struct DashboardView: View {
                 .tint(Color.encre)
         }
         .padding(.top, 40)
+    }
+
+    /// Un bandeau discret au-dessus d'une prévision qui n'est pas la plus
+    /// fraîche : ce qui se passe, et de quoi relire tout de suite.
+    private func bandeauAncien(_ message: String) -> some View {
+        HStack(spacing: 10) {
+            Image(systemName: "clock.arrow.circlepath")
+            Text(message)
+                .font(.footnote)
+                .fixedSize(horizontal: false, vertical: true)
+            Spacer(minLength: 4)
+            Button(Localized.text("app.retry")) { Task { await viewModel.load() } }
+                .font(.footnote.weight(.semibold))
+                .buttonStyle(.bordered)
+        }
+        .foregroundStyle(Color.encre)
+        .tint(Color.encre)
+        .padding(12)
+        .cardBackground()
     }
 
     private func source(_ forecast: AgroForecast) -> some View {

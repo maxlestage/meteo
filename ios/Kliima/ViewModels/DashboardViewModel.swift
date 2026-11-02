@@ -136,6 +136,12 @@ final class DashboardViewModel: ObservableObject {
                 let forecast = try await service.forecast(for: parcelle, days: 7)
                 guard !Task.isCancelled else { return }
                 self.forecast = forecast
+                // Venue de la mémoire de l'appareil : on retentera le service.
+                if self.previsionAncienne {
+                    self.reessayerPlusTard(parcelle)
+                } else {
+                    self.essaisAutomatiques = 0
+                }
                 // L'accord des sources vient avec la prévision recoupée ;
                 // l'air est un plus, son échec ne prive de rien.
                 self.consensus = forecast.consensus
@@ -146,16 +152,45 @@ final class DashboardViewModel: ObservableObject {
                 return
             } catch {
                 guard !Task.isCancelled else { return }
-                self.forecast = nil
-                self.consensus = nil
-                self.air = nil
+                // Une relecture ratée ne vide pas l'écran : la prévision déjà
+                // affichée pour cette ville reste, avec son heure, sous le
+                // message. Celle d'une autre ville, non.
+                if self.forecast?.parcelle != parcelle {
+                    self.forecast = nil
+                    self.consensus = nil
+                    self.air = nil
+                }
                 self.errorMessage = (error as? LocalizedError)?.errorDescription
                     ?? Localized.text("app.error")
+                self.reessayerPlusTard(parcelle)
             }
             self.isLoading = false
         }
         loadTask = task
         await task.value
+    }
+
+    /// Après un échec, Kliima ‣ réessaie seul : trente secondes, puis deux
+    /// minutes, puis cinq. Une autre ville ou un succès arrête la série.
+    private var essaisAutomatiques = 0
+
+    private func reessayerPlusTard(_ ville: Parcelle) {
+        let delais: [UInt64] = [30, 120, 300]
+        guard essaisAutomatiques < delais.count else { return }
+        let delai = delais[essaisAutomatiques]
+        essaisAutomatiques += 1
+        Task { [weak self] in
+            try? await Task.sleep(nanoseconds: delai * 1_000_000_000)
+            guard let self, self.parcelle == ville, self.errorMessage != nil || self.previsionAncienne else { return }
+            await self.load()
+        }
+    }
+
+    /// Vrai quand la prévision affichée date de plus de trente minutes : elle
+    /// vient de la mémoire de l'appareil, le service n'ayant pas répondu.
+    var previsionAncienne: Bool {
+        guard let lue = forecast?.fetchedAt else { return false }
+        return Date().timeIntervalSince(lue) > 30 * 60
     }
 
     // MARK: Villes enregistrées
