@@ -229,7 +229,10 @@ struct AgroWeatherService: AgroWeatherProviding {
                   Date().timeIntervalSince(date) < 12 * 3600,
                   let payload = try? Self.decoder(ForecastPayload.self, data)
             else { throw error }
-            return Self.base(payload, parcelle: parcelle, fetchedAt: date)
+            // Coupée à l'heure qu'il est, pas à celle de sa réception : sinon
+            // le bandeau et la pluie partaient de midi à vingt-deux heures,
+            // et « aujourd'hui » se posait sur la veille passé minuit.
+            return Self.base(payload, parcelle: parcelle, fetchedAt: date, maintenant: Date())
         }
     }
 
@@ -432,9 +435,15 @@ struct AgroWeatherService: AgroWeatherProviding {
         }
     }
 
-    private static func base(_ payload: ForecastPayload, parcelle: Parcelle, fetchedAt: Date = Date()) -> AgroForecast {
+    /// `maintenant` : l'heure qu'il est, pour une réponse gardée en mémoire —
+    /// ses heures et ses jours passés sont retirés. Sans lui, la réponse est
+    /// fraîche et son propre « maintenant » fait foi.
+    private static func base(
+        _ payload: ForecastPayload, parcelle: Parcelle, fetchedAt: Date = Date(), maintenant: Date? = nil
+    ) -> AgroForecast {
         let zone = TimeZone(identifier: payload.timezone) ?? .current
         let current = payload.current.decode(in: zone)
+        let jours = payload.daily.decode(in: zone)
 
         return AgroForecast(
             parcelle: parcelle,
@@ -444,10 +453,21 @@ struct AgroWeatherService: AgroWeatherProviding {
             // L'API renvoie la journée entière depuis minuit : on repart de
             // l'heure en cours, pour que « maintenant » soit bien le premier
             // élément des séries.
-            hourly: fromCurrentHour(payload.hourly.decode(in: zone), now: current.time),
-            daily: payload.daily.decode(in: zone),
+            hourly: fromCurrentHour(payload.hourly.decode(in: zone), now: max(current.time, maintenant ?? current.time)),
+            daily: maintenant.map { fromToday(jours, now: $0, in: zone) } ?? jours,
             fetchedAt: fetchedAt
         )
+    }
+
+    /// Retire les jours déjà finis, comptés à l'heure de la ville : le premier
+    /// jour gardé est celui que l'écran appelle « aujourd'hui ».
+    static func fromToday(_ days: [DailySample], now: Date, in zone: TimeZone) -> [DailySample] {
+        var calendrier = Calendar(identifier: .gregorian)
+        calendrier.timeZone = zone
+        let today = calendrier.startOfDay(for: now)
+        let kept = days.filter { $0.date >= today }
+        // Si aujourd'hui sort de la série, on la garde telle quelle.
+        return kept.isEmpty ? days : kept
     }
 
     /// Coupe la série horaire au début de l'heure en cours.
