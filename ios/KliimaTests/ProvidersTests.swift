@@ -155,7 +155,7 @@ final class ProvidersTests: XCTestCase {
     }
 
     /// Open-Meteo en panne : MET Norway fait seul la prévision de base, à
-    /// l'heure, sans inventer ni UV ni rafales.
+    /// l'heure, sans inventer ni UV ni rafales quand la réponse n'en a pas.
     func testMetNorwayFaitLaPrevisionDeSecours() throws {
         let f = ISO8601DateFormatter()
         let debut = Date(timeIntervalSince1970: (Date().timeIntervalSince1970 / 3600).rounded(.down) * 3600)
@@ -195,6 +195,35 @@ final class ProvidersTests: XCTestCase {
         let aujourdhui = prevision.hourly.filter { calendrier.isDate($0.time, inSameDayAs: debut) }
         XCTAssertEqual(prevision.daily.first?.temperatureMax, aujourdhui.map(\.temperature).max())
         XCTAssertNil(AgroWeatherService.baseMetNorway(try MetPayload.decode(data("{}")), parcelle: .paris))
+    }
+
+    /// La forme complète de MET Norway donne rafales, probabilité de pluie
+    /// et point de rosée : la prévision de secours les lit, sans les deviner.
+    func testLaPrevisionDeSecoursLitLaFormeComplete() throws {
+        let f = ISO8601DateFormatter()
+        let debut = Date(timeIntervalSince1970: (Date().timeIntervalSince1970 / 3600).rounded(.down) * 3600)
+        let payload = try MetPayload.decode(data("""
+        {"properties": {"timeseries": [
+          {"time": "\(f.string(from: debut))",
+           "data": {"instant": {"details": {"air_temperature": 12, "wind_speed": 5, "wind_speed_of_gust": 12,
+                                            "relative_humidity": 80, "dew_point_temperature": 8.4}},
+                    "next_1_hours": {"summary": {"symbol_code": "rain"},
+                                     "details": {"precipitation_amount": 0.4, "probability_of_precipitation": 42.5}}}},
+          {"time": "\(f.string(from: debut.addingTimeInterval(3600)))",
+           "data": {"instant": {"details": {"air_temperature": 12, "wind_speed": 5, "wind_speed_of_gust": 3}},
+                    "next_1_hours": {"summary": {"symbol_code": "cloudy"}, "details": {"precipitation_amount": 0}}}}
+        ]}}
+        """))
+        let prevision = try XCTUnwrap(AgroWeatherService.baseMetNorway(payload, parcelle: .paris))
+        XCTAssertEqual(prevision.hourly[0].windGusts, 43.2, accuracy: 0.0001)
+        XCTAssertEqual(prevision.current.windGusts, 43.2, accuracy: 0.0001)
+        XCTAssertEqual(prevision.hourly[0].precipitationProbability, 42.5)
+        XCTAssertEqual(prevision.hourly[0].dewPoint, 8.4)
+        // Une rafale annoncée sous le vent moyen ne le fait pas baisser ;
+        // sans probabilité, le risque vient du cumul.
+        XCTAssertEqual(prevision.hourly[1].windGusts, prevision.hourly[1].windSpeed)
+        XCTAssertEqual(prevision.hourly[1].precipitationProbability, 5)
+        XCTAssertEqual(prevision.daily.first?.windGustsMax ?? 0, 43.2, accuracy: 0.0001)
     }
 
     /// La prévision de secours date à l'heure de la ville, pas du lecteur :
