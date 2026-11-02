@@ -107,20 +107,10 @@ struct WeatherComplicationProvider: TimelineProvider {
         }
     }
 
-    /// La pluie dans les trois heures pèse plus qu'un ciel sec. Les trois
-    /// heures se comptent depuis l'entrée (`instant`), pas depuis le moment
-    /// où la chronologie est calculée : une entrée posée cinq heures d'avance
-    /// voyait une averse à une heure d'elle « dans six heures », et la pile
-    /// intelligente ne remontait pas Kliima ‣ quand il le fallait.
+    /// La pluie dans les trois heures pèse plus qu'un ciel sec : la règle vit
+    /// dans `Horizon.pertinence`, partagée avec les widgets de l'iPhone.
     static func pertinence(_ heures: [HourlySample], a instant: Date) -> TimelineEntryRelevance {
-        switch Ville.prochainePluie(heures) {
-        case .enCours:
-            return TimelineEntryRelevance(score: 80, duration: 3600)
-        case .prevue(let debut, _, _) where debut.timeIntervalSince(instant) < 3 * 3600:
-            return TimelineEntryRelevance(score: 60, duration: 3600)
-        default:
-            return TimelineEntryRelevance(score: 10, duration: 3600)
-        }
+        TimelineEntryRelevance(score: Horizon.pertinence(heures, a: instant), duration: 3600)
     }
 }
 
