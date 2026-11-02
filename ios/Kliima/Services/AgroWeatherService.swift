@@ -276,8 +276,19 @@ struct AgroWeatherService: AgroWeatherProviding {
         guard let premiere = heures.first else { return nil }
 
         let parJour = Dictionary(grouping: heures) { calendrier.startOfDay(for: $0.time) }
+        let aujourdhui = calendrier.startOfDay(for: premiere.time)
         let jours: [DailySample] = parJour.keys.sorted().compactMap { date in
-            guard let h = parJour[date], !h.isEmpty else { return nil }
+            guard let h = parJour[date], let derniere = h.last else { return nil }
+            // La série horaire de MET Norway s'arrête en cours de journée :
+            // un jour dont on n'a que la nuit afficherait un maximum de 4 °C
+            // et pas de pluie pour une après-midi douce et mouillée. Seul
+            // aujourd'hui se résume en partie — depuis maintenant — ; un jour
+            // suivant n'entre que couvert jusqu'à minuit.
+            if date > aujourdhui,
+               let finDuJour = calendrier.date(byAdding: .day, value: 1, to: date),
+               derniere.time.addingTimeInterval(3600) < finDuJour {
+                return nil
+            }
             let mouillees = h.filter { $0.weatherCode >= 51 }
             let code = mouillees.map(\.weatherCode).max()
                 ?? Dictionary(grouping: h, by: \.weatherCode).max { $0.value.count < $1.value.count }?.key ?? 2
