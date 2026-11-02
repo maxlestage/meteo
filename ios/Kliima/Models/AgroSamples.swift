@@ -26,8 +26,9 @@ struct HourlySample: Equatable, Identifiable {
     let windSpeed: Double
     /// Rafales à 10 m (km/h).
     let windGusts: Double
-    /// Indice UV.
-    let uvIndex: Double
+    /// Indice UV ; absent quand la source ne le donne pas (MET Norway, en
+    /// prévision de secours) — un « 0 » serait une mesure inventée.
+    let uvIndex: Double?
 
     var id: Date { time }
 }
@@ -46,8 +47,9 @@ struct DailySample: Equatable, Identifiable {
     let precipitationProbabilityMax: Double
     /// Rafales maximales du jour (km/h).
     let windGustsMax: Double
-    /// Indice UV le plus fort de la journée.
-    let uvIndexMax: Double
+    /// Indice UV le plus fort de la journée ; absent quand la source ne le
+    /// donne pas.
+    let uvIndexMax: Double?
     let sunrise: Date?
     let sunset: Date?
 

@@ -182,7 +182,9 @@ final class ProvidersTests: XCTestCase {
         XCTAssertEqual(prevision.hourly[1].precipitationProbability, 70)
         XCTAssertEqual(prevision.hourly[0].windSpeed, 18, accuracy: 0.0001)
         XCTAssertEqual(prevision.hourly[0].windGusts, prevision.hourly[0].windSpeed)
-        XCTAssertEqual(prevision.hourly[0].uvIndex, 0)
+        // MET Norway ne donne pas l'UV : inconnu, pas « 0 · faible ».
+        XCTAssertNil(prevision.hourly[0].uvIndex)
+        XCTAssertNil(prevision.daily.first?.uvIndexMax)
         // 8 °C et 18 km/h : le vent refroidit.
         XCTAssertLessThan(prevision.current.apparentTemperature, 8)
         XCTAssertFalse(prevision.daily.isEmpty)

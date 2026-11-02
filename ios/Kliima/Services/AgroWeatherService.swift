@@ -236,8 +236,8 @@ struct AgroWeatherService: AgroWeatherProviding {
     /// La prévision de base faite par MET Norway seul, quand Open-Meteo ne
     /// répond plus. Horaire sur les deux à trois jours où MET Norway l'est ;
     /// les jours se résument d'après ces heures. Ce que MET Norway ne donne
-    /// pas dans sa forme compacte n'est pas inventé : l'UV reste à zéro et les
-    /// rafales valent le vent moyen. Le risque de pluie vient du cumul annoncé.
+    /// pas dans sa forme compacte n'est pas inventé : l'UV reste inconnu (pas
+    /// « 0 · faible » sous un soleil de midi) et les rafales valent le vent moyen. Le risque de pluie vient du cumul annoncé.
     /// Les heures et les jours sont ceux de la ville (`zone`) : le fuseau de
     /// l'appareil n'est qu'un dernier recours, quand aucune réponse d'Open-Meteo
     /// n'a jamais été gardée pour elle.
@@ -270,7 +270,7 @@ struct AgroWeatherService: AgroWeatherProviding {
                 precipitation: pluie,
                 windSpeed: vent,
                 windGusts: vent,
-                uvIndex: 0
+                uvIndex: nil
             )
         }
         guard let premiere = heures.first else { return nil }
@@ -299,7 +299,7 @@ struct AgroWeatherService: AgroWeatherProviding {
                 precipitationSum: h.map(\.precipitation).reduce(0, +),
                 precipitationProbabilityMax: h.map(\.precipitationProbability).max() ?? 0,
                 windGustsMax: h.map(\.windGusts).max() ?? 0,
-                uvIndexMax: 0, sunrise: nil, sunset: nil
+                uvIndexMax: nil, sunrise: nil, sunset: nil
             )
         }
         let pression = payload.nearest(to: premiere.time)?.data?.instant?.details?["air_pressure_at_sea_level"] ?? 0
