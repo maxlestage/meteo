@@ -10,6 +10,10 @@ enum AgroWeatherError: LocalizedError, Equatable {
         switch self {
         case .unreachable:
             return Localized.text("api.unreachable")
+        case let .badStatus(code) where code == 429 || code >= 500:
+            // Surcharge ou panne passagère du fournisseur : ce n'est pas un
+            // code qu'on demande à quelqu'un de comprendre.
+            return Localized.text("api.busy")
         case let .badStatus(code):
             return Localized.text("api.status", String(code))
         case .malformedResponse:
@@ -199,8 +203,96 @@ struct AgroWeatherService: AgroWeatherProviding {
             URLQueryItem(name: "forecast_days", value: String(days)),
         ]
 
-        let payload: ForecastPayload = try await get(components.url!)
-        return Self.base(payload, parcelle: parcelle)
+        let cache = Self.fichierDeBase(parcelle, days: days)
+        do {
+            let data = try await Self.lireAvecRelais(components, session: session)
+            let payload = try Self.decoder(ForecastPayload.self, data)
+            try? data.write(to: cache, options: .atomic)
+            return Self.base(payload, parcelle: parcelle)
+        } catch {
+            // Ni Open-Meteo ni le relais : la dernière prévision reçue pour
+            // cette ville, si elle a moins de douze heures, plutôt qu'un écran
+            // vide. Son heure de réception est la sienne : l'écran le dit.
+            guard let data = try? Data(contentsOf: cache),
+                  let date = (try? FileManager.default.attributesOfItem(atPath: cache.path))?[.modificationDate] as? Date,
+                  Date().timeIntervalSince(date) < 12 * 3600,
+                  let payload = try? Self.decoder(ForecastPayload.self, data)
+            else { throw error }
+            return Self.base(payload, parcelle: parcelle, fetchedAt: date)
+        }
+    }
+
+    /// Où garder la dernière prévision de base reçue pour une ville.
+    static func fichierDeBase(_ parcelle: Parcelle, days: Int) -> URL {
+        let dossier = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask)[0]
+        let nom = String(format: "base-%.3f_%.3f-%d.json", parcelle.latitude, parcelle.longitude, days)
+        return dossier.appendingPathComponent(nom)
+    }
+
+    /// L'adresse du relais, quand ce binaire en a une (l'application ; ni le
+    /// widget ni la montre).
+    private static var relais: URL? {
+        guard let valeur = Bundle.main.object(forInfoDictionaryKey: "KliimaRelay") as? String,
+              !valeur.trimmingCharacters(in: .whitespaces).isEmpty
+        else { return nil }
+        return URL(string: valeur.trimmingCharacters(in: .whitespaces))
+    }
+
+    /// Open-Meteo en direct, en réessayant une panne passagère ; puis, s'il
+    /// se tait, la même question au relais, qui garde ses réponses et en sert
+    /// une un peu ancienne quand le fournisseur ne répond plus.
+    static func lireAvecRelais(_ components: URLComponents, session: URLSession) async throws -> Data {
+        do {
+            return try await lire(components.url!, session: session, essais: 3)
+        } catch let erreur as AgroWeatherError {
+            guard let relais, var parRelais = URLComponents(url: relais, resolvingAgainstBaseURL: false) else {
+                throw erreur
+            }
+            let chemin = parRelais.path.hasSuffix("/") ? String(parRelais.path.dropLast()) : parRelais.path
+            parRelais.path = chemin + "/v1/open-meteo/forecast"
+            parRelais.queryItems = components.queryItems
+            guard let url = parRelais.url, let data = try? await lire(url, session: session, essais: 1) else {
+                throw erreur
+            }
+            return data
+        }
+    }
+
+    /// Une lecture, réessayée après une seconde puis trois quand le service
+    /// ne répond pas ou se dit surchargé (429, 5xx). Un refus franc (400…)
+    /// ne se réessaie pas.
+    static func lire(_ url: URL, session: URLSession, essais: Int) async throws -> Data {
+        var derniere: AgroWeatherError = .unreachable
+        for essai in 0..<max(essais, 1) {
+            if essai > 0 {
+                try await Task.sleep(nanoseconds: essai == 1 ? 1_000_000_000 : 3_000_000_000)
+            }
+            let data: Data
+            let response: URLResponse
+            do {
+                (data, response) = try await session.data(from: url)
+            } catch let error as URLError where error.code == .cancelled {
+                throw error
+            } catch {
+                derniere = .unreachable
+                continue
+            }
+            if let http = response as? HTTPURLResponse, !(200..<300).contains(http.statusCode) {
+                derniere = .badStatus(http.statusCode)
+                if http.statusCode == 429 || http.statusCode >= 500 { continue }
+                throw derniere
+            }
+            return data
+        }
+        throw derniere
+    }
+
+    private static func decoder<T: Decodable>(_ type: T.Type, _ data: Data) throws -> T {
+        do {
+            return try JSONDecoder().decode(type, from: data)
+        } catch {
+            throw AgroWeatherError.malformedResponse
+        }
     }
 
     /// Lit une prévision de base reçue telle quelle — du direct, par exemple.
@@ -212,7 +304,7 @@ struct AgroWeatherService: AgroWeatherProviding {
         }
     }
 
-    private static func base(_ payload: ForecastPayload, parcelle: Parcelle) -> AgroForecast {
+    private static func base(_ payload: ForecastPayload, parcelle: Parcelle, fetchedAt: Date = Date()) -> AgroForecast {
         let zone = TimeZone(identifier: payload.timezone) ?? .current
         let current = payload.current.decode(in: zone)
 
@@ -226,7 +318,7 @@ struct AgroWeatherService: AgroWeatherProviding {
             // élément des séries.
             hourly: fromCurrentHour(payload.hourly.decode(in: zone), now: current.time),
             daily: payload.daily.decode(in: zone),
-            fetchedAt: Date()
+            fetchedAt: fetchedAt
         )
     }
 
