@@ -133,6 +133,36 @@ final class AgroWeatherDecodingTests: XCTestCase {
         let later = midnight.addingTimeInterval(48 * 3600)
         XCTAssertEqual(AgroWeatherService.fromCurrentHour(hours, now: later).count, hours.count)
     }
+
+    /// Une prévision gardée en mémoire commence par des jours finis : le
+    /// premier gardé est aujourd'hui, compté à l'heure de la ville.
+    func testDailySeriesStartsAtTodayInTheCityTimeZone() throws {
+        let paris = try XCTUnwrap(TimeZone(identifier: "Europe/Paris"))
+        var calendrier = Calendar(identifier: .gregorian)
+        calendrier.timeZone = paris
+        let premier = calendrier.date(from: DateComponents(year: 2026, month: 11, day: 1))!
+        let days = (0..<7).map { rang in
+            DailySample(
+                date: calendrier.date(byAdding: .day, value: rang, to: premier)!,
+                weatherCode: 3, temperatureMin: 5, temperatureMax: 12,
+                precipitationSum: 0, precipitationProbabilityMax: 10, windGustsMax: 20, uvIndexMax: 1,
+                sunrise: nil, sunset: nil
+            )
+        }
+
+        // Le 2 novembre à 23 h 30 UTC, il est déjà 0 h 30 le 3 à Paris.
+        let now = calendrier.date(from: DateComponents(year: 2026, month: 11, day: 3, hour: 0, minute: 30))!
+        let kept = AgroWeatherService.fromToday(days, now: now, in: paris)
+        XCTAssertEqual(kept.count, 5)
+        XCTAssertEqual(kept.first?.date, days[2].date)
+
+        // Le jour même, rien n'est retiré.
+        XCTAssertEqual(AgroWeatherService.fromToday(days, now: premier.addingTimeInterval(3600), in: paris).count, 7)
+
+        // Si aujourd'hui sort de la série, on ne renvoie pas du vide.
+        let apres = calendrier.date(byAdding: .day, value: 30, to: premier)!
+        XCTAssertEqual(AgroWeatherService.fromToday(days, now: apres, in: paris).count, 7)
+    }
 }
 
 /// Le contrat avec le service de qualité de l'air : mêmes cas que
