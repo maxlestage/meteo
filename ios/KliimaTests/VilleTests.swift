@@ -98,6 +98,26 @@ final class VilleTests: XCTestCase {
         XCTAssertEqual(Ville.conseils(s), [.cremeSolaire])
     }
 
+    /// MET Norway en secours ne donne pas l'UV : les heures qui l'ont
+    /// décident seules, et une série sans UV ne conseille rien pour le soleil.
+    /// (Propre à iOS : le cœur Rust n'a pas de prévision de secours.)
+    func testUnUvInconnuNeConseilleRien() {
+        let sansUv = serie(12).map { h in
+            HourlySample(
+                time: h.time, weatherCode: h.weatherCode, isDay: h.isDay,
+                precipitationProbability: h.precipitationProbability,
+                temperature: h.temperature, apparentTemperature: h.apparentTemperature,
+                relativeHumidity: h.relativeHumidity, dewPoint: h.dewPoint,
+                precipitation: h.precipitation, windSpeed: h.windSpeed,
+                windGusts: h.windGusts, uvIndex: nil
+            )
+        }
+        XCTAssertEqual(Ville.conseils(sansUv), [])
+        var s = sansUv
+        s[2] = avec(s[2], uv: 6)
+        XCTAssertEqual(Ville.conseils(s), [.cremeSolaire])
+    }
+
     func testCeQuiArriveApresDouzeHeuresNeChangePasLesConseils() {
         var s = serie(24)
         s[12] = avec(s[12], temperature: -5)

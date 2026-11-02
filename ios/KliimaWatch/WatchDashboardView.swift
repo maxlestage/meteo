@@ -476,8 +476,8 @@ private struct WatchTuiles: View {
                 Tuile(
                     symbole: "sun.max.fill",
                     titre: Localized.text("tile.uv"),
-                    valeur: AgroFormat.decimal(today.uvIndexMax, decimals: 0),
-                    detail: Ville.niveauUv(today.uvIndexMax).label
+                    valeur: today.uvIndexMax.map { AgroFormat.decimal($0, decimals: 0) } ?? "–",
+                    detail: today.uvIndexMax.map { Ville.niveauUv($0).label }
                 )
             }
             Tuile(
