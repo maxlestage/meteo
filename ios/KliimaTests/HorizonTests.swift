@@ -11,7 +11,8 @@ final class HorizonTests: XCTestCase {
     /// 14 h 00 pile, en instant absolu.
     private let quatorze = Date(timeIntervalSince1970: TimeInterval(1_790_000_000 - 1_790_000_000 % 3600))
 
-    private func heure(_ decalage: Int, temperature: Double = 18, debut: Date? = nil) -> HourlySample {
+    private func heure(_ decalage: Int, temperature: Double = 18, debut: Date? = nil,
+                       pluie: Double = 0) -> HourlySample {
         HourlySample(
             time: (debut ?? quatorze).addingTimeInterval(Double(decalage) * 3600),
             weatherCode: 3,
@@ -21,7 +22,7 @@ final class HorizonTests: XCTestCase {
             apparentTemperature: temperature - 1,
             relativeHumidity: 65,
             dewPoint: 11,
-            precipitation: 0,
+            precipitation: pluie,
             windSpeed: 8,
             windGusts: 14,
             uvIndex: 1
@@ -113,5 +114,34 @@ final class HorizonTests: XCTestCase {
         let moments = Horizon.chronologie(courant: courant(), heures: serie(3), jours: [],
                                           depuis: quatorze.addingTimeInterval(60), nombre: 12)
         XCTAssertEqual(moments.count, 3, "maintenant, puis 15 h et 16 h — rien d'inventé après")
+    }
+
+    // MARK: La pile intelligente
+
+    /// Douze heures sèches, où il pleut à l'heure `pluie`.
+    private func seriePluvieuse(_ pluie: Int?) -> [HourlySample] {
+        (0..<12).map { heure($0, temperature: 18 + Double($0), pluie: $0 == pluie ? 1.2 : 0) }
+    }
+
+    func testIlPleutLaPileRemonteKliima() {
+        XCTAssertEqual(Horizon.pertinence(seriePluvieuse(0), a: quatorze.addingTimeInterval(20 * 60)), 80)
+    }
+
+    func testUnePluieDansDeuxHeuresPesePlusQuUnCielSec() {
+        let a1420 = quatorze.addingTimeInterval(20 * 60)
+        XCTAssertEqual(Horizon.pertinence(seriePluvieuse(2), a: a1420), 60)
+        XCTAssertEqual(Horizon.pertinence(seriePluvieuse(nil), a: a1420), 10)
+    }
+
+    func testUnePluieLointaineNeComptePas() {
+        XCTAssertEqual(Horizon.pertinence(seriePluvieuse(3), a: quatorze), 10, "trois heures pile : trop loin")
+        XCTAssertEqual(Horizon.pertinence(seriePluvieuse(6), a: quatorze), 10)
+    }
+
+    func testLesTroisHeuresSeComptentDepuisLEntree() {
+        // Une entrée posée à 19 h, calculée à 14 h : une pluie à 20 h est à
+        // une heure d'elle, pas à six.
+        let serie = Array(seriePluvieuse(6).dropFirst(5))
+        XCTAssertEqual(Horizon.pertinence(serie, a: quatorze.addingTimeInterval(5 * 3600)), 60)
     }
 }
