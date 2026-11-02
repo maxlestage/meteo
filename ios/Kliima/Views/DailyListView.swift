@@ -86,8 +86,11 @@ struct DailyListView: View {
     private func temperatureBar(for day: DailySample, isToday: Bool, rang: Int) -> some View {
         GeometryReader { geometry in
             let width = geometry.size.width
-            let start = (day.temperatureMin - weekLow) / span
             let length = max((day.temperatureMax - day.temperatureMin) / span, 0.06)
+            // La longueur minimale ne pousse pas la barre hors du rail : le
+            // jour le plus chaud, presque sans amplitude, la faisait dépasser
+            // à droite. Elle recule alors d'autant.
+            let start = min((day.temperatureMin - weekLow) / span, 1 - length)
 
             ZStack(alignment: .leading) {
                 Capsule()
