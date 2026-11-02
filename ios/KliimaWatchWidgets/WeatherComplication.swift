@@ -102,17 +102,21 @@ struct WeatherComplicationProvider: TimelineProvider {
                 loaded: true,
                 hours: heures,
                 timeZone: TimeZone(identifier: forecast.timezone) ?? .current,
-                relevance: Self.pertinence(heures)
+                relevance: Self.pertinence(heures, a: moment.date)
             )
         }
     }
 
-    /// La pluie dans les trois heures pèse plus qu'un ciel sec.
-    static func pertinence(_ heures: [HourlySample]) -> TimelineEntryRelevance {
+    /// La pluie dans les trois heures pèse plus qu'un ciel sec. Les trois
+    /// heures se comptent depuis l'entrée (`instant`), pas depuis le moment
+    /// où la chronologie est calculée : une entrée posée cinq heures d'avance
+    /// voyait une averse à une heure d'elle « dans six heures », et la pile
+    /// intelligente ne remontait pas Kliima ‣ quand il le fallait.
+    static func pertinence(_ heures: [HourlySample], a instant: Date) -> TimelineEntryRelevance {
         switch Ville.prochainePluie(heures) {
         case .enCours:
             return TimelineEntryRelevance(score: 80, duration: 3600)
-        case .prevue(let debut, _, _) where debut.timeIntervalSinceNow < 3 * 3600:
+        case .prevue(let debut, _, _) where debut.timeIntervalSince(instant) < 3 * 3600:
             return TimelineEntryRelevance(score: 60, duration: 3600)
         default:
             return TimelineEntryRelevance(score: 10, duration: 3600)
