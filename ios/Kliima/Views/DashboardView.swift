@@ -43,7 +43,8 @@ struct DashboardView: View {
                         } else if viewModel.previsionAncienne, let lue = viewModel.forecast?.fetchedAt {
                             bandeauAncien(Localized.text(
                                 "app.staleForecast",
-                                lue.formatted(date: .omitted, time: .shortened)
+                                // L'heure de la ville, pas celle du lecteur.
+                                AgroFormat.time(lue, in: viewModel.timeZone)
                             ))
                         }
 
