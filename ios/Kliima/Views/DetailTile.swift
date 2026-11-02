@@ -37,7 +37,10 @@ struct DetailTile: View {
 
     private func gaugeBar(_ gauge: (position: Double, colors: [Color])) -> some View {
         GeometryReader { geometry in
-            let width = geometry.size.width
+            // Le point voyage à l'intérieur de la piste : centré sur la
+            // position, il débordait de sa moitié à chaque bout — toutes
+            // les nuits sous un indice UV nul, il sortait à gauche du rail.
+            let course = max(geometry.size.width - 9, 0)
             let position = min(max(gauge.position, 0), 1)
 
             ZStack(alignment: .leading) {
@@ -47,7 +50,7 @@ struct DetailTile: View {
                 Circle()
                     .fill(Color.encre)
                     .frame(width: 9, height: 9)
-                    .offset(x: width * position - 4.5)
+                    .offset(x: course * position)
             }
             .frame(maxHeight: .infinity)
         }
