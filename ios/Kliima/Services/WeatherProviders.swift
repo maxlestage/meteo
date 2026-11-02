@@ -316,8 +316,11 @@ extension WeatherProviders {
         return try await json(components.url!, session, userAgent: true)
     }
 
+    /// La forme complète, pour la prévision de secours : elle porte les
+    /// rafales, la probabilité de pluie et le point de rosée que la forme
+    /// compacte n'a pas — sans eux, il faudrait les deviner.
     static func metNorwayPayload(_ parcelle: Parcelle, _ session: URLSession) async throws -> MetPayload {
-        var components = URLComponents(string: "https://api.met.no/weatherapi/locationforecast/2.0/compact")!
+        var components = URLComponents(string: "https://api.met.no/weatherapi/locationforecast/2.0/complete")!
         components.queryItems = [
             URLQueryItem(name: "lat", value: String(format: "%.4f", parcelle.latitude)),
             URLQueryItem(name: "lon", value: String(format: "%.4f", parcelle.longitude)),

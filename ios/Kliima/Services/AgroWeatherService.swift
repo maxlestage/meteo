@@ -212,7 +212,7 @@ struct AgroWeatherService: AgroWeatherProviding {
         } catch {
             // Ni Open-Meteo ni le relais : MET Norway, qui ne dépend pas
             // d'eux, fait la prévision de base — moins détaillée (ni UV ni
-            // rafales), mais de l'heure.
+            // lever du soleil), mais de l'heure.
             // MET Norway date en UTC sans dire le fuseau : celui de la ville
             // vient de la dernière réponse d'Open-Meteo gardée, quel que soit
             // son âge — un fuseau ne change pas.
@@ -235,9 +235,12 @@ struct AgroWeatherService: AgroWeatherProviding {
 
     /// La prévision de base faite par MET Norway seul, quand Open-Meteo ne
     /// répond plus. Horaire sur les deux à trois jours où MET Norway l'est ;
-    /// les jours se résument d'après ces heures. Ce que MET Norway ne donne
-    /// pas dans sa forme compacte n'est pas inventé : l'UV reste inconnu (pas
-    /// « 0 · faible » sous un soleil de midi) et les rafales valent le vent moyen. Le risque de pluie vient du cumul annoncé.
+    /// les jours se résument d'après ces heures. Sa forme complète donne les
+    /// rafales, la probabilité de pluie et le point de rosée : ils sont lus
+    /// tels quels. Ce qu'une réponse ne donne pas n'est pas inventé : l'UV
+    /// reste inconnu (pas « 0 · faible » sous un soleil de midi ; MET Norway
+    /// n'en donne qu'un par ciel clair), sans rafale annoncée elles valent le
+    /// vent moyen, sans probabilité le risque vient du cumul annoncé.
     /// Les heures et les jours sont ceux de la ville (`zone`) : le fuseau de
     /// l'appareil n'est qu'un dernier recours, quand aucune réponse d'Open-Meteo
     /// n'a jamais été gardée pour elle.
@@ -255,21 +258,26 @@ struct AgroWeatherService: AgroWeatherProviding {
             let symbole = prochaine.summary?.symbol_code ?? ""
             let pluie = prochaine.details?["precipitation_amount"] ?? 0
             let vent = (instant["wind_speed"] ?? 0) * 3.6
+            // Une rafale n'est jamais plus faible que le vent moyen.
+            let rafales = max(vent, (instant["wind_speed_of_gust"] ?? 0) * 3.6)
             let humidite = instant["relative_humidity"] ?? 0
+            let probabilite: Double = prochaine.details?["probability_of_precipitation"]
+                .map { min(max($0, 0), 100) }
+                ?? (pluie >= 0.1 ? 70 : (pluie > 0 ? 30 : 5))
             let heureLocale = calendrier.component(.hour, from: time)
             let jour = symbole.hasSuffix("_day") || (!symbole.hasSuffix("_night") && (7..<19).contains(heureLocale))
             return HourlySample(
                 time: time,
                 weatherCode: WeatherProviders.codeDuSymbole(symbole) ?? (pluie >= 0.1 ? 61 : 2),
                 isDay: jour,
-                precipitationProbability: pluie >= 0.1 ? 70 : (pluie > 0 ? 30 : 5),
+                precipitationProbability: probabilite,
                 temperature: temperature,
                 apparentTemperature: Self.ressenti(temperature, vent: vent),
                 relativeHumidity: humidite,
-                dewPoint: Self.pointDeRosee(temperature, humidite: humidite),
+                dewPoint: instant["dew_point_temperature"] ?? Self.pointDeRosee(temperature, humidite: humidite),
                 precipitation: pluie,
                 windSpeed: vent,
-                windGusts: vent,
+                windGusts: rafales,
                 uvIndex: nil
             )
         }
