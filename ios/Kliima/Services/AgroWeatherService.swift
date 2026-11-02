@@ -210,9 +210,16 @@ struct AgroWeatherService: AgroWeatherProviding {
             try? data.write(to: cache, options: .atomic)
             return Self.base(payload, parcelle: parcelle)
         } catch {
-            // Ni Open-Meteo ni le relais : la dernière prévision reçue pour
-            // cette ville, si elle a moins de douze heures, plutôt qu'un écran
-            // vide. Son heure de réception est la sienne : l'écran le dit.
+            // Ni Open-Meteo ni le relais : MET Norway, qui ne dépend pas
+            // d'eux, fait la prévision de base — moins détaillée (ni UV ni
+            // rafales), mais de l'heure.
+            if let met = try? await WeatherProviders.metNorwayPayload(parcelle, session),
+               let deSecours = Self.baseMetNorway(met, parcelle: parcelle) {
+                return deSecours
+            }
+            // Puis la dernière prévision reçue pour cette ville, si elle a
+            // moins de douze heures, plutôt qu'un écran vide. Son heure de
+            // réception est la sienne : l'écran le dit.
             guard let data = try? Data(contentsOf: cache),
                   let date = (try? FileManager.default.attributesOfItem(atPath: cache.path))?[.modificationDate] as? Date,
                   Date().timeIntervalSince(date) < 12 * 3600,
@@ -220,6 +227,91 @@ struct AgroWeatherService: AgroWeatherProviding {
             else { throw error }
             return Self.base(payload, parcelle: parcelle, fetchedAt: date)
         }
+    }
+
+    /// La prévision de base faite par MET Norway seul, quand Open-Meteo ne
+    /// répond plus. Horaire sur les deux à trois jours où MET Norway l'est ;
+    /// les jours se résument d'après ces heures. Ce que MET Norway ne donne
+    /// pas dans sa forme compacte n'est pas inventé : l'UV reste à zéro et les
+    /// rafales valent le vent moyen. Le risque de pluie vient du cumul annoncé.
+    static func baseMetNorway(_ payload: MetPayload, parcelle: Parcelle) -> AgroForecast? {
+        let zone = TimeZone.current
+        var calendrier = Calendar(identifier: .gregorian)
+        calendrier.timeZone = zone
+        let debut = Date(timeIntervalSince1970: (Date().timeIntervalSince1970 / 3600).rounded(.down) * 3600)
+
+        let heures: [HourlySample] = (payload.properties?.timeseries ?? []).compactMap { entree in
+            guard let time = entree.time, time >= debut,
+                  let instant = entree.data?.instant?.details,
+                  let temperature = instant["air_temperature"],
+                  let prochaine = entree.data?.next_1_hours
+            else { return nil }
+            let symbole = prochaine.summary?.symbol_code ?? ""
+            let pluie = prochaine.details?["precipitation_amount"] ?? 0
+            let vent = (instant["wind_speed"] ?? 0) * 3.6
+            let humidite = instant["relative_humidity"] ?? 0
+            let heureLocale = calendrier.component(.hour, from: time)
+            let jour = symbole.hasSuffix("_day") || (!symbole.hasSuffix("_night") && (7..<19).contains(heureLocale))
+            return HourlySample(
+                time: time,
+                weatherCode: WeatherProviders.codeDuSymbole(symbole) ?? (pluie >= 0.1 ? 61 : 2),
+                isDay: jour,
+                precipitationProbability: pluie >= 0.1 ? 70 : (pluie > 0 ? 30 : 5),
+                temperature: temperature,
+                apparentTemperature: Self.ressenti(temperature, vent: vent),
+                relativeHumidity: humidite,
+                dewPoint: Self.pointDeRosee(temperature, humidite: humidite),
+                precipitation: pluie,
+                windSpeed: vent,
+                windGusts: vent,
+                uvIndex: 0
+            )
+        }
+        guard let premiere = heures.first else { return nil }
+
+        let parJour = Dictionary(grouping: heures) { calendrier.startOfDay(for: $0.time) }
+        let jours: [DailySample] = parJour.keys.sorted().compactMap { date in
+            guard let h = parJour[date], !h.isEmpty else { return nil }
+            let mouillees = h.filter { $0.weatherCode >= 51 }
+            let code = mouillees.map(\.weatherCode).max()
+                ?? Dictionary(grouping: h, by: \.weatherCode).max { $0.value.count < $1.value.count }?.key ?? 2
+            return DailySample(
+                date: date, weatherCode: code,
+                temperatureMin: h.map(\.temperature).min() ?? premiere.temperature,
+                temperatureMax: h.map(\.temperature).max() ?? premiere.temperature,
+                precipitationSum: h.map(\.precipitation).reduce(0, +),
+                precipitationProbabilityMax: h.map(\.precipitationProbability).max() ?? 0,
+                windGustsMax: h.map(\.windGusts).max() ?? 0,
+                uvIndexMax: 0, sunrise: nil, sunset: nil
+            )
+        }
+        let pression = payload.nearest(to: premiere.time)?.data?.instant?.details?["air_pressure_at_sea_level"] ?? 0
+        let courant = CurrentSample(
+            time: premiere.time, temperature: premiere.temperature,
+            apparentTemperature: premiere.apparentTemperature, weatherCode: premiere.weatherCode,
+            isDay: premiere.isDay, relativeHumidity: premiere.relativeHumidity,
+            windSpeed: premiere.windSpeed, windGusts: premiere.windGusts, pressure: pression
+        )
+        return AgroForecast(
+            parcelle: parcelle, timezone: zone.identifier, elevation: 0,
+            current: courant, hourly: heures, daily: jours, fetchedAt: Date()
+        )
+    }
+
+    /// Le refroidissement éolien sous 10 °C avec du vent, la température
+    /// sinon — la formule d'Environnement Canada.
+    static func ressenti(_ t: Double, vent v: Double) -> Double {
+        guard t <= 10, v > 4.8 else { return t }
+        let p = pow(v, 0.16)
+        return 13.12 + 0.6215 * t - 11.37 * p + 0.3965 * t * p
+    }
+
+    /// Le point de rosée par l'approximation de Magnus.
+    static func pointDeRosee(_ t: Double, humidite: Double) -> Double {
+        guard humidite > 0 else { return t }
+        let a = 17.62, b = 243.12
+        let g = log(humidite / 100) + a * t / (b + t)
+        return b * g / (a - g)
     }
 
     /// Où garder la dernière prévision de base reçue pour une ville.
@@ -269,8 +361,12 @@ struct AgroWeatherService: AgroWeatherProviding {
             }
             let data: Data
             let response: URLResponse
+            // Huit secondes : Open-Meteo en panne ne répond pas du tout, et la
+            // minute par défaut, trois fois, laissait l'écran vide trois minutes.
+            var requete = URLRequest(url: url)
+            requete.timeoutInterval = 8
             do {
-                (data, response) = try await session.data(from: url)
+                (data, response) = try await session.data(for: requete)
             } catch let error as URLError where error.code == .cancelled {
                 throw error
             } catch {
