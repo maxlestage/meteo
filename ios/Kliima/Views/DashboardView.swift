@@ -367,7 +367,8 @@ struct DashboardView: View {
         let today = forecast.daily.first
         let current = forecast.current
         let maintenant = Ville.heure(contenant: current.time, dans: forecast.hourly)
-        let uv = maintenant?.uvIndex ?? 0
+        // Sans UV (MET Norway en secours), la tuile dit « – », pas « 0 · faible ».
+        let uv = maintenant?.uvIndex
         let uvMax = today?.uvIndexMax ?? uv
 
         var tiles: [TileModel] = [
@@ -393,14 +394,16 @@ struct DashboardView: View {
             ),
             TileModel(
                 label: Localized.text("tile.uv"),
-                value: "\(AgroFormat.decimal(uv, decimals: 0)) · \(Ville.niveauUv(uv).label)",
-                caption: Localized.text(
-                    "tile.uv.caption",
-                    AgroFormat.decimal(uvMax, decimals: 0),
-                    Ville.niveauUv(uvMax).label.lowercased()
-                ),
-                gauge: (
-                    position: uv / 11,
+                value: uv.map { "\(AgroFormat.decimal($0, decimals: 0)) · \(Ville.niveauUv($0).label)" } ?? "–",
+                caption: uvMax.map {
+                    Localized.text(
+                        "tile.uv.caption",
+                        AgroFormat.decimal($0, decimals: 0),
+                        Ville.niveauUv($0).label.lowercased()
+                    )
+                },
+                gauge: uv.map { indice in (
+                    position: indice / 11,
                     colors: [
                         Color(red: 0.494, green: 0.816, blue: 0.478),
                         Color(red: 0.941, green: 0.757, blue: 0.294),
@@ -408,7 +411,7 @@ struct DashboardView: View {
                         Color(red: 0.851, green: 0.325, blue: 0.310),
                         Color(red: 0.608, green: 0.349, blue: 0.714),
                     ]
-                )
+                ) }
             ),
             TileModel(
                 label: Localized.text("tile.rainToday"),

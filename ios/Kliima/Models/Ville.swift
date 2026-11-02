@@ -119,7 +119,8 @@ enum Ville {
         if (fenetre.map(\.apparentTemperature).min() ?? .infinity) <= VilleSeuils.manteauRessenti {
             liste.append(.manteau)
         }
-        let uv = fenetre.map(\.uvIndex).max() ?? 0
+        // Un UV inconnu ne conseille rien : on ne dit pas « crème » au hasard.
+        let uv = fenetre.compactMap(\.uvIndex).max() ?? 0
         if uv >= VilleSeuils.uvCreme {
             liste.append(.cremeSolaire)
         } else if uv >= VilleSeuils.uvLunettes {
