@@ -806,6 +806,29 @@
         }
       }
     },
+    "api.busy": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The weather service is overloaded right now. Kliima ‣ will try again on its own."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "El servicio meteorológico está saturado ahora mismo. Kliima ‣ lo reintentará solo."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Le service météo est surchargé pour le moment. Kliima ‣ réessaie tout seul."
+          }
+        }
+      }
+    },
     "api.malformed": {
       "extractionState": "manual",
       "localizations": {
@@ -1009,6 +1032,29 @@
           "stringUnit": {
             "state": "translated",
             "value": "Données Open-Meteo — modèles Météo-France, ECMWF, DWD, NOAA, Met Office, ECCC et JMA. Ville à %1$@ d’altitude."
+          }
+        }
+      }
+    },
+    "app.staleForecast": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Forecast from %1$@: the weather service isn’t answering, retrying automatically."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Previsión de las %1$@: el servicio meteorológico no responde, se reintentará solo."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Prévision de %1$@ : le service météo ne répond pas, nouvel essai automatique."
           }
         }
       }

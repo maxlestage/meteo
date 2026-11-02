@@ -153,4 +153,40 @@ final class ProvidersTests: XCTestCase {
         XCTAssertEqual(result.providersQueried, 3)
         XCTAssertEqual(result.agreement, .forte)
     }
+
+    /// Open-Meteo en panne : MET Norway fait seul la prévision de base, à
+    /// l'heure, sans inventer ni UV ni rafales.
+    func testMetNorwayFaitLaPrevisionDeSecours() throws {
+        let f = ISO8601DateFormatter()
+        let debut = Date(timeIntervalSince1970: (Date().timeIntervalSince1970 / 3600).rounded(.down) * 3600)
+        func heure(_ i: Double, _ t: Double, _ pluie: Double, _ symbole: String) -> String {
+            """
+            {"time": "\(f.string(from: debut.addingTimeInterval(i * 3600)))",
+             "data": {"instant": {"details": {"air_temperature": \(t), "wind_speed": 5, "relative_humidity": 80, "air_pressure_at_sea_level": 1012}},
+                      "next_1_hours": {"summary": {"symbol_code": "\(symbole)"}, "details": {"precipitation_amount": \(pluie)}}}}
+            """
+        }
+        let payload = try MetPayload.decode(data("""
+        {"properties": {"timeseries": [
+          {"time": "\(f.string(from: debut.addingTimeInterval(-3600)))", "data": {"instant": {"details": {"air_temperature": 1}}}},
+          \(heure(0, 8, 0, "clearsky_night")), \(heure(1, 9, 1.2, "rain")), \(heure(2, 11, 0, "fair_day"))
+        ]}}
+        """))
+        let prevision = try XCTUnwrap(AgroWeatherService.baseMetNorway(payload, parcelle: .paris))
+        XCTAssertEqual(prevision.hourly.count, 3, "l'heure passée est écartée")
+        XCTAssertEqual(prevision.current.temperature, 8)
+        XCTAssertFalse(prevision.current.isDay)
+        XCTAssertEqual(prevision.current.weatherCode, 0)
+        XCTAssertEqual(prevision.current.pressure, 1012)
+        XCTAssertEqual(prevision.hourly[1].weatherCode, 63)
+        XCTAssertEqual(prevision.hourly[1].precipitationProbability, 70)
+        XCTAssertEqual(prevision.hourly[0].windSpeed, 18, accuracy: 0.0001)
+        XCTAssertEqual(prevision.hourly[0].windGusts, prevision.hourly[0].windSpeed)
+        XCTAssertEqual(prevision.hourly[0].uvIndex, 0)
+        // 8 °C et 18 km/h : le vent refroidit.
+        XCTAssertLessThan(prevision.current.apparentTemperature, 8)
+        XCTAssertFalse(prevision.daily.isEmpty)
+        XCTAssertEqual(prevision.daily.map(\.temperatureMax).max(), 11)
+        XCTAssertNil(AgroWeatherService.baseMetNorway(try MetPayload.decode(data("{}")), parcelle: .paris))
+    }
 }
