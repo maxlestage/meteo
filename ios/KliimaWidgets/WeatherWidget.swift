@@ -297,8 +297,8 @@ struct WeatherWidgetView: View {
                 )
                 TuileWidget(
                     symbole: "sun.max.fill", titre: Localized.text("tile.uv"),
-                    valeur: entry.today.map { AgroFormat.decimal($0.uvIndexMax, decimals: 0) } ?? "–",
-                    detail: entry.today.map { Ville.niveauUv($0.uvIndexMax).label }
+                    valeur: entry.today?.uvIndexMax.map { AgroFormat.decimal($0, decimals: 0) } ?? "–",
+                    detail: entry.today?.uvIndexMax.map { Ville.niveauUv($0).label }
                 )
             }
 
