@@ -189,4 +189,32 @@ final class ProvidersTests: XCTestCase {
         XCTAssertEqual(prevision.daily.map(\.temperatureMax).max(), 11)
         XCTAssertNil(AgroWeatherService.baseMetNorway(try MetPayload.decode(data("{}")), parcelle: .paris))
     }
+
+    /// La prévision de secours date à l'heure de la ville, pas du lecteur :
+    /// le fuseau vient de la dernière réponse d'Open-Meteo gardée.
+    func testLaPrevisionDeSecoursEstALHeureDeLaVille() throws {
+        let tokyo = try XCTUnwrap(TimeZone(identifier: "Asia/Tokyo"))
+        XCTAssertEqual(AgroWeatherService.fuseauGarde(data(#"{"timezone": "Asia/Tokyo", "elevation": 40}"#)), tokyo)
+        XCTAssertNil(AgroWeatherService.fuseauGarde(data("{}")))
+        XCTAssertNil(AgroWeatherService.fuseauGarde(data(#"{"timezone": "Nulle/Part"}"#)))
+
+        let f = ISO8601DateFormatter()
+        let debut = Date(timeIntervalSince1970: (Date().timeIntervalSince1970 / 3600).rounded(.down) * 3600)
+        let heures = (0..<30).map { i in
+            """
+            {"time": "\(f.string(from: debut.addingTimeInterval(Double(i) * 3600)))",
+             "data": {"instant": {"details": {"air_temperature": 12, "wind_speed": 2, "relative_humidity": 70}},
+                      "next_1_hours": {"summary": {"symbol_code": "cloudy"}, "details": {"precipitation_amount": 0}}}}
+            """
+        }.joined(separator: ",")
+        let payload = try MetPayload.decode(data(#"{"properties": {"timeseries": ["# + heures + "]}}"))
+        let prevision = try XCTUnwrap(AgroWeatherService.baseMetNorway(payload, parcelle: .paris, zone: tokyo))
+        XCTAssertEqual(prevision.timezone, "Asia/Tokyo")
+        var calendrier = Calendar(identifier: .gregorian)
+        calendrier.timeZone = tokyo
+        XCTAssertGreaterThanOrEqual(prevision.daily.count, 2, "trente heures couvrent au moins deux jours")
+        for jour in prevision.daily {
+            XCTAssertEqual(jour.date, calendrier.startOfDay(for: jour.date), "les jours commencent à minuit à Tokyo")
+        }
+    }
 }
