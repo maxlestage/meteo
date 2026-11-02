@@ -99,6 +99,9 @@ struct WeatherEntry: TimelineEntry {
     /// semaine.
     var days: [DailySample] = []
     let timeZone: TimeZone
+    /// Plus haut quand la pluie approche : dans une pile de widgets, iOS
+    /// remonte alors Kliima ‣ de lui-même — comme la montre le fait déjà.
+    var relevance: TimelineEntryRelevance? = nil
 }
 
 /// Le widget interroge l'API lui-même, pour la ville enregistrée par
@@ -163,14 +166,16 @@ struct WeatherTimelineProvider: TimelineProvider {
             jours: forecast.daily,
             depuis: maintenant
         ).map { moment in
-            WeatherEntry(
+            let heures = Array(moment.heures.prefix(12))
+            return WeatherEntry(
                 date: moment.date,
                 parcelleName: parcelle.name,
                 current: moment.courant,
                 today: moment.jour,
-                hours: Array(moment.heures.prefix(12)),
+                hours: heures,
                 days: Array(forecast.daily.filter { $0.date >= (moment.jour?.date ?? .distantPast) }.prefix(7)),
-                timeZone: zone
+                timeZone: zone,
+                relevance: TimelineEntryRelevance(score: Horizon.pertinence(heures, a: moment.date), duration: 3600)
             )
         }
     }

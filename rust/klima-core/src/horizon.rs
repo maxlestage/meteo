@@ -12,6 +12,7 @@
 //! parcelle. L'appelant compare donc avec « maintenant à la parcelle ».
 
 use crate::meteo::{DailySample, HourlySample};
+use crate::ville::{prochaine_pluie, Pluie};
 
 const HEURE_MS: i64 = 3_600_000;
 
@@ -43,6 +44,33 @@ pub fn jour_contenant(instant: i64, jours: &[DailySample]) -> Option<&DailySampl
     jours.iter().rev().find(|j| j.date <= instant).or_else(|| jours.first())
 }
 
+/// Le poids d'un moment dans la pile intelligente : plus haut quand la pluie
+/// approche, pour que la pile remonte Kliima ‣ d'elle-même au moment où l'on
+/// en a besoin. `heures` commence à l'heure du moment ; les trois heures se
+/// comptent depuis `instant`, l'heure de l'entrée — pas depuis le moment où
+/// la chronologie est calculée.
+pub fn pertinence(instant: i64, heures: &[HourlySample]) -> u8 {
+    match prochaine_pluie(heures) {
+        Pluie::EnCours { .. } => pertinence::PLUIE_EN_COURS,
+        Pluie::Prevue { debut, .. } if debut - instant < pertinence::PLUIE_DANS_MS => {
+            pertinence::PLUIE_PROCHE
+        }
+        _ => pertinence::SEC,
+    }
+}
+
+/// Les poids de la pile intelligente.
+pub mod pertinence {
+    /// Il pleut.
+    pub const PLUIE_EN_COURS: u8 = 80;
+    /// La pluie arrive dans moins de trois heures.
+    pub const PLUIE_PROCHE: u8 = 60;
+    /// Sec, ou pluie plus lointaine.
+    pub const SEC: u8 = 10;
+    /// Trois heures.
+    pub const PLUIE_DANS_MS: i64 = 3 * super::HEURE_MS;
+}
+
 /* ---------------------------------------------------------------- */
 
 #[cfg(test)]
@@ -72,6 +100,40 @@ mod tests {
 
     fn serie(n: i64, debut: i64) -> Vec<HourlySample> {
         (0..n).map(|i| heure(i, 18.0 + i as f64, debut)).collect()
+    }
+
+    /// Une série de douze heures sèches où il pleut à l'heure `pluie`.
+    fn serie_pluvieuse(pluie: Option<usize>) -> Vec<HourlySample> {
+        let mut s = serie(12, QUATORZE);
+        if let Some(i) = pluie {
+            s[i].precipitation = 1.2;
+        }
+        s
+    }
+
+    #[test]
+    fn il_pleut_la_pile_remonte_kliima() {
+        assert_eq!(pertinence(QUATORZE + 20 * MINUTE, &serie_pluvieuse(Some(0))), 80);
+    }
+
+    #[test]
+    fn une_pluie_dans_deux_heures_pese_plus_qu_un_ciel_sec() {
+        assert_eq!(pertinence(QUATORZE + 20 * MINUTE, &serie_pluvieuse(Some(2))), 60);
+        assert_eq!(pertinence(QUATORZE + 20 * MINUTE, &serie_pluvieuse(None)), 10);
+    }
+
+    #[test]
+    fn une_pluie_lointaine_ne_compte_pas() {
+        assert_eq!(pertinence(QUATORZE, &serie_pluvieuse(Some(3))), 10, "trois heures pile : trop loin");
+        assert_eq!(pertinence(QUATORZE, &serie_pluvieuse(Some(6))), 10);
+    }
+
+    #[test]
+    fn les_trois_heures_se_comptent_depuis_l_entree() {
+        // Une entrée posée à 19 h, calculée à 14 h : une pluie à 20 h est à
+        // une heure d'elle, pas à six.
+        let s = serie_pluvieuse(Some(6));
+        assert_eq!(pertinence(QUATORZE + 5 * HEURE_MS, &s[5..]), 60);
     }
 
     #[test]
