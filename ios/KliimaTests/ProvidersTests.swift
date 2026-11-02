@@ -186,7 +186,12 @@ final class ProvidersTests: XCTestCase {
         // 8 °C et 18 km/h : le vent refroidit.
         XCTAssertLessThan(prevision.current.apparentTemperature, 8)
         XCTAssertFalse(prevision.daily.isEmpty)
-        XCTAssertEqual(prevision.daily.map(\.temperatureMax).max(), 11)
+        // Aujourd'hui se résume depuis maintenant, avec celles de ses heures
+        // qu'on a — quelle que soit l'heure où le test tourne.
+        var calendrier = Calendar(identifier: .gregorian)
+        calendrier.timeZone = .current
+        let aujourdhui = prevision.hourly.filter { calendrier.isDate($0.time, inSameDayAs: debut) }
+        XCTAssertEqual(prevision.daily.first?.temperatureMax, aujourdhui.map(\.temperature).max())
         XCTAssertNil(AgroWeatherService.baseMetNorway(try MetPayload.decode(data("{}")), parcelle: .paris))
     }
 
@@ -200,7 +205,7 @@ final class ProvidersTests: XCTestCase {
 
         let f = ISO8601DateFormatter()
         let debut = Date(timeIntervalSince1970: (Date().timeIntervalSince1970 / 3600).rounded(.down) * 3600)
-        let heures = (0..<30).map { i in
+        let heures = (0..<60).map { i in
             """
             {"time": "\(f.string(from: debut.addingTimeInterval(Double(i) * 3600)))",
              "data": {"instant": {"details": {"air_temperature": 12, "wind_speed": 2, "relative_humidity": 70}},
@@ -212,9 +217,41 @@ final class ProvidersTests: XCTestCase {
         XCTAssertEqual(prevision.timezone, "Asia/Tokyo")
         var calendrier = Calendar(identifier: .gregorian)
         calendrier.timeZone = tokyo
-        XCTAssertGreaterThanOrEqual(prevision.daily.count, 2, "trente heures couvrent au moins deux jours")
+        XCTAssertGreaterThanOrEqual(prevision.daily.count, 2, "soixante heures couvrent aujourd'hui et demain")
         for jour in prevision.daily {
             XCTAssertEqual(jour.date, calendrier.startOfDay(for: jour.date), "les jours commencent à minuit à Tokyo")
         }
+    }
+
+    /// La série horaire de MET Norway s'arrête en cours de journée : ce
+    /// dernier morceau ne se résume pas en jour entier. Aujourd'hui, lui, se
+    /// résume depuis maintenant.
+    func testLaPrevisionDeSecoursNeResumePasUnJourEntame() throws {
+        let paris = try XCTUnwrap(TimeZone(identifier: "Europe/Paris"))
+        var calendrier = Calendar(identifier: .gregorian)
+        calendrier.timeZone = paris
+        let f = ISO8601DateFormatter()
+        let debut = Date(timeIntervalSince1970: (Date().timeIntervalSince1970 / 3600).rounded(.down) * 3600)
+        let demain = try XCTUnwrap(calendrier.date(byAdding: .day, value: 1, to: calendrier.startOfDay(for: debut)))
+        let apresDemain = try XCTUnwrap(calendrier.date(byAdding: .day, value: 1, to: demain))
+        // De maintenant à après-demain 05:00 : demain est entier, après-demain
+        // n'a que sa nuit — froide et sèche.
+        let fin = apresDemain.addingTimeInterval(6 * 3600)
+        let n = Int(fin.timeIntervalSince(debut) / 3600)
+        let heures = (0..<n).map { i -> String in
+            let t = debut.addingTimeInterval(Double(i) * 3600)
+            let nuitDApresDemain = t >= apresDemain
+            return """
+            {"time": "\(f.string(from: t))",
+             "data": {"instant": {"details": {"air_temperature": \(nuitDApresDemain ? 2 : 12), "wind_speed": 2, "relative_humidity": 70}},
+                      "next_1_hours": {"summary": {"symbol_code": "cloudy"}, "details": {"precipitation_amount": 0}}}}
+            """
+        }.joined(separator: ",")
+        let payload = try MetPayload.decode(data(#"{"properties": {"timeseries": ["# + heures + "]}}"))
+        let prevision = try XCTUnwrap(AgroWeatherService.baseMetNorway(payload, parcelle: .paris, zone: paris))
+        XCTAssertEqual(prevision.daily.map(\.date), [calendrier.startOfDay(for: debut), demain],
+                       "aujourd'hui et demain ; pas la nuit d'après-demain")
+        XCTAssertEqual(prevision.daily.map(\.temperatureMin).min(), 12, "les 2 °C de la nuit entamée ne font pas un jour")
+        XCTAssertEqual(prevision.hourly.last?.temperature, 2, "les heures, elles, restent")
     }
 }
