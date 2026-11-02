@@ -87,6 +87,33 @@ enum Horizon {
         }
         return moments
     }
+
+    /// Les poids de la pile intelligente.
+    enum Pertinence {
+        /// Il pleut.
+        static let pluieEnCours: Float = 80
+        /// La pluie arrive dans moins de trois heures.
+        static let pluieProche: Float = 60
+        /// Sec, ou pluie plus lointaine.
+        static let sec: Float = 10
+        static let pluieDans: TimeInterval = 3 * 3600
+    }
+
+    /// Le poids d'un moment dans la pile intelligente : plus haut quand la
+    /// pluie approche, pour que la pile remonte Kliima ‣ d'elle-même au moment
+    /// où l'on en a besoin. `heures` commence à l'heure du moment ; les trois
+    /// heures se comptent depuis `instant`, l'heure de l'entrée — pas depuis
+    /// le moment où la chronologie est calculée.
+    static func pertinence(_ heures: [HourlySample], a instant: Date) -> Float {
+        switch Ville.prochainePluie(heures) {
+        case .enCours:
+            return Pertinence.pluieEnCours
+        case .prevue(let debut, _, _) where debut.timeIntervalSince(instant) < Pertinence.pluieDans:
+            return Pertinence.pluieProche
+        default:
+            return Pertinence.sec
+        }
+    }
 }
 
 extension CurrentSample {
