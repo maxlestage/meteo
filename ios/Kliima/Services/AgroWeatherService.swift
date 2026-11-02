@@ -10,6 +10,10 @@ enum AgroWeatherError: LocalizedError, Equatable {
         switch self {
         case .unreachable:
             return Localized.text("api.unreachable")
+        case let .badStatus(code) where code == 429 || code >= 500:
+            // Surcharge ou panne passagère du fournisseur : ce n'est pas un
+            // code qu'on demande à quelqu'un de comprendre.
+            return Localized.text("api.busy")
         case let .badStatus(code):
             return Localized.text("api.status", String(code))
         case .malformedResponse:
@@ -199,8 +203,192 @@ struct AgroWeatherService: AgroWeatherProviding {
             URLQueryItem(name: "forecast_days", value: String(days)),
         ]
 
-        let payload: ForecastPayload = try await get(components.url!)
-        return Self.base(payload, parcelle: parcelle)
+        let cache = Self.fichierDeBase(parcelle, days: days)
+        do {
+            let data = try await Self.lireAvecRelais(components, session: session)
+            let payload = try Self.decoder(ForecastPayload.self, data)
+            try? data.write(to: cache, options: .atomic)
+            return Self.base(payload, parcelle: parcelle)
+        } catch {
+            // Ni Open-Meteo ni le relais : MET Norway, qui ne dépend pas
+            // d'eux, fait la prévision de base — moins détaillée (ni UV ni
+            // rafales), mais de l'heure.
+            if let met = try? await WeatherProviders.metNorwayPayload(parcelle, session),
+               let deSecours = Self.baseMetNorway(met, parcelle: parcelle) {
+                return deSecours
+            }
+            // Puis la dernière prévision reçue pour cette ville, si elle a
+            // moins de douze heures, plutôt qu'un écran vide. Son heure de
+            // réception est la sienne : l'écran le dit.
+            guard let data = try? Data(contentsOf: cache),
+                  let date = (try? FileManager.default.attributesOfItem(atPath: cache.path))?[.modificationDate] as? Date,
+                  Date().timeIntervalSince(date) < 12 * 3600,
+                  let payload = try? Self.decoder(ForecastPayload.self, data)
+            else { throw error }
+            return Self.base(payload, parcelle: parcelle, fetchedAt: date)
+        }
+    }
+
+    /// La prévision de base faite par MET Norway seul, quand Open-Meteo ne
+    /// répond plus. Horaire sur les deux à trois jours où MET Norway l'est ;
+    /// les jours se résument d'après ces heures. Ce que MET Norway ne donne
+    /// pas dans sa forme compacte n'est pas inventé : l'UV reste à zéro et les
+    /// rafales valent le vent moyen. Le risque de pluie vient du cumul annoncé.
+    static func baseMetNorway(_ payload: MetPayload, parcelle: Parcelle) -> AgroForecast? {
+        let zone = TimeZone.current
+        var calendrier = Calendar(identifier: .gregorian)
+        calendrier.timeZone = zone
+        let debut = Date(timeIntervalSince1970: (Date().timeIntervalSince1970 / 3600).rounded(.down) * 3600)
+
+        let heures: [HourlySample] = (payload.properties?.timeseries ?? []).compactMap { entree in
+            guard let time = entree.time, time >= debut,
+                  let instant = entree.data?.instant?.details,
+                  let temperature = instant["air_temperature"],
+                  let prochaine = entree.data?.next_1_hours
+            else { return nil }
+            let symbole = prochaine.summary?.symbol_code ?? ""
+            let pluie = prochaine.details?["precipitation_amount"] ?? 0
+            let vent = (instant["wind_speed"] ?? 0) * 3.6
+            let humidite = instant["relative_humidity"] ?? 0
+            let heureLocale = calendrier.component(.hour, from: time)
+            let jour = symbole.hasSuffix("_day") || (!symbole.hasSuffix("_night") && (7..<19).contains(heureLocale))
+            return HourlySample(
+                time: time,
+                weatherCode: WeatherProviders.codeDuSymbole(symbole) ?? (pluie >= 0.1 ? 61 : 2),
+                isDay: jour,
+                precipitationProbability: pluie >= 0.1 ? 70 : (pluie > 0 ? 30 : 5),
+                temperature: temperature,
+                apparentTemperature: Self.ressenti(temperature, vent: vent),
+                relativeHumidity: humidite,
+                dewPoint: Self.pointDeRosee(temperature, humidite: humidite),
+                precipitation: pluie,
+                windSpeed: vent,
+                windGusts: vent,
+                uvIndex: 0
+            )
+        }
+        guard let premiere = heures.first else { return nil }
+
+        let parJour = Dictionary(grouping: heures) { calendrier.startOfDay(for: $0.time) }
+        let jours: [DailySample] = parJour.keys.sorted().compactMap { date in
+            guard let h = parJour[date], !h.isEmpty else { return nil }
+            let mouillees = h.filter { $0.weatherCode >= 51 }
+            let code = mouillees.map(\.weatherCode).max()
+                ?? Dictionary(grouping: h, by: \.weatherCode).max { $0.value.count < $1.value.count }?.key ?? 2
+            return DailySample(
+                date: date, weatherCode: code,
+                temperatureMin: h.map(\.temperature).min() ?? premiere.temperature,
+                temperatureMax: h.map(\.temperature).max() ?? premiere.temperature,
+                precipitationSum: h.map(\.precipitation).reduce(0, +),
+                precipitationProbabilityMax: h.map(\.precipitationProbability).max() ?? 0,
+                windGustsMax: h.map(\.windGusts).max() ?? 0,
+                uvIndexMax: 0, sunrise: nil, sunset: nil
+            )
+        }
+        let pression = payload.nearest(to: premiere.time)?.data?.instant?.details?["air_pressure_at_sea_level"] ?? 0
+        let courant = CurrentSample(
+            time: premiere.time, temperature: premiere.temperature,
+            apparentTemperature: premiere.apparentTemperature, weatherCode: premiere.weatherCode,
+            isDay: premiere.isDay, relativeHumidity: premiere.relativeHumidity,
+            windSpeed: premiere.windSpeed, windGusts: premiere.windGusts, pressure: pression
+        )
+        return AgroForecast(
+            parcelle: parcelle, timezone: zone.identifier, elevation: 0,
+            current: courant, hourly: heures, daily: jours, fetchedAt: Date()
+        )
+    }
+
+    /// Le refroidissement éolien sous 10 °C avec du vent, la température
+    /// sinon — la formule d'Environnement Canada.
+    static func ressenti(_ t: Double, vent v: Double) -> Double {
+        guard t <= 10, v > 4.8 else { return t }
+        let p = pow(v, 0.16)
+        return 13.12 + 0.6215 * t - 11.37 * p + 0.3965 * t * p
+    }
+
+    /// Le point de rosée par l'approximation de Magnus.
+    static func pointDeRosee(_ t: Double, humidite: Double) -> Double {
+        guard humidite > 0 else { return t }
+        let a = 17.62, b = 243.12
+        let g = log(humidite / 100) + a * t / (b + t)
+        return b * g / (a - g)
+    }
+
+    /// Où garder la dernière prévision de base reçue pour une ville.
+    static func fichierDeBase(_ parcelle: Parcelle, days: Int) -> URL {
+        let dossier = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask)[0]
+        let nom = String(format: "base-%.3f_%.3f-%d.json", parcelle.latitude, parcelle.longitude, days)
+        return dossier.appendingPathComponent(nom)
+    }
+
+    /// L'adresse du relais, quand ce binaire en a une (l'application ; ni le
+    /// widget ni la montre).
+    private static var relais: URL? {
+        guard let valeur = Bundle.main.object(forInfoDictionaryKey: "KliimaRelay") as? String,
+              !valeur.trimmingCharacters(in: .whitespaces).isEmpty
+        else { return nil }
+        return URL(string: valeur.trimmingCharacters(in: .whitespaces))
+    }
+
+    /// Open-Meteo en direct, en réessayant une panne passagère ; puis, s'il
+    /// se tait, la même question au relais, qui garde ses réponses et en sert
+    /// une un peu ancienne quand le fournisseur ne répond plus.
+    static func lireAvecRelais(_ components: URLComponents, session: URLSession) async throws -> Data {
+        do {
+            return try await lire(components.url!, session: session, essais: 3)
+        } catch let erreur as AgroWeatherError {
+            guard let relais, var parRelais = URLComponents(url: relais, resolvingAgainstBaseURL: false) else {
+                throw erreur
+            }
+            let chemin = parRelais.path.hasSuffix("/") ? String(parRelais.path.dropLast()) : parRelais.path
+            parRelais.path = chemin + "/v1/open-meteo/forecast"
+            parRelais.queryItems = components.queryItems
+            guard let url = parRelais.url, let data = try? await lire(url, session: session, essais: 1) else {
+                throw erreur
+            }
+            return data
+        }
+    }
+
+    /// Une lecture, réessayée après une seconde puis trois quand le service
+    /// ne répond pas ou se dit surchargé (429, 5xx). Un refus franc (400…)
+    /// ne se réessaie pas.
+    static func lire(_ url: URL, session: URLSession, essais: Int) async throws -> Data {
+        var derniere: AgroWeatherError = .unreachable
+        for essai in 0..<max(essais, 1) {
+            if essai > 0 {
+                try await Task.sleep(nanoseconds: essai == 1 ? 1_000_000_000 : 3_000_000_000)
+            }
+            let data: Data
+            let response: URLResponse
+            // Huit secondes : Open-Meteo en panne ne répond pas du tout, et la
+            // minute par défaut, trois fois, laissait l'écran vide trois minutes.
+            var requete = URLRequest(url: url)
+            requete.timeoutInterval = 8
+            do {
+                (data, response) = try await session.data(for: requete)
+            } catch let error as URLError where error.code == .cancelled {
+                throw error
+            } catch {
+                derniere = .unreachable
+                continue
+            }
+            if let http = response as? HTTPURLResponse, !(200..<300).contains(http.statusCode) {
+                derniere = .badStatus(http.statusCode)
+                if http.statusCode == 429 || http.statusCode >= 500 { continue }
+                throw derniere
+            }
+            return data
+        }
+        throw derniere
+    }
+
+    private static func decoder<T: Decodable>(_ type: T.Type, _ data: Data) throws -> T {
+        do {
+            return try JSONDecoder().decode(type, from: data)
+        } catch {
+            throw AgroWeatherError.malformedResponse
+        }
     }
 
     /// Lit une prévision de base reçue telle quelle — du direct, par exemple.
@@ -212,7 +400,7 @@ struct AgroWeatherService: AgroWeatherProviding {
         }
     }
 
-    private static func base(_ payload: ForecastPayload, parcelle: Parcelle) -> AgroForecast {
+    private static func base(_ payload: ForecastPayload, parcelle: Parcelle, fetchedAt: Date = Date()) -> AgroForecast {
         let zone = TimeZone(identifier: payload.timezone) ?? .current
         let current = payload.current.decode(in: zone)
 
@@ -226,7 +414,7 @@ struct AgroWeatherService: AgroWeatherProviding {
             // élément des séries.
             hourly: fromCurrentHour(payload.hourly.decode(in: zone), now: current.time),
             daily: payload.daily.decode(in: zone),
-            fetchedAt: Date()
+            fetchedAt: fetchedAt
         )
     }
 

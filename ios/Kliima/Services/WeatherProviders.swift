@@ -171,6 +171,9 @@ extension WeatherProviders {
 
     private static func json(_ url: URL, _ session: URLSession, userAgent: Bool = false) async throws -> Data {
         var request = URLRequest(url: url)
+        // Dix secondes, pas la minute par défaut : un fournisseur qui ne
+        // répond plus faisait attendre toute la prévision avec lui.
+        request.timeoutInterval = 10
         if userAgent { request.setValue(WeatherProviders.userAgent, forHTTPHeaderField: "User-Agent") }
         let (data, response) = try await session.data(for: request)
         if let http = response as? HTTPURLResponse, !(200..<300).contains(http.statusCode) {
