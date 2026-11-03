@@ -266,6 +266,7 @@ struct DashboardView: View {
         guard plan.allows(.alertes), await AlertScheduler.requestAuthorization() else { return }
         let state = await AlertScheduler.schedule(
             hours: forecast.hourly,
+            ville: forecast.parcelle.name,
             plan: plan,
             state: SharedStore.loadAlertState()
         )

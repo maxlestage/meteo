@@ -59,9 +59,15 @@ enum AlertScheduler {
     ///
     /// Renvoie l'état mis à jour, que l'appelant enregistre : c'est lui qui
     /// empêche la répétition au réveil suivant.
+    ///
+    /// `ville` est le nom de la ville dont viennent les heures : il va en
+    /// sous-titre. « Gel annoncé, jusqu'à −2 °C » ne disait pas où — au palier
+    /// qui ouvre les alertes, on suit plusieurs villes, et la notification
+    /// arrive souvent bien après qu'on a quitté l'écran de celle-ci.
     @discardableResult
     static func schedule(
         hours: [HourlySample],
+        ville: String,
         plan: Plan,
         state: AlertState,
         now: Date = Date(),
@@ -78,7 +84,7 @@ enum AlertScheduler {
         for alert in alerts {
             guard let at = Alerts.deferPastQuietHours(send: now, event: alert.at, options: options)
             else { continue }
-            if await post(alert, at: at, now: now, center: center) { sent.append(alert) }
+            if await post(alert, ville: ville, at: at, now: now, center: center) { sent.append(alert) }
         }
 
         return Alerts.recordSent(state, sent, at: now)
@@ -87,12 +93,17 @@ enum AlertScheduler {
     /// Traduit une alerte en notification et la programme.
     private static func post(
         _ alert: Alert,
+        ville: String,
         at: Date,
         now: Date,
         center: UNUserNotificationCenter
     ) async -> Bool {
         let content = UNMutableNotificationContent()
         content.title = Localized.text(alert.titleKey)
+        // La ville en sous-titre, et un fil par ville : le centre de
+        // notifications range les alertes de Lyon à part de celles de Paris.
+        content.subtitle = ville
+        content.threadIdentifier = "kliima.ville.\(ville)"
         content.body = Localized.text(alert.bodyKey, formatted(alert))
         content.sound = .default
 
