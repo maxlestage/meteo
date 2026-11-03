@@ -120,6 +120,14 @@ pub struct CielObserve {
 }
 
 impl CielObserve {
+    /// Vrai tant que le bulletin parle encore du moment présent : pas plus
+    /// vieux que `AGE_MAX_MS` à `maintenant` (heure de la ville, ms). Choisi
+    /// frais à l'arrivée de la prévision, il vieillit avec elle : gardée en
+    /// mémoire ou laissée ouverte, elle disait encore la pluie de midi à 17 h.
+    pub fn frais(&self, maintenant: i64) -> bool {
+        maintenant - self.time <= seuils::AGE_MAX_MS
+    }
+
     /// Ce qui tombe, pour le dire : nature et intensité.
     pub fn precipitation(&self) -> Option<Precipitation> {
         self.tombe.map(Tombe::precipitation)
