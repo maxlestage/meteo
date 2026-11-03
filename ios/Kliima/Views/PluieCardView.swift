@@ -50,6 +50,7 @@ struct PluieCardView: View {
 
             HStack {
                 Text(Localized.text("hourly.now"))
+                    .accessibilityLabel(Localized.text("hourly.now.a11y"))
                 Spacer()
                 Text("+6 h")
                 Spacer()
