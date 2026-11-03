@@ -206,7 +206,8 @@ pub fn use_forecast(
                     &recoupement.series,
                     recoupement.observation,
                     recoupement.ciel,
-                    radar.as_ref().and_then(|r| r.maintenant),
+                    // Une image gardée faute de mieux ne dit plus ce qui tombe.
+                    radar.as_ref().filter(|r| r.frais(horloge::maintenant_utc())).and_then(|r| r.maintenant),
                 )),
                 consensus: consensus_from_outcomes(&recoupement.outcomes),
                 air,

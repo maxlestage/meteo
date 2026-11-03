@@ -136,7 +136,8 @@ struct AgroWeatherService: AgroWeatherProviding {
         apprentissage: Apprentissage? = nil
     ) -> AgroForecast {
         let tombe: Int?
-        if let radar, radar.voitLaVille {
+        // Une image gardée faute de mieux ne dit plus ce qui tombe.
+        if let radar, radar.voitLaVille(a: Date()) {
             tombe = Radar.tombe(radar.maintenant)
         } else {
             tombe = sources.ciel?.tombe?.code
@@ -172,7 +173,7 @@ struct AgroWeatherService: AgroWeatherProviding {
     /// cours. (Il ne peut pas retirer ici une pluie que l'aéroport a mise : le
     /// direct, qui recoupe tout d'un coup, le fera à son premier message.)
     static func appliquer(_ radar: RadarPrevision, a forecast: AgroForecast) -> AgroForecast {
-        guard let tombe = Radar.tombe(radar.maintenant) else { return forecast }
+        guard radar.frais(Date()), let tombe = Radar.tombe(radar.maintenant) else { return forecast }
         let r = Fusion.recouper(
             heures: forecast.hourly, jours: forecast.daily, courant: forecast.current,
             series: [], observation: FusionObservation(temperature: nil, tombe: tombe)
