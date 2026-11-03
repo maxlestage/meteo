@@ -443,6 +443,7 @@ private struct WatchHeures: View {
                 .symbolRenderingMode(.multicolor)
                 .font(.system(size: 15))
                 .frame(height: 18)
+                .accessibilityLabel(WeatherCondition.forCode(code).label(isDay: isDay))
             Text(AgroFormat.temperature(temperature))
                 .font(.system(size: 13, weight: .medium).monospacedDigit())
                 .lineLimit(1)
