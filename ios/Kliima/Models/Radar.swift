@@ -12,6 +12,10 @@ enum RadarSeuils {
     /// À partir de ce débit au-dessus de la ville, il tombe quelque chose
     /// (mm/h) : le seuil d'un quart mouillé du guetteur, ramené à l'heure.
     static let debitMouille = VeilleSeuils.pluieQuartMm * 4
+    /// Au-delà de cet âge, l'image ne dit plus ce qui tombe. Le guetteur relit
+    /// à chaque quart : une lecture manquée laisse une image d'une vingtaine
+    /// de minutes, deux disent que le relais ne répond plus.
+    static let ageMax: TimeInterval = 30 * 60
 }
 
 /// Ce que le radar dit pour une ville.
@@ -33,8 +37,20 @@ struct RadarPrevision: Equatable, Sendable {
             && a.deplacement?.cap == b.deplacement?.cap
     }
 
-    /// Vrai quand un radar voit la ville : il fait alors foi pour ce qui tombe.
-    var voitLaVille: Bool { maintenant != nil }
+    /// Vrai tant que l'image n'est pas plus vieille que `RadarSeuils.ageMax`
+    /// à `instant`. Gardée en mémoire quand le relais ne répond plus, une
+    /// image de midi disait encore à 15 h ce qui tombait, taisait l'aéroport
+    /// et montrait où allait une averse partie depuis. Miroir de
+    /// `Prevision::frais`.
+    func frais(_ instant: Date) -> Bool {
+        instant.timeIntervalSince(image) <= RadarSeuils.ageMax
+    }
+
+    /// Vrai quand un radar voit la ville sur une image fraîche : il fait alors
+    /// foi pour ce qui tombe. Miroir de `Prevision::voit_la_ville`.
+    func voitLaVille(a instant: Date) -> Bool {
+        maintenant != nil && frais(instant)
+    }
 }
 
 enum Radar {

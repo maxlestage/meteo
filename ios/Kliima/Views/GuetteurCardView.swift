@@ -33,9 +33,14 @@ struct GuetteurCardView: View {
                 tete
 
                 if let quarts, let lecture = Veille.veille(
-                    Veille.observer(serie(quarts), maintenant: contexte.date, ciel: aeroport), maintenant: contexte.date
+                    Veille.observer(
+                        serie(quarts, a: contexte.date), maintenant: contexte.date, ciel: aeroport(a: contexte.date)
+                    ),
+                    maintenant: contexte.date
                 ) {
-                    let aveugle = Veille.aveugle(serie(quarts), maintenant: contexte.date, ciel: aeroport)
+                    let aveugle = Veille.aveugle(
+                        serie(quarts, a: contexte.date), maintenant: contexte.date, ciel: aeroport(a: contexte.date)
+                    )
                     bulle(Localized.text("veille.now"), immediat(lecture))
                     bulle(Localized.text("veille.next"), suite(lecture, aveugle: aveugle))
                     grille(lecture)
@@ -48,7 +53,7 @@ struct GuetteurCardView: View {
                         .background(Color.filet.opacity(0.6), in: bulleForme)
                 }
 
-                if let mouvement = VeilleTextes.mouvement(radar) {
+                if let mouvement = VeilleTextes.mouvement(radar, a: contexte.date) {
                     Label(mouvement, systemImage: "location.north.line.fill")
                         .font(.subheadline.weight(.semibold))
                         .foregroundStyle(bleuPluie)
@@ -66,7 +71,7 @@ struct GuetteurCardView: View {
                 }
 
                 // La mention que la licence du radar demande.
-                if let source = VeilleTextes.sourceRadar(radar, in: timeZone) {
+                if let source = VeilleTextes.sourceRadar(radar, a: contexte.date, in: timeZone) {
                     Text(source)
                         .font(.caption2)
                         .foregroundStyle(Color.encreDouce)
@@ -78,14 +83,17 @@ struct GuetteurCardView: View {
         .accessibilityElement(children: .combine)
     }
 
-    /// La série refaite avec le radar.
-    private func serie(_ quarts: [QuartSample]) -> [QuartSample] {
-        Veille.radariser(quarts, radar: radar?.quarts ?? [])
+    /// La série refaite avec le radar. Une image gardée en mémoire quand le
+    /// relais ne répond plus n'y entre pas : le guetteur fait comme s'il
+    /// n'avait pas de radar.
+    private func serie(_ quarts: [QuartSample], a instant: Date) -> [QuartSample] {
+        guard let radar, radar.frais(instant) else { return quarts }
+        return Veille.radariser(quarts, radar: radar.quarts)
     }
 
     /// Ce que voit l'aéroport ne compte que si le radar ne voit pas la ville.
-    private var aeroport: CielObserve? {
-        radar?.voitLaVille == true ? nil : ciel
+    private func aeroport(a instant: Date) -> CielObserve? {
+        radar?.voitLaVille(a: instant) == true ? nil : ciel
     }
 
     // MARK: Morceaux
