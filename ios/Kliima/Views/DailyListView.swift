@@ -111,11 +111,16 @@ struct DailyListView: View {
                     .offset(x: width * start)
 
                 if isToday {
+                    // Le point court à l'intérieur du rail, comme celui des
+                    // jauges : centré sur la position, il débordait de sa
+                    // moitié quand il faisait le plus froid ou le plus chaud
+                    // de la semaine.
+                    let course = max(width - 7, 0)
                     let position = min(max((currentTemperature - weekLow) / span, 0), 1)
                     Circle()
                         .fill(Color.encre)
                         .frame(width: 7, height: 7)
-                        .offset(x: width * position - 3.5)
+                        .offset(x: course * position)
                 }
             }
             .frame(height: 4)
