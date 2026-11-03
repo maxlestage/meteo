@@ -182,6 +182,41 @@ final class FusionTests: XCTestCase {
         XCTAssertEqual(d.sunrise, jour.sunrise)
     }
 
+    func testLaJourneeEnCoursEmbrasseLInstant() {
+        let jour = { (date: Date, min: Double, max: Double) in
+            DailySample(
+                date: date, weatherCode: 1, temperatureMin: min, temperatureMax: max,
+                precipitationSum: 0, precipitationProbabilityMax: 0, windGustsMax: 20, uvIndexMax: 3,
+                sunrise: nil, sunset: nil
+            )
+        }
+        let aujourdHui = midi.addingTimeInterval(-12 * 3600)
+        let demain = midi.addingTimeInterval(12 * 3600)
+        let jours = [jour(aujourdHui, 10, 17), jour(demain, 16, 20)]
+        // Il fait 18,4 : le maximum du jour monte jusqu'à lui, demain ne bouge pas.
+        var r = Fusion.recouper(heures: [], jours: jours, courant: courant, series: [], observation: .aucune)
+        XCTAssertEqual(r.jours[0].temperatureMin, 10)
+        XCTAssertEqual(r.jours[0].temperatureMax, 18.4)
+        XCTAssertEqual(r.jours[1], jours[1])
+        // Plus froid que le minimum annoncé : le minimum descend.
+        let froid = CurrentSample(
+            time: courant.time, temperature: 8, apparentTemperature: courant.apparentTemperature,
+            weatherCode: courant.weatherCode, isDay: courant.isDay, relativeHumidity: courant.relativeHumidity,
+            windSpeed: courant.windSpeed, windGusts: courant.windGusts, pressure: courant.pressure
+        )
+        r = Fusion.recouper(heures: [], jours: jours, courant: froid, series: [], observation: .aucune)
+        XCTAssertEqual(r.jours[0].temperatureMin, 8)
+        XCTAssertEqual(r.jours[0].temperatureMax, 17)
+        // Dans l'amplitude : rien ne change, le jour ne rétrécit jamais.
+        let large = [jour(aujourdHui, 5, 25)]
+        XCTAssertEqual(Fusion.recouper(heures: [], jours: large, courant: courant, series: [], observation: .aucune).jours[0], large[0])
+        // Une série qui commence demain, ou qui a fini hier, n'est pas touchée.
+        let plusTard = [jour(demain, 3, 5)]
+        XCTAssertEqual(Fusion.recouper(heures: [], jours: plusTard, courant: courant, series: [], observation: .aucune).jours[0], plusTard[0])
+        let hier = [jour(aujourdHui.addingTimeInterval(-24 * 3600), 3, 5)]
+        XCTAssertEqual(Fusion.recouper(heures: [], jours: hier, courant: courant, series: [], observation: .aucune).jours[0], hier[0])
+    }
+
     // MARK: Les séries des fournisseurs
 
     func testUneSerieParModeleQuiCouvreLePoint() throws {
