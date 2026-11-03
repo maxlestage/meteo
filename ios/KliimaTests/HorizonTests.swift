@@ -207,6 +207,27 @@ final class HorizonTests: XCTestCase {
 
     private var minuit: Date { quatorze.addingTimeInterval(-14 * 3600) }
 
+    /// L'en-tête de l'iPhone et de la montre : à 17 h 10, « maintenant » est
+    /// la prévision de dix-sept heures (22°) ; le jour publié s'arrêtait à
+    /// 13°, et on lisait « 22° » au-dessus de « ↑ 13° ».
+    func testLEnTeteNAnnoncePasUnMaximumSousLaTemperatureAffichee() {
+        let forecast = AgroForecast(
+            parcelle: .paris, timezone: "UTC", elevation: 0,
+            current: releveDe1345(), hourly: serie(debut: treize),
+            daily: [jour(minuit), jour(minuit.addingTimeInterval(86_400))],
+            fetchedAt: treize.addingTimeInterval(45 * 60)
+        )
+        let a1710 = quatorze.addingTimeInterval(3 * 3600 + 10 * 60)
+        let jours = forecast.joursAutourDeMaintenant(a: a1710)
+        XCTAssertEqual(jours.count, 2)
+        XCTAssertEqual(jours[0].temperatureMax, 22, "« 22° » sous « ↑ 22° »")
+        XCTAssertEqual(jours[0].temperatureMin, 9)
+        XCTAssertEqual(jours[1].temperatureMax, 13, "demain ne bouge pas")
+        // Dans l'heure du relevé, c'est lui qu'on embrasse.
+        let a1350 = treize.addingTimeInterval(50 * 60)
+        XCTAssertEqual(forecast.joursAutourDeMaintenant(a: a1350)[0].temperatureMax, 17.5)
+    }
+
     func testLeJourEmbrasseLaTemperatureAffichee() throws {
         let jours = [jour(minuit), jour(minuit.addingTimeInterval(86_400))]
         var j = try XCTUnwrap(Horizon.jour(contenant: quatorze.addingTimeInterval(3600),
