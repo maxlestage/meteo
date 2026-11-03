@@ -63,3 +63,51 @@ fn une_fleche_affichee_se_lit_en_mots() {
     assert!(vues >= 5, "l'amplitude fléchée a disparu des vues ({vues}) : revoir ce test");
     assert_eq!(muettes, Vec::<String>::new());
 }
+
+/// Un symbole du ciel (ou d'un conseil) dit ce qu'il montre, ou se tait.
+///
+/// Sans libellé, VoiceOver lisait le nom anglais du symbole SF : « cloud sun
+/// rain » sur le widget, la complication, l'île. Chaque `Image` dessinée
+/// d'après le ciel ou un conseil porte donc `.accessibilityLabel(…)` — le
+/// ciel en mots — ou `.accessibilityHidden(true)` quand le libellé s'affiche
+/// déjà à côté.
+#[test]
+fn un_symbole_du_ciel_se_lit_en_mots() {
+    let mut fichiers = Vec::new();
+    swift(&racine().join("ios"), &mut fichiers);
+
+    let mut muets = Vec::new();
+    let mut vues = 0;
+    for fichier in &fichiers {
+        let source = fs::read_to_string(fichier).expect("source lisible");
+        let lignes: Vec<&str> = source.lines().collect();
+        for (i, ligne) in lignes.iter().enumerate() {
+            let code = ligne.trim_start();
+            if code.starts_with("//") || !code.contains("Image(systemName:") {
+                continue;
+            }
+            if !(code.contains("symbolName") || code.contains("symbole)")) {
+                continue;
+            }
+            vues += 1;
+            // Les modificateurs qui suivent l'image (et leurs commentaires),
+            // jusqu'à la vue suivante.
+            let dit = lignes
+                .iter()
+                .skip(i + 1)
+                .take(PORTEE)
+                .take_while(|suite| {
+                    let suite = suite.trim_start();
+                    suite.starts_with('.') || suite.starts_with("//")
+                })
+                .any(|suite| {
+                    suite.contains(".accessibilityLabel(") || suite.contains(".accessibilityHidden(")
+                });
+            if !dit {
+                muets.push(format!("{}:{}", fichier.display(), i + 1));
+            }
+        }
+    }
+    assert!(vues >= 20, "les symboles du ciel ont disparu des vues ({vues}) : revoir ce test");
+    assert_eq!(muets, Vec::<String>::new());
+}

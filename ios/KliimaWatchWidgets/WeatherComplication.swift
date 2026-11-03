@@ -217,6 +217,7 @@ struct WeatherComplicationView: View {
             VStack(spacing: 0) {
                 Image(systemName: symbole)
                     .font(.system(size: 12))
+                    .accessibilityLabel(libelle)
                 Text(courte)
                     .font(.system(size: 15, weight: .medium))
                     .minimumScaleFactor(0.6)
@@ -239,6 +240,7 @@ struct WeatherComplicationView: View {
                     Image(systemName: symbole)
                         .font(.system(size: 14))
                         .symbolRenderingMode(.multicolor)
+                        .accessibilityLabel(libelle)
                     Spacer(minLength: 4)
                     if let today = entry.today {
                         Text("\(AgroFormat.temperature(today.temperatureMin)) / \(AgroFormat.temperature(today.temperatureMax))")
@@ -269,6 +271,13 @@ struct WeatherComplicationView: View {
 
     private var condition: WeatherCondition? {
         entry.current.map { WeatherCondition.forCode($0.weatherCode) }
+    }
+
+    /// Ce que VoiceOver dit du symbole : le ciel en mots, plutôt que le nom
+    /// anglais du symbole.
+    private var libelle: String {
+        guard let current = entry.current, let condition else { return Localized.text("widget.unavailable") }
+        return condition.label(isDay: current.isDay)
     }
 
     /// Le symbole du ciel, ou un nuage neutre tant qu'on ne sait pas.
