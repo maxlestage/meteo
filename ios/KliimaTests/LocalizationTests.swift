@@ -84,6 +84,25 @@ final class LocalizationTests: XCTestCase {
         }
     }
 
+    /// L'amplitude du jour se lit en mots, dans l'ordre de l'écran, sans les
+    /// flèches que VoiceOver prononçait « flèche vers le haut ».
+    func testAmplitudeIsReadInWords() {
+        let minimum = AgroFormat.temperature(9)
+        let maximum = AgroFormat.temperature(13)
+        for maximumDAbord in [false, true] {
+            let lue = Localized.amplitude(min: 9, max: 13, maximumDAbord: maximumDAbord)
+            XCTAssertFalse(lue.contains("↑") || lue.contains("↓"), lue)
+            XCTAssertFalse(lue.contains("range."), "clé non résolue : \(lue)")
+            let positionMin = lue.range(of: minimum)?.lowerBound
+            let positionMax = lue.range(of: maximum)?.lowerBound
+            XCTAssertNotNil(positionMin, lue)
+            XCTAssertNotNil(positionMax, lue)
+            if let positionMin, let positionMax {
+                XCTAssertEqual(positionMax < positionMin, maximumDAbord, lue)
+            }
+        }
+    }
+
     /// Les alertes et les motifs de blocage passent par le même catalogue :
     /// une clé absente ferait apparaître son identifiant à l'écran.
     func testAlertAndPlanKeysHaveLabels() throws {
