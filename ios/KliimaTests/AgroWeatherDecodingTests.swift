@@ -207,6 +207,46 @@ final class AgroWeatherDecodingTests: XCTestCase {
         let apres = calendrier.date(byAdding: .day, value: 30, to: premier)!
         XCTAssertEqual(AgroWeatherService.fromToday(days, now: apres, in: paris).count, 7)
     }
+
+    /// Une prévision laissée ouverte passe minuit : « aujourd'hui » est relu à
+    /// l'affichage, à l'heure de la ville, pas figé à l'arrivée.
+    func testAujourdhuiSuitMinuitALHeureDeLaVille() throws {
+        let paris = try XCTUnwrap(TimeZone(identifier: "Europe/Paris"))
+        var calendrier = Calendar(identifier: .gregorian)
+        calendrier.timeZone = paris
+        let premier = calendrier.date(from: DateComponents(year: 2026, month: 11, day: 2))!
+        let days = (0..<3).map { rang in
+            DailySample(
+                date: calendrier.date(byAdding: .day, value: rang, to: premier)!,
+                weatherCode: 3, temperatureMin: Double(rang), temperatureMax: Double(10 + rang),
+                precipitationSum: 0, precipitationProbabilityMax: 10, windGustsMax: 20, uvIndexMax: 1,
+                sunrise: nil, sunset: nil
+            )
+        }
+        let arrivee = calendrier.date(from: DateComponents(year: 2026, month: 11, day: 2, hour: 23, minute: 10))!
+        let forecast = AgroForecast(
+            parcelle: Parcelle(name: "Paris", latitude: 48.86, longitude: 2.35),
+            timezone: "Europe/Paris",
+            elevation: 35,
+            current: CurrentSample(
+                time: arrivee, temperature: 6, apparentTemperature: 4, weatherCode: 3, isDay: false,
+                relativeHumidity: 80, windSpeed: 10, windGusts: 20, pressure: 1015
+            ),
+            hourly: [],
+            daily: days,
+            fetchedAt: arrivee
+        )
+
+        // Avant minuit, aujourd'hui est le 2.
+        XCTAssertEqual(forecast.aujourdhui(maintenant: arrivee)?.date, days[0].date)
+        // À 0 h 20 à Paris (23 h 20 UTC la veille), c'est déjà le 3.
+        let apresMinuit = calendrier.date(from: DateComponents(year: 2026, month: 11, day: 3, hour: 0, minute: 20))!
+        XCTAssertEqual(forecast.aujourdhui(maintenant: apresMinuit)?.temperatureMax, 11)
+        XCTAssertEqual(forecast.joursAVenir(maintenant: apresMinuit).count, 2)
+        // Au-delà de la série, on garde ce qu'on a plutôt que rien.
+        let bienPlusTard = calendrier.date(byAdding: .day, value: 10, to: premier)!
+        XCTAssertEqual(forecast.joursAVenir(maintenant: bienPlusTard).count, 3)
+    }
 }
 
 /// Le contrat avec le service de qualité de l'air : mêmes cas que
