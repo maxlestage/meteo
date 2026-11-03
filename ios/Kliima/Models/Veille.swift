@@ -237,7 +237,8 @@ enum Veille {
     /// le quart en cours toujours — prennent ce qu'on voit, à sa force. Au-delà,
     /// la prévision reprend la parole ; un ciel sec observé ne retire rien.
     static func observer(_ serie: [QuartSample], maintenant: Date, ciel: CielObserve?) -> [QuartSample] {
-        guard let ciel, let tombe = ciel.tombe, let validite = ciel.tombeJusquA,
+        // Un bulletin périmé ne dit plus ce qui tombe maintenant.
+        guard let ciel, ciel.frais(maintenant), let tombe = ciel.tombe, let validite = ciel.tombeJusquA,
               tombe.code >= FusionSeuils.codeMouille
         else { return serie }
         // Ce qu'on voit couvre au moins la demi-heure en cours, sauf si les
@@ -290,7 +291,7 @@ enum Veille {
     /// Vrai quand l'aéroport voit tomber ce que la prévision du quart en cours
     /// ne voit pas : la fin que donneraient les modèles n'en est pas une.
     static func aveugle(_ serie: [QuartSample], maintenant: Date, ciel: CielObserve?) -> Bool {
-        guard let tombe = ciel?.tombe, tombe.code >= FusionSeuils.codeMouille,
+        guard let ciel, ciel.frais(maintenant), let tombe = ciel.tombe, tombe.code >= FusionSeuils.codeMouille,
               let quart = serie.first(where: { $0.time <= maintenant && maintenant < $0.time.addingTimeInterval(VeilleSeuils.quart) })
         else { return false }
         return !mouille(quart)
