@@ -355,8 +355,11 @@ private struct WatchPluie: View {
     let timeZone: TimeZone
 
     var body: some View {
-        let pluie = Ville.prochainePluie(forecast.hourly)
-        let conseils = Ville.conseils(forecast.hourly)
+        // Depuis l'heure en cours : la montre garde la prévision ouverte
+        // longtemps, et l'heure de sa lecture finit par être passée.
+        let heures = AgroWeatherService.fromCurrentHour(forecast.hourly, now: Date())
+        let pluie = Ville.prochainePluie(heures)
+        let conseils = Ville.conseils(heures)
         let seche = pluie.code == "aucune"
 
         VStack(alignment: .leading, spacing: 4) {
@@ -412,7 +415,8 @@ private struct WatchHeures: View {
         VStack(alignment: .leading, spacing: 6) {
             Intitule(symbole: "clock", texte: Localized.text("hourly.title"))
             HStack(alignment: .top, spacing: 2) {
-                ForEach(Array(forecast.hourly.prefix(colonnes).enumerated()), id: \.element.time) { index, heure in
+                ForEach(Array(AgroWeatherService.fromCurrentHour(forecast.hourly, now: Date())
+                    .prefix(colonnes).enumerated()), id: \.element.time) { index, heure in
                     colonne(heure, maintenant: index == 0)
                         .frame(maxWidth: .infinity)
                 }
