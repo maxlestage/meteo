@@ -165,6 +165,25 @@ final class HorizonTests: XCTestCase {
         XCTAssertEqual(avant.temperature, 17.5, "dans son heure, le relevé")
     }
 
+    /// L'écran principal (iPhone, montre), ouvert sur une prévision gardée en
+    /// cache : à 17 h 10, plus la mesure de 13 h 45 sous « Maintenant ».
+    func testLEcranPrincipalNeMontrePasNonPlusUnReleveDUneHeurePassee() {
+        let forecast = AgroForecast(
+            parcelle: .paris, timezone: "Europe/Paris", elevation: 0,
+            current: releveDe1345(), hourly: serie(debut: treize), daily: [jour(minuit)],
+            fetchedAt: treize.addingTimeInterval(45 * 60)
+        )
+        let a1710 = quatorze.addingTimeInterval(3 * 3600 + 10 * 60)
+        let present = forecast.maintenant(a: a1710)
+        XCTAssertEqual(present.time, quatorze.addingTimeInterval(3 * 3600))
+        XCTAssertEqual(present.temperature, 22, "la prévision de dix-sept heures")
+        XCTAssertEqual(present.apparentTemperature, 21)
+        XCTAssertEqual(present.weatherCode, 3)
+        XCTAssertNil(present.pressure, "pas une pression d'il y a trois heures")
+        XCTAssertEqual(forecast.maintenant(a: treize.addingTimeInterval(50 * 60)).temperature, 17.5,
+                       "dans son heure, le relevé")
+    }
+
     func testChaqueMomentCommenceSaListeDHeuresParLaSienne() {
         let moments = Horizon.chronologie(courant: courant(), heures: serie(), jours: [],
                                           depuis: quatorze.addingTimeInterval(60), nombre: 2)
