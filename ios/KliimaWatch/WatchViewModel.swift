@@ -23,6 +23,8 @@ final class WatchViewModel: ObservableObject {
     @Published private(set) var quarts: [QuartSample]?
     @Published private(set) var quartsLusA: Date?
     @Published private(set) var veilleEnLecture = false
+    /// La ville de la série : celle d'une autre ville ne s'affiche pas.
+    private var quartsDe: Parcelle?
 
     private let service: AgroWeatherProviding
     private let location: LocationService
@@ -47,9 +49,17 @@ final class WatchViewModel: ObservableObject {
     /// Le relevé tant qu'il est de l'heure en cours, l'heure prévue ensuite.
     var current: CurrentSample? { forecast?.maintenant() }
 
+    /// La série au quart d'heure de la ville affichée, ou rien : arrivé
+    /// ailleurs, le poignet ne dit pas « sec » d'après le ciel d'une autre ville.
+    var quartsDeLaVille: [QuartSample]? {
+        guard let ville = forecast?.parcelle, quartsDe == ville else { return nil }
+        return quarts
+    }
+
     func load() async {
         isLoading = true
         errorMessage = nil
+        let avant = parcelle
 
         // La position est un confort : sans elle, on garde la ville par défaut.
         if let coordinate = try? await location.currentCoordinate() {
@@ -83,6 +93,12 @@ final class WatchViewModel: ObservableObject {
         }
 
         isLoading = false
+
+        // Arrivé dans une autre ville, le guetteur la lit tout de suite
+        // plutôt qu'au prochain quart.
+        if parcelle != avant, quartsDe != parcelle {
+            await relireQuarts()
+        }
     }
 
     /// Le guetteur relit le ciel une minute après chaque quart, tant que
@@ -98,12 +114,20 @@ final class WatchViewModel: ObservableObject {
     }
 
     /// Une lecture du guetteur. Un échec garde la série d'avant, qui reste
-    /// vraie pour les quarts qu'elle couvre encore.
+    /// vraie pour les quarts qu'elle couvre encore — sauf si elle est d'une
+    /// autre ville.
     func relireQuarts() async {
+        let parcelle = parcelle
         veilleEnLecture = true
         defer { veilleEnLecture = false }
-        if let lus = try? await service.quarts(for: parcelle) {
+        let lus = try? await service.quarts(for: parcelle)
+        // La ville a changé pendant la lecture : `load()` relira.
+        guard parcelle == self.parcelle else { return }
+        if let lus {
             quarts = lus
+            quartsDe = parcelle
+        } else if quartsDe != parcelle {
+            quarts = nil
         }
         quartsLusA = Date()
     }
