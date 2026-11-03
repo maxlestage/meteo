@@ -226,6 +226,29 @@ mod tests {
     }
 
     #[test]
+    fn les_seuils_de_l_accord_sont_inclusifs() {
+        // 1,5 °C pile reste un accord fort ; 3 °C pile n'est pas encore faible.
+        let r = consensus(&[t(0, 18.0), t(1, 19.5)], 0, 0).unwrap();
+        assert_eq!(r.temperature.spread, 1.5);
+        assert_eq!(r.agreement, Agreement::Forte);
+        let r = consensus(&[t(0, 18.0), t(1, 21.0)], 0, 0).unwrap();
+        assert_eq!(r.temperature.spread, 3.0);
+        assert_eq!(r.agreement, Agreement::Moyenne);
+        // 0,1 mm pile, c'est de la pluie : face à un modèle sec, désaccord.
+        let r = consensus(&[reading(0, 18.0, 0.0, 10.0), reading(1, 18.0, 0.1, 10.0)], 0, 0).unwrap();
+        assert!(!r.agree_on_rain);
+        assert_eq!(r.agreement, Agreement::Moyenne);
+    }
+
+    #[test]
+    fn sans_compte_les_fournisseurs_sont_ceux_des_releves() {
+        // Deux modèles d'Open-Meteo : un seul fournisseur.
+        let r = consensus(&[t(0, 18.0), t(1, 18.4)], 0, 0).unwrap();
+        assert_eq!(r.providers_answered, 1);
+        assert_eq!(r.providers_queried, 1);
+    }
+
+    #[test]
     fn tous_daccord_sur_la_pluie() {
         let r = consensus(
             &[
