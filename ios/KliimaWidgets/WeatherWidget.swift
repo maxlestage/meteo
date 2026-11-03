@@ -102,6 +102,13 @@ struct WeatherEntry: TimelineEntry {
     /// Plus haut quand la pluie approche : dans une pile de widgets, iOS
     /// remonte alors Kliima ‣ de lui-même — comme la montre le fait déjà.
     var relevance: TimelineEntryRelevance? = nil
+
+    /// L'indice UV de l'heure de l'entrée, pas le maximum du jour : celui-ci
+    /// se lisait comme l'indice du moment, « 5 · modéré » à minuit. Inconnu
+    /// quand la série n'en donne pas (MET Norway en secours).
+    var uvEnCours: Double? {
+        Ville.heure(contenant: date, dans: hours)?.uvIndex
+    }
 }
 
 /// Le widget interroge l'API lui-même, pour la ville enregistrée par
@@ -304,8 +311,8 @@ struct WeatherWidgetView: View {
                 )
                 TuileWidget(
                     symbole: "sun.max.fill", titre: Localized.text("tile.uv"),
-                    valeur: entry.today?.uvIndexMax.map { AgroFormat.decimal($0, decimals: 0) } ?? "–",
-                    detail: entry.today?.uvIndexMax.map { Ville.niveauUv($0).label }
+                    valeur: entry.uvEnCours.map { AgroFormat.decimal($0, decimals: 0) } ?? "–",
+                    detail: entry.uvEnCours.map { Ville.niveauUv($0).label }
                 )
             }
 

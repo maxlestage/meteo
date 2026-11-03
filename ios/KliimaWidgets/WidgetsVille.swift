@@ -553,8 +553,8 @@ struct DehorsWidgetView: View {
                 )
                 TuileWidget(
                     symbole: "sun.max.fill", titre: Localized.text("tile.uv"),
-                    valeur: entry.today?.uvIndexMax.map { AgroFormat.decimal($0, decimals: 0) } ?? "–",
-                    detail: entry.today?.uvIndexMax.map { Ville.niveauUv($0).label }
+                    valeur: entry.uvEnCours.map { AgroFormat.decimal($0, decimals: 0) } ?? "–",
+                    detail: entry.uvEnCours.map { Ville.niveauUv($0).label }
                 )
                 TuileWidget(
                     symbole: "humidity.fill", titre: Localized.text("tile.humidity"),
@@ -585,7 +585,7 @@ struct DehorsWidgetView: View {
             .font(.caption2.weight(.semibold))
             .lineLimit(1)
             .minimumScaleFactor(0.7)
-            if let uv = entry.today?.uvIndexMax {
+            if let uv = entry.uvEnCours {
                 Label(
                     "\(Localized.text("tile.uv")) \(AgroFormat.decimal(uv, decimals: 0)) · \(Ville.niveauUv(uv).label)",
                     systemImage: "sun.max.fill"
