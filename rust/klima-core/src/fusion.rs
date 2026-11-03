@@ -202,7 +202,7 @@ pub fn recouper(
         })
         .collect();
 
-    let jours: Vec<DailySample> = base_jours
+    let mut jours: Vec<DailySample> = base_jours
         .iter()
         .map(|base| {
             let voix: Vec<&JourSource> = index_jours.iter().filter_map(|i| i.get(&base.date).copied()).collect();
@@ -226,6 +226,8 @@ pub fn recouper(
         }
     }
 
+    embrasser_l_instant(&mut jours, &courant);
+
     let sources = series
         .iter()
         .filter(|s| s.heures.iter().any(|h| h.temperature.is_some()))
@@ -233,6 +235,28 @@ pub fn recouper(
         .collect();
 
     Recoupement { heures, jours, courant, sources }
+}
+
+/// La journée en cours embrasse l'instant présent.
+///
+/// L'en-tête montre la température du moment à côté du minimum et du maximum
+/// du jour. Les deux ne viennent pas des mêmes voix — l'instant suit l'heure
+/// recoupée et la station, la journée la médiane des extrêmes publiés — et
+/// on lisait « 12° », puis « ↑ 11° » juste dessous. Ce qu'il fait déjà est
+/// atteint : le jour s'élargit jusqu'à lui, il ne rétrécit jamais.
+fn embrasser_l_instant(jours: &mut [DailySample], courant: &CurrentSample) {
+    let maintenant = courant.time;
+    let t = courant.temperature;
+    if !t.is_finite() {
+        return;
+    }
+    let Some(i) = jours.iter().rposition(|j| j.date <= maintenant) else { return };
+    let fin = jours.get(i + 1).map_or(jours[i].date + 86_400_000, |suivant| suivant.date);
+    if maintenant < fin {
+        let jour = &mut jours[i];
+        jour.temperature_min = jour.temperature_min.min(t);
+        jour.temperature_max = jour.temperature_max.max(t);
+    }
 }
 
 fn valeurs<T>(voix: &[&T], champ: impl Fn(&T) -> Option<f64>) -> Vec<f64> {
@@ -552,5 +576,40 @@ mod tests {
         assert_eq!(d.precipitation_probability_max, 67.0);
         assert_eq!(d.weather_code, 61);
         assert_eq!((d.uv_index_max, d.sunrise), (5.0, Some(1)), "UV, lever et coucher : la base");
+    }
+
+    #[test]
+    fn la_journee_en_cours_embrasse_l_instant() {
+        let jour = |date: i64, min: f64, max: f64| DailySample {
+            date,
+            weather_code: 1,
+            temperature_min: min,
+            temperature_max: max,
+            precipitation_sum: 0.0,
+            precipitation_probability_max: 0.0,
+            wind_gusts_max: 20.0,
+            uv_index_max: 3.0,
+            sunrise: None,
+            sunset: None,
+        };
+        let aujourd_hui = MIDI - 12 * HEURE;
+        let demain = MIDI + 12 * HEURE;
+        let jours = [jour(aujourd_hui, 10.0, 17.0), jour(demain, 16.0, 20.0)];
+        // Il fait 18,4 : le maximum du jour monte jusqu'à lui, demain ne bouge pas.
+        let r = recouper(&[], &jours, &courant(), &[], Observation::default());
+        assert_eq!((r.jours[0].temperature_min, r.jours[0].temperature_max), (10.0, 18.4));
+        assert_eq!(r.jours[1], jours[1]);
+        // Plus froid que le minimum annoncé : le minimum descend.
+        let froid = CurrentSample { temperature: 8.0, ..courant() };
+        let r = recouper(&[], &jours, &froid, &[], Observation::default());
+        assert_eq!((r.jours[0].temperature_min, r.jours[0].temperature_max), (8.0, 17.0));
+        // Dans l'amplitude : rien ne change, le jour ne rétrécit jamais.
+        let large = [jour(aujourd_hui, 5.0, 25.0)];
+        assert_eq!(recouper(&[], &large, &courant(), &[], Observation::default()).jours[0], large[0]);
+        // Une série qui commence demain, ou qui a fini hier, n'est pas touchée.
+        let plus_tard = [jour(demain, 3.0, 5.0)];
+        assert_eq!(recouper(&[], &plus_tard, &courant(), &[], Observation::default()).jours[0], plus_tard[0]);
+        let hier = [jour(aujourd_hui - 24 * HEURE, 3.0, 5.0)];
+        assert_eq!(recouper(&[], &hier, &courant(), &[], Observation::default()).jours[0], hier[0]);
     }
 }
