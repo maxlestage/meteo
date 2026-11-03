@@ -382,6 +382,24 @@ mod tests {
         assert_eq!(code_du_debit(12.0), 65);
     }
 
+    #[test]
+    fn les_seuils_du_radar_sont_inclusifs() {
+        // Un quart mouille à 0,1 mm : 0,4 mm/h, pile, tombe déjà.
+        assert_eq!(tombe(Some(DEBIT_MOUILLE)), Some(61));
+        assert_eq!(tombe(Some(0.39)), None);
+        assert_eq!(code_du_debit(2.49), 61);
+        assert_eq!(code_du_debit(2.5), 63, "2,5 mm/h : déjà modérée");
+        assert_eq!(code_du_debit(7.59), 63);
+        assert_eq!(code_du_debit(7.6), 65, "7,6 mm/h : déjà forte");
+        // La rose bascule à mi-chemin entre deux directions.
+        assert_eq!(direction(22.4), "dir.n");
+        assert_eq!(direction(22.5), "dir.ne");
+        assert_eq!(direction(337.4), "dir.no");
+        assert_eq!(direction(337.5), "dir.n");
+        assert_eq!(direction(360.0), "dir.n");
+        assert_eq!(direction(-90.0), "dir.o");
+    }
+
     /// Une averse ronde de rayon 8 km centrée en (cx, cy).
     fn averse(cx: f64, cy: f64) -> Champ {
         let demi = 60;
