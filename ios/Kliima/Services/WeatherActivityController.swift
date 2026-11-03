@@ -184,8 +184,17 @@ final class WeatherActivityController: ObservableObject {
 
     /// L'état affichable : les conditions mesurées, et l'heure qui vient.
     static func state(from forecast: AgroForecast, at now: Date) -> WeatherActivityAttributes.ContentState {
-        let today = Horizon.jour(contenant: now, dans: forecast.daily)
-        let next = Horizon.heureSuivante(apres: now, dans: forecast.hourly).map {
+        let suivante = Horizon.heureSuivante(apres: now, dans: forecast.hourly)
+        // Le jour embrasse ce qui se montre comme « maintenant », puis l'heure
+        // suivante si elle est du même jour : une fois l'île périmée, c'est
+        // elle qu'on lit à côté du minimum et du maximum. Comme le relais.
+        var today = Horizon.jour(contenant: now, embrassant: forecast.current.temperature,
+                                 dans: forecast.daily)
+        if let jour = today, let suivante, suivante.time >= jour.date,
+           suivante.time < Horizon.finDuJour(jour, dans: forecast.daily) {
+            today = jour.embrassant(suivante.temperature)
+        }
+        let next = suivante.map {
             WeatherActivityAttributes.NextHour(
                 start: $0.time,
                 temperature: $0.temperature,
