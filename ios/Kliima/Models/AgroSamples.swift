@@ -126,3 +126,21 @@ struct AgroForecast: Equatable {
     /// absent sans relais, ou sans aéroport pour juger.
     var apprentissage: Apprentissage?
 }
+
+extension AgroForecast {
+    /// Les jours à partir d'aujourd'hui, relus à chaque affichage.
+    ///
+    /// La série est taillée quand la prévision arrive. Laissée ouverte, ou
+    /// gardée en mémoire faute de réseau, elle passait minuit sans bouger : la
+    /// ligne « Aujourd'hui », le minimum et le maximum de l'en-tête et l'UV du
+    /// jour étaient ceux de la veille. Même remède que pour les heures
+    /// (`AgroWeatherService.fromCurrentHour`), compté à l'heure de la ville.
+    func joursAVenir(maintenant: Date = Date()) -> [DailySample] {
+        AgroWeatherService.fromToday(daily, now: maintenant, in: TimeZone(identifier: timezone) ?? .current)
+    }
+
+    /// Aujourd'hui, à l'heure de la ville.
+    func aujourdhui(maintenant: Date = Date()) -> DailySample? {
+        joursAVenir(maintenant: maintenant).first
+    }
+}
