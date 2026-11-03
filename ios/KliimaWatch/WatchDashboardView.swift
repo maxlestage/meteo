@@ -442,6 +442,8 @@ private struct WatchHeures: View {
                 .foregroundStyle(.secondary)
                 .lineLimit(1)
                 .minimumScaleFactor(0.7)
+                // « Maint. » se lit « maint point » : VoiceOver dit le mot.
+                .accessibilityLabel(maintenant ? Localized.text("hourly.now.a11y") : AgroFormat.hour(heure.time, in: timeZone))
             Image(systemName: WeatherCondition.forCode(code).icon.symbolName(isDay: isDay))
                 .symbolRenderingMode(.multicolor)
                 .font(.system(size: 15))
@@ -455,7 +457,12 @@ private struct WatchHeures: View {
                 .font(.system(size: 9).monospacedDigit())
                 .foregroundStyle(bleuPluie)
                 .lineLimit(1)
+                // Un pourcentage nu ne dit pas de quoi il est le risque.
+                .accessibilityLabel(Localized.text("rain.chance.a11y", AgroFormat.percent(heure.precipitationProbability)))
+                .accessibilityHidden(heure.precipitationProbability < 20)
         }
+        // Une heure se lit d'un trait, comme sur l'iPhone.
+        .accessibilityElement(children: .combine)
     }
 }
 

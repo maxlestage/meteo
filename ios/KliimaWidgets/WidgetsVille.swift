@@ -99,6 +99,9 @@ struct PluieWidgetView: View {
             HStack(spacing: 0) {
                 ForEach(Array(heures.enumerated()), id: \.element.id) { rang, heure in
                     Text(rang % 3 == 0 ? (rang == 0 ? Localized.text("hourly.now") : AgroFormat.hour(heure.time, in: entry.timeZone)) : " ")
+                        // « Maint. » se lit « maint point » : VoiceOver dit le mot.
+                        .accessibilityLabel(rang == 0 ? Localized.text("hourly.now.a11y") : AgroFormat.hour(heure.time, in: entry.timeZone))
+                        .accessibilityHidden(rang % 3 != 0)
                         .font(.system(size: 10, weight: .semibold))
                         .opacity(0.75)
                         .lineLimit(1)
@@ -125,6 +128,7 @@ struct PluieWidgetView: View {
             BarresDePluie(heures: entry.hours, hauteur: 34)
             HStack {
                 Text(Localized.text("hourly.now"))
+                    .accessibilityLabel(Localized.text("hourly.now.a11y"))
                 Spacer()
                 if let derniere = entry.hours.last {
                     Text(AgroFormat.hour(derniere.time, in: entry.timeZone))
@@ -406,6 +410,8 @@ private struct LigneDeJour: View {
                 .lineLimit(1)
                 .minimumScaleFactor(0.7)
                 .frame(width: 38, alignment: .leading)
+                // « Auj. » se lit « auj point » : VoiceOver dit le mot.
+                .accessibilityLabel(aujourdhui ? Localized.text("daily.today.a11y") : AgroFormat.weekday(jour.date, in: timeZone))
             Image(systemName: WeatherCondition.forCode(jour.weatherCode).icon.symbolName(isDay: true))
                 .symbolRenderingMode(.multicolor)
                 .font(.system(size: 15))
@@ -417,6 +423,9 @@ private struct LigneDeJour: View {
                 .lineLimit(1)
                 .minimumScaleFactor(0.7)
                 .frame(width: 30, alignment: .leading)
+                // Un pourcentage nu ne dit pas de quoi il est le risque.
+                .accessibilityLabel(Localized.text("rain.chance.a11y", AgroFormat.percent(jour.precipitationProbabilityMax)))
+                .accessibilityHidden(jour.precipitationProbabilityMax < 30)
             // Jamais coupées ni repliées : « 15 » sur une ligne et « ° » sur
             // l'autre, c'était la première version.
             Text(AgroFormat.temperature(jour.temperatureMin))
