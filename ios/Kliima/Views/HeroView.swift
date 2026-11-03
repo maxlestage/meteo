@@ -14,7 +14,9 @@ struct HeroView: View {
     @Environment(\.accessibilityReduceMotion) private var moinsDeMouvement
 
     var body: some View {
-        let condition = WeatherCondition.forCode(forecast.current.weatherCode)
+        // Le relevé tant qu'il est de l'heure en cours, l'heure prévue ensuite.
+        let current = forecast.maintenant()
+        let condition = WeatherCondition.forCode(current.weatherCode)
 
         VStack(spacing: 2) {
             Text(forecast.parcelle.name)
@@ -22,7 +24,7 @@ struct HeroView: View {
                 .lineLimit(1)
                 .minimumScaleFactor(0.6)
 
-            Image(systemName: condition.icon.symbolName(isDay: forecast.current.isDay))
+            Image(systemName: condition.icon.symbolName(isDay: current.isDay))
                 .symbolRenderingMode(.multicolor)
                 .font(.system(size: 62))
                 .symbolEffect(.variableColor.iterative.reversing, options: .repeating, isActive: !moinsDeMouvement)
@@ -35,13 +37,13 @@ struct HeroView: View {
                     withAnimation(.easeInOut(duration: 3).repeatForever(autoreverses: true)) { flotte = true }
                 }
 
-            Text(AgroFormat.temperature(forecast.current.temperature))
+            Text(AgroFormat.temperature(current.temperature))
                 .font(.system(size: 96, weight: .thin))
-                .contentTransition(.numericText(value: forecast.current.temperature))
-                .animation(.snappy, value: forecast.current.temperature)
+                .contentTransition(.numericText(value: current.temperature))
+                .animation(.snappy, value: current.temperature)
                 .padding(.top, -6)
 
-            Text(condition.label(isDay: forecast.current.isDay))
+            Text(condition.label(isDay: current.isDay))
                 .font(.title3)
                 .foregroundStyle(Color.encreDouce)
 

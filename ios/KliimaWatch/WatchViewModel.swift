@@ -44,7 +44,8 @@ final class WatchViewModel: ObservableObject {
     }
 
     /// Conditions du moment, ou la première heure disponible.
-    var current: CurrentSample? { forecast?.current }
+    /// Le relevé tant qu'il est de l'heure en cours, l'heure prévue ensuite.
+    var current: CurrentSample? { forecast?.maintenant() }
 
     func load() async {
         isLoading = true
