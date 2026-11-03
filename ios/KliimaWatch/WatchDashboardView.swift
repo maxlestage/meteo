@@ -481,7 +481,7 @@ private struct WatchTuiles: View {
                 symbole: "wind",
                 titre: Localized.text("tile.wind"),
                 valeur: AgroFormat.unit(current.windSpeed, "km/h", decimals: 0),
-                detail: "↗ " + AgroFormat.unit(current.windGusts, "km/h", decimals: 0)
+                detail: Localized.text("tile.wind.gusts", AgroFormat.unit(current.windGusts, "km/h", decimals: 0))
             )
             Tuile(
                 symbole: "sun.max.fill",
