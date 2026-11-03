@@ -47,6 +47,31 @@ enum Horizon {
         jours.last { $0.date <= instant } ?? jours.first
     }
 
+    /// Le jour qui contient `instant`, élargi jusqu'à `temperature` — celle
+    /// qu'on affiche pour cet instant. Miroir de `horizon::jour_embrassant`.
+    ///
+    /// Un widget posé pour quinze heures montre la température prévue à
+    /// quinze heures à côté du minimum et du maximum du jour. Les deux ne
+    /// viennent pas des mêmes voix — l'heure est la médiane des températures
+    /// horaires, le jour celle des extrêmes publiés — et l'on pouvait lire
+    /// « 14° » puis « 9° / 13° ». Ce qu'il fait à cet instant est atteint ce
+    /// jour-là : le jour s'élargit jusqu'à lui, il ne rétrécit jamais.
+    static func jour(contenant instant: Date, embrassant temperature: Double,
+                     dans jours: [DailySample]) -> DailySample? {
+        guard let j = jour(contenant: instant, dans: jours) else { return nil }
+        // Hors du jour trouvé (avant la série, ou après sa fin), rien à
+        // embrasser : la température d'un autre jour ne dit rien de celui-ci.
+        guard j.date <= instant, instant < finDuJour(j, dans: jours) else { return j }
+        return j.embrassant(temperature)
+    }
+
+    /// Le minuit qui clôt `jour` : le début du jour suivant de la série — un
+    /// jour de changement d'heure dure 23 ou 25 heures —, ou vingt-quatre
+    /// heures après le dernier.
+    static func finDuJour(_ jour: DailySample, dans jours: [DailySample]) -> Date {
+        jours.first { $0.date > jour.date }?.date ?? jour.date.addingTimeInterval(86_400)
+    }
+
     /// Un moment d'une chronologie de widget : ce qu'il faut montrer à partir de `date`.
     struct Moment: Equatable {
         let date: Date
@@ -74,7 +99,7 @@ enum Horizon {
             date: instant,
             courant: courant,
             heures: aPartirDe(instant, dans: heures),
-            jour: jour(contenant: instant, dans: jours)
+            jour: jour(contenant: instant, embrassant: courant.temperature, dans: jours)
         )]
         for heure in heures where heure.time > instant {
             guard moments.count <= nombre else { break }
@@ -82,7 +107,7 @@ enum Horizon {
                 date: heure.time,
                 courant: CurrentSample(prevu: heure),
                 heures: heures.filter { $0.time >= heure.time },
-                jour: jour(contenant: heure.time, dans: jours)
+                jour: jour(contenant: heure.time, embrassant: heure.temperature, dans: jours)
             ))
         }
         return moments
@@ -113,6 +138,21 @@ enum Horizon {
         default:
             return Pertinence.sec
         }
+    }
+}
+
+extension DailySample {
+    /// Le même jour, élargi jusqu'à `temperature` s'il ne la contenait pas.
+    func embrassant(_ temperature: Double) -> DailySample {
+        guard temperature.isFinite else { return self }
+        return DailySample(
+            date: date, weatherCode: weatherCode,
+            temperatureMin: min(temperatureMin, temperature),
+            temperatureMax: max(temperatureMax, temperature),
+            precipitationSum: precipitationSum, precipitationProbabilityMax: precipitationProbabilityMax,
+            windGustsMax: windGustsMax, uvIndexMax: uvIndexMax,
+            sunrise: sunrise, sunset: sunset
+        )
     }
 }
 
