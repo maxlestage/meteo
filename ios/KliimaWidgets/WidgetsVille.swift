@@ -549,7 +549,7 @@ struct DehorsWidgetView: View {
                 TuileWidget(
                     symbole: "wind", titre: Localized.text("tile.wind"),
                     valeur: AgroFormat.unit(current.windSpeed, "km/h", decimals: 0),
-                    detail: Localized.text("tile.wind.caption", AgroFormat.unit(current.windGusts, "km/h", decimals: 0))
+                    detail: Localized.text("tile.wind.gusts", AgroFormat.unit(current.windGusts, "km/h", decimals: 0))
                 )
                 TuileWidget(
                     symbole: "sun.max.fill", titre: Localized.text("tile.uv"),
@@ -579,7 +579,7 @@ struct DehorsWidgetView: View {
                 .minimumScaleFactor(0.6)
                 .widgetAccentable()
             Label(
-                "\(AgroFormat.unit(current.windSpeed, "km/h", decimals: 0)) · \(AgroFormat.unit(current.windGusts, "km/h", decimals: 0))",
+                "\(AgroFormat.unit(current.windSpeed, "km/h", decimals: 0)) · \(Localized.text("tile.wind.gusts", AgroFormat.unit(current.windGusts, "km/h", decimals: 0)))",
                 systemImage: "wind"
             )
             .font(.caption2.weight(.semibold))
