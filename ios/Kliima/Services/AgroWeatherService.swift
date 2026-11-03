@@ -313,7 +313,7 @@ struct AgroWeatherService: AgroWeatherProviding {
                 uvIndexMax: nil, sunrise: nil, sunset: nil
             )
         }
-        let pression = payload.nearest(to: premiere.time)?.data?.instant?.details?["air_pressure_at_sea_level"] ?? 0
+        let pression = payload.nearest(to: premiere.time)?.data?.instant?.details?["air_pressure_at_sea_level"]
         let courant = CurrentSample(
             time: premiere.time, temperature: premiere.temperature,
             apparentTemperature: premiere.apparentTemperature, weatherCode: premiere.weatherCode,
@@ -663,7 +663,7 @@ struct ForecastPayload: Decodable {
                 relativeHumidity: relativeHumidity2m ?? 0,
                 windSpeed: windSpeed10m ?? 0,
                 windGusts: windGusts10m ?? 0,
-                pressure: pressureMsl ?? 0
+                pressure: pressureMsl
             )
         }
     }
