@@ -172,7 +172,6 @@ pub struct Contenu {
 pub fn contenu(prevision: &Forecast, maintenant: i64) -> Option<Contenu> {
     let local = maintenant + prevision.utc_offset_seconds * 1000;
     let heure = horizon::heure_contenant(local, &prevision.hourly)?;
-    let jour = horizon::jour_contenant(local, &prevision.daily);
     let suivante = horizon::heure_suivante(local, &prevision.hourly);
 
     let releve = &prevision.current;
@@ -181,6 +180,19 @@ pub fn contenu(prevision: &Forecast, maintenant: i64) -> Option<Contenu> {
     } else {
         (heure.temperature, heure.apparent_temperature, heure.weather_code, heure.is_day, heure.wind_speed)
     };
+
+    // Le jour embrasse ce qui se montre comme « maintenant », puis l'heure
+    // suivante si elle est du même jour : une fois l'île périmée, c'est elle
+    // qu'on lit à côté du minimum et du maximum.
+    let jour = horizon::jour_embrassant(local, temperature, &prevision.daily).map(|mut jour| {
+        if let Some(h) = suivante.filter(|h| {
+            (jour.date..jour.date + 24 * HEURE_MS).contains(&h.time) && h.temperature.is_finite()
+        }) {
+            jour.temperature_min = jour.temperature_min.min(h.temperature);
+            jour.temperature_max = jour.temperature_max.max(h.temperature);
+        }
+        jour
+    });
 
     let date_apple = |local_ms: i64| prevision.instant(local_ms) as f64 / 1000.0 - EPOQUE_APPLE_S;
     let prochaine = suivante.map(|h: &HourlySample| {
@@ -200,8 +212,8 @@ pub fn contenu(prevision: &Forecast, maintenant: i64) -> Option<Contenu> {
         "weatherCode": code,
         "isDay": jour_ou_nuit,
         "windSpeed": vent,
-        "temperatureMin": jour.map_or(temperature, |j| j.temperature_min),
-        "temperatureMax": jour.map_or(temperature, |j| j.temperature_max),
+        "temperatureMin": jour.as_ref().map_or(temperature, |j| j.temperature_min),
+        "temperatureMax": jour.as_ref().map_or(temperature, |j| j.temperature_max),
     });
     if let Some(prochaine) = prochaine {
         etat["next"] = prochaine;
@@ -314,6 +326,32 @@ pub(crate) mod tests {
         assert_eq!(c.etat["next"]["precipitationProbability"], 70.0);
         assert_eq!(c.perime, a(15, 0) / 1000);
         assert_eq!(c.heure, a(14, 0) + DECALAGE_S * 1000);
+    }
+
+    #[test]
+    fn le_minimum_et_le_maximum_embrassent_ce_que_lile_montre() {
+        // Un maximum du jour publié sous les heures prévues : on lisait
+        // « 22° » à côté de « ↑ 21,5° ».
+        let mut p = prevision();
+        p.daily[0].temperature_max = 21.5;
+        let c = contenu(&p, a(14, 5)).unwrap();
+        assert_eq!(c.etat["temperature"], 22.0);
+        // L'heure suivante (23° à 15 h) aussi : périmée, l'île la montre.
+        assert_eq!(c.etat["temperatureMax"], 23.0);
+        assert_eq!(c.etat["temperatureMin"], 11.0, "le jour ne rétrécit jamais");
+
+        // À 23 h 30, l'heure suivante est de demain : elle n'élargit pas aujourd'hui.
+        let mut p = prevision();
+        let minuit = p.daily[0].date + 24 * HEURE_MS;
+        for (i, h) in p.hourly.iter_mut().enumerate() {
+            h.time = minuit - HEURE_MS + i as i64 * HEURE_MS;
+        }
+        p.hourly[1].temperature = 30.0;
+        p.current.time = p.hourly[0].time - HEURE_MS;
+        let maintenant = p.hourly[0].time + 30 * 60_000 - DECALAGE_S * 1000;
+        let c = contenu(&p, maintenant).unwrap();
+        assert_eq!(c.etat["next"]["temperature"], 30.0);
+        assert_eq!(c.etat["temperatureMax"], 23.0);
     }
 
     #[test]
