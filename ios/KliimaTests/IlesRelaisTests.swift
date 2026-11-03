@@ -58,4 +58,22 @@ final class IlesRelaisTests: XCTestCase {
         XCTAssertNil(lu.latitude)
         XCTAssertEqual(lu.parcelleName, "Chartres")
     }
+
+    // MARK: L'activité demandée revient
+
+    @MainActor
+    func testUneActiviteCoupeeParIOSRevientEtUneBalayeeNon() {
+        let t0 = Date(timeIntervalSince1970: 1_800_000_000)
+        let suite = { (demandee: Bool, affichee: Bool, heures: Double?) in
+            WeatherActivityController.suite(
+                demandee: demandee, affichee: affichee,
+                ouverteLe: heures.map { t0.addingTimeInterval(-$0 * 3600) }, maintenant: t0)
+        }
+        XCTAssertEqual(suite(false, false, 9), .rien, "jamais demandée : rien")
+        XCTAssertEqual(suite(true, true, 2), .rien, "affichée et jeune : rien")
+        XCTAssertEqual(suite(true, true, 6.5), .rouvrir, "plus de six heures : rouverte avant d'être coupée")
+        XCTAssertEqual(suite(true, false, 8), .rouvrir, "coupée par iOS au bout de huit heures : rouverte")
+        XCTAssertEqual(suite(true, false, 3), .oublier, "balayée à la main : on n'insiste pas")
+        XCTAssertEqual(suite(true, true, nil), .rouvrir, "âge inconnu : rouverte pour huit heures pleines")
+    }
 }

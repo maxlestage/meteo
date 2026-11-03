@@ -34,13 +34,64 @@ final class WeatherActivityController: ObservableObject {
         #endif
     }
 
+    /// Vrai si une activité est encore à l'écran. Une activité qu'on vient de
+    /// fermer reste quelques instants dans `Activity.activities` : la compter
+    /// empêchait de la rouvrir, et l'île disparaissait sans revenir.
     private static var hasActivities: Bool {
         #if canImport(ActivityKit)
         if #available(iOS 16.2, *) {
-            return !Activity<WeatherActivityAttributes>.activities.isEmpty
+            return !vivantes.isEmpty
         }
         #endif
         return false
+    }
+
+    #if canImport(ActivityKit)
+    @available(iOS 16.2, *)
+    private static var vivantes: [Activity<WeatherActivityAttributes>] {
+        Activity<WeatherActivityAttributes>.activities.filter {
+            $0.activityState == .active || $0.activityState == .stale
+        }
+    }
+    #endif
+
+    // MARK: Ce que la personne a demandé
+
+    /// iOS termine une activité en direct au bout de huit heures, sans rien
+    /// dire. On se souvient donc qu'elle a été demandée, et quand : à la
+    /// prochaine ouverture, une activité que le système a fermée revient
+    /// d'elle-même, et une activité de plus de six heures est rouverte avant
+    /// d'être coupée. Une activité retirée à la main avant ses huit heures, en
+    /// la balayant de l'écran verrouillé, ne revient pas.
+    private static let demandeeCle = "kliima.activite.demandee"
+    private static let ouverteCle = "kliima.activite.ouverteLe"
+    /// Ce que dure une activité avant qu'iOS la coupe, à quelques minutes près.
+    static let dureeMax: TimeInterval = 8 * 3600
+    /// Au-delà, on la rouvre à la prochaine ouverture plutôt que de la
+    /// laisser s'éteindre.
+    static let renouveler: TimeInterval = 6 * 3600
+
+    private static var demandee: Bool {
+        get { UserDefaults.standard.bool(forKey: demandeeCle) }
+        set { UserDefaults.standard.set(newValue, forKey: demandeeCle) }
+    }
+
+    private static var ouverteLe: Date? {
+        get { UserDefaults.standard.object(forKey: ouverteCle) as? Date }
+        set { UserDefaults.standard.set(newValue, forKey: ouverteCle) }
+    }
+
+    /// Ce qu'il faut faire d'une activité demandée, selon ce qu'iOS montre
+    /// encore et depuis quand elle est ouverte. Pur, pour être testé.
+    enum Suite: Equatable { case rien, rouvrir, oublier }
+
+    static func suite(demandee: Bool, affichee: Bool, ouverteLe: Date?, maintenant: Date) -> Suite {
+        guard demandee else { return .rien }
+        let age = ouverteLe.map { maintenant.timeIntervalSince($0) } ?? dureeMax
+        if affichee { return age >= renouveler ? .rouvrir : .rien }
+        // Plus là : coupée par iOS au bout de ses huit heures — on la rouvre —,
+        // ou balayée à la main avant — on n'insiste pas.
+        return age >= dureeMax - 15 * 60 ? .rouvrir : .oublier
     }
 
     /// Ouvre le suivi de la météo d'une parcelle — une seule fois.
@@ -50,10 +101,17 @@ final class WeatherActivityController: ObservableObject {
         // Déjà affichée : on la met à jour plutôt que d'en empiler une autre.
         guard !Self.hasActivities else {
             isRunning = true
+            Self.demandee = true
             Task { await refresh(forecast: forecast) }
             return
         }
+        ouvrir(parcelle: parcelle, forecast: forecast)
+        #endif
+    }
 
+    #if canImport(ActivityKit)
+    @available(iOS 16.2, *)
+    private func ouvrir(parcelle: Parcelle, forecast: AgroForecast) {
         let attributes = WeatherActivityAttributes(
             parcelleName: parcelle.name,
             timeZoneIdentifier: forecast.timezone,
@@ -78,32 +136,66 @@ final class WeatherActivityController: ObservableObject {
         }
         // Quota atteint ou activités refusées : l'application continue sans.
         isRunning = activity != nil || Self.hasActivities
-        if let activity { Self.suivre(activity) }
-        #endif
+        if let activity {
+            Self.demandee = true
+            Self.ouverteLe = now
+            Self.suivre(activity)
+        }
     }
+    #endif
 
     /// Reflète la prévision fraîchement chargée sur toute activité affichée.
+    ///
+    /// Et rouvre l'activité quand il le faut : coupée par iOS au bout de huit
+    /// heures, vieille de plus de six, ou ouverte pour une autre ville ou sous
+    /// un autre nom — le nom et le lieu sont figés à l'ouverture, et y verser
+    /// la prévision d'ailleurs montrait Paris sous le nom de Lyon.
     func refresh(forecast: AgroForecast) async {
         #if canImport(ActivityKit)
-        // Le nom est figé à l'ouverture : une île ouverte sous « Ma ville »
-        // le gardait toute la journée. Même endroit, nom devenu celui de la
-        // commune : on la rouvre sous son vrai nom.
-        if #available(iOS 16.2, *),
-           let ouverte = Activity<WeatherActivityAttributes>.activities.first,
-           ouverte.attributes.parcelleName != forecast.parcelle.name,
-           ouverte.attributes.latitude == forecast.parcelle.latitude,
-           ouverte.attributes.longitude == forecast.parcelle.longitude {
-            await stop()
-            start(parcelle: forecast.parcelle, forecast: forecast)
-            return
+        if #available(iOS 16.2, *), isAvailable {
+            let affichee = Self.vivantes.first
+            // Ouverte par une version qui ne s'en souvenait pas : elle a été
+            // demandée, on ne sait pas quand — elle sera rouverte, pour huit
+            // heures pleines.
+            if affichee != nil, !Self.demandee {
+                Self.demandee = true
+                Self.ouverteLe = nil
+            }
+            let ailleurs = affichee.map {
+                $0.attributes.parcelleName != forecast.parcelle.name
+                    || $0.attributes.latitude != forecast.parcelle.latitude
+                    || $0.attributes.longitude != forecast.parcelle.longitude
+            } ?? false
+            switch Self.suite(demandee: Self.demandee, affichee: affichee != nil,
+                              ouverteLe: Self.ouverteLe, maintenant: Date()) {
+            case .rouvrir:
+                await fermer()
+                ouvrir(parcelle: forecast.parcelle, forecast: forecast)
+                return
+            case .oublier:
+                Self.demandee = false
+            case .rien where ailleurs:
+                await fermer()
+                ouvrir(parcelle: forecast.parcelle, forecast: forecast)
+                return
+            case .rien:
+                break
+            }
         }
         #endif
         await Self.update(forecast: forecast)
         isRunning = Self.hasActivities
     }
 
-    /// Ferme toutes les activités météo, y compris celles d'un lancement précédent.
+    /// Ferme toutes les activités météo, à la demande de la personne : elles
+    /// ne reviendront pas d'elles-mêmes.
     func stop() async {
+        Self.demandee = false
+        await fermer()
+    }
+
+    /// Ferme toutes les activités météo, y compris celles d'un lancement précédent.
+    private func fermer() async {
         #if canImport(ActivityKit)
         if #available(iOS 16.2, *) {
             for activity in Activity<WeatherActivityAttributes>.activities {
