@@ -132,6 +132,50 @@ final class AgroWeatherDecodingTests: XCTestCase {
         // Si l'heure courante sort de la série, on ne renvoie pas du vide.
         let later = midnight.addingTimeInterval(48 * 3600)
         XCTAssertEqual(AgroWeatherService.fromCurrentHour(hours, now: later).count, hours.count)
+
+        // Une série qui commence plus tard est gardée entière.
+        let before = midnight.addingTimeInterval(-3600)
+        XCTAssertEqual(AgroWeatherService.fromCurrentHour(hours, now: before).count, hours.count)
+
+        // Un trou dans la série : on repart de l'heure qui suit, pas de celle
+        // qui a fini.
+        let troue = hours.filter { $0.time != midnight.addingTimeInterval(9 * 3600) }
+        XCTAssertEqual(AgroWeatherService.fromCurrentHour(troue, now: now).first?.time,
+                       midnight.addingTimeInterval(10 * 3600))
+    }
+
+    /// À Bombay (UTC+5:30), les heures de la ville tombent à la demi-heure en
+    /// temps universel : à 9 h 40, la série s'ouvre sur 9 h, pas sur 10 h.
+    func testHourlySeriesKeepsTheCurrentHourInAHalfHourTimeZone() throws {
+        let zone = try XCTUnwrap(TimeZone(identifier: "Asia/Kolkata"))
+        var calendrier = Calendar(identifier: .gregorian)
+        calendrier.timeZone = zone
+        let minuit = try XCTUnwrap(calendrier.date(from: DateComponents(year: 2026, month: 5, day: 12)))
+        let hours = (0..<24).map { index in
+            HourlySample(
+                time: minuit.addingTimeInterval(Double(index) * 3600),
+                weatherCode: 3,
+                isDay: true,
+                precipitationProbability: 10,
+                temperature: 30,
+                apparentTemperature: 33,
+                relativeHumidity: 70,
+                dewPoint: 24,
+                precipitation: 0,
+                windSpeed: 8,
+                windGusts: 14,
+                uvIndex: 1
+            )
+        }
+
+        let now = minuit.addingTimeInterval(9 * 3600 + 40 * 60)
+        let trimmed = AgroWeatherService.fromCurrentHour(hours, now: now)
+        XCTAssertEqual(trimmed.count, 15)
+        XCTAssertEqual(trimmed.first.map { calendrier.component(.hour, from: $0.time) }, 9)
+
+        // Pile à l'heure, l'heure qui commence est la bonne.
+        let pile = minuit.addingTimeInterval(9 * 3600)
+        XCTAssertEqual(AgroWeatherService.fromCurrentHour(hours, now: pile).first?.time, pile)
     }
 
     /// Une prévision gardée en mémoire commence par des jours finis : le

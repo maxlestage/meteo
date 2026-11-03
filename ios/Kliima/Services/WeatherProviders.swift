@@ -223,13 +223,18 @@ extension WeatherProviders {
     private static func currentHourIndex(_ payload: ModelPayload) -> Int? {
         let zone = TimeZone(identifier: payload.timezone ?? "") ?? .current
         let formatter = DateFormatter.openMeteo(format: "yyyy-MM-dd'T'HH:mm", zone: zone)
-        let start = (Date().timeIntervalSince1970 / 3600).rounded(.down) * 3600
+        // L'heure qui contient l'instant, pas celle qui suit l'heure ronde en
+        // temps universel : dans un fuseau à la demi-heure (Bombay, Adélaïde),
+        // l'accord portait sur l'heure suivante.
+        let maintenant = Date()
+        var enCours: Int?
 
         for (index, stamp) in payload.hourly.time.enumerated() {
             guard let date = formatter.date(from: stamp) else { continue }
-            if date.timeIntervalSince1970 >= start { return index }
+            if date > maintenant { return enCours ?? index }
+            enCours = maintenant < date.addingTimeInterval(3600) ? index : nil
         }
-        return payload.hourly.time.isEmpty ? nil : payload.hourly.time.count - 1
+        return enCours ?? (payload.hourly.time.isEmpty ? nil : payload.hourly.time.count - 1)
     }
 
     /// Les sept modèles, heure par heure et jour par jour, sur `days` jours :
