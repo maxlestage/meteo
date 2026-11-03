@@ -288,7 +288,8 @@ pub fn veille(serie: &[QuartSample], maintenant: i64) -> Option<Veille> {
 /// observé ne retire rien.
 pub fn observer(serie: &[QuartSample], maintenant: i64, ciel: Option<&crate::ciel::CielObserve>) -> Vec<QuartSample> {
     let mut serie = serie.to_vec();
-    let Some(ciel) = ciel else { return serie };
+    // Un bulletin périmé ne dit plus ce qui tombe maintenant.
+    let Some(ciel) = ciel.filter(|c| c.frais(maintenant)) else { return serie };
     let (Some(tombe), Some(jusqu_a)) = (ciel.tombe, ciel.tombe_jusqu_a()) else {
         return serie;
     };
@@ -348,7 +349,7 @@ pub fn radariser(serie: &[QuartSample], radar: &[(i64, f64)]) -> Vec<QuartSample
 /// voit pas : les modèles ont raté la cellule, et la fin qu'ils donneraient
 /// n'en est pas une. L'interface le dit plutôt que d'inventer une heure.
 pub fn aveugle(serie: &[QuartSample], maintenant: i64, ciel: Option<&crate::ciel::CielObserve>) -> bool {
-    let vu = ciel.and_then(|c| c.tombe).is_some_and(|t| t.code >= crate::fusion::seuils::CODE_MOUILLE);
+    let vu = ciel.filter(|c| c.frais(maintenant)).and_then(|c| c.tombe).is_some_and(|t| t.code >= crate::fusion::seuils::CODE_MOUILLE);
     vu && serie
         .iter()
         .find(|q| q.time <= maintenant && maintenant < q.time + QUART_MS)
@@ -439,6 +440,15 @@ mod tests {
         assert!(aveugle(&sec, MAINTENANT, Some(&ancien)), "les modèles n'ont rien vu");
         assert!(!aveugle(&serie(&[0.6]), MAINTENANT, Some(&ancien)));
         assert!(!aveugle(&sec, MAINTENANT, None));
+
+        // Un bulletin d'une heure et quart compte encore ; au-delà, la
+        // prévision gardée ouverte ne dit plus la pluie d'avant.
+        let limite = CielObserve { time: MAINTENANT - crate::ciel::seuils::AGE_MAX_MS, ..vu(pluie, Tendance::Stable) };
+        assert!(mouille(&observer(&sec, MAINTENANT, Some(&limite))[0]));
+        assert!(aveugle(&sec, MAINTENANT, Some(&limite)));
+        let perime = CielObserve { time: limite.time - 60_000, ..limite.clone() };
+        assert_eq!(observer(&sec, MAINTENANT, Some(&perime)), sec);
+        assert!(!aveugle(&sec, MAINTENANT, Some(&perime)));
 
         // BECMG NSW : la fin est annoncée, le quart en cours seulement.
         let fin = Tendance::Changement { passager: false, tombe: None, sec: true };
