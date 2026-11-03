@@ -3290,6 +3290,29 @@
         }
       }
     },
+    "tile.wind.gusts": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gusts %1$@"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rachas %1$@"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rafales %1$@"
+          }
+        }
+      }
+    },
     "uv.eleve": {
       "extractionState": "manual",
       "localizations": {
