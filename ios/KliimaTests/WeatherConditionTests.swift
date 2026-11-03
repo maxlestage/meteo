@@ -39,4 +39,13 @@ final class WeatherConditionTests: XCTestCase {
             WeatherCondition.Icon.cloudy.symbolName(isDay: false)
         )
     }
+
+    func testLabelsFollowDayAndNight() {
+        // Un ciel clair, la nuit, est une nuit claire.
+        XCTAssertEqual(WeatherCondition.forCode(0).label(isDay: false), Localized.text("wmo.clearNight"))
+        XCTAssertEqual(WeatherCondition.forCode(1).label(isDay: false), Localized.text("wmo.mainlyClearNight"))
+        XCTAssertEqual(WeatherCondition.forCode(0).label(isDay: true), WeatherCondition.forCode(0).label)
+        // La pluie ne dépend pas de l'heure.
+        XCTAssertEqual(WeatherCondition.forCode(63).label(isDay: false), WeatherCondition.forCode(63).label)
+    }
 }
