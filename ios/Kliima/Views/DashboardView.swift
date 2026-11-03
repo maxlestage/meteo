@@ -100,7 +100,7 @@ struct DashboardView: View {
                                 .entreeEnCascade(3)
 
                                 DailyListView(
-                                    days: forecast.daily,
+                                    days: forecast.joursAVenir(),
                                     currentTemperature: forecast.current.temperature,
                                     timeZone: viewModel.timeZone
                                 )
@@ -373,7 +373,7 @@ struct DashboardView: View {
 
     private func detailTiles(_ forecast: AgroForecast) -> [TileModel] {
         let zone = viewModel.timeZone
-        let today = forecast.daily.first
+        let today = forecast.aujourdhui()
         let current = forecast.current
         let maintenant = Ville.heure(contenant: current.time, dans: forecast.hourly)
         // Sans UV (MET Norway en secours), la tuile dit « – », pas « 0 · faible ».
