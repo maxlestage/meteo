@@ -52,6 +52,7 @@ struct WeatherLiveActivity: Widget {
                     Image(systemName: maintenant.condition.icon.symbolName(isDay: maintenant.isDay))
                         .symbolRenderingMode(.multicolor)
                         .font(.title3)
+                        .accessibilityHidden(true)
                     Text(AgroFormat.unit(maintenant.windSpeed, "km/h", decimals: 0))
                         .font(.caption)
                         .foregroundStyle(.secondary)
@@ -75,6 +76,7 @@ struct WeatherLiveActivity: Widget {
         } compactLeading: {
             Image(systemName: maintenant.condition.icon.symbolName(isDay: maintenant.isDay))
                 .symbolRenderingMode(.multicolor)
+                .accessibilityLabel(maintenant.condition.label(isDay: maintenant.isDay))
         } compactTrailing: {
             Text(AgroFormat.temperature(maintenant.temperature))
                 .monospacedDigit()
@@ -82,6 +84,7 @@ struct WeatherLiveActivity: Widget {
         } minimal: {
             Image(systemName: maintenant.condition.icon.symbolName(isDay: maintenant.isDay))
                 .symbolRenderingMode(.multicolor)
+                .accessibilityLabel(maintenant.condition.label(isDay: maintenant.isDay))
         }
     }
 }
@@ -120,6 +123,7 @@ private struct ActiviteSurLaMontre: View {
             Image(systemName: maintenant.condition.icon.symbolName(isDay: maintenant.isDay))
                 .symbolRenderingMode(.multicolor)
                 .font(.title3)
+                .accessibilityHidden(true)
 
             Text(AgroFormat.temperature(maintenant.temperature))
                 .font(.system(size: 32, weight: .medium, design: .rounded))
@@ -174,6 +178,7 @@ private struct HeureCompacte: View {
                 Text(quand)
                 Image(systemName: heure.condition.icon.symbolName(isDay: heure.isDay))
                     .symbolRenderingMode(.multicolor)
+                    .accessibilityLabel(heure.condition.label(isDay: heure.isDay))
                 Text(temperature)
                 if let risque { Text(risque) }
             }
@@ -194,6 +199,7 @@ private struct DansUneHeure: View {
             Text(AgroFormat.hour(heure.start, in: timeZone))
             Image(systemName: heure.condition.icon.symbolName(isDay: heure.isDay))
                 .symbolRenderingMode(.multicolor)
+                .accessibilityLabel(heure.condition.label(isDay: heure.isDay))
             Text(AgroFormat.temperature(heure.temperature))
             if heure.precipitationProbability >= 20 {
                 Text(AgroFormat.percent(heure.precipitationProbability))
@@ -250,6 +256,7 @@ private struct WeatherActivityView: View {
                     .symbolRenderingMode(.multicolor)
                     .font(.system(size: 34))
                     .frame(width: 44)
+                    .accessibilityHidden(true)
                 Text(AgroFormat.temperature(maintenant.temperature))
                     .font(.system(size: 46, weight: .medium, design: .rounded))
                     .monospacedDigit()
