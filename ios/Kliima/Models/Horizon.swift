@@ -72,6 +72,22 @@ enum Horizon {
         jours.first { $0.date > jour.date }?.date ?? jour.date.addingTimeInterval(86_400)
     }
 
+    /// Ce qu'il faut montrer comme « maintenant » à `instant` : le relevé
+    /// s'il est de l'heure en cours, l'heure prévue sinon. Miroir de
+    /// `iles::contenu` côté relais.
+    ///
+    /// Une prévision gardée en cache (douze heures au plus, quand le réseau
+    /// tombe) ou relue plus tard porte un relevé d'une heure passée : le
+    /// widget posé à 17 h montrait la mesure de 13 h 45 comme celle de
+    /// l'instant, et l'île la gardait jusqu'à la bascule. Un relevé de 13 h 45
+    /// n'a pas à se présenter comme celui de 14 h 05.
+    static func conditions(a instant: Date, releve: CurrentSample,
+                           dans heures: [HourlySample]) -> CurrentSample {
+        guard let enCours = heure(contenant: instant, dans: heures),
+              releve.time < enCours.time else { return releve }
+        return CurrentSample(prevu: enCours)
+    }
+
     /// Un moment d'une chronologie de widget : ce qu'il faut montrer à partir de `date`.
     struct Moment: Equatable {
         let date: Date
@@ -85,7 +101,8 @@ enum Horizon {
     /// La chronologie des `nombre` heures à venir, calculée d'avance.
     ///
     /// Le premier moment est l'instant présent, avec les conditions mesurées —
-    /// plus fraîches que l'heure prévue. Les suivants commencent à chaque
+    /// plus fraîches que l'heure prévue — tant qu'elles sont de l'heure en
+    /// cours (`conditions(a:releve:dans:)`). Les suivants commencent à chaque
     /// début d'heure de la série, avec les conditions prévues pour elle : le
     /// widget bascule tout seul à l'heure pile, sans rien recharger.
     static func chronologie(
@@ -95,11 +112,12 @@ enum Horizon {
         depuis instant: Date,
         nombre: Int = 12
     ) -> [Moment] {
+        let present = conditions(a: instant, releve: courant, dans: heures)
         var moments = [Moment(
             date: instant,
-            courant: courant,
+            courant: present,
             heures: aPartirDe(instant, dans: heures),
-            jour: jour(contenant: instant, embrassant: courant.temperature, dans: jours)
+            jour: jour(contenant: instant, embrassant: present.temperature, dans: jours)
         )]
         for heure in heures where heure.time > instant {
             guard moments.count <= nombre else { break }
