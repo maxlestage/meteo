@@ -217,6 +217,8 @@ private struct WatchHeader: View {
                     Text("↑\(AgroFormat.temperature(today.temperatureMax)) ↓\(AgroFormat.temperature(today.temperatureMin))")
                         .monospacedDigit()
                         .lineLimit(1)
+                        .accessibilityLabel(Localized.amplitude(min: today.temperatureMin, max: today.temperatureMax,
+                                                                maximumDAbord: true))
                 }
             }
             .font(.caption2)
