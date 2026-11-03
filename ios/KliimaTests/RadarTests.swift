@@ -55,6 +55,24 @@ final class RadarTests: XCTestCase {
         XCTAssertEqual(Radar.direction(-45), "dir.no")
     }
 
+    /// Mêmes cas que `les_seuils_du_radar_sont_inclusifs`.
+    func testLesSeuilsDuRadarSontInclusifs() {
+        // Un quart mouille à 0,1 mm : 0,4 mm/h, pile, tombe déjà.
+        XCTAssertEqual(Radar.tombe(RadarSeuils.debitMouille), 61)
+        XCTAssertNil(Radar.tombe(0.39))
+        XCTAssertEqual(Radar.codeDuDebit(2.49), 61)
+        XCTAssertEqual(Radar.codeDuDebit(2.5), 63, "2,5 mm/h : déjà modérée")
+        XCTAssertEqual(Radar.codeDuDebit(7.59), 63)
+        XCTAssertEqual(Radar.codeDuDebit(7.6), 65, "7,6 mm/h : déjà forte")
+        // La rose bascule à mi-chemin entre deux directions.
+        XCTAssertEqual(Radar.direction(22.4), "dir.n")
+        XCTAssertEqual(Radar.direction(22.5), "dir.ne")
+        XCTAssertEqual(Radar.direction(337.4), "dir.no")
+        XCTAssertEqual(Radar.direction(337.5), "dir.n")
+        XCTAssertEqual(Radar.direction(360), "dir.n")
+        XCTAssertEqual(Radar.direction(-90), "dir.o")
+    }
+
     func testLAdresseDuRadarChezLeRelais() {
         let url = RadarRelais.adresse(
             relais: URL(string: "https://relais.klima/")!,
