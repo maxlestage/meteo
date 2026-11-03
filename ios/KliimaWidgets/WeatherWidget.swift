@@ -281,6 +281,7 @@ struct WeatherWidgetView: View {
                 Image(systemName: condition.icon.symbolName(isDay: current.isDay))
                     .symbolRenderingMode(.multicolor)
                     .font(.system(size: 52))
+                    .accessibilityHidden(true)
             }
 
             if let pluie = phraseDePluie {
@@ -333,6 +334,7 @@ struct WeatherWidgetView: View {
                 Image(systemName: condition.icon.symbolName(isDay: current.isDay))
                     .symbolRenderingMode(.multicolor)
                     .font(.title2)
+                    .accessibilityHidden(true)
             }
 
             Spacer(minLength: 0)
@@ -376,6 +378,7 @@ struct WeatherWidgetView: View {
                         .symbolRenderingMode(.multicolor)
                         .font(.system(size: 18))
                         .frame(height: 22)
+                        .accessibilityLabel(WeatherCondition.forCode(hour.weatherCode).label(isDay: hour.isDay))
                     Text(AgroFormat.temperature(hour.temperature))
                         .font(.system(size: 15, weight: .medium, design: .rounded))
                         .monospacedDigit()
