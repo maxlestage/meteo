@@ -213,7 +213,7 @@ private struct WatchHeader: View {
                 Text(condition.label(isDay: current.isDay))
                     .lineLimit(1)
                 Spacer(minLength: 0)
-                if let today = forecast.daily.first {
+                if let today = forecast.aujourdhui() {
                     Text("↑\(AgroFormat.temperature(today.temperatureMax)) ↓\(AgroFormat.temperature(today.temperatureMin))")
                         .monospacedDigit()
                         .lineLimit(1)
@@ -476,7 +476,7 @@ private struct WatchTuiles: View {
                 valeur: AgroFormat.unit(current.windSpeed, "km/h", decimals: 0),
                 detail: "↗ " + AgroFormat.unit(current.windGusts, "km/h", decimals: 0)
             )
-            if let today = forecast.daily.first {
+            if let today = forecast.aujourdhui() {
                 Tuile(
                     symbole: "sun.max.fill",
                     titre: Localized.text("tile.uv"),
