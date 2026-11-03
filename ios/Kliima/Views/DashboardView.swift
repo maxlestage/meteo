@@ -375,9 +375,16 @@ struct DashboardView: View {
         let zone = viewModel.timeZone
         let today = forecast.aujourdhui()
         let current = forecast.current
+        // L'humidité et son point de rosée sont ceux du même instant : celui
+        // de la mesure.
         let maintenant = Ville.heure(contenant: current.time, dans: forecast.hourly)
+        // L'UV, lui, n'est pas mesuré : il vient de la série horaire, et se
+        // relit à l'heure en cours, comme le bandeau (#122). Une prévision
+        // arrivée à 13 h et relue à 18 h montrait encore l'indice de midi,
+        // à côté du maximum du jour qui, lui, suivait l'horloge.
+        let heureEnCours = Ville.heure(contenant: max(current.time, Date()), dans: forecast.hourly)
         // Sans UV (MET Norway en secours), la tuile dit « – », pas « 0 · faible ».
-        let uv = maintenant?.uvIndex
+        let uv = heureEnCours?.uvIndex
         let uvMax = today?.uvIndexMax ?? uv
 
         var tiles: [TileModel] = [
