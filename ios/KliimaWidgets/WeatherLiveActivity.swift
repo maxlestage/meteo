@@ -140,6 +140,8 @@ private struct ActiviteSurLaMontre: View {
                         .font(.caption2)
                         .foregroundStyle(.secondary)
                         .monospacedDigit()
+                        .accessibilityLabel(Localized.amplitude(min: context.state.temperatureMin,
+                                                                max: context.state.temperatureMax))
                 }
                 if let suivante {
                     HeureCompacte(heure: suivante, timeZone: context.attributes.timeZone)
