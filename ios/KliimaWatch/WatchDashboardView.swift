@@ -464,6 +464,10 @@ private struct WatchTuiles: View {
 
     var body: some View {
         let current = forecast.maintenant()
+        // L'UV de l'heure en cours, comme sur l'iPhone (#126) : le maximum du
+        // jour se lisait comme l'indice du moment, « 5 · modéré » sous la
+        // lune. Sans UV dans la série, « – ».
+        let uv = Ville.heure(contenant: Date(), dans: forecast.hourly)?.uvIndex
         let grille = [GridItem(.flexible(), spacing: 6), GridItem(.flexible(), spacing: 6)]
 
         LazyVGrid(columns: grille, spacing: 6) {
@@ -479,14 +483,12 @@ private struct WatchTuiles: View {
                 valeur: AgroFormat.unit(current.windSpeed, "km/h", decimals: 0),
                 detail: "↗ " + AgroFormat.unit(current.windGusts, "km/h", decimals: 0)
             )
-            if let today = forecast.aujourdhui() {
-                Tuile(
-                    symbole: "sun.max.fill",
-                    titre: Localized.text("tile.uv"),
-                    valeur: today.uvIndexMax.map { AgroFormat.decimal($0, decimals: 0) } ?? "–",
-                    detail: today.uvIndexMax.map { Ville.niveauUv($0).label }
-                )
-            }
+            Tuile(
+                symbole: "sun.max.fill",
+                titre: Localized.text("tile.uv"),
+                valeur: uv.map { AgroFormat.decimal($0, decimals: 0) } ?? "–",
+                detail: uv.map { Ville.niveauUv($0).label }
+            )
             Tuile(
                 symbole: "humidity.fill",
                 titre: Localized.text("tile.humidity"),
