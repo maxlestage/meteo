@@ -15,4 +15,15 @@ enum Localized {
         guard !arguments.isEmpty else { return format }
         return String(format: format, locale: .current, arguments: arguments)
     }
+
+    /// Le minimum et le maximum du jour tels que VoiceOver doit les dire.
+    ///
+    /// À l'écran, des flèches — « ↑ 13°  ↓ 9° » —, que VoiceOver lisait
+    /// « flèche vers le haut ». L'ordre suit celui de l'écran : l'en-tête
+    /// commence par le maximum, les widgets par le minimum.
+    static func amplitude(min: Double, max: Double, maximumDAbord: Bool = false) -> String {
+        let minimum = text("range.min.a11y", AgroFormat.temperature(min))
+        let maximum = text("range.max.a11y", AgroFormat.temperature(max))
+        return maximumDAbord ? "\(maximum), \(minimum)" : "\(minimum), \(maximum)"
+    }
 }

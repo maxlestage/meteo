@@ -274,6 +274,7 @@ struct WeatherWidgetView: View {
                             .font(.caption)
                             .monospacedDigit()
                             .opacity(0.8)
+                            .accessibilityLabel(Localized.amplitude(min: today.temperatureMin, max: today.temperatureMax))
                     }
                 }
                 Spacer(minLength: 8)
@@ -347,6 +348,7 @@ struct WeatherWidgetView: View {
                     .monospacedDigit()
                     .opacity(0.8)
                     .lineLimit(1)
+                    .accessibilityLabel(Localized.amplitude(min: today.temperatureMin, max: today.temperatureMax))
             }
 
             if let pluie = phraseDePluie {
