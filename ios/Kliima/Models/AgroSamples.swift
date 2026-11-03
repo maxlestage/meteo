@@ -159,6 +159,25 @@ extension AgroForecast {
         joursAVenir(maintenant: maintenant).first
     }
 
+    /// Les jours à venir, aujourd'hui élargi jusqu'à la température montrée
+    /// comme « maintenant » (`Horizon.jour(contenant:embrassant:dans:)`).
+    ///
+    /// La fusion embrasse le relevé à l'arrivée de la prévision. Une heure
+    /// plus tard, « maintenant » est l'heure prévue — la médiane des
+    /// températures horaires —, le jour reste la médiane des extrêmes
+    /// publiés, et l'en-tête pouvait dire « 14° » puis « ↑ 13° » juste
+    /// dessous. Les widgets, la complication et l'île embrassaient déjà ce
+    /// qu'ils montrent ; l'écran principal de l'iPhone et de la montre, non.
+    func joursAutourDeMaintenant(a instant: Date = Date()) -> [DailySample] {
+        var jours = joursAVenir(maintenant: instant)
+        guard let premier = jours.first,
+              let embrasse = Horizon.jour(contenant: instant, embrassant: maintenant(a: instant).temperature,
+                                          dans: jours),
+              embrasse.date == premier.date else { return jours }
+        jours[0] = embrasse
+        return jours
+    }
+
     /// Le jour dont la tuile « Lever » parle : aujourd'hui tant que le soleil
     /// ne s'est pas couché, demain ensuite.
     ///

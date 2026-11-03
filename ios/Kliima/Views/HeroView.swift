@@ -47,7 +47,8 @@ struct HeroView: View {
                 .font(.title3)
                 .foregroundStyle(Color.encreDouce)
 
-            if let today = forecast.aujourdhui() {
+            // Le jour embrasse la température affichée au-dessus.
+            if let today = forecast.joursAutourDeMaintenant().first {
                 Text("↑ \(AgroFormat.temperature(today.temperatureMax))   ↓ \(AgroFormat.temperature(today.temperatureMin))")
                     .font(.title3)
                     // Les flèches se lisaient « flèche vers le haut ».
