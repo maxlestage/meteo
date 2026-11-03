@@ -245,6 +245,7 @@ struct WeatherComplicationView: View {
                             .font(.system(size: 11, weight: .medium))
                             .foregroundStyle(.secondary)
                             .lineLimit(1)
+                            .accessibilityLabel(Localized.amplitude(min: today.temperatureMin, max: today.temperatureMax))
                     }
                 }
                 if let pluie = phraseDePluie {
