@@ -70,6 +70,12 @@ STRINGS = {
     "hourly.now": ("Maint.", "Now", "Ahora"),
     "daily.title": ("Prévision sur 7 jours", "7-day forecast", "Previsión a 7 días"),
     "daily.today": ("Auj.", "Today", "Hoy"),
+    # Ce que VoiceOver lit à la place des abréviations et des chiffres nus.
+    "hourly.now.a11y": ("Maintenant", "Now", "Ahora"),
+    "daily.today.a11y": ("Aujourd’hui", "Today", "Hoy"),
+    "range.min.a11y": ("Minimum %1$@", "Low %1$@", "Mínima %1$@"),
+    "range.max.a11y": ("Maximum %1$@", "High %1$@", "Máxima %1$@"),
+    "rain.chance.a11y": ("Risque de pluie %1$@", "Chance of rain %1$@", "Probabilidad de lluvia %1$@"),
 
 
     # --- Activité en direct ---
