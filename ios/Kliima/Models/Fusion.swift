@@ -150,7 +150,7 @@ enum Fusion {
         var heures = base.map { heure in
             fusionnerHeure(heure, index.compactMap { $0[heure.time] })
         }
-        let jours = baseJours.map { jour in
+        var jours = baseJours.map { jour in
             fusionnerJour(jour, indexJours.compactMap { $0[jour.date] })
         }
         let courant = fusionnerCourant(baseCourant, base.first, heures.first, index, observation)
@@ -177,10 +177,37 @@ enum Fusion {
                 uvIndex: h.uvIndex
             )
         }
+        embrasserLInstant(&jours, courant)
+
         let sources = series
             .filter { $0.heures.contains { $0.temperature != nil } }
             .map(\.sourceId)
         return Recoupement(heures: heures, jours: jours, courant: courant, sources: sources)
+    }
+
+    /// La journée en cours embrasse l'instant présent, comme
+    /// `embrasser_l_instant` côté Rust.
+    ///
+    /// L'en-tête montre la température du moment à côté du minimum et du
+    /// maximum du jour. Les deux ne viennent pas des mêmes voix — l'instant
+    /// suit l'heure recoupée et la station, la journée la médiane des extrêmes
+    /// publiés — et on lisait « 12° », puis « ↑ 11° » juste dessous. Ce qu'il
+    /// fait déjà est atteint : le jour s'élargit jusqu'à lui, il ne rétrécit
+    /// jamais.
+    private static func embrasserLInstant(_ jours: inout [DailySample], _ courant: CurrentSample) {
+        let maintenant = courant.time
+        let t = courant.temperature
+        guard t.isFinite, let i = jours.lastIndex(where: { $0.date <= maintenant }) else { return }
+        let fin = i + 1 < jours.count ? jours[i + 1].date : jours[i].date.addingTimeInterval(86_400)
+        guard maintenant < fin else { return }
+        let j = jours[i]
+        jours[i] = DailySample(
+            date: j.date, weatherCode: j.weatherCode,
+            temperatureMin: min(j.temperatureMin, t), temperatureMax: max(j.temperatureMax, t),
+            precipitationSum: j.precipitationSum, precipitationProbabilityMax: j.precipitationProbabilityMax,
+            windGustsMax: j.windGustsMax, uvIndexMax: j.uvIndexMax,
+            sunrise: j.sunrise, sunset: j.sunset
+        )
     }
 
     private static func fusionnerHeure(_ base: HourlySample, _ voix: [HeureSource]) -> HourlySample {
