@@ -65,11 +65,15 @@ struct HourlyStripView: View {
                 .font(.subheadline.weight(.semibold))
                 .lineLimit(1)
                 .minimumScaleFactor(0.7)
+                // « Maint. » se lit « maint point » : VoiceOver dit le mot.
+                .accessibilityLabel(isFirst ? Localized.text("hourly.now.a11y") : AgroFormat.hour(hour.time, in: timeZone))
 
+            // Sans libellé, VoiceOver lisait le nom anglais du symbole.
             Image(systemName: condition.icon.symbolName(isDay: isDay))
                 .symbolRenderingMode(.multicolor)
                 .font(.system(size: 20))
                 .frame(height: 24)
+                .accessibilityLabel(condition.label(isDay: isDay))
 
             Text(hour.precipitationProbability >= 10
                  ? AgroFormat.percent(hour.precipitationProbability)
@@ -77,6 +81,9 @@ struct HourlyStripView: View {
                 .font(.caption2.weight(.semibold))
                 .foregroundStyle(Color(red: 0.498, green: 0.816, blue: 0.961))
                 .lineLimit(1)
+                // Un pourcentage nu ne dit pas de quoi il est le risque.
+                .accessibilityLabel(Localized.text("rain.chance.a11y", AgroFormat.percent(hour.precipitationProbability)))
+                .accessibilityHidden(hour.precipitationProbability < 10)
 
             Text(AgroFormat.temperature(temperature))
                 .font(.title3)
