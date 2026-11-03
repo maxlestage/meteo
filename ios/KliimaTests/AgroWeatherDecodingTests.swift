@@ -247,6 +247,56 @@ final class AgroWeatherDecodingTests: XCTestCase {
         let bienPlusTard = calendrier.date(byAdding: .day, value: 10, to: premier)!
         XCTAssertEqual(forecast.joursAVenir(maintenant: bienPlusTard).count, 3)
     }
+
+    /// Le soir, la tuile « Lever » parle de demain ; sans coucher (nuit
+    /// polaire) ou sans lendemain, elle garde aujourd'hui.
+    func testSunTileMovesToTomorrowAfterSunset() {
+        let paris = TimeZone(identifier: "Europe/Paris")!
+        var calendrier = Calendar(identifier: .gregorian)
+        calendrier.timeZone = paris
+        func instant(_ jour: Int, _ heure: Int, _ minute: Int = 0) -> Date {
+            calendrier.date(from: DateComponents(year: 2026, month: 11, day: jour, hour: heure, minute: minute))!
+        }
+        func jour(_ numero: Int, lever: Date?, coucher: Date?) -> DailySample {
+            DailySample(
+                date: calendrier.date(from: DateComponents(year: 2026, month: 11, day: numero))!,
+                weatherCode: 3, temperatureMin: 5, temperatureMax: 12,
+                precipitationSum: 0, precipitationProbabilityMax: 10, windGustsMax: 20, uvIndexMax: 1,
+                sunrise: lever, sunset: coucher
+            )
+        }
+        func prevision(_ jours: [DailySample]) -> AgroForecast {
+            AgroForecast(
+                parcelle: Parcelle(name: "Paris", latitude: 48.86, longitude: 2.35),
+                timezone: "Europe/Paris",
+                elevation: 35,
+                current: CurrentSample(
+                    time: instant(3, 8), temperature: 6, apparentTemperature: 4, weatherCode: 3, isDay: true,
+                    relativeHumidity: 80, windSpeed: 10, windGusts: 20, pressure: 1015
+                ),
+                hourly: [],
+                daily: jours,
+                fetchedAt: instant(3, 8)
+            )
+        }
+        let mardi = jour(3, lever: instant(3, 7, 46), coucher: instant(3, 17, 18))
+        let mercredi = jour(4, lever: instant(4, 7, 47), coucher: instant(4, 17, 16))
+        let forecast = prevision([mardi, mercredi])
+
+        // Avant le lever et dans l'après-midi : aujourd'hui.
+        XCTAssertEqual(forecast.soleilAVenir(maintenant: instant(3, 6))?.sunrise, mardi.sunrise)
+        XCTAssertEqual(forecast.soleilAVenir(maintenant: instant(3, 17, 17))?.sunrise, mardi.sunrise)
+        // Au coucher et après : demain.
+        XCTAssertEqual(forecast.soleilAVenir(maintenant: instant(3, 17, 18))?.sunrise, mercredi.sunrise)
+        XCTAssertEqual(forecast.soleilAVenir(maintenant: instant(3, 21))?.sunset, mercredi.sunset)
+        // Après minuit, demain est devenu aujourd'hui.
+        XCTAssertEqual(forecast.soleilAVenir(maintenant: instant(4, 0, 20))?.sunrise, mercredi.sunrise)
+        // Sans lendemain dans la série, on garde ce qu'on a.
+        XCTAssertEqual(prevision([mardi]).soleilAVenir(maintenant: instant(3, 21))?.sunrise, mardi.sunrise)
+        // Nuit polaire : pas de coucher, on reste sur aujourd'hui.
+        let polaire = prevision([jour(3, lever: nil, coucher: nil), mercredi])
+        XCTAssertNil(polaire.soleilAVenir(maintenant: instant(3, 21))?.sunrise)
+    }
 }
 
 /// Le contrat avec le service de qualité de l'air : mêmes cas que

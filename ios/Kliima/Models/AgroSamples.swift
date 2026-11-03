@@ -143,4 +143,20 @@ extension AgroForecast {
     func aujourdhui(maintenant: Date = Date()) -> DailySample? {
         joursAVenir(maintenant: maintenant).first
     }
+
+    /// Le jour dont la tuile « Lever » parle : aujourd'hui tant que le soleil
+    /// ne s'est pas couché, demain ensuite.
+    ///
+    /// À 21 h, la tuile annonçait encore le lever et le coucher du matin et de
+    /// l'après-midi, deux heures passées : ce qu'on cherche le soir, c'est
+    /// l'heure à laquelle il fera jour demain. Sans coucher (jour ou nuit
+    /// polaire), ou sans lendemain dans la série, on garde aujourd'hui.
+    func soleilAVenir(maintenant: Date = Date()) -> DailySample? {
+        let jours = joursAVenir(maintenant: maintenant)
+        guard let aujourdhui = jours.first else { return nil }
+        if let coucher = aujourdhui.sunset, coucher <= maintenant, jours.count > 1 {
+            return jours[1]
+        }
+        return aujourdhui
+    }
 }
