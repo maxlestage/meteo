@@ -243,6 +243,7 @@ struct HeuresWidgetView: View {
             Image(systemName: condition.icon.symbolName(isDay: current.isDay))
                 .symbolRenderingMode(.multicolor)
                 .font(family == .systemLarge ? .title : .title3)
+                .accessibilityHidden(true)
             Text(AgroFormat.temperature(current.temperature))
                 .font(.system(size: family == .systemLarge ? 40 : 22, weight: .light, design: .rounded))
                 .lineLimit(1)
@@ -277,6 +278,7 @@ struct BandeauHeures: View {
                         .symbolRenderingMode(.multicolor)
                         .font(.system(size: 18))
                         .frame(height: 22)
+                        .accessibilityLabel(WeatherCondition.forCode(heure.weatherCode).label(isDay: heure.isDay))
                     Text(AgroFormat.temperature(heure.temperature))
                         .font(.system(size: 15, weight: .medium, design: .rounded))
                         .monospacedDigit()
@@ -408,6 +410,7 @@ private struct LigneDeJour: View {
                 .symbolRenderingMode(.multicolor)
                 .font(.system(size: 15))
                 .frame(width: 22)
+                .accessibilityLabel(WeatherCondition.forCode(jour.weatherCode).label(isDay: true))
             Text(jour.precipitationProbabilityMax >= 30 ? AgroFormat.percent(jour.precipitationProbabilityMax) : "")
                 .font(.system(size: 10, weight: .semibold))
                 .foregroundStyle(bleuPluie)
@@ -499,6 +502,7 @@ struct DehorsWidgetView: View {
                                     Image(systemName: conseil.symbolName)
                                         .symbolRenderingMode(.multicolor)
                                         .font(.system(size: 16))
+                                        .accessibilityLabel(conseil.label)
                                 }
                             }
                         }
@@ -539,6 +543,7 @@ struct DehorsWidgetView: View {
                 Image(systemName: condition.icon.symbolName(isDay: current.isDay))
                     .symbolRenderingMode(.multicolor)
                     .font(.title)
+                    .accessibilityLabel(condition.label(isDay: current.isDay))
             }
             LazyVGrid(columns: colonnes, spacing: 8) {
                 TuileWidget(
