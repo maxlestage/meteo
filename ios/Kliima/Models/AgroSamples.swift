@@ -99,8 +99,9 @@ struct CurrentSample: Equatable {
     let relativeHumidity: Double
     let windSpeed: Double
     let windGusts: Double
-    /// Pression ramenée au niveau de la mer (hPa).
-    let pressure: Double
+    /// Pression ramenée au niveau de la mer (hPa) ; `nil` quand la source
+    /// ne l'a pas donnée — la tuile dit alors « – », pas « 0 hPa ».
+    let pressure: Double?
 }
 
 /// Prévision complète renvoyée par le service.
