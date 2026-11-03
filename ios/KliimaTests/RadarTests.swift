@@ -14,13 +14,31 @@ final class RadarTests: XCTestCase {
         XCTAssertEqual(p.quarts[1].debut, Date(timeIntervalSince1970: 1_791_314_100))
         XCTAssertEqual(p.deplacement?.vitesse, 42)
         XCTAssertEqual(p.deplacement?.cap, 75)
-        XCTAssertTrue(p.voitLaVille)
+        XCTAssertTrue(p.voitLaVille(a: p.image))
 
         let aveugle = try XCTUnwrap(Radar.decode(Data(#"{"image":1791313200,"maintenant":null,"quarts":[]}"#.utf8)))
         XCTAssertNil(aveugle.maintenant)
-        XCTAssertFalse(aveugle.voitLaVille)
+        XCTAssertFalse(aveugle.voitLaVille(a: aveugle.image))
         XCTAssertNil(aveugle.deplacement)
         XCTAssertNil(Radar.decode(Data("pas du json".utf8)))
+    }
+
+    /// Mêmes cas que `une_image_perimee_ne_dit_plus_ce_qui_tombe`.
+    func testUneImagePerimeeNeDitPlusCeQuiTombe() {
+        let image = Date(timeIntervalSince1970: 1_791_327_600)
+        let vue = RadarPrevision(image: image, maintenant: 0.8, quarts: [(debut: image, debit: 0.8)], deplacement: (vitesse: 42, cap: 75))
+        XCTAssertTrue(vue.voitLaVille(a: image.addingTimeInterval(RadarSeuils.ageMax)), "à la limite, l'image compte encore")
+        let apres = image.addingTimeInterval(RadarSeuils.ageMax + 60)
+        XCTAssertFalse(vue.frais(apres))
+        XCTAssertFalse(vue.voitLaVille(a: apres), "une minute de plus, elle est écartée")
+        let aveugle = RadarPrevision(image: image, maintenant: nil, quarts: [], deplacement: nil)
+        XCTAssertTrue(aveugle.frais(image))
+        XCTAssertFalse(aveugle.voitLaVille(a: image))
+
+        // Le guetteur ne dit plus où va une averse vue sur une image périmée.
+        XCTAssertNotNil(VeilleTextes.mouvement(vue, a: image.addingTimeInterval(60)))
+        XCTAssertNil(VeilleTextes.mouvement(vue, a: apres))
+        XCTAssertNil(VeilleTextes.sourceRadar(vue, a: apres, in: TimeZone(identifier: "Europe/Paris")!))
     }
 
     func testCeQuiTombeEtOuCaVa() {

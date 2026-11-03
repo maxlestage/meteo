@@ -23,8 +23,8 @@ enum VeilleTextes {
     }
 
     /// D'où viennent les averses, quand le radar en voit qui comptent.
-    static func mouvement(_ radar: RadarPrevision?) -> String? {
-        guard let radar, radar.voitLaVille, let deplacement = radar.deplacement,
+    static func mouvement(_ radar: RadarPrevision?, a instant: Date) -> String? {
+        guard let radar, radar.voitLaVille(a: instant), let deplacement = radar.deplacement,
               radar.quarts.contains(where: { $0.debit >= RadarSeuils.debitMouille })
         else { return nil }
         return Localized.text(
@@ -35,8 +35,8 @@ enum VeilleTextes {
     }
 
     /// La mention du radar : son heure, sa source, sa licence.
-    static func sourceRadar(_ radar: RadarPrevision?, in zone: TimeZone) -> String? {
-        guard let radar, radar.voitLaVille else { return nil }
+    static func sourceRadar(_ radar: RadarPrevision?, a instant: Date, in zone: TimeZone) -> String? {
+        guard let radar, radar.voitLaVille(a: instant) else { return nil }
         return Localized.text("veille.radar", AgroFormat.time(radar.image, in: zone))
     }
 
