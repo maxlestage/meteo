@@ -89,11 +89,11 @@ struct DashboardView: View {
 
                                 // Puis la journée : faut-il un parapluie, et
                                 // jusqu'à quand — puis ce qu'il faut emporter.
-                                PluieCardView(hours: forecast.hourly, timeZone: viewModel.timeZone)
+                                PluieCardView(hours: heuresAVenir(forecast), timeZone: viewModel.timeZone)
                                     .entreeEnCascade(2)
 
                                 HourlyStripView(
-                                    hours: forecast.hourly,
+                                    hours: heuresAVenir(forecast),
                                     current: forecast.current,
                                     timeZone: viewModel.timeZone
                                 )
@@ -281,6 +281,15 @@ struct DashboardView: View {
     }
 
     // MARK: Sous-vues
+
+    /// Les heures à partir de celle en cours, relues à chaque affichage. La
+    /// série est taillée quand la prévision arrive ; gardée en mémoire faute
+    /// de réseau, ou laissée ouverte, elle s'ouvrait deux heures plus tard sur
+    /// une heure finie, sous « Maintenant » — et la pluie « en cours » était
+    /// celle d'avant.
+    private func heuresAVenir(_ forecast: AgroForecast) -> [HourlySample] {
+        AgroWeatherService.fromCurrentHour(forecast.hourly, now: Date())
+    }
 
     private var searchResults: some View {
         VStack(spacing: 0) {
