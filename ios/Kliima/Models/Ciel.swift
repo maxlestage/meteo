@@ -93,6 +93,15 @@ struct CielObserve: Equatable, Sendable {
     /// Ce qui tombe, pour le dire.
     var precipitation: VeillePrecipitation? { tombe?.precipitation }
 
+    /// Vrai tant que le bulletin parle encore du moment présent : pas plus
+    /// vieux que `CielSeuils.ageMax` à `maintenant`. Choisi frais à l'arrivée
+    /// de la prévision, il vieillit avec elle : gardée en mémoire ou laissée
+    /// ouverte, elle disait encore la pluie de midi à 17 h. Miroir de
+    /// `CielObserve::frais`.
+    func frais(_ maintenant: Date) -> Bool {
+        maintenant.timeIntervalSince(time) <= CielSeuils.ageMax
+    }
+
     /// Jusqu'à quand ce qu'on voit tombera encore, d'après le bulletin :
     /// deux heures sous `NOSIG` ou un `BECMG` qui fait tomber, le quart en
     /// cours seulement sous `BECMG NSW`, sinon jusqu'au bulletin suivant.

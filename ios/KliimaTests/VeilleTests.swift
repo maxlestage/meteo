@@ -73,6 +73,23 @@ final class VeilleTests: XCTestCase {
         XCTAssertFalse(Veille.aveugle(serie([0.6]), maintenant: maintenant, ciel: ancien))
         XCTAssertFalse(Veille.aveugle(sec, maintenant: maintenant, ciel: nil))
 
+        // Un bulletin d'une heure et quart compte encore ; au-delà, la
+        // prévision gardée ouverte ne dit plus la pluie d'avant.
+        let limite = CielObserve(
+            station: "LFBD", nom: "Bordeaux/Merignac", distanceKm: 8,
+            time: maintenant.addingTimeInterval(-CielSeuils.ageMax), tombe: pluie, tendance: .stable
+        )
+        XCTAssertTrue(Veille.mouille(Veille.observer(sec, maintenant: maintenant, ciel: limite)[0]))
+        XCTAssertTrue(Veille.aveugle(sec, maintenant: maintenant, ciel: limite))
+        let perime = CielObserve(
+            station: "LFBD", nom: "Bordeaux/Merignac", distanceKm: 8,
+            time: limite.time.addingTimeInterval(-60), tombe: pluie, tendance: .stable
+        )
+        XCTAssertEqual(Veille.observer(sec, maintenant: maintenant, ciel: perime), sec)
+        XCTAssertFalse(Veille.aveugle(sec, maintenant: maintenant, ciel: perime))
+        XCTAssertNotNil(VeilleTextes.vu(limite, in: .gmt, maintenant: maintenant))
+        XCTAssertNil(VeilleTextes.vu(perime, in: .gmt, maintenant: maintenant))
+
         lu = Veille.observer(sec, maintenant: maintenant, ciel: vu(pluie, .changement(passager: false, tombe: nil, sec: true)))
         XCTAssertTrue(Veille.mouille(lu[0]))
         XCTAssertFalse(Veille.mouille(lu[1]))
