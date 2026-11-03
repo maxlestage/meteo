@@ -42,6 +42,10 @@ pub mod seuils {
     /// À partir de ce débit au-dessus de la ville, il tombe quelque chose
     /// (mm/h) : le seuil d'un quart mouillé du guetteur, ramené à l'heure.
     pub const DEBIT_MOUILLE: f64 = crate::veille::seuils::PLUIE_QUART_MM * 4.0;
+    /// Au-delà de cet âge, l'image ne dit plus ce qui tombe (ms). Le guetteur
+    /// relit à chaque quart : une lecture manquée laisse une image d'une
+    /// vingtaine de minutes, deux disent que le relais ne répond plus.
+    pub const AGE_MAX_MS: i64 = 30 * 60_000;
 }
 
 use seuils::*;
@@ -286,6 +290,22 @@ pub struct Prevision {
     pub deplacement: Option<(f64, f64)>,
 }
 
+impl Prevision {
+    /// Vrai tant que l'image n'est pas plus vieille que `AGE_MAX_MS` à
+    /// `maintenant` (ms UTC). Gardée en mémoire quand le relais ne répond
+    /// plus, une image de midi disait encore à 15 h ce qui tombait, taisait
+    /// l'aéroport et montrait où allait une averse partie depuis.
+    pub fn frais(&self, maintenant: i64) -> bool {
+        maintenant - self.image <= AGE_MAX_MS
+    }
+
+    /// Vrai quand un radar voit la ville sur une image fraîche : il fait
+    /// alors foi pour ce qui tombe.
+    pub fn voit_la_ville(&self, maintenant: i64) -> bool {
+        self.maintenant.is_some() && self.frais(maintenant)
+    }
+}
+
 /// Prolonge ce que voit l'image la plus récente dans la direction où va la
 /// pluie : le débit d'un quart est celui qui, à l'heure de l'image, se
 /// trouvait là d'où le vent l'amène — lu au milieu du quart. Sans
@@ -382,6 +402,17 @@ mod tests {
         // Un ciel vide ne se déplace pas.
         let sec = Champ::decouper((60, 60), 60, |_, _| Echo::Debit(0.0));
         assert_eq!(deplacement(&sec, &sec, 15.0), None);
+    }
+
+    #[test]
+    fn une_image_perimee_ne_dit_plus_ce_qui_tombe() {
+        let image = 1_791_327_600_000;
+        let vue = Prevision { image, maintenant: Some(0.8), quarts: vec![(image, 0.8)], deplacement: None };
+        assert!(vue.voit_la_ville(image + AGE_MAX_MS), "à la limite, l'image compte encore");
+        assert!(!vue.frais(image + AGE_MAX_MS + 60_000));
+        assert!(!vue.voit_la_ville(image + AGE_MAX_MS + 60_000), "une minute de plus, elle est écartée");
+        let aveugle = Prevision { maintenant: None, quarts: Vec::new(), ..vue };
+        assert!(aveugle.frais(image) && !aveugle.voit_la_ville(image));
     }
 
     #[test]

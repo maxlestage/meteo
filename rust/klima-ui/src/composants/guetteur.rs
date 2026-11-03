@@ -47,6 +47,9 @@ const DEBIT_PLEIN: f64 = 8.0;
 pub fn Guetteur(props: &Props) -> Html {
     let i18n = use_i18n();
     let etat = &props.etat;
+    // Une image gardée en mémoire quand le relais ne répond plus ne dit plus
+    // ce qui tombe : le guetteur fait comme s'il n'avait pas de radar.
+    let radar_frais = props.radar.as_ref().filter(|r| r.frais(etat.maintenant));
 
     let vu = etat
         .maintenant_a_la_ville()
@@ -56,9 +59,8 @@ pub fn Guetteur(props: &Props) -> Html {
             // Quand il voit la ville, il fait foi pour ce qui tombe ; sinon,
             // ce que voit l'aéroport.
             let decalage = q.utc_offset_seconds * 1000;
-            let ciel = props.ciel.as_ref().filter(|_| props.radar.as_ref().is_none_or(|r| r.maintenant.is_none()));
-            let radar: Vec<(i64, f64)> = props
-                .radar
+            let ciel = props.ciel.as_ref().filter(|_| radar_frais.is_none_or(|r| r.maintenant.is_none()));
+            let radar: Vec<(i64, f64)> = radar_frais
                 .iter()
                 .flat_map(|r| r.quarts.iter().map(|(t, d)| (t + decalage, *d)))
                 .collect();
@@ -87,7 +89,7 @@ pub fn Guetteur(props: &Props) -> Html {
     });
 
     // Le radar : d'où viennent les averses, et la mention de sa source.
-    let radar = props.radar.as_ref().filter(|r| r.maintenant.is_some()).map(|r| {
+    let radar = radar_frais.filter(|r| r.maintenant.is_some()).map(|r| {
         let decalage = etat.quarts.as_ref().map_or(0, |q| q.utc_offset_seconds * 1000);
         let locale = i18n.locale();
         let pluie = r.quarts.iter().any(|(_, d)| *d >= klima_core::radar::seuils::DEBIT_MOUILLE);
