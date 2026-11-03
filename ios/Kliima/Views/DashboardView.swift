@@ -386,6 +386,8 @@ struct DashboardView: View {
         // Sans UV (MET Norway en secours), la tuile dit « – », pas « 0 · faible ».
         let uv = heureEnCours?.uvIndex
         let uvMax = today?.uvIndexMax ?? uv
+        // Le soir venu, le lever et le coucher sont ceux de demain.
+        let soleil = forecast.soleilAVenir()
 
         var tiles: [TileModel] = [
             TileModel(
@@ -444,8 +446,8 @@ struct DashboardView: View {
             ),
             TileModel(
                 label: Localized.text("tile.sunrise"),
-                value: AgroFormat.time(today?.sunrise, in: zone),
-                caption: Localized.text("tile.sunrise.caption", AgroFormat.time(today?.sunset, in: zone))
+                value: AgroFormat.time(soleil?.sunrise, in: zone),
+                caption: Localized.text("tile.sunrise.caption", AgroFormat.time(soleil?.sunset, in: zone))
             ),
         ]
 
