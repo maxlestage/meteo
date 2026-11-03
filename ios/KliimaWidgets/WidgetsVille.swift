@@ -426,6 +426,11 @@ private struct LigneDeJour: View {
                 let etendue = bornes.upperBound - bornes.lowerBound
                 let debut = (jour.temperatureMin - bornes.lowerBound) / etendue
                 let fin = (jour.temperatureMax - bornes.lowerBound) / etendue
+                // Six points au moins pour qu'un jour sans amplitude se voie,
+                // mais jamais au-delà du rail : le jour le plus chaud recule
+                // d'autant au lieu de dépasser à droite.
+                let largeur = max(6, geo.size.width * (fin - debut))
+                let depart = max(min(geo.size.width * debut, geo.size.width - largeur), 0)
                 ZStack(alignment: .leading) {
                     Capsule().fill(Color.white.opacity(0.18))
                     Capsule()
@@ -433,8 +438,8 @@ private struct LigneDeJour: View {
                             colors: [Color(red: 0.55, green: 0.80, blue: 1.0), Color(red: 1.0, green: 0.78, blue: 0.40)],
                             startPoint: .leading, endPoint: .trailing
                         ))
-                        .frame(width: max(6, geo.size.width * (fin - debut)))
-                        .offset(x: geo.size.width * debut)
+                        .frame(width: largeur)
+                        .offset(x: depart)
                 }
             }
             .frame(height: 5)
