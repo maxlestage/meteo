@@ -31,7 +31,7 @@ struct WatchDashboardView: View {
                         WatchHeader(forecast: forecast)
                             .apparition(0)
                         WatchGuetteur(
-                            quarts: viewModel.quarts,
+                            quarts: viewModel.quartsDeLaVille,
                             enLecture: viewModel.veilleEnLecture,
                             timeZone: viewModel.timeZone,
                             ciel: forecast.ciel
@@ -49,7 +49,9 @@ struct WatchDashboardView: View {
                 // Une autre ville rejoue l'arrivée des cartes.
                 .id(viewModel.forecast?.parcelle)
             }
-            .navigationTitle(viewModel.parcelle.name)
+            // Le nom de la ville montrée : une relecture ratée ailleurs garde
+            // la prévision d'avant, elle ne prend pas le nom du lieu nouveau.
+            .navigationTitle(viewModel.forecast?.parcelle.name ?? viewModel.parcelle.name)
             .navigationBarTitleDisplayMode(.inline)
             .containerBackground(for: .navigation) {
                 WatchCiel(
