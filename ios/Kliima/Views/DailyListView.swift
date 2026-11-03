@@ -49,11 +49,15 @@ struct DailyListView: View {
                 .lineLimit(1)
                 .minimumScaleFactor(0.75)
                 .frame(width: largeurJour, alignment: .leading)
+                // « Auj. » se lit « auj point » : VoiceOver dit le mot.
+                .accessibilityLabel(isToday ? Localized.text("daily.today.a11y") : AgroFormat.weekday(day.date, in: timeZone))
 
             VStack(spacing: 0) {
                 Image(systemName: condition.icon.symbolName(isDay: true))
                     .symbolRenderingMode(.multicolor)
                     .font(.system(size: tailleIcone))
+                    // Sans libellé, VoiceOver lisait le nom anglais du symbole.
+                    .accessibilityLabel(condition.label(isDay: true))
                 Text(day.precipitationProbabilityMax >= 10
                      ? AgroFormat.percent(day.precipitationProbabilityMax)
                      : " ")
@@ -61,6 +65,8 @@ struct DailyListView: View {
                     .foregroundStyle(Color(red: 0.498, green: 0.816, blue: 0.961))
                     .lineLimit(1)
                     .minimumScaleFactor(0.75)
+                    .accessibilityLabel(Localized.text("rain.chance.a11y", AgroFormat.percent(day.precipitationProbabilityMax)))
+                    .accessibilityHidden(day.precipitationProbabilityMax < 10)
             }
             .frame(width: largeurCiel)
 
@@ -69,13 +75,17 @@ struct DailyListView: View {
                 .lineLimit(1)
                 .minimumScaleFactor(0.75)
                 .frame(width: largeurTemperature, alignment: .trailing)
+                // Deux degrés côte à côte ne disent pas lequel est le minimum.
+                .accessibilityLabel(Localized.text("range.min.a11y", AgroFormat.temperature(day.temperatureMin)))
 
             temperatureBar(for: day, isToday: isToday, rang: rang)
+                .accessibilityHidden(true)
 
             Text(AgroFormat.temperature(day.temperatureMax))
                 .lineLimit(1)
                 .minimumScaleFactor(0.75)
                 .frame(width: largeurTemperature, alignment: .trailing)
+                .accessibilityLabel(Localized.text("range.max.a11y", AgroFormat.temperature(day.temperatureMax)))
         }
         .font(.body)
         .monospacedDigit()
