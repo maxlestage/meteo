@@ -100,7 +100,7 @@ struct DashboardView: View {
                                 .entreeEnCascade(3)
 
                                 DailyListView(
-                                    days: forecast.joursAVenir(),
+                                    days: forecast.joursAutourDeMaintenant(),
                                     currentTemperature: forecast.maintenant().temperature,
                                     timeZone: viewModel.timeZone
                                 )

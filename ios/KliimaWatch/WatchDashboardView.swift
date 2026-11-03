@@ -213,7 +213,8 @@ private struct WatchHeader: View {
                 Text(condition.label(isDay: current.isDay))
                     .lineLimit(1)
                 Spacer(minLength: 0)
-                if let today = forecast.aujourdhui() {
+                // Le jour embrasse la température affichée au-dessus.
+                if let today = forecast.joursAutourDeMaintenant().first {
                     Text("↑\(AgroFormat.temperature(today.temperatureMax)) ↓\(AgroFormat.temperature(today.temperatureMin))")
                         .monospacedDigit()
                         .lineLimit(1)
