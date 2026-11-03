@@ -132,7 +132,10 @@ struct VillesView: View {
                 let condition = WeatherCondition.forCode(apercu.weatherCode)
                 Image(systemName: condition.icon.symbolName(isDay: apercu.isDay))
                     .symbolRenderingMode(.multicolor)
-                    .accessibilityLabel(condition.label)
+                    // La nuit, VoiceOver disait « Ciel dégagé » sous la lune
+                    // que l'icône montrait : le libellé suit le jour, comme
+                    // l'en-tête et le bandeau.
+                    .accessibilityLabel(condition.label(isDay: apercu.isDay))
                 Text(AgroFormat.temperature(apercu.temperature))
                     .font(.title3.monospacedDigit())
             } else {
