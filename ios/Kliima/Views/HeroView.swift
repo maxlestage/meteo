@@ -48,6 +48,10 @@ struct HeroView: View {
             if let today = forecast.daily.first {
                 Text("↑ \(AgroFormat.temperature(today.temperatureMax))   ↓ \(AgroFormat.temperature(today.temperatureMin))")
                     .font(.title3)
+                    // Les flèches se lisaient « flèche vers le haut ».
+                    .accessibilityLabel(Localized.text("range.max.a11y", AgroFormat.temperature(today.temperatureMax))
+                                        + ", "
+                                        + Localized.text("range.min.a11y", AgroFormat.temperature(today.temperatureMin)))
             }
 
             // La prévision n'est pas celle d'un modèle : toutes les sources
