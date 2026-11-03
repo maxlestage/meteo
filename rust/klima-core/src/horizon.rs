@@ -44,6 +44,28 @@ pub fn jour_contenant(instant: i64, jours: &[DailySample]) -> Option<&DailySampl
     jours.iter().rev().find(|j| j.date <= instant).or_else(|| jours.first())
 }
 
+/// Le jour qui contient `instant`, élargi jusqu'à `temperature` — celle qu'on
+/// affiche pour cet instant.
+///
+/// Un widget posé pour quinze heures montre la température prévue à quinze
+/// heures à côté du minimum et du maximum du jour. Les deux ne viennent pas
+/// des mêmes voix — l'heure est la médiane des températures horaires, le jour
+/// celle des extrêmes publiés — et l'on pouvait lire « 14° » puis « 9° / 13° ».
+/// Ce qu'il fait à cet instant est atteint ce jour-là : le jour s'élargit
+/// jusqu'à lui, il ne rétrécit jamais. Même règle que
+/// `fusion::embrasser_l_instant`, appliquée à chaque instant affiché.
+pub fn jour_embrassant(instant: i64, temperature: f64, jours: &[DailySample]) -> Option<DailySample> {
+    let mut jour = jour_contenant(instant, jours)?.clone();
+    // Hors du jour trouvé (avant la série, ou après sa fin), rien à embrasser :
+    // la température d'un autre jour ne dit rien de celui-ci.
+    let dedans = jour.date <= instant && instant < jour.date + 24 * HEURE_MS;
+    if dedans && temperature.is_finite() {
+        jour.temperature_min = jour.temperature_min.min(temperature);
+        jour.temperature_max = jour.temperature_max.max(temperature);
+    }
+    Some(jour)
+}
+
 /// Le poids d'un moment dans la pile intelligente : plus haut quand la pluie
 /// approche, pour que la pile remonte Kliima ‣ d'elle-même au moment où l'on
 /// en a besoin. `heures` commence à l'heure du moment ; les trois heures se
@@ -200,5 +222,63 @@ mod tests {
             jour_contenant(minuit + 25 * HEURE_MS, &jours).map(|j| j.date),
             Some(minuit + 24 * HEURE_MS)
         );
+    }
+
+    fn jour_de(date: i64) -> DailySample {
+        DailySample {
+            date,
+            weather_code: 3,
+            temperature_min: 9.0,
+            temperature_max: 13.0,
+            precipitation_sum: 0.0,
+            precipitation_probability_max: 0.0,
+            uv_index_max: 0.0,
+            wind_gusts_max: 0.0,
+            sunrise: None,
+            sunset: None,
+        }
+    }
+
+    #[test]
+    fn le_jour_embrasse_la_temperature_affichee() {
+        let minuit = QUATORZE - 14 * HEURE_MS;
+        let jours = [jour_de(minuit), jour_de(minuit + 24 * HEURE_MS)];
+        let jour = jour_embrassant(QUATORZE + HEURE_MS, 14.2, &jours).unwrap();
+        assert_eq!((jour.temperature_min, jour.temperature_max), (9.0, 14.2), "« 14° » sous « ↑ 13° »");
+        let jour = jour_embrassant(QUATORZE, 7.5, &jours).unwrap();
+        assert_eq!((jour.temperature_min, jour.temperature_max), (7.5, 13.0));
+    }
+
+    #[test]
+    fn le_jour_ne_retrecit_jamais() {
+        let minuit = QUATORZE - 14 * HEURE_MS;
+        let jour = jour_embrassant(QUATORZE, 11.0, &[jour_de(minuit)]).unwrap();
+        assert_eq!((jour.temperature_min, jour.temperature_max), (9.0, 13.0));
+    }
+
+    #[test]
+    fn seul_le_jour_de_l_instant_s_elargit() {
+        let minuit = QUATORZE - 14 * HEURE_MS;
+        let jours = [jour_de(minuit), jour_de(minuit + 24 * HEURE_MS)];
+        // Demain quatorze heures : c'est demain qui s'élargit, pas aujourd'hui.
+        let demain = jour_embrassant(QUATORZE + 24 * HEURE_MS, 20.0, &jours).unwrap();
+        assert_eq!(demain.date, minuit + 24 * HEURE_MS);
+        assert_eq!(demain.temperature_max, 20.0);
+        assert_eq!(jours[0].temperature_max, 13.0);
+    }
+
+    #[test]
+    fn hors_de_la_serie_le_jour_reste_tel_quel() {
+        let minuit = QUATORZE - 14 * HEURE_MS;
+        let jours = [jour_de(minuit)];
+        // La veille : le premier jour est rendu, mais pas élargi.
+        let veille = jour_embrassant(minuit - HEURE_MS, 30.0, &jours).unwrap();
+        assert_eq!(veille.temperature_max, 13.0);
+        // Le surlendemain : la série est finie.
+        let apres = jour_embrassant(minuit + 30 * HEURE_MS, 30.0, &jours).unwrap();
+        assert_eq!(apres.temperature_max, 13.0);
+        assert!(jour_embrassant(QUATORZE, 20.0, &[]).is_none());
+        let nan = jour_embrassant(QUATORZE, f64::NAN, &jours).unwrap();
+        assert_eq!((nan.temperature_min, nan.temperature_max), (9.0, 13.0));
     }
 }

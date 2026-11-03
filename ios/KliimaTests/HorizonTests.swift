@@ -116,6 +116,72 @@ final class HorizonTests: XCTestCase {
         XCTAssertEqual(moments.count, 3, "maintenant, puis 15 h et 16 h — rien d'inventé après")
     }
 
+    // MARK: Le jour embrasse ce qu'on affiche
+
+    private func jour(_ date: Date) -> DailySample {
+        DailySample(date: date, weatherCode: 3, temperatureMin: 9, temperatureMax: 13,
+                    precipitationSum: 0, precipitationProbabilityMax: 0, windGustsMax: 0,
+                    uvIndexMax: 0, sunrise: nil, sunset: nil)
+    }
+
+    private var minuit: Date { quatorze.addingTimeInterval(-14 * 3600) }
+
+    func testLeJourEmbrasseLaTemperatureAffichee() throws {
+        let jours = [jour(minuit), jour(minuit.addingTimeInterval(86_400))]
+        var j = try XCTUnwrap(Horizon.jour(contenant: quatorze.addingTimeInterval(3600),
+                                           embrassant: 14.2, dans: jours))
+        XCTAssertEqual(j.temperatureMin, 9)
+        XCTAssertEqual(j.temperatureMax, 14.2, "« 14° » sous « ↑ 13° »")
+        j = try XCTUnwrap(Horizon.jour(contenant: quatorze, embrassant: 7.5, dans: jours))
+        XCTAssertEqual(j.temperatureMin, 7.5)
+        XCTAssertEqual(j.temperatureMax, 13)
+    }
+
+    func testLeJourNeRetrecitJamais() throws {
+        let j = try XCTUnwrap(Horizon.jour(contenant: quatorze, embrassant: 11, dans: [jour(minuit)]))
+        XCTAssertEqual(j.temperatureMin, 9)
+        XCTAssertEqual(j.temperatureMax, 13)
+    }
+
+    func testSeulLeJourDeLInstantSElargit() throws {
+        let jours = [jour(minuit), jour(minuit.addingTimeInterval(86_400))]
+        // Demain quatorze heures : c'est demain qui s'élargit, pas aujourd'hui.
+        let demain = try XCTUnwrap(Horizon.jour(contenant: quatorze.addingTimeInterval(86_400),
+                                                embrassant: 20, dans: jours))
+        XCTAssertEqual(demain.date, minuit.addingTimeInterval(86_400))
+        XCTAssertEqual(demain.temperatureMax, 20)
+        XCTAssertEqual(jours[0].temperatureMax, 13)
+    }
+
+    func testHorsDeLaSerieLeJourResteTelQuel() throws {
+        let jours = [jour(minuit)]
+        // La veille : le premier jour est rendu, mais pas élargi.
+        let veille = try XCTUnwrap(Horizon.jour(contenant: minuit.addingTimeInterval(-3600),
+                                                embrassant: 30, dans: jours))
+        XCTAssertEqual(veille.temperatureMax, 13)
+        // Le surlendemain : la série est finie.
+        let apres = try XCTUnwrap(Horizon.jour(contenant: minuit.addingTimeInterval(30 * 3600),
+                                               embrassant: 30, dans: jours))
+        XCTAssertEqual(apres.temperatureMax, 13)
+        XCTAssertNil(Horizon.jour(contenant: quatorze, embrassant: 20, dans: []))
+        let nan = try XCTUnwrap(Horizon.jour(contenant: quatorze, embrassant: .nan, dans: jours))
+        XCTAssertEqual(nan.temperatureMin, 9)
+        XCTAssertEqual(nan.temperatureMax, 13)
+    }
+
+    /// Le défaut vu sur les widgets et la complication : l'entrée de dix-sept
+    /// heures montrait 21° à côté d'un maximum de 13°.
+    func testChaqueMomentDeLaChronologieEmbrasseSaTemperature() {
+        let moments = Horizon.chronologie(courant: courant(17.5), heures: serie(), jours: [jour(minuit)],
+                                          depuis: quatorze.addingTimeInterval(60), nombre: 4)
+        for moment in moments {
+            XCTAssertGreaterThanOrEqual(moment.jour?.temperatureMax ?? -.infinity, moment.courant.temperature)
+            XCTAssertEqual(moment.jour?.temperatureMin, 9)
+        }
+        XCTAssertEqual(moments[0].jour?.temperatureMax, 17.5)
+        XCTAssertEqual(moments[3].jour?.temperatureMax, 21)
+    }
+
     // MARK: La pile intelligente
 
     /// Douze heures sèches, où il pleut à l'heure `pluie`.
