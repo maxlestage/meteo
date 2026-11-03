@@ -307,7 +307,7 @@ struct WeatherWidgetView: View {
                 TuileWidget(
                     symbole: "wind", titre: Localized.text("tile.wind"),
                     valeur: AgroFormat.unit(current.windSpeed, "km/h", decimals: 0),
-                    detail: AgroFormat.unit(current.windGusts, "km/h", decimals: 0)
+                    detail: Localized.text("tile.wind.gusts", AgroFormat.unit(current.windGusts, "km/h", decimals: 0))
                 )
                 TuileWidget(
                     symbole: "sun.max.fill", titre: Localized.text("tile.uv"),
