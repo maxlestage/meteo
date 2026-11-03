@@ -471,11 +471,19 @@ struct AgroWeatherService: AgroWeatherProviding {
     }
 
     /// Coupe la série horaire au début de l'heure en cours.
+    ///
+    /// L'heure en cours est celle qui contient `now`, pas celle qui suit
+    /// l'heure ronde en temps universel : à 9 h 40 à Bombay (UTC+5:30),
+    /// l'heure de 9 h commence à 4 h 30 UTC, avant 4 h, et la série s'ouvrait
+    /// sur 10 h — « Maintenant » montrait l'heure suivante. Même chose à
+    /// Adélaïde, Terre-Neuve ou Téhéran, et au quart d'heure à Katmandou.
     static func fromCurrentHour(_ hours: [HourlySample], now: Date) -> [HourlySample] {
-        let start = (now.timeIntervalSince1970 / 3600).rounded(.down) * 3600
-        let trimmed = hours.filter { $0.time.timeIntervalSince1970 >= start }
+        // Une série qui commence plus tard est tout entière à venir.
+        guard let derniere = hours.lastIndex(where: { $0.time <= now }) else { return hours }
+        // Un trou dans la série : on repart de l'heure qui suit.
+        let debut = now < hours[derniere].time.addingTimeInterval(3600) ? derniere : derniere + 1
         // Si l'heure courante sort de la série, on garde la série telle quelle.
-        return trimmed.isEmpty ? hours : trimmed
+        return debut < hours.count ? Array(hours[debut...]) : hours
     }
 
     /// Interroge tous les fournisseurs et recoupe leurs réponses.
