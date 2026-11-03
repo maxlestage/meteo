@@ -20,8 +20,8 @@ struct DashboardView: View {
         NavigationStack {
             ZStack {
                 SkyBackground(
-                    isDay: viewModel.forecast?.current.isDay ?? false,
-                    weatherCode: viewModel.forecast?.current.weatherCode ?? 3
+                    isDay: viewModel.forecast?.maintenant().isDay ?? false,
+                    weatherCode: viewModel.forecast?.maintenant().weatherCode ?? 3
                 )
 
                 ScrollView {
@@ -94,14 +94,14 @@ struct DashboardView: View {
 
                                 HourlyStripView(
                                     hours: heuresAVenir(forecast),
-                                    current: forecast.current,
+                                    current: forecast.maintenant(),
                                     timeZone: viewModel.timeZone
                                 )
                                 .entreeEnCascade(3)
 
                                 DailyListView(
                                     days: forecast.joursAVenir(),
-                                    currentTemperature: forecast.current.temperature,
+                                    currentTemperature: forecast.maintenant().temperature,
                                     timeZone: viewModel.timeZone
                                 )
                                 .entreeEnCascade(4)
@@ -374,7 +374,8 @@ struct DashboardView: View {
     private func detailTiles(_ forecast: AgroForecast) -> [TileModel] {
         let zone = viewModel.timeZone
         let today = forecast.aujourdhui()
-        let current = forecast.current
+        // Le relevé tant qu'il est de l'heure en cours, l'heure prévue ensuite.
+        let current = forecast.maintenant()
         // L'humidité et son point de rosée sont ceux du même instant : celui
         // de la mesure.
         let maintenant = Ville.heure(contenant: current.time, dans: forecast.hourly)

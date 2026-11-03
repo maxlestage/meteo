@@ -129,6 +129,20 @@ struct AgroForecast: Equatable {
 }
 
 extension AgroForecast {
+    /// Les conditions à montrer comme « maintenant », relues à chaque
+    /// affichage : le relevé tant qu'il est de l'heure en cours, l'heure
+    /// prévue ensuite (`Horizon.conditions(a:releve:dans:)`).
+    ///
+    /// Les widgets, la complication et l'île le faisaient déjà (#131) ; l'écran
+    /// principal de l'iPhone et de la montre, non. Ouverte sur une prévision
+    /// gardée en cache faute de réseau, ou laissée ouverte, l'application
+    /// montrait à 17 h 10 la mesure de 13 h 45 — température, ciel, ressenti,
+    /// vent — sous « Maintenant », à côté d'un bandeau qui, lui, repartait de
+    /// dix-sept heures.
+    func maintenant(a instant: Date = Date()) -> CurrentSample {
+        Horizon.conditions(a: instant, releve: current, dans: hourly)
+    }
+
     /// Les jours à partir d'aujourd'hui, relus à chaque affichage.
     ///
     /// La série est taillée quand la prévision arrive. Laissée ouverte, ou

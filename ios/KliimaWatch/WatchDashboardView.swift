@@ -53,8 +53,8 @@ struct WatchDashboardView: View {
             .navigationBarTitleDisplayMode(.inline)
             .containerBackground(for: .navigation) {
                 WatchCiel(
-                    isDay: viewModel.forecast?.current.isDay ?? true,
-                    weatherCode: viewModel.forecast?.current.weatherCode ?? 0
+                    isDay: viewModel.forecast?.maintenant().isDay ?? true,
+                    weatherCode: viewModel.forecast?.maintenant().weatherCode ?? 0
                 )
             }
         }
@@ -187,7 +187,7 @@ private struct WatchHeader: View {
     @Environment(\.accessibilityReduceMotion) private var moinsDeMouvement
 
     var body: some View {
-        let current = forecast.current
+        let current = forecast.maintenant()
         let condition = WeatherCondition.forCode(current.weatherCode)
 
         VStack(alignment: .leading, spacing: 2) {
@@ -428,7 +428,7 @@ private struct WatchHeures: View {
     }
 
     private func colonne(_ heure: HourlySample, maintenant: Bool) -> some View {
-        let current = forecast.current
+        let current = forecast.maintenant()
         let code = maintenant ? current.weatherCode : heure.weatherCode
         let isDay = maintenant ? current.isDay : heure.isDay
         let temperature = maintenant ? current.temperature : heure.temperature
@@ -462,7 +462,7 @@ private struct WatchTuiles: View {
     let forecast: AgroForecast
 
     var body: some View {
-        let current = forecast.current
+        let current = forecast.maintenant()
         let grille = [GridItem(.flexible(), spacing: 6), GridItem(.flexible(), spacing: 6)]
 
         LazyVGrid(columns: grille, spacing: 6) {
