@@ -103,6 +103,68 @@ final class HorizonTests: XCTestCase {
         XCTAssertEqual(moments[2].courant.temperature, 20)
     }
 
+    // MARK: Le relevé ne se présente pas pour une heure qui n'est pas la sienne
+
+    /// Relevé à 13 h 45, heures de 13 h (18°) à 18 h (23°) — les mêmes cas
+    /// que `iles::tests` côté relais.
+    private var treize: Date { quatorze.addingTimeInterval(-3600) }
+
+    private func releveDe1345() -> CurrentSample {
+        CurrentSample(time: treize.addingTimeInterval(45 * 60), temperature: 17.5, apparentTemperature: 16,
+                      weatherCode: 1, isDay: true, relativeHumidity: 60, windSpeed: 9, windGusts: 15,
+                      pressure: 1015)
+    }
+
+    func testDansLHeureDuReleveCEstLeReleve() {
+        let present = Horizon.conditions(a: treize.addingTimeInterval(50 * 60), releve: releveDe1345(),
+                                         dans: serie(debut: treize))
+        XCTAssertEqual(present.temperature, 17.5)
+        XCTAssertEqual(present.pressure, 1015)
+    }
+
+    func testLHeurePasseeLeReleveCedeLaPlaceALHeurePrevue() {
+        let present = Horizon.conditions(a: quatorze.addingTimeInterval(5 * 60), releve: releveDe1345(),
+                                         dans: serie(debut: treize))
+        XCTAssertEqual(present.time, quatorze)
+        XCTAssertEqual(present.temperature, 19, "la prévision de quatorze heures")
+        XCTAssertEqual(present.apparentTemperature, 18)
+        XCTAssertEqual(present.weatherCode, 3)
+        XCTAssertNil(present.pressure, "la prévision horaire n'en porte pas")
+    }
+
+    func testApresLaFinDeLaSerieLeReleveResteFauteDeMieux() {
+        let present = Horizon.conditions(a: treize.addingTimeInterval(8 * 3600), releve: releveDe1345(),
+                                         dans: serie(debut: treize))
+        XCTAssertEqual(present.temperature, 17.5)
+    }
+
+    /// Le défaut vu sur les widgets : une prévision gardée en cache, relue à
+    /// 17 h 10, posait la mesure de 13 h 45 comme celle de l'instant.
+    func testUnWidgetRechargeDepuisLeCacheNeMontrePasLaMesureDuMidi() {
+        let a1710 = quatorze.addingTimeInterval(3 * 3600 + 10 * 60)
+        let moments = Horizon.chronologie(courant: releveDe1345(), heures: serie(debut: treize),
+                                          jours: [jour(minuit)], depuis: a1710, nombre: 1)
+        XCTAssertEqual(moments[0].courant.time, quatorze.addingTimeInterval(3 * 3600))
+        XCTAssertEqual(moments[0].courant.temperature, 22, "la prévision de dix-sept heures")
+        XCTAssertEqual(moments[0].jour?.temperatureMax, 22, "le jour embrasse ce qu'on montre")
+    }
+
+    @MainActor
+    func testLIleNeMontrePasNonPlusUnReleveDUneHeurePassee() {
+        let forecast = AgroForecast(
+            parcelle: .paris, timezone: "Europe/Paris", elevation: 0,
+            current: releveDe1345(), hourly: serie(debut: treize), daily: [jour(minuit)],
+            fetchedAt: treize.addingTimeInterval(45 * 60)
+        )
+        let etat = WeatherActivityController.state(from: forecast, at: quatorze.addingTimeInterval(5 * 60))
+        XCTAssertEqual(etat.temperature, 19)
+        XCTAssertEqual(etat.apparentTemperature, 18)
+        XCTAssertEqual(etat.weatherCode, 3)
+        XCTAssertEqual(etat.next?.temperature, 20)
+        let avant = WeatherActivityController.state(from: forecast, at: treize.addingTimeInterval(50 * 60))
+        XCTAssertEqual(avant.temperature, 17.5, "dans son heure, le relevé")
+    }
+
     func testChaqueMomentCommenceSaListeDHeuresParLaSienne() {
         let moments = Horizon.chronologie(courant: courant(), heures: serie(), jours: [],
                                           depuis: quatorze.addingTimeInterval(60), nombre: 2)
