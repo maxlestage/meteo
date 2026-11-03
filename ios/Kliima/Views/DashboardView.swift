@@ -441,8 +441,10 @@ struct DashboardView: View {
             ),
             TileModel(
                 label: Localized.text("tile.pressure"),
-                value: AgroFormat.unit(current.pressure, "hPa", decimals: 0),
-                caption: Localized.text("tile.pressure.caption")
+                // Sans pression dans la réponse, « – » : « 0 hPa » se lisait
+                // comme une mesure.
+                value: current.pressure.map { AgroFormat.unit($0, "hPa", decimals: 0) } ?? "–",
+                caption: current.pressure.map { _ in Localized.text("tile.pressure.caption") }
             ),
             TileModel(
                 label: Localized.text("tile.sunrise"),

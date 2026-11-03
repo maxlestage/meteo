@@ -160,8 +160,8 @@ extension CurrentSample {
     /// Les conditions prévues pour une heure, présentées comme « maintenant ».
     ///
     /// La prévision horaire porte le ressenti, mais pas la pression : elle
-    /// vaut 0 ici. Les widgets ne l'affichent pas ; qui voudrait l'afficher
-    /// devra la chercher dans le relevé plutôt que de montrer ce zéro.
+    /// est inconnue ici. Les widgets ne l'affichent pas ; qui voudrait
+    /// l'afficher devra la chercher dans le relevé.
     init(prevu heure: HourlySample) {
         self.init(
             time: heure.time,
@@ -172,7 +172,7 @@ extension CurrentSample {
             relativeHumidity: heure.relativeHumidity,
             windSpeed: heure.windSpeed,
             windGusts: heure.windGusts,
-            pressure: 0
+            pressure: nil
         )
     }
 }

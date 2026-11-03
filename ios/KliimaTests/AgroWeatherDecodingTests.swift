@@ -102,6 +102,19 @@ final class AgroWeatherDecodingTests: XCTestCase {
         XCTAssertEqual(geo.results?.first?.admin1, "Eure-et-Loir")
     }
 
+    /// Une pression nulle ou absente reste inconnue : la tuile disait
+    /// « 0 hPa », qui se lisait comme une mesure.
+    func testUnePressionAbsenteResteInconnue() throws {
+        let zone = try XCTUnwrap(TimeZone(identifier: "Europe/Paris"))
+        for pression in [#""pressure_msl": null,"#, ""] {
+            let json = """
+            {"time": "2026-05-12T01:00", \(pression) "temperature_2m": 11.2}
+            """.data(using: .utf8)!
+            let bloc = try JSONDecoder().decode(ForecastPayload.CurrentBlock.self, from: json)
+            XCTAssertNil(bloc.decode(in: zone).pressure)
+        }
+    }
+
     /// L'API renvoie la journée depuis minuit : les séries doivent repartir de
     /// l'heure en cours pour que « maintenant » soit le premier élément.
     func testHourlySeriesStartsAtTheCurrentHour() throws {

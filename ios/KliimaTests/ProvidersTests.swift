@@ -197,6 +197,21 @@ final class ProvidersTests: XCTestCase {
         XCTAssertNil(AgroWeatherService.baseMetNorway(try MetPayload.decode(data("{}")), parcelle: .paris))
     }
 
+    /// MET Norway sans pression : inconnue, pas « 0 hPa ».
+    func testLaPrevisionDeSecoursSansPressionNeDitPasZero() throws {
+        let f = ISO8601DateFormatter()
+        let debut = Date(timeIntervalSince1970: (Date().timeIntervalSince1970 / 3600).rounded(.down) * 3600)
+        let payload = try MetPayload.decode(data("""
+        {"properties": {"timeseries": [
+          {"time": "\(f.string(from: debut))",
+           "data": {"instant": {"details": {"air_temperature": 8, "wind_speed": 5, "relative_humidity": 80}},
+                    "next_1_hours": {"summary": {"symbol_code": "cloudy"}, "details": {"precipitation_amount": 0}}}}
+        ]}}
+        """))
+        let prevision = try XCTUnwrap(AgroWeatherService.baseMetNorway(payload, parcelle: .paris))
+        XCTAssertNil(prevision.current.pressure)
+    }
+
     /// La forme complète de MET Norway donne rafales, probabilité de pluie
     /// et point de rosée : la prévision de secours les lit, sans les deviner.
     func testLaPrevisionDeSecoursLitLaFormeComplete() throws {
