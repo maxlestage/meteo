@@ -240,6 +240,7 @@ STRINGS = {
 
     # --- Tuiles ---
     "tile.wind.caption": ("Rafales %1$@.", "Gusts %1$@.", "Rachas %1$@."),
+    "tile.wind.gusts": ("Rafales %1$@", "Gusts %1$@", "Rachas %1$@"),
     "tile.feelsLike": ("Ressenti", "Feels like", "Sensación"),
     "tile.feelsLike.caption": ("Il fait %1$@ au thermomètre.", "The thermometer reads %1$@.", "El termómetro marca %1$@."),
     "tile.humidity": ("Humidité", "Humidity", "Humedad"),
