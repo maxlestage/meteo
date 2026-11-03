@@ -45,6 +45,7 @@ enum BackgroundRefresh {
         // d'achat s'en chargeant à chaque ouverture.
         let state = await AlertScheduler.schedule(
             hours: forecast.hourly,
+            ville: forecast.parcelle.name,
             plan: SharedStore.loadPlan(),
             state: SharedStore.loadAlertState()
         )
