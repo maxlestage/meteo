@@ -51,8 +51,8 @@ pub fn CielVivant(props: &Props) -> Html {
     // fondu — un changement de ville ne fait pas sauter la couleur.
     let fond = match (jour, icone) {
         (false, _) | (_, None) => "nuit",
-        (true, Some(ConditionIcon::Clear | ConditionIcon::Partly)) => "jour",
-        (true, _) => "gris",
+        (true, Some(icone)) if icone.ciel_bleu() => "jour",
+        (true, Some(_)) => "gris",
     };
 
     let nuages = match icone {
