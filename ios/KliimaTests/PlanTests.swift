@@ -58,6 +58,18 @@ final class PlanTests: XCTestCase {
         XCTAssertTrue(acces.locked.isEmpty)
     }
 
+    /// Miroir de `moins_de_parcelles_que_le_plafond_ne_verrouille_rien`
+    /// (`klima-core/src/plan.rs`) : au plafond pile, ou sans aucune ville,
+    /// rien n'est verrouillé.
+    func testMoinsDeParcellesQueLePlafondNeVerrouilleRien() {
+        let acces = Plan.libre.partition(["Chartres"])
+        XCTAssertEqual(acces.readable, ["Chartres"])
+        XCTAssertTrue(acces.locked.isEmpty)
+
+        let vide = Plan.libre.partition([String]())
+        XCTAssertTrue(vide.readable.isEmpty && vide.locked.isEmpty)
+    }
+
     func testMotifDeBlocageEstUneCle() {
         for feature in Feature.allCases {
             let key = feature.upgradeReasonKey
