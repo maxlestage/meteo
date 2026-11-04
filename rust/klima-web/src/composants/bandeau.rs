@@ -7,6 +7,7 @@
 //! qui glisse.
 
 use klima_core::meteo::{CurrentSample, HourlySample};
+use klima_core::ville;
 use klima_core::weather::weather_condition;
 use yew::prelude::*;
 
@@ -61,7 +62,7 @@ pub fn Bandeau(props: &Props) -> Html {
                     />
 
                     <span class="strip__rain">
-                        if hour.precipitation_probability >= 10.0 {
+                        if ville::risque_affiche(hour.precipitation_probability) {
                             { f.percent(hour.precipitation_probability) }
                         } else {
                             { "\u{00a0}" }

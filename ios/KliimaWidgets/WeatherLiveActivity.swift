@@ -171,7 +171,7 @@ private struct HeureCompacte: View {
     var body: some View {
         let quand = AgroFormat.hour(heure.start, in: timeZone)
         let temperature = AgroFormat.temperature(heure.temperature)
-        let risque = heure.precipitationProbability >= 20 ? AgroFormat.percent(heure.precipitationProbability) : nil
+        let risque = Ville.risqueAffiche(heure.precipitationProbability) ? AgroFormat.percent(heure.precipitationProbability) : nil
 
         ViewThatFits(in: .horizontal) {
             HStack(spacing: 2) {
@@ -201,7 +201,7 @@ private struct DansUneHeure: View {
                 .symbolRenderingMode(.multicolor)
                 .accessibilityLabel(heure.condition.label(isDay: heure.isDay))
             Text(AgroFormat.temperature(heure.temperature))
-            if heure.precipitationProbability >= 20 {
+            if Ville.risqueAffiche(heure.precipitationProbability) {
                 Text(AgroFormat.percent(heure.precipitationProbability))
             }
         }
