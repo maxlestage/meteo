@@ -30,6 +30,17 @@ final class WeatherConditionTests: XCTestCase {
         )
     }
 
+    /// Mêmes cas que `ciel_couvert.rs` (klima-web) : le fond est bleu pour
+    /// un ciel dégagé ou peu nuageux, gris dès qu'il est couvert.
+    func testUnCielCouvertEstGris() {
+        XCTAssertEqual([0, 1, 2].map { WeatherCondition.forCode($0).icon.cielBleu }, [true, true, true])
+        // Couvert, brouillard, pluie, neige, orage : gris.
+        XCTAssertEqual([3, 45, 61, 71, 95].map { WeatherCondition.forCode($0).icon.cielBleu },
+                       [false, false, false, false, false])
+        // Un code inconnu retombe sur « couvert », gris lui aussi.
+        XCTAssertFalse(WeatherCondition.forCode(4).icon.cielBleu)
+    }
+
     func testSymbolsFollowDayAndNight() {
         XCTAssertEqual(WeatherCondition.Icon.clear.symbolName(isDay: true), "sun.max.fill")
         XCTAssertEqual(WeatherCondition.Icon.clear.symbolName(isDay: false), "moon.stars.fill")

@@ -18,6 +18,19 @@ pub enum ConditionIcon {
     Thunder,
 }
 
+impl ConditionIcon {
+    /// Le fond est un ciel bleu : dégagé ou peu nuageux. Tout le reste —
+    /// couvert compris — est un ciel gris.
+    ///
+    /// L'iPhone et la montre passaient au gris au code 45 (brouillard) : un
+    /// ciel « Couvert » y restait peint en azur, quand le web le peignait en
+    /// gris. La règle suit le pictogramme, ici et dans son miroir Swift
+    /// (`WeatherCondition.Icon.cielBleu`).
+    pub fn ciel_bleu(self) -> bool {
+        matches!(self, Clear | Partly)
+    }
+}
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct WeatherCondition {
     /// Clé de catalogue, par exemple « wmo.drizzle ».
@@ -78,6 +91,16 @@ pub const DOCUMENTED_CODES: [u16; 28] = [
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    /// Mêmes cas que `testUnCielCouvertEstGris` (Swift).
+    #[test]
+    fn un_ciel_couvert_est_gris() {
+        assert!([0, 1, 2].iter().all(|&c| weather_condition(c).icon.ciel_bleu()));
+        // Couvert, brouillard, pluie, neige, orage : gris.
+        assert!([3, 45, 61, 71, 95].iter().all(|&c| !weather_condition(c).icon.ciel_bleu()));
+        // Un code inconnu retombe sur « couvert », gris lui aussi.
+        assert!(!weather_condition(4).icon.ciel_bleu());
+    }
 
     #[test]
     fn ciel_degage() {
