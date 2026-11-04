@@ -286,7 +286,8 @@ pub struct Prevision {
     /// (mm/h). Vides si aucun radar ne voit la ville.
     pub quarts: Vec<(i64, f64)>,
     /// Le déplacement de la pluie : vitesse (km/h) et direction où elle va
-    /// (degrés, 0 = nord, 90 = est). `None` sans pluie à suivre.
+    /// (degrés, 0 = nord, 90 = est). `None` sans pluie à suivre, ou quand
+    /// elle ne bouge pas.
     pub deplacement: Option<(f64, f64)>,
 }
 
@@ -326,7 +327,9 @@ pub fn prevoir(image: i64, champ: &Champ, vitesse: Option<(f64, f64)>) -> Previs
             (debut, debit)
         })
         .collect();
-    let deplacement = vitesse.map(|(vx, vy)| {
+    // Une pluie qui ne bouge pas n'a pas de direction : `atan2(0, −0)` en
+    // donnait une — « les averses filent vers le sud à 0 km/h ».
+    let deplacement = vitesse.filter(|&(vx, vy)| vx != 0.0 || vy != 0.0).map(|(vx, vy)| {
         let km_h = (vx * vx + vy * vy).sqrt() * 60.0;
         // Les rangées descendent vers le sud : le nord est −y.
         let cap = vx.atan2(-vy).to_degrees().rem_euclid(360.0);
@@ -454,6 +457,11 @@ mod tests {
         let p = prevoir(image + 7 * 60_000, &averse(0.0, 0.0), None);
         assert!(p.quarts.iter().all(|(_, d)| *d > 5.0));
         assert_eq!(p.deplacement, None);
+
+        // Mesurée immobile, elle reste là, mais ne file nulle part.
+        let p = prevoir(image + 7 * 60_000, &averse(0.0, 0.0), Some((0.0, 0.0)));
+        assert!(p.quarts.iter().all(|(_, d)| *d > 5.0));
+        assert_eq!(p.deplacement, None, "pas de « vers le sud à 0 km/h »");
 
         // Une ville que personne ne voit.
         let aveugle = Champ::decouper((5, 5), 5, |_, _| Echo::Inconnu);
