@@ -222,6 +222,14 @@ mod tests {
             jour_contenant(minuit + 25 * HEURE_MS, &jours).map(|j| j.date),
             Some(minuit + 24 * HEURE_MS)
         );
+        // Minuit pile, c'est déjà le lendemain.
+        assert_eq!(
+            jour_contenant(minuit + 24 * HEURE_MS, &jours).map(|j| j.date),
+            Some(minuit + 24 * HEURE_MS)
+        );
+        // Avant la série, faute de mieux, le premier jour ; sans série, rien.
+        assert_eq!(jour_contenant(minuit - HEURE_MS, &jours).map(|j| j.date), Some(minuit));
+        assert!(jour_contenant(QUATORZE, &[]).is_none());
     }
 
     fn jour_de(date: i64) -> DailySample {
