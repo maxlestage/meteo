@@ -36,6 +36,11 @@ pub mod seuils {
     pub const GEL: f64 = 0.0;
     /// Rafales à partir desquelles un parapluie se retourne (km/h).
     pub const RAFALES_CONSEIL: f64 = 50.0;
+    /// Le risque de pluie s'écrit à côté d'une heure ou d'un jour à partir de
+    /// ce pourcentage (%). Chaque écran avait le sien — 10 sur l'iPhone et le
+    /// web, 20 sur la montre et l'île, 30 dans les widgets : un « 25 % » lu
+    /// dans l'application manquait au widget de la même heure.
+    pub const RISQUE_AFFICHE: f64 = 10.0;
 }
 
 use seuils::*;
@@ -45,6 +50,12 @@ const HEURE_MS: i64 = 3_600_000;
 /// Vrai si l'heure est pluvieuse : assez d'eau, ou assez de risque.
 pub fn pluvieuse(heure: &HourlySample) -> bool {
     heure.precipitation >= PLUIE_MM || heure.precipitation_probability >= PLUIE_PROBABILITE
+}
+
+/// Vrai si le risque de pluie mérite d'être écrit à côté de l'heure ou du
+/// jour. En deçà, la place reste vide : un « 3 % » ne dit rien.
+pub fn risque_affiche(probabilite: f64) -> bool {
+    probabilite >= RISQUE_AFFICHE
 }
 
 /* ---------------------------------------------------------------- */
@@ -269,6 +280,12 @@ pub(crate) mod tests {
         assert!(pluvieuse(&h));
         h.precipitation_probability = 49.0;
         assert!(!pluvieuse(&h));
+    }
+
+    #[test]
+    fn le_risque_s_ecrit_des_dix_pour_cent_partout() {
+        let ecrits: Vec<bool> = [0.0, 9.9, 10.0, 25.0, 100.0, f64::NAN].into_iter().map(risque_affiche).collect();
+        assert_eq!(ecrits, [false, false, true, true, true, false]);
     }
 
     #[test]

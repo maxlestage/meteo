@@ -58,7 +58,7 @@ struct DailyListView: View {
                     .font(.system(size: tailleIcone))
                     // Sans libellé, VoiceOver lisait le nom anglais du symbole.
                     .accessibilityLabel(condition.label(isDay: true))
-                Text(day.precipitationProbabilityMax >= 10
+                Text(Ville.risqueAffiche(day.precipitationProbabilityMax)
                      ? AgroFormat.percent(day.precipitationProbabilityMax)
                      : " ")
                     .font(.caption2.weight(.semibold))
@@ -68,7 +68,7 @@ struct DailyListView: View {
                     .lineLimit(1)
                     .minimumScaleFactor(0.75)
                     .accessibilityLabel(Localized.text("rain.chance.a11y", AgroFormat.percent(day.precipitationProbabilityMax)))
-                    .accessibilityHidden(day.precipitationProbabilityMax < 10)
+                    .accessibilityHidden(!Ville.risqueAffiche(day.precipitationProbabilityMax))
             }
             .frame(width: largeurCiel)
 

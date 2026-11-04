@@ -41,6 +41,11 @@ final class VilleTests: XCTestCase {
         XCTAssertFalse(Ville.pluvieuse(avec(heure(0), probabilite: 49)))
     }
 
+    func testLeRisqueSEcritDesDixPourCentPartout() {
+        let risques: [Double] = [0, 9.9, 10, 25, 100, .nan]
+        XCTAssertEqual(risques.map(Ville.risqueAffiche), [false, false, true, true, true, false])
+    }
+
     func testSansPluieOnDitSurCombienDHeures() {
         XCTAssertEqual(Ville.prochainePluie(serie(24)), .aucune(heures: 12))
         XCTAssertEqual(Ville.prochainePluie(serie(5)), .aucune(heures: 5))
