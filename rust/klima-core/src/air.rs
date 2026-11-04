@@ -219,6 +219,39 @@ mod tests {
     }
 
     #[test]
+    fn les_bornes_de_l_air_sont_inclusives() {
+        // Chaque borne appartient à la classe du dessous ; un dixième au-delà,
+        // à celle du dessus. Un `<=` devenu `<` d'un seul côté se verrait ici.
+        assert_eq!(qualite_air(60.0), QualiteAir::Moyenne);
+        assert_eq!(qualite_air(60.1), QualiteAir::Mediocre);
+        assert_eq!(qualite_air(80.1), QualiteAir::TresMediocre);
+        assert_eq!(qualite_air(100.1), QualiteAir::ExtremementMediocre);
+        // Les pollens, eux, changent de niveau pile à la borne.
+        assert_eq!(niveau_pollen(49.9), NiveauPollen::Modere);
+        assert_eq!(niveau_pollen(199.9), NiveauPollen::Eleve);
+    }
+
+    #[test]
+    fn un_grain_pile_se_dit() {
+        let air = AirSample { pollens: vec![(Pollen::Bouleau, 1.0)], ..AirSample::default() };
+        assert_eq!(pollen_dominant(&air), Some((Pollen::Bouleau, 1.0, NiveauPollen::Faible)));
+        let air = AirSample { pollens: vec![(Pollen::Bouleau, 0.9)], ..AirSample::default() };
+        assert_eq!(pollen_dominant(&air), None);
+    }
+
+    #[test]
+    fn un_releve_non_fini_ne_l_emporte_pas() {
+        // Une valeur folle en tête de liste ne passe pas devant un vrai relevé.
+        let air = AirSample {
+            pollens: vec![(Pollen::Aulne, f64::NAN), (Pollen::Bouleau, f64::INFINITY), (Pollen::Graminees, 5.0)],
+            ..AirSample::default()
+        };
+        assert_eq!(pollen_dominant(&air), Some((Pollen::Graminees, 5.0, NiveauPollen::Faible)));
+        let air = AirSample { pollens: vec![(Pollen::Aulne, f64::NAN)], ..AirSample::default() };
+        assert_eq!(pollen_dominant(&air), None);
+    }
+
+    #[test]
     fn les_codes_sont_ceux_des_catalogues() {
         assert_eq!(QualiteAir::ExtremementMediocre.key(), "air.extremementMediocre");
         assert_eq!(Pollen::Graminees.key(), "pollen.graminees");
