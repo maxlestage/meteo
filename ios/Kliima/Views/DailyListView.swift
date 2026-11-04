@@ -62,7 +62,9 @@ struct DailyListView: View {
                      ? AgroFormat.percent(day.precipitationProbabilityMax)
                      : " ")
                     .font(.caption2.weight(.semibold))
-                    .foregroundStyle(Color(red: 0.498, green: 0.816, blue: 0.961))
+                    // L'azur pâle, fixe, s'effaçait sur le ciel clair : le bleu de
+                    // la pluie suit le thème.
+                    .foregroundStyle(Color.bleuPluie)
                     .lineLimit(1)
                     .minimumScaleFactor(0.75)
                     .accessibilityLabel(Localized.text("rain.chance.a11y", AgroFormat.percent(day.precipitationProbabilityMax)))
