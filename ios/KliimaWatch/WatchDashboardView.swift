@@ -107,7 +107,7 @@ private struct WatchCiel: View {
                 Color(red: 0.016, green: 0.031, blue: 0.067),
             ]
         }
-        if weatherCode >= 45 {
+        if !WeatherCondition.forCode(weatherCode).icon.cielBleu {
             return [
                 Color(red: 0.165, green: 0.208, blue: 0.259),
                 Color(red: 0.110, green: 0.141, blue: 0.180),

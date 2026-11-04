@@ -55,7 +55,7 @@ struct SkyBackground: View {
                 Color(red: 0.808, green: 0.820, blue: 0.918),
             ]
         }
-        if weatherCode >= 45 {
+        if !WeatherCondition.forCode(weatherCode).icon.cielBleu {
             // Ciel couvert : un gris bleuté franc.
             return [
                 Color(red: 0.561, green: 0.639, blue: 0.722),
@@ -82,7 +82,7 @@ struct SkyBackground: View {
                 Color(red: 0.016, green: 0.031, blue: 0.067),
             ]
         }
-        if weatherCode >= 45 {
+        if !WeatherCondition.forCode(weatherCode).icon.cielBleu {
             return [
                 Color(red: 0.165, green: 0.208, blue: 0.259),
                 Color(red: 0.110, green: 0.141, blue: 0.180),
