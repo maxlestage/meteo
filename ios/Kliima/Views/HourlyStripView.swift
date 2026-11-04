@@ -79,7 +79,9 @@ struct HourlyStripView: View {
                  ? AgroFormat.percent(hour.precipitationProbability)
                  : " ")
                 .font(.caption2.weight(.semibold))
-                .foregroundStyle(Color(red: 0.498, green: 0.816, blue: 0.961))
+                // L'azur pâle, fixe, s'effaçait sur le ciel clair : le bleu de
+                // la pluie suit le thème.
+                .foregroundStyle(Color.bleuPluie)
                 .lineLimit(1)
                 // Un pourcentage nu ne dit pas de quoi il est le risque.
                 .accessibilityLabel(Localized.text("rain.chance.a11y", AgroFormat.percent(hour.precipitationProbability)))
