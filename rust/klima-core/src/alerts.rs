@@ -457,6 +457,48 @@ mod tests {
         assert_eq!(apres.last_sent.get(&AlertKind::Pluie), Some(&NOW));
     }
 
+    /* ---- les seuils pile ---- */
+
+    /// Un `<=` devenu `<` d'un seul côté ferait taire l'iPhone ou le relais
+    /// pile sur la borne : les miroirs divergeraient sans qu'aucun test ne
+    /// bouge. Mêmes cas que `testLesSeuilsDesAlertesSontInclusifs`.
+    #[test]
+    fn les_seuils_des_alertes_sont_inclusifs() {
+        let seul = |change: &dyn Fn(&mut Vec<HourlySample>)| {
+            let mut h = hours();
+            change(&mut h);
+            kinds(&evaluate_alerts(&h, &AlertState::default(), &options()))
+        };
+
+        // Zéro degré pile gèle, un dixième au-dessus non.
+        assert_eq!(seul(&|h| h[8].temperature = 0.0), vec![AlertKind::Gel]);
+        assert!(seul(&|h| h[8].temperature = 0.1).is_empty());
+        // Trente-trois degrés pile, c'est la chaleur.
+        assert_eq!(seul(&|h| h[6].temperature = 33.0), vec![AlertKind::Chaleur]);
+        assert!(seul(&|h| h[6].temperature = 32.9).is_empty());
+        // Soixante-dix km/h pile de rafale, c'est le vent.
+        assert_eq!(seul(&|h| h[3].wind_gusts = 70.0), vec![AlertKind::Vent]);
+        assert!(seul(&|h| h[3].wind_gusts = 69.9).is_empty());
+        // La pluie à deux heures pile s'annonce déjà.
+        assert_eq!(seul(&|h| h[2].precipitation = 2.0), vec![AlertKind::Pluie]);
+        // La douzième heure (index 11) est encore dans l'horizon.
+        assert_eq!(seul(&|h| h[11].weather_code = 95), vec![AlertKind::Orage]);
+
+        // Le délai de garde tombe à six heures pile.
+        let mut h = hours();
+        h[5].weather_code = 95;
+        let state = sent(AlertKind::Orage, NOW - 6 * HOUR_MS);
+        assert_eq!(kinds(&evaluate_alerts(&h, &state, &options())), vec![AlertKind::Orage]);
+
+        // Une reprise qui tombe pile à l'heure de l'événement l'annonce encore.
+        let send = 20_558 * DAY_MS + 23 * HOUR_MS;
+        let reprise = 20_559 * DAY_MS + 7 * HOUR_MS;
+        assert_eq!(defer_past_quiet_hours(send, reprise, 22, 7), Some(reprise));
+        // Vingt-deux heures pile, c'est déjà le silence.
+        let soir = 20_558 * DAY_MS + 22 * HOUR_MS;
+        assert_eq!(defer_past_quiet_hours(soir, soir + 12 * HOUR_MS, 22, 7), Some(reprise));
+    }
+
     #[test]
     fn les_cinq_natures_ont_un_code_distinct() {
         let codes: std::collections::BTreeSet<&str> = ALERT_KINDS.iter().map(|k| k.code()).collect();
