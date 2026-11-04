@@ -56,48 +56,75 @@ final class WatchViewModel: ObservableObject {
         return quarts
     }
 
+    /// Charge la prévision, et cale la montre sur le poignet.
+    ///
+    /// La position ne bloque pas l'affichage — c'est la règle de l'iPhone
+    /// (`DashboardViewModel.locateIfUnchosen`) : la montre attendait la
+    /// position, puis le nom de la commune, avant de demander la moindre
+    /// prévision. À la première ouverture, la demande d'autorisation laissait
+    /// un sablier derrière elle ; ensuite, chaque relevé lent du poignet
+    /// faisait attendre une ville qu'on connaissait déjà. La dernière ville
+    /// connue se charge maintenant tout de suite, pendant que la position est
+    /// relevée, et la prévision bascule quand celle-ci désigne une autre
+    /// ville.
     func load() async {
         isLoading = true
         errorMessage = nil
         let avant = parcelle
 
-        // La position est un confort : sans elle, on garde la ville par défaut.
-        if let coordinate = try? await location.currentCoordinate() {
-            // Le nom de la commune, comme les widgets de l'iPhone : « Ma
-            // ville » ne disait pas où l'on était.
-            let lieu = CLLocation(latitude: coordinate.latitude, longitude: coordinate.longitude)
-            let commune = try? await CLGeocoder().reverseGeocodeLocation(lieu).first?.locality
-            parcelle = Position.parcelle(
-                named: commune ?? Localized.text("search.myField"),
-                latitude: coordinate.latitude,
-                longitude: coordinate.longitude
-            )
-            // La complication de cadran lira la même ville.
-            SharedStore.save(parcelle)
-        }
-
-        do {
-            // Deux jours suffisent au poignet : les douze heures qui viennent
-            // débordent parfois sur demain.
-            let forecast = try await service.forecast(for: parcelle, days: 2)
-            self.forecast = forecast
-            chargeeA = Date()
-            // Ce que la montre vient d'apprendre, le cadran et la pile
-            // intelligente le montrent aussi, sans attendre leur prochain tour.
-            WidgetCenter.shared.reloadAllTimelines()
-        } catch {
-            // Une relecture qui échoue garde la prévision d'avant : elle reste
-            // plus juste qu'un écran vide.
-            self.errorMessage = (error as? LocalizedError)?.errorDescription
-                ?? Localized.text("app.error")
-        }
-
+        async let poignet = villeDuPoignet()
+        await chargerPrevision()
         isLoading = false
+
+        // La position est un confort : sans elle, on garde la ville affichée.
+        if let ici = await poignet, ici != parcelle {
+            parcelle = ici
+            // La complication de cadran lira la même ville.
+            SharedStore.save(ici)
+            await chargerPrevision()
+        }
 
         // Arrivé dans une autre ville, le guetteur la lit tout de suite
         // plutôt qu'au prochain quart.
         if parcelle != avant, quartsDe != parcelle {
             await relireQuarts()
+        }
+    }
+
+    /// La ville où se trouve le poignet, arrondie à la maille et nommée par
+    /// sa commune — comme les widgets de l'iPhone : « Ma ville » ne disait
+    /// pas où l'on était. Rien sans position.
+    private func villeDuPoignet() async -> Parcelle? {
+        guard let coordinate = try? await location.currentCoordinate() else { return nil }
+        let lieu = CLLocation(latitude: coordinate.latitude, longitude: coordinate.longitude)
+        let commune = try? await CLGeocoder().reverseGeocodeLocation(lieu).first?.locality
+        return Position.parcelle(
+            named: commune ?? Localized.text("search.myField"),
+            latitude: coordinate.latitude,
+            longitude: coordinate.longitude
+        )
+    }
+
+    /// La prévision de la ville courante. Une relecture qui échoue garde la
+    /// prévision d'avant : elle reste plus juste qu'un écran vide.
+    private func chargerPrevision() async {
+        let ville = parcelle
+        do {
+            // Deux jours suffisent au poignet : les douze heures qui viennent
+            // débordent parfois sur demain.
+            let forecast = try await service.forecast(for: ville, days: 2)
+            // La ville a changé pendant la lecture : la suivante la remplacera.
+            guard ville == parcelle else { return }
+            self.forecast = forecast
+            chargeeA = Date()
+            errorMessage = nil
+            // Ce que la montre vient d'apprendre, le cadran et la pile
+            // intelligente le montrent aussi, sans attendre leur prochain tour.
+            WidgetCenter.shared.reloadAllTimelines()
+        } catch {
+            guard ville == parcelle else { return }
+            self.errorMessage = (error as? LocalizedError)?.errorDescription
+                ?? Localized.text("app.error")
         }
     }
 
