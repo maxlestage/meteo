@@ -42,6 +42,17 @@ final class ConsensusTests: XCTestCase {
         XCTAssertEqual(result.temperature.median, 15)
     }
 
+    /// Miroir de `une_moitie_negative_s_arrondit_vers_le_haut`.
+    func testUneMoitieNegativeSArronditVersLeHaut() throws {
+        let gel = try XCTUnwrap(ModelConsensus.consensus([reading(0, -2), reading(1, -2.5)]))
+        XCTAssertEqual(gel.temperature.median, -2.2)
+        XCTAssertEqual(gel.temperature.min, -2.5)
+        XCTAssertEqual(gel.temperature.max, -2)
+        XCTAssertEqual(gel.temperature.spread, 0.5)
+        let doux = try XCTUnwrap(ModelConsensus.consensus([reading(0, 2), reading(1, 2.5)]))
+        XCTAssertEqual(doux.temperature.median, 2.3)
+    }
+
     func testTightModelsAgreeStrongly() throws {
         let result = try XCTUnwrap(ModelConsensus.consensus([
             reading(0, 18), reading(1, 18.4), reading(2, 19),
