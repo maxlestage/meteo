@@ -88,6 +88,36 @@ final class ApprentiTests: XCTestCase {
         XCTAssertEqual(r[2].heures[0].temperature, 12)
     }
 
+    func testLesSeuilsDeLApprentiSontInclusifs() {
+        // Dix minutes pile d'un côté ou de l'autre : le relevé vaut encore.
+        let annonce = [ApprentiAnnonce(time: t(10), temperature: 15, precipitation: nil)]
+        func releve(_ dt: TimeInterval) -> [ApprentiReleve] {
+            [ApprentiReleve(time: t(10).addingTimeInterval(dt), temperature: 14, mouille: false)]
+        }
+        let tolerance = ApprentiSeuils.toleranceS
+        XCTAssertEqual(Apprenti.noter("x", annonces: annonce, releves: releve(tolerance), maintenant: t(20)).n, 1)
+        XCTAssertEqual(Apprenti.noter("x", annonces: annonce, releves: releve(-tolerance), maintenant: t(20)).n, 1)
+        XCTAssertEqual(Apprenti.noter("x", annonces: annonce, releves: releve(tolerance + 1), maintenant: t(20)).n, 0)
+        // L'heure pile de maintenant est déjà passée.
+        XCTAssertEqual(Apprenti.noter("x", annonces: annonce, releves: releve(0), maintenant: t(10)).n, 1)
+        XCTAssertEqual(Apprenti.noter("x", annonces: annonce, releves: releve(0),
+                                      maintenant: t(10).addingTimeInterval(-1)).n, 0)
+
+        // 0,1 mm pile annoncé, c'est annoncer la pluie.
+        func pluie(_ cumul: Double) -> [ApprentiAnnonce] { [ApprentiAnnonce(time: t(0), temperature: nil, precipitation: cumul)] }
+        let mouille = [ApprentiReleve(time: t(0), temperature: nil, mouille: true)]
+        XCTAssertEqual(Apprenti.noter("x", annonces: pluie(ApprentiSeuils.pluieMm), releves: mouille, maintenant: t(1)).pluieJustes, 1)
+        XCTAssertEqual(Apprenti.noter("x", annonces: pluie(0.09), releves: mouille, maintenant: t(1)).pluieJustes, 0)
+
+        // Vingt-quatre heures pile suffisent, et trois degrés pile passent.
+        let min = ApprentiSeuils.relevesMin
+        XCTAssertEqual(note(n: min, biais: 6).correction, ApprentiSeuils.correctionMax)
+        XCTAssertEqual(note(n: min, biais: -6).correction, -ApprentiSeuils.correctionMax)
+        XCTAssertEqual(note(n: 168, biais: .nan, ecart: 1).correction, 0, "un biais illisible ne corrige rien")
+        XCTAssertEqual(Apprenti.meilleure([note(n: min, biais: 0, ecart: 0.5)])?.n, min)
+        XCTAssertNil(Apprenti.meilleure([note(n: min - 1, biais: 0, ecart: 0.5)]))
+    }
+
     func testLaMeilleureEstLaPlusJusteParmiLesAssezNotees() {
         let notes = [note("a", n: 100, biais: 0, ecart: 1.4), note("b", n: 10, biais: 0, ecart: 0.2), note("c", n: 100, biais: 0, ecart: 0.9)]
         XCTAssertEqual(Apprenti.meilleure(notes)?.sourceId, "c")
