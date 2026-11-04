@@ -228,6 +228,21 @@ final class HorizonTests: XCTestCase {
         XCTAssertEqual(forecast.joursAutourDeMaintenant(a: a1350)[0].temperatureMax, 17.5)
     }
 
+    /// Miroir de `le_jour_est_le_dernier_commence` : le jour d'un instant
+    /// est le dernier commencé, minuit pile est déjà le lendemain, avant la
+    /// série c'est le premier faute de mieux, et sans série il n'y a rien.
+    func testLeJourEstLeDernierCommence() {
+        let demain = minuit.addingTimeInterval(86_400)
+        let jours = [jour(minuit), jour(demain)]
+        XCTAssertEqual(Horizon.jour(contenant: quatorze, dans: jours)?.date, minuit)
+        XCTAssertEqual(Horizon.jour(contenant: minuit.addingTimeInterval(25 * 3600), dans: jours)?.date,
+                       demain)
+        XCTAssertEqual(Horizon.jour(contenant: demain, dans: jours)?.date, demain)
+        XCTAssertEqual(Horizon.jour(contenant: minuit.addingTimeInterval(-3600), dans: jours)?.date,
+                       minuit)
+        XCTAssertNil(Horizon.jour(contenant: quatorze, dans: []))
+    }
+
     func testLeJourEmbrasseLaTemperatureAffichee() throws {
         let jours = [jour(minuit), jour(minuit.addingTimeInterval(86_400))]
         var j = try XCTUnwrap(Horizon.jour(contenant: quatorze.addingTimeInterval(3600),
