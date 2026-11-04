@@ -128,7 +128,10 @@ struct VillesView: View {
             if fermee {
                 Image(systemName: "lock.fill")
                     .foregroundStyle(.secondary)
-            } else if let apercu = viewModel.apercus[ville.id] {
+            } else if let prevision = viewModel.apercus[ville.id] {
+                // Le relevé tant qu'il est de l'heure en cours, l'heure
+                // prévue ensuite — la même règle que l'en-tête.
+                let apercu = prevision.maintenant()
                 let condition = WeatherCondition.forCode(apercu.weatherCode)
                 Image(systemName: condition.icon.symbolName(isDay: apercu.isDay))
                     .symbolRenderingMode(.multicolor)

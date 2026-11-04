@@ -30,8 +30,10 @@ final class DashboardViewModel: ObservableObject {
     /// Les villes enregistrées, dans l'ordre choisi — fermées comprises :
     /// c'est la vue qui sépare ce que le palier ouvre.
     @Published private(set) var villes: [Parcelle] = SharedStore.loadVilles()
-    /// Les conditions du moment de chaque ville enregistrée, par identifiant.
-    @Published private(set) var apercus: [String: CurrentSample] = [:]
+    /// La prévision de chaque ville enregistrée, par identifiant : la liste
+    /// en tire les conditions du moment à chaque affichage
+    /// (`AgroForecast.maintenant()`), comme l'en-tête.
+    @Published private(set) var apercus: [String: AgroForecast] = [:]
 
     /// Résultats de la recherche de commune.
     @Published private(set) var searchResults: [Parcelle] = []
@@ -232,7 +234,10 @@ final class DashboardViewModel: ObservableObject {
 
     private func chargerApercu(_ ville: Parcelle) async {
         guard let prevision = try? await service.forecast(for: ville, days: 1) else { return }
-        apercus[ville.id] = prevision.current
+        // La prévision entière, pas son relevé : servie par le cache faute de
+        // réseau, ou relue des heures plus tard, la liste montrait la mesure
+        // de 13 h 45 à 17 h, à côté d'un en-tête qui disait l'heure en cours.
+        apercus[ville.id] = prevision
     }
 
     // MARK: Direct
