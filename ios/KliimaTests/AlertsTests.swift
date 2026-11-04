@@ -207,6 +207,43 @@ final class AlertsTests: XCTestCase {
         XCTAssertEqual(try JSONDecoder().decode(AlertState.self, from: ancien), .empty)
     }
 
+    // MARK: Les seuils pile
+
+    /// Un `<=` devenu `<` d'un seul côté ferait taire l'iPhone ou le relais
+    /// pile sur la borne. Mêmes cas que `les_seuils_des_alertes_sont_inclusifs`.
+    func testLesSeuilsDesAlertesSontInclusifs() {
+        // Zéro degré pile gèle, un dixième au-dessus non.
+        XCTAssertEqual(kinds(hours { $0[8] = hour(8, temperature: 0) }), [.gel])
+        XCTAssertTrue(kinds(hours { $0[8] = hour(8, temperature: 0.1) }).isEmpty)
+        // Trente-trois degrés pile, c'est la chaleur.
+        XCTAssertEqual(kinds(hours { $0[6] = hour(6, temperature: 33) }), [.chaleur])
+        XCTAssertTrue(kinds(hours { $0[6] = hour(6, temperature: 32.9) }).isEmpty)
+        // Soixante-dix km/h pile de rafale, c'est le vent.
+        XCTAssertEqual(kinds(hours { $0[3] = hour(3, gusts: 70) }), [.vent])
+        XCTAssertTrue(kinds(hours { $0[3] = hour(3, gusts: 69.9) }).isEmpty)
+        // La pluie à deux heures pile s'annonce déjà.
+        XCTAssertEqual(kinds(hours { $0[2] = hour(2, precipitation: 2) }), [.pluie])
+        // La douzième heure (index 11) est encore dans l'horizon.
+        XCTAssertEqual(kinds(hours { $0[11] = hour(11, code: 95) }), [.orage])
+
+        // Le délai de garde tombe à six heures pile.
+        XCTAssertEqual(kinds(hours { $0[5] = hour(5, code: 95) }, sent(.orage, hoursAgo: 6)), [.orage])
+
+        // Une reprise qui tombe pile à l'heure de l'événement l'annonce encore.
+        let reprise = date("2026-04-16T07:00:00")
+        XCTAssertEqual(
+            Alerts.deferPastQuietHours(send: date("2026-04-15T23:00:00"), event: reprise, options: options()),
+            reprise
+        )
+        // Vingt-deux heures pile, c'est déjà le silence.
+        XCTAssertEqual(
+            Alerts.deferPastQuietHours(
+                send: date("2026-04-15T22:00:00"), event: date("2026-04-16T10:00:00"), options: options()
+            ),
+            reprise
+        )
+    }
+
     func testLesCinqNaturesOntUnCodeDistinct() {
         XCTAssertEqual(Set(AlertKind.allCases.map(\.rawValue)).count, 5)
     }
