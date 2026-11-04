@@ -196,6 +196,28 @@ final class AlertsTests: XCTestCase {
         XCTAssertEqual(kinds(h, sent(.orage, hoursAgo: 1)), [.gel])
     }
 
+    /// Noter un envoi garde ceux des autres natures et rafraîchit le sien.
+    /// Un état qui repartirait de zéro oublierait l'orage annoncé il y a une
+    /// heure dès qu'un gel part : l'orage repartirait dans la foulée. Mêmes
+    /// cas que `noter_un_envoi_garde_les_autres_natures`.
+    func testNoterUnEnvoiGardeLesAutresNatures() {
+        let orage = sent(.orage, hoursAgo: 3)
+        let gel = Alert(kind: .gel, at: now, titleKey: "", bodyKey: "", params: [:])
+        let apres = Alerts.recordSent(orage, [gel], at: now.addingTimeInterval(-3600))
+        XCTAssertEqual(apres.lastSent[AlertKind.orage.rawValue], now.addingTimeInterval(-3 * 3600))
+        XCTAssertEqual(apres.lastSent[AlertKind.gel.rawValue], now.addingTimeInterval(-3600))
+        XCTAssertEqual(apres.lastSent.count, 2)
+
+        // L'orage, toujours sous son délai de garde, ne repart pas.
+        XCTAssertTrue(kinds(hours { $0[5] = hour(5, code: 95) }, apres).isEmpty)
+
+        // Un nouvel envoi de la même nature remplace l'ancien.
+        let encore = Alert(kind: .orage, at: now, titleKey: "", bodyKey: "", params: [:])
+        let relu = Alerts.recordSent(apres, [encore], at: now)
+        XCTAssertEqual(relu.lastSent[AlertKind.orage.rawValue], now)
+        XCTAssertEqual(relu.lastSent.count, 2)
+    }
+
     func testLEtatSeSerialiseEtLitCeluiDUneVersionPrecedente() throws {
         let after = sent(.pluie, hoursAgo: 0)
         let round = try JSONDecoder().decode(AlertState.self, from: JSONEncoder().encode(after))
