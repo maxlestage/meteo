@@ -41,6 +41,36 @@ final class AirTests: XCTestCase {
         XCTAssertNil(Air.pollenDominant(AirSample()))
     }
 
+    func testLesBornesDeLAirSontInclusives() {
+        // Chaque borne appartient à la classe du dessous ; un dixième au-delà,
+        // à celle du dessus. Un `<=` devenu `<` d'un seul côté se verrait ici.
+        XCTAssertEqual(Air.qualite(60), .moyenne)
+        XCTAssertEqual(Air.qualite(60.1), .mediocre)
+        XCTAssertEqual(Air.qualite(80.1), .tresMediocre)
+        XCTAssertEqual(Air.qualite(100.1), .extremementMediocre)
+        // Les pollens, eux, changent de niveau pile à la borne.
+        XCTAssertEqual(Air.niveauPollen(49.9), .modere)
+        XCTAssertEqual(Air.niveauPollen(199.9), .eleve)
+    }
+
+    func testUnGrainPileSeDit() throws {
+        let dominant = try XCTUnwrap(Air.pollenDominant(AirSample(pollens: [(.bouleau, 1)])))
+        XCTAssertEqual(dominant.pollen, .bouleau)
+        XCTAssertEqual(dominant.grains, 1)
+        XCTAssertEqual(dominant.niveau, .faible)
+        XCTAssertNil(Air.pollenDominant(AirSample(pollens: [(.bouleau, 0.9)])))
+    }
+
+    func testUnReleveNonFiniNeLEmportePas() throws {
+        // Une valeur folle en tête de liste ne passe pas devant un vrai relevé.
+        let air = AirSample(pollens: [(.aulne, .nan), (.bouleau, .infinity), (.graminees, 5)])
+        let dominant = try XCTUnwrap(Air.pollenDominant(air))
+        XCTAssertEqual(dominant.pollen, .graminees)
+        XCTAssertEqual(dominant.grains, 5)
+        XCTAssertEqual(dominant.niveau, .faible)
+        XCTAssertNil(Air.pollenDominant(AirSample(pollens: [(.aulne, .nan)])))
+    }
+
     func testLesCodesSontCeuxDesCatalogues() {
         XCTAssertEqual(QualiteAir.extremementMediocre.key, "air.extremementMediocre")
         XCTAssertEqual(Pollen.graminees.key, "pollen.graminees")
