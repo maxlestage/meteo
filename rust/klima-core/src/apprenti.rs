@@ -267,6 +267,33 @@ mod tests {
     }
 
     #[test]
+    fn les_seuils_de_l_apprenti_sont_inclusifs() {
+        // Dix minutes pile d'un côté ou de l'autre : le relevé vaut encore.
+        let annonce = [Annonce { time: 10 * H, temperature: Some(15.0), precipitation: None }];
+        let releve = |dt: i64| [Releve { time: 10 * H + dt, temperature: Some(14.0), mouille: false }];
+        assert_eq!(noter("x", &annonce, &releve(TOLERANCE_S), 20 * H).n, 1);
+        assert_eq!(noter("x", &annonce, &releve(-TOLERANCE_S), 20 * H).n, 1);
+        assert_eq!(noter("x", &annonce, &releve(TOLERANCE_S + 1), 20 * H).n, 0);
+        // L'heure pile de maintenant est déjà passée.
+        assert_eq!(noter("x", &annonce, &releve(0), 10 * H).n, 1);
+        assert_eq!(noter("x", &annonce, &releve(0), 10 * H - 1).n, 0);
+
+        // 0,1 mm pile annoncé, c'est annoncer la pluie.
+        let pluie = |cumul: f64| [Annonce { time: 0, temperature: None, precipitation: Some(cumul) }];
+        let mouille = [Releve { time: 0, temperature: None, mouille: true }];
+        assert_eq!(noter("x", &pluie(PLUIE_MM), &mouille, H).pluie_justes, 1);
+        assert_eq!(noter("x", &pluie(0.09), &mouille, H).pluie_justes, 0);
+
+        // Vingt-quatre heures pile suffisent, et trois degrés pile passent.
+        let note = |n: u32, biais: f64, ecart: f64| Note { source_id: "x".into(), n, biais, ecart, pluie_n: 0, pluie_justes: 0 };
+        assert_eq!(note(RELEVES_MIN, 6.0, 6.0).correction(), CORRECTION_MAX);
+        assert_eq!(note(RELEVES_MIN, -6.0, 6.0).correction(), -CORRECTION_MAX);
+        assert_eq!(note(168, f64::NAN, 1.0).correction(), 0.0, "un biais illisible ne corrige rien");
+        assert_eq!(meilleure(&[note(RELEVES_MIN, 0.0, 0.5)]).map(|n| n.n), Some(RELEVES_MIN));
+        assert_eq!(meilleure(&[note(RELEVES_MIN - 1, 0.0, 0.5)]), None);
+    }
+
+    #[test]
     fn la_meilleure_est_la_plus_juste_parmi_les_assez_notees() {
         let note = |id: &str, n: u32, ecart: f64| Note { source_id: id.into(), n, biais: 0.0, ecart, pluie_n: 0, pluie_justes: 0 };
         let notes = vec![note("a", 100, 1.4), note("b", 10, 0.2), note("c", 100, 0.9)];
