@@ -5,6 +5,7 @@
 //! endroits différents, et la comparaison d'un coup d'œil serait fausse.
 
 use klima_core::meteo::DailySample;
+use klima_core::ville;
 use klima_core::weather::weather_condition;
 use yew::prelude::*;
 
@@ -63,7 +64,7 @@ pub fn Jours(props: &Props) -> Html {
                             title={i18n.t(condition.label_key)}
                         />
                         <span class="days__rain">
-                            if day.precipitation_probability_max >= 10.0 {
+                            if ville::risque_affiche(day.precipitation_probability_max) {
                                 { f.percent(day.precipitation_probability_max) }
                             }
                         </span>
