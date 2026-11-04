@@ -457,6 +457,31 @@ mod tests {
         assert_eq!(apres.last_sent.get(&AlertKind::Pluie), Some(&NOW));
     }
 
+    /// Noter un envoi garde ceux des autres natures et rafraîchit le sien.
+    /// Un état qui repartirait de zéro oublierait l'orage annoncé il y a une
+    /// heure dès qu'un gel part : l'orage repartirait dans la foulée. Mêmes
+    /// cas que `testNoterUnEnvoiGardeLesAutresNatures`.
+    #[test]
+    fn noter_un_envoi_garde_les_autres_natures() {
+        let orage = sent(AlertKind::Orage, NOW - 3 * HOUR_MS);
+        let gel = Alert { kind: AlertKind::Gel, at: NOW, title_key: "", body_key: "", params: Params::new() };
+        let apres = record_sent(&orage, &[gel], NOW - HOUR_MS);
+        assert_eq!(apres.last_sent.get(&AlertKind::Orage), Some(&(NOW - 3 * HOUR_MS)));
+        assert_eq!(apres.last_sent.get(&AlertKind::Gel), Some(&(NOW - HOUR_MS)));
+        assert_eq!(apres.last_sent.len(), 2);
+
+        // L'orage, toujours sous son délai de garde, ne repart pas.
+        let mut h = hours();
+        h[5].weather_code = 95;
+        assert!(evaluate_alerts(&h, &apres, &options()).is_empty());
+
+        // Un nouvel envoi de la même nature remplace l'ancien.
+        let encore = Alert { kind: AlertKind::Orage, at: NOW, title_key: "", body_key: "", params: Params::new() };
+        let relu = record_sent(&apres, &[encore], NOW);
+        assert_eq!(relu.last_sent.get(&AlertKind::Orage), Some(&NOW));
+        assert_eq!(relu.last_sent.len(), 2);
+    }
+
     /* ---- les seuils pile ---- */
 
     /// Un `<=` devenu `<` d'un seul côté ferait taire l'iPhone ou le relais
