@@ -182,6 +182,21 @@ mod tests {
     }
 
     #[test]
+    fn une_moitie_negative_s_arrondit_vers_le_haut() {
+        // −2 et −2,5 : la médiane tombe pile sur −2,25. L'arrondi est celui de
+        // JavaScript, vers le haut — −2,2, comme 2,25 donne 2,3. L'iPhone
+        // arrondissait loin de zéro : −2,3 sous le gel, un dixième de moins
+        // que le web.
+        let r = consensus(&[t(0, -2.0), t(1, -2.5)], 0, 0).unwrap();
+        assert_eq!(r.temperature.median, -2.2);
+        assert_eq!(r.temperature.min, -2.5);
+        assert_eq!(r.temperature.max, -2.0);
+        assert_eq!(r.temperature.spread, 0.5);
+        let r = consensus(&[t(0, 2.0), t(1, 2.5)], 0, 0).unwrap();
+        assert_eq!(r.temperature.median, 2.3);
+    }
+
+    #[test]
     fn modeles_serres_accord_fort() {
         let r = consensus(&[t(0, 18.0), t(1, 19.0)], 0, 0).unwrap();
         assert_eq!(r.temperature.spread, 1.0);
