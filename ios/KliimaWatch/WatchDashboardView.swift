@@ -453,13 +453,13 @@ private struct WatchHeures: View {
                 .font(.system(size: 13, weight: .medium).monospacedDigit())
                 .lineLimit(1)
                 .minimumScaleFactor(0.7)
-            Text(heure.precipitationProbability >= 20 ? AgroFormat.percent(heure.precipitationProbability) : " ")
+            Text(Ville.risqueAffiche(heure.precipitationProbability) ? AgroFormat.percent(heure.precipitationProbability) : " ")
                 .font(.system(size: 9).monospacedDigit())
                 .foregroundStyle(bleuPluie)
                 .lineLimit(1)
                 // Un pourcentage nu ne dit pas de quoi il est le risque.
                 .accessibilityLabel(Localized.text("rain.chance.a11y", AgroFormat.percent(heure.precipitationProbability)))
-                .accessibilityHidden(heure.precipitationProbability < 20)
+                .accessibilityHidden(!Ville.risqueAffiche(heure.precipitationProbability))
         }
         // Une heure se lit d'un trait, comme sur l'iPhone.
         .accessibilityElement(children: .combine)

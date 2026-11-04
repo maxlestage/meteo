@@ -75,7 +75,7 @@ struct HourlyStripView: View {
                 .frame(height: 24)
                 .accessibilityLabel(condition.label(isDay: isDay))
 
-            Text(hour.precipitationProbability >= 10
+            Text(Ville.risqueAffiche(hour.precipitationProbability)
                  ? AgroFormat.percent(hour.precipitationProbability)
                  : " ")
                 .font(.caption2.weight(.semibold))
@@ -85,7 +85,7 @@ struct HourlyStripView: View {
                 .lineLimit(1)
                 // Un pourcentage nu ne dit pas de quoi il est le risque.
                 .accessibilityLabel(Localized.text("rain.chance.a11y", AgroFormat.percent(hour.precipitationProbability)))
-                .accessibilityHidden(hour.precipitationProbability < 10)
+                .accessibilityHidden(!Ville.risqueAffiche(hour.precipitationProbability))
 
             Text(AgroFormat.temperature(temperature))
                 .font(.title3)

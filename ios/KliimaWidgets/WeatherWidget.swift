@@ -390,7 +390,7 @@ struct WeatherWidgetView: View {
                         .font(.system(size: 15, weight: .medium, design: .rounded))
                         .monospacedDigit()
                         .lineLimit(1)
-                    Text(hour.precipitationProbability >= 30 ? AgroFormat.percent(hour.precipitationProbability) : " ")
+                    Text(Ville.risqueAffiche(hour.precipitationProbability) ? AgroFormat.percent(hour.precipitationProbability) : " ")
                         .font(.system(size: 10, weight: .semibold))
                         .foregroundStyle(bleuPluie)
                         .lineLimit(1)

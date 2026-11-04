@@ -287,7 +287,7 @@ struct BandeauHeures: View {
                         .font(.system(size: 15, weight: .medium, design: .rounded))
                         .monospacedDigit()
                         .lineLimit(1)
-                    Text(heure.precipitationProbability >= 30 ? AgroFormat.percent(heure.precipitationProbability) : " ")
+                    Text(Ville.risqueAffiche(heure.precipitationProbability) ? AgroFormat.percent(heure.precipitationProbability) : " ")
                         .font(.system(size: 10, weight: .semibold))
                         .foregroundStyle(bleuPluie)
                         .lineLimit(1)
@@ -417,7 +417,7 @@ private struct LigneDeJour: View {
                 .font(.system(size: 15))
                 .frame(width: 22)
                 .accessibilityLabel(WeatherCondition.forCode(jour.weatherCode).label(isDay: true))
-            Text(jour.precipitationProbabilityMax >= 30 ? AgroFormat.percent(jour.precipitationProbabilityMax) : "")
+            Text(Ville.risqueAffiche(jour.precipitationProbabilityMax) ? AgroFormat.percent(jour.precipitationProbabilityMax) : "")
                 .font(.system(size: 10, weight: .semibold))
                 .foregroundStyle(bleuPluie)
                 .lineLimit(1)
@@ -425,7 +425,7 @@ private struct LigneDeJour: View {
                 .frame(width: 30, alignment: .leading)
                 // Un pourcentage nu ne dit pas de quoi il est le risque.
                 .accessibilityLabel(Localized.text("rain.chance.a11y", AgroFormat.percent(jour.precipitationProbabilityMax)))
-                .accessibilityHidden(jour.precipitationProbabilityMax < 30)
+                .accessibilityHidden(!Ville.risqueAffiche(jour.precipitationProbabilityMax))
             // Jamais coupées ni repliées : « 15 » sur une ligne et « ° » sur
             // l'autre, c'était la première version.
             Text(AgroFormat.temperature(jour.temperatureMin))
