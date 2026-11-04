@@ -228,6 +228,9 @@ struct WeatherComplicationView: View {
                 .widgetLabel(entry.parcelleName)
         case .accessoryInline:
             Label(enLigne, systemImage: symbole)
+                // « 20° · 17° / 30° » se lisait « barre oblique », sans dire
+                // lequel est le minimum, et le ciel du symbole se taisait.
+                .accessibilityLabel(enLigneLu)
         default:
             VStack(alignment: .leading, spacing: 1) {
                 Text(entry.parcelleName)
@@ -315,5 +318,14 @@ struct WeatherComplicationView: View {
         return "\(AgroFormat.temperature(current.temperature)) · "
             + "\(AgroFormat.temperature(today.temperatureMin)) / "
             + AgroFormat.temperature(today.temperatureMax)
+    }
+
+    /// Ce que VoiceOver dit de la ligne : la température, le ciel, puis le
+    /// minimum et le maximum en mots (`Localized.amplitude`).
+    private var enLigneLu: String {
+        guard entry.current != nil else { return enLigne }
+        let debut = "\(courte), \(libelle)"
+        guard let today = entry.today else { return debut }
+        return "\(debut), " + Localized.amplitude(min: today.temperatureMin, max: today.temperatureMax)
     }
 }
