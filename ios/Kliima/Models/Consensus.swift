@@ -132,8 +132,10 @@ enum ModelConsensus {
         return (sorted[middle - 1] + sorted[middle]) / 2
     }
 
+    /// `floor(x + 0,5)`, comme `round` côté Rust : `.rounded()` arrondit loin
+    /// de zéro, et une médiane de −2,25 °C se lisait −2,3 sur l'iPhone, −2,2
+    /// sur le web.
     private static func round(_ value: Double, decimals: Int) -> Double {
-        let factor = pow(10.0, Double(decimals))
-        return (value * factor).rounded() / factor
+        Ville.arrondi(value, decimals)
     }
 }
