@@ -118,6 +118,30 @@ final class VilleTests: XCTestCase {
         XCTAssertEqual(Ville.conseils(s), [.cremeSolaire])
     }
 
+    /// Chaque seuil des conseils compte pile, et le dixième d'à côté ne dit
+    /// rien : un `<=` devenu `<` d'un seul côté ferait diverger les miroirs.
+    func testLesSeuilsDesConseilsSontInclusifs() {
+        func un(_ f: (HourlySample) -> HourlySample) -> [Conseil] {
+            var s = serie(24)
+            s[4] = f(s[4])
+            return Ville.conseils(s)
+        }
+        XCTAssertEqual(un { avec($0, pluie: 0.1) }, [.parapluie])
+        XCTAssertEqual(un { avec($0, pluie: 0.09) }, [])
+        XCTAssertEqual(un { avec($0, probabilite: 50) }, [.parapluie])
+        XCTAssertEqual(un { avec($0, probabilite: 49.9) }, [])
+        XCTAssertEqual(un { avec($0, ressenti: 10) }, [.manteau])
+        XCTAssertEqual(un { avec($0, ressenti: 10.1) }, [])
+        XCTAssertEqual(un { avec($0, uv: 5.9) }, [.lunettes])
+        XCTAssertEqual(un { avec($0, uv: 2.9) }, [])
+        XCTAssertEqual(un { avec($0, temperature: 30) }, [.hydratation])
+        XCTAssertEqual(un { avec($0, temperature: 29.9) }, [])
+        XCTAssertEqual(un { avec($0, temperature: 0) }, [.gel])
+        XCTAssertEqual(un { avec($0, temperature: 0.1) }, [])
+        XCTAssertEqual(un { avec($0, rafales: 50) }, [.vent])
+        XCTAssertEqual(un { avec($0, rafales: 49.9) }, [])
+    }
+
     func testCeQuiArriveApresDouzeHeuresNeChangePasLesConseils() {
         var s = serie(24)
         s[12] = avec(s[12], temperature: -5)
