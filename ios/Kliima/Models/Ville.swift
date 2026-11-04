@@ -30,6 +30,11 @@ enum VilleSeuils {
     static let gel = 0.0
     /// Rafales à partir desquelles un parapluie se retourne (km/h).
     static let rafalesConseil = 50.0
+    /// Le risque de pluie s'écrit à côté d'une heure ou d'un jour à partir de
+    /// ce pourcentage (%). Chaque écran avait le sien — 10 sur l'iPhone et le
+    /// web, 20 sur la montre et l'île, 30 dans les widgets : un « 25 % » lu
+    /// dans l'application manquait au widget de la même heure.
+    static let risqueAffiche = 10.0
 }
 
 /// Ce que la pluie fera dans les heures qui viennent.
@@ -86,6 +91,13 @@ enum Ville {
     static func pluvieuse(_ heure: HourlySample) -> Bool {
         heure.precipitation >= VilleSeuils.pluieMm
             || heure.precipitationProbability >= VilleSeuils.pluieProbabilite
+    }
+
+    /// Vrai si le risque de pluie mérite d'être écrit à côté de l'heure ou du
+    /// jour. En deçà, la place reste vide : un « 3 % » ne dit rien.
+    /// Miroir de `ville::risque_affiche`.
+    static func risqueAffiche(_ probabilite: Double) -> Bool {
+        probabilite >= VilleSeuils.risqueAffiche
     }
 
     /// La pluie des douze prochaines heures.
