@@ -155,3 +155,58 @@ fn une_abreviation_affichee_se_lit_en_mots() {
     assert!(vues >= 7, "les abréviations ont disparu des vues ({vues}) : revoir ce test");
     assert_eq!(muettes, Vec::<String>::new());
 }
+
+/// La ligne de l'écran verrouillé et du cadran se lit en mots.
+///
+/// La forme « en ligne » écrit « 20° · 17° / 30° » à côté du symbole du ciel.
+/// VoiceOver lisait « barre oblique », sans dire lequel était le minimum, et
+/// le ciel du symbole se taisait. Chaque ligne porte, juste après, un libellé
+/// qui dit la température, le ciel et l'amplitude (`Localized.amplitude`).
+#[test]
+fn la_ligne_du_cadran_se_lit_en_mots() {
+    let mut fichiers = Vec::new();
+    swift(&racine().join("ios"), &mut fichiers);
+
+    let mut muettes = Vec::new();
+    let mut vues = 0;
+    for fichier in &fichiers {
+        let source = fs::read_to_string(fichier).expect("source lisible");
+        let lignes: Vec<&str> = source.lines().collect();
+        for (i, ligne) in lignes.iter().enumerate() {
+            let code = ligne.trim_start();
+            if code.starts_with("//") || !code.starts_with("Label(enLigne") {
+                continue;
+            }
+            vues += 1;
+            let libelle = lignes
+                .iter()
+                .skip(i + 1)
+                .take(PORTEE)
+                .take_while(|suite| {
+                    let suite = suite.trim_start();
+                    suite.starts_with('.') || suite.starts_with("//")
+                })
+                .find_map(|suite| {
+                    let (_, reste) = suite.split_once(".accessibilityLabel(")?;
+                    Some(reste.trim_end().trim_end_matches(')').to_string())
+                });
+            // Le libellé dit l'amplitude en mots, pas la barre oblique.
+            let en_mots = libelle.is_some_and(|nom| {
+                let declaration = format!("var {nom}: String");
+                lignes
+                    .iter()
+                    .position(|l| l.contains(&declaration))
+                    .is_some_and(|debut| {
+                        lignes[debut..(debut + PORTEE).min(lignes.len())]
+                            .iter()
+                            .any(|l| l.contains("Localized.amplitude("))
+                    })
+            });
+            if !en_mots {
+                muettes.push(format!("{}:{}", fichier.display(), i + 1));
+            }
+        }
+    }
+    assert!(vues >= 2, "les lignes de l'écran verrouillé et du cadran ont disparu ({vues}) : revoir ce test");
+    assert_eq!(muettes, Vec::<String>::new());
+}
