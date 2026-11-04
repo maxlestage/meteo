@@ -349,6 +349,31 @@ pub(crate) mod tests {
         assert_eq!(conseils(&s), vec![Conseil::CremeSolaire]);
     }
 
+    /// Chaque seuil des conseils compte pile, et le dixième d'à côté ne dit
+    /// rien : un `<=` devenu `<` d'un seul côté ferait diverger les miroirs.
+    #[test]
+    fn les_seuils_des_conseils_sont_inclusifs() {
+        let un = |f: fn(&mut HourlySample)| {
+            let mut s = serie(24);
+            f(&mut s[4]);
+            conseils(&s)
+        };
+        assert_eq!(un(|h| h.precipitation = 0.1), vec![Conseil::Parapluie]);
+        assert_eq!(un(|h| h.precipitation = 0.09), vec![]);
+        assert_eq!(un(|h| h.precipitation_probability = 50.0), vec![Conseil::Parapluie]);
+        assert_eq!(un(|h| h.precipitation_probability = 49.9), vec![]);
+        assert_eq!(un(|h| h.apparent_temperature = 10.0), vec![Conseil::Manteau]);
+        assert_eq!(un(|h| h.apparent_temperature = 10.1), vec![]);
+        assert_eq!(un(|h| h.uv_index = 5.9), vec![Conseil::Lunettes]);
+        assert_eq!(un(|h| h.uv_index = 2.9), vec![]);
+        assert_eq!(un(|h| h.temperature = 30.0), vec![Conseil::Hydratation]);
+        assert_eq!(un(|h| h.temperature = 29.9), vec![]);
+        assert_eq!(un(|h| h.temperature = 0.0), vec![Conseil::Gel]);
+        assert_eq!(un(|h| h.temperature = 0.1), vec![]);
+        assert_eq!(un(|h| h.wind_gusts = 50.0), vec![Conseil::Vent]);
+        assert_eq!(un(|h| h.wind_gusts = 49.9), vec![]);
+    }
+
     #[test]
     fn ce_qui_arrive_apres_douze_heures_ne_change_pas_les_conseils() {
         let mut s = serie(24);
