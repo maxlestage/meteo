@@ -28,6 +28,17 @@ struct WeatherCondition: Equatable {
     enum Icon: String {
         case clear, partly, cloudy, fog, drizzle, rain, showers, snow, thunder
 
+        /// Le fond est un ciel bleu : dégagé ou peu nuageux. Tout le reste —
+        /// couvert compris — est un ciel gris.
+        ///
+        /// Le fond passait au gris au code 45 (brouillard) : un ciel
+        /// « Couvert » (code 3) restait peint en azur sur l'iPhone et la
+        /// montre, quand le web le peignait déjà en gris
+        /// (`klima-web/src/composants/ciel.rs`). La règle suit désormais le
+        /// pictogramme, des deux côtés — un code inconnu, qui retombe sur
+        /// « couvert », est gris lui aussi.
+        var cielBleu: Bool { self == .clear || self == .partly }
+
         /// Symbole système correspondant.
         func symbolName(isDay: Bool) -> String {
             switch self {
