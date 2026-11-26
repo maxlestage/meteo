@@ -70,7 +70,7 @@ const git = (...args) => execFileSync('git', args, { encoding: 'utf8' }).trim()
 function sansSignatures(message) {
   return message
     .split('\n')
-    .filter((l) => !/^(Co-Authored-By|Co-authored-by|Claude-Session|Signed-off-by):/i.test(l.trim()))
+    .filter((l) => !/^(Co-Authored-By|Signed-off-by|[A-Za-z]+-Session):/i.test(l.trim()))
     // La ligne de tirets que GitHub laisse au bas d'un commit fusionné.
     .filter((l) => !/^-{3,}$/.test(l.trim()))
     .join('\n')
